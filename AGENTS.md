@@ -94,3 +94,17 @@ Keep a component inside its route until it is reused by another feature. Do not 
 - Include screenshots for new screens and material visual changes. Include mobile and dark-theme states when relevant.
 - Explain new reusable patterns or dependencies in the pull request.
 - Follow `CONTRIBUTING.md` for the contribution workflow.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked using GitHub Issues. External Pull Requests are not treated as a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage labels use default mapping: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+The repository uses a single-context domain documentation layout. See `docs/agents/domain.md`.
