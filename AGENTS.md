@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Studio Admin is a responsive admin dashboard built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and shadcn/ui.
+RepairHub is a responsive platform built with Next.js 16, React 19, TypeScript, Tailwind CSS v4, and shadcn/ui.
 
 This repository uses the shadcn `radix-nova` style. The shadcn CLI reports `base: "radix"`, which refers to Radix UI. Always inspect the local components in `src/components/ui/` because individual wrappers may use different primitives.
 
@@ -87,12 +87,6 @@ Keep a component inside its route until it is reused by another feature. Do not 
 - Follow the Biome configuration: double quotes, semicolons, two-space indentation, sorted imports, and a 120-character line width.
 - Avoid unnecessary dependencies.
 - Keep changes focused and do not refactor unrelated files.
-
-## Contributions
-
-- Use conventional commit prefixes such as `feat:`, `fix:`, `refactor:`, `docs:`, and `chore:`.
-- Include screenshots for new screens and material visual changes. Include mobile and dark-theme states when relevant.
-- Explain new reusable patterns or dependencies in the pull request.
 
 ## Agent skills
 
