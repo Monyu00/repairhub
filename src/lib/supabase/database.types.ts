@@ -148,6 +148,47 @@ export interface Database {
           },
         ];
       };
+      equipment: {
+        Row: {
+          id: string;
+          name: string;
+          code: string;
+          space_id: string;
+          purchase_date: string | null;
+          warranty_expiry: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          code: string;
+          space_id: string;
+          purchase_date?: string | null;
+          warranty_expiry?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          code?: string;
+          space_id?: string;
+          purchase_date?: string | null;
+          warranty_expiry?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "equipment_space_id_fkey";
+            columns: ["space_id"];
+            isOneToOne: false;
+            referencedRelation: "spaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tickets: {
         Row: {
           id: string;
@@ -208,6 +249,13 @@ export interface Database {
             columns: ["space_id"];
             isOneToOne: false;
             referencedRelation: "spaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tickets_equipment_id_fkey";
+            columns: ["equipment_id"];
+            isOneToOne: false;
+            referencedRelation: "equipment";
             referencedColumns: ["id"];
           },
         ];

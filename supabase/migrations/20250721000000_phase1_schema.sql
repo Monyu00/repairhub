@@ -99,13 +99,30 @@ CREATE TABLE public.technician_categories (
   PRIMARY KEY (technician_id, category_id)
 );
 
+-- 5b. Equipment
+CREATE TABLE public.equipment (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  code TEXT NOT NULL UNIQUE,
+  space_id UUID REFERENCES public.spaces ON DELETE RESTRICT NOT NULL,
+  purchase_date DATE,
+  warranty_expiry DATE,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE TRIGGER trigger_update_equipment_timestamp
+  BEFORE UPDATE ON public.equipment
+  FOR EACH ROW
+  EXECUTE PROCEDURE public.handle_updated_at();
+
 -- 6. Tickets
 CREATE TABLE public.tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   status public.ticket_status DEFAULT 'pending'::public.ticket_status NOT NULL,
   category_id UUID REFERENCES public.categories ON DELETE RESTRICT NOT NULL,
   space_id UUID REFERENCES public.spaces ON DELETE RESTRICT NOT NULL,
-  equipment_id UUID, -- nullable, for future equipment tracking
+  equipment_id UUID REFERENCES public.equipment ON DELETE SET NULL,
   description TEXT NOT NULL,
   reporter_email TEXT NOT NULL,
   reporter_phone TEXT,
@@ -197,6 +214,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.buildings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.spaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.equipment ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.technician_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_photos ENABLE ROW LEVEL SECURITY;
@@ -246,6 +264,18 @@ CREATE POLICY "Allow anyone to read categories"
 
 CREATE POLICY "Allow admins to manage categories"
   ON public.categories FOR ALL
+  TO authenticated
+  USING ((SELECT user_role FROM public.profiles WHERE id = auth.uid()) = 'admin'::public.user_role)
+  WITH CHECK ((SELECT user_role FROM public.profiles WHERE id = auth.uid()) = 'admin'::public.user_role);
+
+-- Equipment Policies
+CREATE POLICY "Allow anyone to read equipment"
+  ON public.equipment FOR SELECT
+  TO authenticated, anon
+  USING (true);
+
+CREATE POLICY "Allow admins to manage equipment"
+  ON public.equipment FOR ALL
   TO authenticated
   USING ((SELECT user_role FROM public.profiles WHERE id = auth.uid()) = 'admin'::public.user_role)
   WITH CHECK ((SELECT user_role FROM public.profiles WHERE id = auth.uid()) = 'admin'::public.user_role);
@@ -321,5 +351,5 @@ GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO postgres, service_role;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
-GRANT SELECT ON public.buildings, public.spaces, public.categories TO anon;
+GRANT SELECT ON public.buildings, public.spaces, public.categories, public.equipment TO anon;
 GRANT INSERT ON public.tickets, public.ticket_photos TO anon;
