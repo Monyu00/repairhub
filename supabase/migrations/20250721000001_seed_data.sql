@@ -30,3 +30,14 @@ INSERT INTO public.categories (name, sort_order) VALUES
 ('土木', 7),
 ('其他', 8)
 ON CONFLICT (name) DO NOTHING;
+
+-- 4. Insert Equipment
+INSERT INTO public.equipment (name, code, space_id, purchase_date, warranty_expiry) VALUES
+('冷氣機 AC-01', 'AC-ADMIN-P', (SELECT id FROM public.spaces WHERE name = '校長室' AND building_id = (SELECT id FROM public.buildings WHERE code = 'ADMIN')), '2024-01-15', '2027-01-15'),
+('冷氣機 AC-02', 'AC-ACAD-101', (SELECT id FROM public.spaces WHERE name = '一般教室 101' AND building_id = (SELECT id FROM public.buildings WHERE code = 'ACAD')), '2024-03-20', '2027-03-20'),
+('冷氣機 AC-03', 'AC-ACAD-202', (SELECT id FROM public.spaces WHERE name = '一般教室 202' AND building_id = (SELECT id FROM public.buildings WHERE code = 'ACAD')), '2024-03-20', '2027-03-20'),
+('冷氣機 AC-04', 'AC-LIBR-READ', (SELECT id FROM public.spaces WHERE name = '圖書閱覽室' AND building_id = (SELECT id FROM public.buildings WHERE code = 'LIBR')), '2023-06-10', '2026-06-10'),
+('投影機 PROJ-01', 'PROJ-ACAD-101', (SELECT id FROM public.spaces WHERE name = '一般教室 101' AND building_id = (SELECT id FROM public.buildings WHERE code = 'ACAD')), '2024-05-12', '2026-05-12'),
+('投影機 PROJ-02', 'PROJ-ACAD-301', (SELECT id FROM public.spaces WHERE name = '電腦教室 301' AND building_id = (SELECT id FROM public.buildings WHERE code = 'ACAD')), '2024-05-12', '2026-05-12')
+ON CONFLICT (code) DO NOTHING;
+
