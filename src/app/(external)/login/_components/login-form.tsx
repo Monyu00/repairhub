@@ -91,7 +91,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   return (
     <div className="space-y-4">
       {mode === "login" ? (
-        <form noValidate onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="flex flex-col gap-4">
+        <form key="login-form" noValidate onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="flex flex-col gap-4">
           <FieldGroup className="gap-4">
             <Controller
               control={loginForm.control}
@@ -101,6 +101,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   <FieldLabel htmlFor="login-email">電子郵件</FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id="login-email"
                     type="email"
                     placeholder="you@example.com"
@@ -119,6 +120,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   <FieldLabel htmlFor="login-password">密碼</FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id="login-password"
                     type="password"
                     placeholder="••••••••"
@@ -136,7 +138,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           </Button>
         </form>
       ) : (
-        <form noValidate onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="flex flex-col gap-4">
+        <form key="register-form" noValidate onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="flex flex-col gap-4">
           <FieldGroup className="gap-4">
             <Controller
               control={registerForm.control}
@@ -146,6 +148,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   <FieldLabel htmlFor="register-email">電子郵件</FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id="register-email"
                     type="email"
                     placeholder="you@example.com"
@@ -164,6 +167,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   <FieldLabel htmlFor="register-password">密碼</FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id="register-password"
                     type="password"
                     placeholder="••••••••"
@@ -182,6 +186,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   <FieldLabel htmlFor="register-confirm-password">確認密碼</FieldLabel>
                   <Input
                     {...field}
+                    value={field.value ?? ""}
                     id="register-confirm-password"
                     type="password"
                     placeholder="••••••••"
