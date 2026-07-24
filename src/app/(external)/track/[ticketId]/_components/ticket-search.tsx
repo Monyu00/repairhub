@@ -32,9 +32,7 @@ export function TicketSearch({ currentTicketId }: TicketSearchProps) {
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         <Input
           id="ticket-search"
-          placeholder={
-            currentTicketId ? `目前：${currentTicketId.slice(0, 8)}… 查詢其他工單號碼` : "請輸入工單號碼"
-          }
+          placeholder={currentTicketId ? `目前：${currentTicketId.slice(0, 8)}… 查詢其他工單號碼` : "請輸入工單號碼"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-9"

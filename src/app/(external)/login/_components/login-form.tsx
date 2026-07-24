@@ -91,7 +91,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   return (
     <div className="space-y-4">
       {mode === "login" ? (
-        <form key="login-form" noValidate onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="flex flex-col gap-4">
+        <form
+          key="login-form"
+          noValidate
+          onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+          className="flex flex-col gap-4"
+        >
           <FieldGroup className="gap-4">
             <Controller
               control={loginForm.control}
@@ -138,7 +143,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           </Button>
         </form>
       ) : (
-        <form key="register-form" noValidate onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="flex flex-col gap-4">
+        <form
+          key="register-form"
+          noValidate
+          onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+          className="flex flex-col gap-4"
+        >
           <FieldGroup className="gap-4">
             <Controller
               control={registerForm.control}
