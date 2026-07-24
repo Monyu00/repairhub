@@ -5,14 +5,14 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
+import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
 
-import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
+import { UserMenu } from "./_components/sidebar/user-menu";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
@@ -21,6 +21,23 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     getPreference("sidebar_variant"),
     getPreference("sidebar_collapsible"),
   ]);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let currentUserData = null;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
+
+    currentUserData = {
+      email: user.email ?? "",
+      name: (user.user_metadata?.full_name as string) || (user.user_metadata?.name as string) || undefined,
+      avatarUrl: user.user_metadata?.avatar_url as string | undefined,
+      role: profile?.user_role ?? null,
+    };
+  }
 
   return (
     <SidebarProvider
