@@ -78,7 +78,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div className="flex items-center gap-2">
               <LayoutControls />
               <ThemeSwitcher />
-              {currentUserData && <UserMenu user={currentUserData} />}
+              <AccountSwitcher users={users} />
             </div>
           </div>
         </header>
