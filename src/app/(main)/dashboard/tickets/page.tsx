@@ -122,8 +122,8 @@ export default async function Page({ searchParams }: PageProps) {
 
   // 4. Sanitize sensitive fields if user is not admin/technician
   type RawTicket = Record<string, unknown>;
-  const tickets: TicketRow[] = (rawTickets ?? []).map((raw) => {
-    const t = raw as RawTicket;
+  const tickets: TicketRow[] = ((rawTickets ?? []) as unknown[]).map((raw) => {
+    const t = (raw ?? {}) as RawTicket;
     const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
     const spaceData = (spaceRaw ?? {}) as Record<string, unknown>;
 
@@ -151,8 +151,8 @@ export default async function Page({ searchParams }: PageProps) {
       description: String(t.description ?? ""),
       reporter_email: canViewReporter ? (t.reporter_email as string | null) : null,
       reporter_phone: canViewReporter ? (t.reporter_phone as string | null) : null,
-      created_at: t.created_at,
-      updated_at: t.updated_at,
+      created_at: String(t.created_at ?? ""),
+      updated_at: String(t.updated_at ?? ""),
     };
   });
 
