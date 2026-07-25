@@ -1,4 +1,4 @@
-import { LayoutDashboard, type LucideIcon } from "lucide-react";
+import { ClipboardList, LayoutDashboard, type LucideIcon } from "lucide-react";
 
 export type NavBadge = "new" | "soon";
 
@@ -41,13 +41,19 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Dashboard",
+    label: "維修管理",
     items: [
       {
         id: "dashboard",
-        title: "Dashboard",
+        title: "總覽儀表板",
         url: "/dashboard",
         icon: LayoutDashboard,
+      },
+      {
+        id: "tickets",
+        title: "報修單管理",
+        url: "/dashboard/tickets",
+        icon: ClipboardList,
       },
     ],
   },
