@@ -17,15 +17,15 @@ import { UserMenu } from "./_components/sidebar/user-menu";
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
-  const [variant, collapsible] = await Promise.all([
+  const supabase = await createClient();
+
+  const [variant, collapsible, userRes] = await Promise.all([
     getPreference("sidebar_variant"),
     getPreference("sidebar_collapsible"),
+    supabase.auth.getUser(),
   ]);
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = userRes.data.user;
 
   let currentUserData = null;
   if (user) {

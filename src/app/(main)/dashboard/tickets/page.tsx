@@ -37,32 +37,12 @@ export default async function Page({ searchParams }: PageProps) {
 
   const supabase = await createClient();
 
-  // 1. Fetch current user & profile role
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // 1. Start fetching user, categories, buildings, and tickets in parallel
+  const userPromise = supabase.auth.getUser();
+  const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
+  const buildingsPromise = supabase.from("buildings").select("id, name, code").order("code");
 
-  let userRole: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-    userRole = profile?.user_role ?? null;
-  }
-
-  const canViewReporter = userRole === "admin" || userRole === "technician";
-
-  // 2. Fetch filter options (categories & buildings)
-  const [categoriesRes, buildingsRes] = await Promise.all([
-    supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order"),
-    supabase.from("buildings").select("id, name, code").order("code"),
-  ]);
-
-  const filterOptions: FilterOptions = {
-    categories: categoriesRes.data ?? [],
-    buildings: buildingsRes.data ?? [],
-  };
-
-  // 3. Build tickets query
-  // Use inner join if filtering by building_id, otherwise left join
+  // 2. Build tickets query
   const spaceJoin = buildingId ? "spaces!inner" : "spaces";
   const selectString = `
     id,
@@ -106,15 +86,36 @@ export default async function Page({ searchParams }: PageProps) {
     query = query.lte("created_at", `${toDate}T23:59:59.999Z`);
   }
 
-  // Pagination & Order
   const fromIndex = (page - 1) * PAGE_SIZE;
   const toIndex = fromIndex + PAGE_SIZE - 1;
+  const ticketsPromise = query.order("created_at", { ascending: false }).range(fromIndex, toIndex);
 
-  const {
-    data: rawTickets,
-    count,
-    error,
-  } = await query.order("created_at", { ascending: false }).range(fromIndex, toIndex);
+  // 3. Resolve user promise first to launch profile query concurrently with remaining fetches
+  const userRes = await userPromise;
+  const user = userRes.data.user;
+  const profilePromise = user
+    ? supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle()
+    : Promise.resolve({ data: null });
+
+  // 4. Await all remaining queries concurrently
+  const [categoriesRes, buildingsRes, ticketsRes, profileRes] = await Promise.all([
+    categoriesPromise,
+    buildingsPromise,
+    ticketsPromise,
+    profilePromise,
+  ]);
+
+  const userRole = profileRes.data?.user_role ?? null;
+  const canViewReporter = userRole === "admin" || userRole === "technician";
+
+  const filterOptions: FilterOptions = {
+    categories: categoriesRes.data ?? [],
+    buildings: buildingsRes.data ?? [],
+  };
+
+  const rawTickets = ticketsRes.data;
+  const count = ticketsRes.count;
+  const error = ticketsRes.error;
 
   if (error) {
     console.error("Error fetching tickets:", error);

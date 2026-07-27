@@ -13,41 +13,40 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   const { location_id, equipment_id } = await searchParams;
   const supabase = await createClient();
 
-  // Fetch buildings with spaces
-  const { data: buildingsData } = await supabase
-    .from("buildings")
-    .select("id, name, code, spaces(id, name, floor)")
-    .order("name");
+  const buildingsPromise = supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name");
 
-  // Fetch active categories
-  const { data: categoriesData } = await supabase
-    .from("categories")
-    .select("id, name")
-    .eq("is_active", true)
-    .order("sort_order");
+  const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
+
+  const equipmentPromise = equipment_id
+    ? supabase
+        .from("equipment")
+        .select("id, name, code, space_id, space:spaces(id, name, building_id)")
+        .eq("id", equipment_id)
+        .single()
+    : Promise.resolve({ data: null });
+
+  const [buildingsRes, categoriesRes, eqRes] = await Promise.all([
+    buildingsPromise,
+    categoriesPromise,
+    equipmentPromise,
+  ]);
+
+  const buildingsData = buildingsRes.data;
+  const categoriesData = categoriesRes.data;
+  const eqData = eqRes.data;
 
   let initialEquipment: EquipmentInfo | null = null;
-
-  // If equipment_id is passed, fetch equipment and space relationship
-  if (equipment_id) {
-    const { data: eqData } = await supabase
-      .from("equipment")
-      .select("id, name, code, space_id, space:spaces(id, name, building_id)")
-      .eq("id", equipment_id)
-      .single();
-
-    if (eqData) {
-      // Cast nested space relation
-      const spaceObj = Array.isArray(eqData.space) ? eqData.space[0] : eqData.space;
-      if (spaceObj) {
-        initialEquipment = {
-          id: eqData.id,
-          name: eqData.name,
-          code: eqData.code,
-          space_id: eqData.space_id,
-          space: spaceObj,
-        };
-      }
+  if (eqData) {
+    // Cast nested space relation
+    const spaceObj = Array.isArray(eqData.space) ? eqData.space[0] : eqData.space;
+    if (spaceObj) {
+      initialEquipment = {
+        id: eqData.id,
+        name: eqData.name,
+        code: eqData.code,
+        space_id: eqData.space_id,
+        space: spaceObj,
+      };
     }
   }
 
