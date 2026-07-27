@@ -11,9 +11,9 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ClipboardX } from "lucide-react";
+import { ClipboardX, ListFilter, Zap } from "lucide-react";
 
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import {
   Pagination,
   PaginationContent,
@@ -22,7 +22,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { PendingTicketsView } from "./pending-tickets-view";
 import { getTicketColumns } from "./ticket-columns";
 import { TicketFilterBar } from "./ticket-filter-bar";
 import { TicketMobileCard } from "./ticket-mobile-card";
@@ -35,6 +37,8 @@ interface TicketsDataTableProps {
   pageSize: number;
   filterOptions: FilterOptions;
   canViewReporter: boolean;
+  userId?: string | null;
+  userRole?: string | null;
 }
 
 export function TicketsDataTable({
@@ -44,12 +48,16 @@ export function TicketsDataTable({
   pageSize,
   filterOptions,
   canViewReporter,
+  userId,
+  userRole,
 }: TicketsDataTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [activeTab, setActiveTab] = useState("all");
 
+  const isTechnician = userRole === "technician";
   const columns = useMemo(() => getTicketColumns(canViewReporter), [canViewReporter]);
 
   const table = useReactTable({
@@ -76,7 +84,7 @@ export function TicketsDataTable({
     router.push(`/dashboard/tickets/${ticketId}`);
   };
 
-  return (
+  const renderAllTicketsView = () => (
     <div className="space-y-4">
       {/* Filters Bar */}
       <TicketFilterBar filterOptions={filterOptions} />
@@ -177,5 +185,32 @@ export function TicketsDataTable({
         </>
       )}
     </div>
+  );
+
+  if (!isTechnician || !userId) {
+    return renderAllTicketsView();
+  }
+
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <TabsList className="h-9 p-1">
+        <TabsTrigger value="all" className="text-xs gap-1.5 px-3">
+          <ListFilter className="size-3.5" />
+          <span>全校報修單據</span>
+        </TabsTrigger>
+        <TabsTrigger value="pending" className="text-xs gap-1.5 px-3">
+          <Zap className="size-3.5 text-amber-500 fill-amber-500/20" />
+          <span>待處理接單 (即時)</span>
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="all" className="mt-0">
+        {renderAllTicketsView()}
+      </TabsContent>
+
+      <TabsContent value="pending" className="mt-0">
+        <PendingTicketsView userId={userId} canViewReporter={canViewReporter} />
+      </TabsContent>
+    </Tabs>
   );
 }
