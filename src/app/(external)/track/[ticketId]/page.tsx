@@ -37,19 +37,22 @@ export default async function TrackPage({ params }: TrackPageProps) {
   const buildingObj = Array.isArray(spaceObj?.building) ? spaceObj?.building[0] : spaceObj?.building;
   const equipmentObj = Array.isArray(ticket.equipment) ? ticket.equipment[0] : ticket.equipment;
 
-  // Fetch photos (report and closure)
-  const { data: photosData } = await supabase
-    .from("ticket_photos")
-    .select("id, storage_path, phase")
-    .eq("ticket_id", ticketId)
-    .order("created_at", { ascending: true });
+  // Fetch photos and notes concurrently
+  const [photosRes, notesRes] = await Promise.all([
+    supabase
+      .from("ticket_photos")
+      .select("id, storage_path, phase")
+      .eq("ticket_id", ticketId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("ticket_notes")
+      .select("id, content, type, created_at")
+      .eq("ticket_id", ticketId)
+      .order("created_at", { ascending: true }),
+  ]);
 
-  // Fetch notes (both 'note' and 'status_change' types)
-  const { data: notesData } = await supabase
-    .from("ticket_notes")
-    .select("id, content, type, created_at")
-    .eq("ticket_id", ticketId)
-    .order("created_at", { ascending: true });
+  const photosData = photosRes.data;
+  const notesData = notesRes.data;
 
   return (
     <TicketTracker
