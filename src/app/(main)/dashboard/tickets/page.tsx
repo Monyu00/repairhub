@@ -178,6 +178,8 @@ export default async function Page({ searchParams }: PageProps) {
           pageSize={PAGE_SIZE}
           filterOptions={filterOptions}
           canViewReporter={canViewReporter}
+          userId={user?.id ?? null}
+          userRole={userRole}
         />
       </Suspense>
     </div>

@@ -23,6 +23,7 @@ export interface TicketSpace {
 export interface TicketRow {
   id: string;
   status: TicketStatus;
+  category_id?: string;
   category: TicketCategory;
   space: TicketSpace;
   description: string;
