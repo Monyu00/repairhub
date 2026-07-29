@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import { ReporterActions } from "./reporter-actions";
 import { StatusTimeline } from "./status-timeline";
 import { TechnicianNotes } from "./technician-notes";
 import { TicketDetails } from "./ticket-details";
@@ -106,6 +107,13 @@ export function TicketTracker({
           {technicianNotes.length > 0 && (
             <div className="p-5 sm:p-6">
               <TechnicianNotes notes={technicianNotes} />
+            </div>
+          )}
+
+          {/* Reporter verification & actions – only when completed */}
+          {status === "completed" && (
+            <div className="p-5 sm:p-6">
+              <ReporterActions ticketId={ticketId} />
             </div>
           )}
 
