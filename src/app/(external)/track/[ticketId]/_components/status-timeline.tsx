@@ -1,4 +1,12 @@
-import { ArchiveIcon, CheckCircle2Icon, ClockIcon, PlusCircleIcon, WrenchIcon, XCircleIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  CheckCircle2Icon,
+  ClockIcon,
+  PlusCircleIcon,
+  RotateCcwIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from "lucide-react";
 
 type TicketStatus = "pending" | "in_progress" | "completed" | "closed" | "cancelled";
 
@@ -27,13 +35,16 @@ function formatDateTime(iso: string) {
 
 function getStatusIcon(content: string) {
   const lower = content.toLowerCase();
+  if (lower.includes("重新開啟") || lower.includes("問題仍在") || lower.includes("reopen")) {
+    return RotateCcwIcon;
+  }
   if (lower.includes("claim") || lower.includes("in_progress") || lower.includes("維修")) {
     return WrenchIcon;
   }
-  if (lower.includes("complet") || lower.includes("完成")) {
+  if (lower.includes("complet") || lower.includes("完成") || lower.includes("結案") || lower.includes("確認修復")) {
     return CheckCircle2Icon;
   }
-  if (lower.includes("clos") || lower.includes("結案")) {
+  if (lower.includes("clos")) {
     return ArchiveIcon;
   }
   if (lower.includes("cancel") || lower.includes("取消")) {
