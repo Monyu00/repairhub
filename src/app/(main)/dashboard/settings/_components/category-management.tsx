@@ -2,7 +2,24 @@
 
 import { useState, useTransition } from "react";
 
-import { ArrowDown, ArrowUp, Edit2, Plus } from "lucide-react";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { Edit2, GripVertical, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +32,91 @@ import {
   type CategoryItem,
   createCategory,
   renameCategory,
-  swapCategoryOrder,
+  reorderCategories,
   toggleCategoryActive,
 } from "../_actions/category-actions";
 import { CategoryDialog } from "./category-dialog";
 
 interface CategoryManagementProps {
   initialCategories: CategoryItem[];
+}
+
+interface SortableCategoryRowProps {
+  category: CategoryItem;
+  index: number;
+  isPending: boolean;
+  onToggleActive: (category: CategoryItem, checked: boolean) => void;
+  onRenameOpen: (category: CategoryItem) => void;
+}
+
+function SortableCategoryRow({ category, index, isPending, onToggleActive, onRenameOpen }: SortableCategoryRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : 1,
+    position: isDragging ? "relative" : undefined,
+    backgroundColor: isDragging ? "var(--muted)" : undefined,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell className="w-[100px] text-center font-mono text-xs">
+        <div className="flex items-center justify-center gap-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+            disabled={isPending}
+            title="拖拉調整順序"
+          >
+            <GripVertical className="h-4 w-4" />
+            <span className="sr-only">拖拉調整順序</span>
+          </Button>
+          <span className="w-4 text-muted-foreground">{index + 1}</span>
+        </div>
+      </TableCell>
+      <TableCell className="font-medium text-foreground">{category.name}</TableCell>
+      <TableCell className="w-[120px]">
+        {category.is_active ? (
+          <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-700">
+            啟用中
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="text-muted-foreground">
+            已停用
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell className="w-[120px] text-center">
+        <Switch
+          checked={category.is_active}
+          onCheckedChange={(checked) => onToggleActive(category, checked)}
+          disabled={isPending}
+          aria-label={`切換 ${category.name} 狀態`}
+        />
+      </TableCell>
+      <TableCell className="w-[100px] text-right">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onRenameOpen(category)}
+          disabled={isPending}
+          title="重命名類別"
+        >
+          <Edit2 className="h-4 w-4" />
+          <span className="sr-only">重命名</span>
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
 }
 
 export function CategoryManagement({ initialCategories }: CategoryManagementProps) {
@@ -32,6 +127,18 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "rename">("create");
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
+
+  // Configure Sensors for Dragging
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   // Sync state if server props update
   if (initialCategories !== categories && !isPending) {
@@ -88,33 +195,29 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
     });
   };
 
-  const handleMove = (currentIndex: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= categories.length) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const item1 = categories[currentIndex];
-    const item2 = categories[targetIndex];
+    if (over && active.id !== over.id) {
+      const oldIndex = categories.findIndex((c) => c.id === active.id);
+      const newIndex = categories.findIndex((c) => c.id === over.id);
 
-    // Optimistic swap
-    const nextCategories = [...categories];
-    const tempSortOrder = item1.sort_order;
-    item1.sort_order = item2.sort_order;
-    item2.sort_order = tempSortOrder;
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const nextCategories = arrayMove(categories, oldIndex, newIndex);
+        setCategories(nextCategories);
 
-    nextCategories[currentIndex] = item2;
-    nextCategories[targetIndex] = item1;
-    setCategories(nextCategories);
-
-    startTransition(async () => {
-      const res = await swapCategoryOrder(
-        { id: item1.id, sort_order: item2.sort_order },
-        { id: item2.id, sort_order: item1.sort_order },
-      );
-      if (!res.success) {
-        toast.error(res.error ?? "調整排序失敗");
-        setCategories(initialCategories);
+        const orderedIds = nextCategories.map((c) => c.id);
+        startTransition(async () => {
+          const res = await reorderCategories(orderedIds);
+          if (!res.success) {
+            toast.error(res.error ?? "調整排序失敗");
+            setCategories(initialCategories);
+          } else {
+            toast.success("排序已更新");
+          }
+        });
       }
-    });
+    }
   };
 
   return (
@@ -123,7 +226,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
         <div>
           <CardTitle className="text-xl">報修類別列表</CardTitle>
           <CardDescription className="mt-1 text-sm text-muted-foreground">
-            管理前端報修表單顯示的故障類別項目、調整排序或設定停用狀態。
+            管理前端報修表單顯示的故障類別項目，可按住左側圖示拖拉調整顯示順序或設定啟用狀態。
           </CardDescription>
         </div>
         <Button onClick={handleCreateOpen} className="shrink-0 gap-1.5">
@@ -138,90 +241,38 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
           </div>
         ) : (
           <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px] text-center">排序</TableHead>
-                  <TableHead>類別名稱</TableHead>
-                  <TableHead className="w-[120px]">狀態</TableHead>
-                  <TableHead className="w-[120px] text-center">啟用 / 停用</TableHead>
-                  <TableHead className="w-[100px] text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category, index) => {
-                  const isFirst = index === 0;
-                  const isLast = index === categories.length - 1;
-
-                  return (
-                    <TableRow key={category.id}>
-                      <TableCell className="text-center font-mono text-xs">
-                        <div className="flex items-center justify-center gap-1">
-                          <span className="w-5 text-muted-foreground">{index + 1}</span>
-                          <div className="flex flex-col gap-0.5">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              disabled={isFirst || isPending}
-                              onClick={() => handleMove(index, "up")}
-                              title="向上移動"
-                            >
-                              <ArrowUp className="h-3.5 w-3.5" />
-                              <span className="sr-only">向上</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              disabled={isLast || isPending}
-                              onClick={() => handleMove(index, "down")}
-                              title="向下移動"
-                            >
-                              <ArrowDown className="h-3.5 w-3.5" />
-                              <span className="sr-only">向下</span>
-                            </Button>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium text-foreground">{category.name}</TableCell>
-                      <TableCell>
-                        {category.is_active ? (
-                          <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-700">
-                            啟用中
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-muted-foreground">
-                            已停用
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Switch
-                          checked={category.is_active}
-                          onCheckedChange={(checked) => handleToggleActive(category, checked)}
-                          disabled={isPending}
-                          aria-label={`切換 ${category.name} 狀態`}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleRenameOpen(category)}
-                          disabled={isPending}
-                          title="重命名類別"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                          <span className="sr-only">重命名</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px] text-center">排序</TableHead>
+                    <TableHead>類別名稱</TableHead>
+                    <TableHead className="w-[120px]">狀態</TableHead>
+                    <TableHead className="w-[120px] text-center">啟用 / 停用</TableHead>
+                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <SortableContext items={categories.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                    {categories.map((category, index) => (
+                      <SortableCategoryRow
+                        key={category.id}
+                        category={category}
+                        index={index}
+                        isPending={isPending}
+                        onToggleActive={handleToggleActive}
+                        onRenameOpen={handleRenameOpen}
+                      />
+                    ))}
+                  </SortableContext>
+                </TableBody>
+              </Table>
+            </DndContext>
           </div>
         )}
       </CardContent>

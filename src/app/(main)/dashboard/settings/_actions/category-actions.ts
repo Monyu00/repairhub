@@ -167,3 +167,30 @@ export async function swapCategoryOrder(
   revalidatePath("/report");
   return { success: true };
 }
+
+export async function reorderCategories(orderedIds: string[]) {
+  const { supabase, authorized, error } = await verifyAdmin();
+  if (!authorized || !supabase) {
+    return { success: false, error };
+  }
+
+  // Update sort_order for each category according to its new index (1-based)
+  const updates = orderedIds.map((id, index) =>
+    supabase
+      .from("categories")
+      .update({ sort_order: index + 1 })
+      .eq("id", id),
+  );
+
+  const results = await Promise.all(updates);
+  const hasError = results.some((res) => res.error);
+
+  if (hasError) {
+    console.error("Failed to reorder categories");
+    return { success: false, error: "調整排序失敗，請稍後再試" };
+  }
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/report");
+  return { success: true };
+}
