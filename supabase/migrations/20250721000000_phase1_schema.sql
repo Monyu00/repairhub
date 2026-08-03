@@ -349,7 +349,6 @@ CREATE POLICY "Allow authenticated users to read notes"
 
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO postgres, service_role;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO postgres, service_role, authenticated;
 GRANT SELECT ON public.buildings, public.spaces, public.categories, public.equipment TO anon;
 GRANT INSERT ON public.tickets, public.ticket_photos TO anon;
