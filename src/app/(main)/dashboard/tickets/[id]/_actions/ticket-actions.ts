@@ -276,3 +276,114 @@ export async function returnToPending(ticketId: string) {
   revalidatePath(`/dashboard/tickets/${ticketId}`);
   return { success: true };
 }
+
+export async function fetchTechnicians() {
+  const supabase = await createClient();
+  const { data: userRes, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userRes.user) {
+    return { success: false, error: "尚未登入，請先登入", technicians: [] };
+  }
+
+  const userId = userRes.user.id;
+
+  // Verify Admin role
+  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", userId).maybeSingle();
+
+  if (profile?.user_role !== "admin") {
+    return { success: false, error: "僅管理者可讀取技師列表", technicians: [] };
+  }
+
+  const { data: technicians, error: techError } = await supabase
+    .from("profiles")
+    .select("id, display_name")
+    .eq("user_role", "technician");
+
+  if (techError) {
+    console.error("Failed to fetch technicians:", techError);
+    return { success: false, error: "無法取得技師列表", technicians: [] };
+  }
+
+  const formattedTechs = (technicians || []).map((t) => ({
+    id: t.id,
+    displayName: t.display_name || `技師 (${t.id.slice(0, 8)})`,
+  }));
+
+  return { success: true, technicians: formattedTechs };
+}
+
+export async function assignTicket(ticketId: string, technicianId: string) {
+  if (!technicianId) {
+    return { success: false, error: "請選擇要指派的技師" };
+  }
+
+  const supabase = await createClient();
+  const { data: userRes, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !userRes.user) {
+    return { success: false, error: "尚未登入，請先登入" };
+  }
+
+  const userId = userRes.user.id;
+
+  // Verify Admin role
+  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", userId).maybeSingle();
+
+  if (profile?.user_role !== "admin") {
+    return { success: false, error: "僅管理者可執行指派技師" };
+  }
+
+  // Verify ticket status is pending
+  const { data: ticket, error: ticketError } = await supabase
+    .from("tickets")
+    .select("id, status")
+    .eq("id", ticketId)
+    .single();
+
+  if (ticketError || !ticket) {
+    return { success: false, error: "找不到該單據" };
+  }
+
+  if (ticket.status !== "pending") {
+    return { success: false, error: "該單據已被接單或不再處於待處理狀態" };
+  }
+
+  // Verify chosen technician role
+  const { data: techProfile, error: techError } = await supabase
+    .from("profiles")
+    .select("id, user_role, display_name")
+    .eq("id", technicianId)
+    .maybeSingle();
+
+  if (techError || !techProfile || techProfile.user_role !== "technician") {
+    return { success: false, error: "所選使用者非有效技師" };
+  }
+
+  // Update status to in_progress and assigned_to
+  const { error: updateError } = await supabase
+    .from("tickets")
+    .update({
+      status: "in_progress",
+      assigned_to: technicianId,
+    })
+    .eq("id", ticketId)
+    .eq("status", "pending"); // atomic concurrency guard
+
+  if (updateError) {
+    console.error("Failed to assign ticket:", updateError);
+    return { success: false, error: "指派技師失敗" };
+  }
+
+  const techName = techProfile.display_name || `技師 (${technicianId.slice(0, 8)})`;
+
+  // Record status_change note
+  await supabase.from("ticket_notes").insert({
+    ticket_id: ticketId,
+    author_id: userId,
+    content: `管理者已指派此單據給 ${techName}`,
+    type: "status_change",
+  });
+
+  revalidatePath(`/dashboard/tickets/${ticketId}`);
+  return { success: true };
+}
