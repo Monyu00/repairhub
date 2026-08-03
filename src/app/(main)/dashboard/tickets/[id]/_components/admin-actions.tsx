@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { cancelTicket, returnToPending } from "../_actions/ticket-actions";
+import { AssignTechnicianDialog } from "./assign-technician-dialog";
 
 interface AdminActionsProps {
   ticketId: string;
@@ -43,10 +44,11 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
   const [returnOpen, setReturnOpen] = useState(false);
   const [isReturning, setIsReturning] = useState(false);
 
+  const canAssign = status === "pending";
   const canCancel = status === "pending" || status === "in_progress";
   const canReturnToPending = status === "in_progress";
 
-  if (!canCancel && !canReturnToPending) {
+  if (!canAssign && !canCancel && !canReturnToPending) {
     return null;
   }
 
@@ -94,6 +96,9 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 pt-2">
+      {/* Assign technician button */}
+      {canAssign && <AssignTechnicianDialog ticketId={ticketId} />}
+
       {/* Return to pending button */}
       {canReturnToPending && (
         <Button
