@@ -93,16 +93,19 @@ export interface Database {
         Row: {
           id: string;
           user_role: Database["public"]["Enums"]["user_role"] | null;
+          display_name: string | null;
           updated_at: string;
         };
         Insert: {
           id: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
+          display_name?: string | null;
           updated_at?: string;
         };
         Update: {
           id?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
+          display_name?: string | null;
           updated_at?: string;
         };
         Relationships: [
