@@ -21,7 +21,7 @@ interface CategoryDialogProps {
   onOpenChange: (open: boolean) => void;
   mode: "create" | "rename";
   initialName?: string;
-  onSubmit: (name: string) => Promise<{ success: boolean; error?: string }>;
+  onSubmit: (name: string) => Promise<{ success: boolean; error?: string | null }>;
 }
 
 export function CategoryDialog({ open, onOpenChange, mode, initialName = "", onSubmit }: CategoryDialogProps) {

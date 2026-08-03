@@ -27,7 +27,7 @@ async function verifyAdmin() {
     return { supabase, authorized: false, error: "僅系統管理者可執行此操作" };
   }
 
-  return { supabase, authorized: true, error: null };
+  return { supabase, authorized: true, error: undefined };
 }
 
 export async function fetchCategories() {
