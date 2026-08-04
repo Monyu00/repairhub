@@ -1,17 +1,20 @@
 "use client";
 
-import { Tag } from "lucide-react";
+import { MapPin, Tag } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import type { CategoryItem } from "../_actions/category-actions";
+import type { BuildingWithSpaces } from "../_actions/location-actions";
 import { CategoryManagement } from "./category-management";
+import { LocationManagement } from "./location-management";
 
 interface SettingsPageProps {
   categories: CategoryItem[];
+  buildings: BuildingWithSpaces[];
 }
 
-export function SettingsPage({ categories }: SettingsPageProps) {
+export function SettingsPage({ categories, buildings }: SettingsPageProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -25,10 +28,18 @@ export function SettingsPage({ categories }: SettingsPageProps) {
             <Tag className="h-4 w-4" />
             類別管理
           </TabsTrigger>
+          <TabsTrigger value="locations" className="gap-2">
+            <MapPin className="h-4 w-4" />
+            地點管理
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories" className="mt-0">
           <CategoryManagement initialCategories={categories} />
+        </TabsContent>
+
+        <TabsContent value="locations" className="mt-0">
+          <LocationManagement initialBuildings={buildings} />
         </TabsContent>
       </Tabs>
     </div>
