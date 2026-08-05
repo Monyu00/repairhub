@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { type UserItem, updateUserProfile } from "../_actions/user-actions";
 import { UserEditDialog } from "./user-edit-dialog";
+import { UserRoleBadge } from "./user-role-badge";
 
 interface UserManagementProps {
   initialUsers: UserItem[];
@@ -220,26 +221,7 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {user.role === "admin" && (
-                          <Badge variant="destructive" className="gap-1 font-normal">
-                            <ShieldCheck className="h-3 w-3" />
-                            系統管理者
-                          </Badge>
-                        )}
-                        {user.role === "technician" && (
-                          <Badge
-                            variant="default"
-                            className="gap-1 bg-blue-600 font-normal hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-                          >
-                            <Wrench className="h-3 w-3" />
-                            維修技師
-                          </Badge>
-                        )}
-                        {user.role === null && (
-                          <Badge variant="outline" className="font-normal text-muted-foreground">
-                            一般使用者
-                          </Badge>
-                        )}
+                        <UserRoleBadge role={user.role} />
                       </TableCell>
                       <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                         {formatDate(user.createdAt)}
