@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Edit2, Search, ShieldCheck, UserCheck, Users, Wrench } from "lucide-react";
+import { Edit2, Search, ShieldCheck, Tag, UserCheck, Users, Wrench } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,26 +12,47 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
+import type { CategoryItem } from "../_actions/category-actions";
 import { type UserItem, updateUserProfile } from "../_actions/user-actions";
+import { TechnicianCategoryDialog } from "./technician-category-dialog";
 import { UserEditDialog } from "./user-edit-dialog";
 import { UserRoleBadge } from "./user-role-badge";
 
 interface UserManagementProps {
   initialUsers: UserItem[];
+  categories: CategoryItem[];
+  initialTechnicianCategoryMap?: Record<string, string[]>;
 }
 
-export function UserManagement({ initialUsers }: UserManagementProps) {
+export function UserManagement({ initialUsers, categories, initialTechnicianCategoryMap = {} }: UserManagementProps) {
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
+  const [technicianCategoryMap, setTechnicianCategoryMap] =
+    useState<Record<string, string[]>>(initialTechnicianCategoryMap);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
 
+  const [techCategoryDialogOpen, setTechCategoryDialogOpen] = useState(false);
+  const [selectedTechUser, setSelectedTechUser] = useState<UserItem | null>(null);
+
   // Sync state if server props change
   if (initialUsers !== users) {
     setUsers(initialUsers);
   }
+  if (initialTechnicianCategoryMap !== technicianCategoryMap) {
+    setTechnicianCategoryMap(initialTechnicianCategoryMap);
+  }
+
+  // Create a map of category ID to category object for fast lookup
+  const categoryMap = useMemo(() => {
+    const map = new Map<string, CategoryItem>();
+    categories.forEach((cat) => {
+      map.set(cat.id, cat);
+    });
+    return map;
+  }, [categories]);
 
   // Filtered users
   const filteredUsers = useMemo(() => {
@@ -75,6 +96,11 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
     setEditDialogOpen(true);
   };
 
+  const handleCategoryClick = (user: UserItem) => {
+    setSelectedTechUser(user);
+    setTechCategoryDialogOpen(true);
+  };
+
   const handleUserSubmit = async (
     userId: string,
     data: { displayName: string; role: "admin" | "technician" | null },
@@ -87,6 +113,14 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
       );
     }
     return res;
+  };
+
+  const handleTechCategorySuccess = (technicianId: string, updatedCategoryIds: string[]) => {
+    toast.success("已更新技師負責報修類別");
+    setTechnicianCategoryMap((prev) => ({
+      ...prev,
+      [technicianId]: updatedCategoryIds,
+    }));
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -160,7 +194,7 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
           <div>
             <CardTitle className="text-lg font-semibold">使用者與權限管理</CardTitle>
             <CardDescription className="text-sm">
-              對系統使用者指派角色（管理員、維修技師或一般使用者）並設定顯示名稱。
+              對系統使用者指派角色（管理員、維修技師或一般使用者）並設定擅長/負責之報修類別。
             </CardDescription>
           </div>
         </CardHeader>
@@ -199,6 +233,7 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
                 <TableRow>
                   <TableHead>使用者姓名 / Email</TableHead>
                   <TableHead>權限角色</TableHead>
+                  <TableHead className="hidden lg:table-cell">負責報修類別</TableHead>
                   <TableHead className="hidden md:table-cell">建立日期</TableHead>
                   <TableHead className="hidden sm:table-cell">最後登入</TableHead>
                   <TableHead className="text-right">操作</TableHead>
@@ -207,41 +242,84 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                       {searchQuery || roleFilter !== "all" ? "找不到符合條件的使用者" : "目前系統中無使用者資料"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground">{user.displayName || "（未設定姓名）"}</span>
-                          <span className="text-xs text-muted-foreground">{user.email}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <UserRoleBadge role={user.role} />
-                      </TableCell>
-                      <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
-                        {formatDate(user.createdAt)}
-                      </TableCell>
-                      <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">
-                        {formatDate(user.lastSignInAt)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => handleEditClick(user)}
-                          title="編輯使用者角色與名稱"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                          <span className="sr-only">編輯</span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  filteredUsers.map((user) => {
+                    const isTech = user.role === "technician";
+                    const subscribedIds = isTech ? (technicianCategoryMap[user.id] ?? []) : [];
+                    const subscribedCategories = subscribedIds
+                      .map((id) => categoryMap.get(id))
+                      .filter((c): c is CategoryItem => Boolean(c));
+
+                    return (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-foreground">{user.displayName || "（未設定姓名）"}</span>
+                            <span className="text-xs text-muted-foreground">{user.email}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <UserRoleBadge role={user.role} />
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          {isTech ? (
+                            subscribedCategories.length > 0 ? (
+                              <div className="flex flex-wrap gap-1 max-w-[260px]">
+                                {subscribedCategories.map((cat) => (
+                                  <Badge
+                                    key={cat.id}
+                                    variant="secondary"
+                                    className="text-[11px] font-normal px-2 py-0.5 bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/40"
+                                  >
+                                    {cat.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs italic text-amber-600 dark:text-amber-400">未設定類別</span>
+                            )
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                          {formatDate(user.createdAt)}
+                        </TableCell>
+                        <TableCell className="hidden text-xs text-muted-foreground sm:table-cell">
+                          {formatDate(user.lastSignInAt)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {isTech && (
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => handleCategoryClick(user)}
+                                title="設定負責報修類別"
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                              >
+                                <Tag className="h-4 w-4" />
+                                <span className="sr-only">類別設定</span>
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => handleEditClick(user)}
+                              title="編輯使用者角色與名稱"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              <span className="sr-only">編輯</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -249,12 +327,21 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
+      {/* Edit User Dialog */}
       <UserEditDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         user={selectedUser}
         onSubmit={handleUserSubmit}
+      />
+
+      {/* Technician Category Subscription Dialog */}
+      <TechnicianCategoryDialog
+        open={techCategoryDialogOpen}
+        onOpenChange={setTechCategoryDialogOpen}
+        user={selectedTechUser}
+        categories={categories}
+        onSuccess={handleTechCategorySuccess}
       />
     </div>
   );

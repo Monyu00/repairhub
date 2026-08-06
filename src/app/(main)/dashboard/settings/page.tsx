@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import type { CategoryItem } from "./_actions/category-actions";
 import type { BuildingItem, BuildingWithSpaces, SpaceItem } from "./_actions/location-actions";
+import { fetchAllTechnicianCategories } from "./_actions/technician-category-actions";
 import { fetchUsers } from "./_actions/user-actions";
 import { SettingsPage } from "./_components/settings-page";
 
@@ -33,11 +34,12 @@ export default async function Page() {
     redirect("/dashboard");
   }
 
-  // 3. Fetch categories, buildings, and users in parallel
-  const [categoriesRes, buildingsRes, usersRes] = await Promise.all([
+  // 3. Fetch categories, buildings, users, and technician categories in parallel
+  const [categoriesRes, buildingsRes, usersRes, techCategoriesRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order", { ascending: true }),
     supabase.from("buildings").select("*, spaces(*)").order("name", { ascending: true }),
     fetchUsers(),
+    fetchAllTechnicianCategories(),
   ]);
 
   if (categoriesRes.error) {
@@ -48,7 +50,7 @@ export default async function Page() {
     console.error("Error fetching buildings for settings page:", buildingsRes.error);
   }
 
-  const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[]) ?? [];
+  const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[] | null) ?? [];
   const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
     ...b,
     spaces: (b.spaces ?? []).sort((a, b) => {
@@ -58,6 +60,14 @@ export default async function Page() {
   }));
 
   const users = usersRes.users ?? [];
+  const technicianCategoryMap = techCategoriesRes.technicianCategoryMap ?? {};
 
-  return <SettingsPage categories={(categoriesRes.data as CategoryItem[]) ?? []} buildings={buildings} users={users} />;
+  return (
+    <SettingsPage
+      categories={(categoriesRes.data as CategoryItem[] | null) ?? []}
+      buildings={buildings}
+      users={users}
+      technicianCategoryMap={technicianCategoryMap}
+    />
+  );
 }
