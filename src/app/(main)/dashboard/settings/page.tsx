@@ -6,11 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 
 import type { CategoryItem } from "./_actions/category-actions";
 import type { BuildingItem, BuildingWithSpaces, SpaceItem } from "./_actions/location-actions";
+import { fetchUsers } from "./_actions/user-actions";
 import { SettingsPage } from "./_components/settings-page";
 
 export const metadata: Metadata = {
   title: "系統設定 - RepairHub",
-  description: "全校設施設備報修系統核心維護與類別 CRUD 設定。",
+  description: "全校設施設備報修系統核心維護、地點管理與使用者權限設定。",
 };
 
 export default async function Page() {
@@ -32,35 +33,31 @@ export default async function Page() {
     redirect("/dashboard");
   }
 
-  // 3. Fetch categories for admin management (including inactive ones)
-  const { data: categories, error: categoriesError } = await supabase
-    .from("categories")
-    .select("*")
-    .order("sort_order", { ascending: true });
+  // 3. Fetch categories, buildings, and users in parallel
+  const [categoriesRes, buildingsRes, usersRes] = await Promise.all([
+    supabase.from("categories").select("*").order("sort_order", { ascending: true }),
+    supabase.from("buildings").select("*, spaces(*)").order("name", { ascending: true }),
+    fetchUsers(),
+  ]);
 
-  if (categoriesError) {
-    console.error("Error fetching categories for settings page:", categoriesError);
+  if (categoriesRes.error) {
+    console.error("Error fetching categories for settings page:", categoriesRes.error);
   }
 
-  // 4. Fetch buildings with spaces for location management
-  const { data: rawBuildings, error: buildingsError } = await supabase
-    .from("buildings")
-    .select("*, spaces(*)")
-    .order("name", { ascending: true });
-
-  if (buildingsError) {
-    console.error("Error fetching buildings for settings page:", buildingsError);
+  if (buildingsRes.error) {
+    console.error("Error fetching buildings for settings page:", buildingsRes.error);
   }
 
-  const buildings: BuildingWithSpaces[] = ((rawBuildings as (BuildingItem & { spaces: SpaceItem[] })[]) ?? []).map(
-    (b) => ({
-      ...b,
-      spaces: (b.spaces ?? []).sort((a, b) => {
-        if (a.floor !== b.floor) return a.floor - b.floor;
-        return a.name.localeCompare(b.name, "zh-Hant");
-      }),
+  const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[]) ?? [];
+  const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
+    ...b,
+    spaces: (b.spaces ?? []).sort((a, b) => {
+      if (a.floor !== b.floor) return a.floor - b.floor;
+      return a.name.localeCompare(b.name, "zh-Hant");
     }),
-  );
+  }));
 
-  return <SettingsPage categories={(categories as CategoryItem[]) ?? []} buildings={buildings} />;
+  const users = usersRes.users ?? [];
+
+  return <SettingsPage categories={(categoriesRes.data as CategoryItem[]) ?? []} buildings={buildings} users={users} />;
 }

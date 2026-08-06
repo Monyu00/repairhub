@@ -1,20 +1,23 @@
 "use client";
 
-import { MapPin, Tag } from "lucide-react";
+import { MapPin, Tag, Users } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import type { CategoryItem } from "../_actions/category-actions";
 import type { BuildingWithSpaces } from "../_actions/location-actions";
+import type { UserItem } from "../_actions/user-actions";
 import { CategoryManagement } from "./category-management";
 import { LocationManagement } from "./location-management";
+import { UserManagement } from "./user-management";
 
 interface SettingsPageProps {
   categories: CategoryItem[];
   buildings: BuildingWithSpaces[];
+  users: UserItem[];
 }
 
-export function SettingsPage({ categories, buildings }: SettingsPageProps) {
+export function SettingsPage({ categories, buildings, users }: SettingsPageProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -32,6 +35,10 @@ export function SettingsPage({ categories, buildings }: SettingsPageProps) {
             <MapPin className="h-4 w-4" />
             地點管理
           </TabsTrigger>
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="h-4 w-4" />
+            使用者管理
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories" className="mt-0">
@@ -40,6 +47,10 @@ export function SettingsPage({ categories, buildings }: SettingsPageProps) {
 
         <TabsContent value="locations" className="mt-0">
           <LocationManagement initialBuildings={buildings} />
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-0">
+          <UserManagement initialUsers={users} />
         </TabsContent>
       </Tabs>
     </div>
