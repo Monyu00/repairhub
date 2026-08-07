@@ -15,9 +15,10 @@ interface SettingsPageProps {
   categories: CategoryItem[];
   buildings: BuildingWithSpaces[];
   users: UserItem[];
+  technicianCategoryMap?: Record<string, string[]>;
 }
 
-export function SettingsPage({ categories, buildings, users }: SettingsPageProps) {
+export function SettingsPage({ categories, buildings, users, technicianCategoryMap = {} }: SettingsPageProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -50,7 +51,11 @@ export function SettingsPage({ categories, buildings, users }: SettingsPageProps
         </TabsContent>
 
         <TabsContent value="users" className="mt-0">
-          <UserManagement initialUsers={users} />
+          <UserManagement
+            initialUsers={users}
+            categories={categories}
+            initialTechnicianCategoryMap={technicianCategoryMap}
+          />
         </TabsContent>
       </Tabs>
     </div>
