@@ -15,7 +15,7 @@ interface AvgResolutionChartProps {
 const chartConfig = {
   avgDays: {
     label: "平均處理時間 (天)",
-    color: "hsl(var(--chart-3))",
+    color: "var(--chart-3)",
   },
 } satisfies ChartConfig;
 

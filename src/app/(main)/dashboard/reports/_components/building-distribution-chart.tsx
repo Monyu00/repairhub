@@ -26,7 +26,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
     data.forEach((item, index) => {
       config[item.buildingId] = {
         label: item.buildingName,
-        color: item.fill || `hsl(var(--chart-${(index % 5) + 1}))`,
+        color: item.fill || `var(--chart-${(index % 5) + 1})`,
       };
     });
     return config;
@@ -75,11 +75,11 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                   innerRadius={50}
                   outerRadius={80}
                   paddingAngle={3}
-                  stroke="hsl(var(--background))"
+                  stroke="var(--background)"
                   strokeWidth={2}
                 >
                   {data.map((entry, index) => (
-                    <Cell key={entry.buildingId} fill={entry.fill || `hsl(var(--chart-${(index % 5) + 1}))`} />
+                    <Cell key={entry.buildingId} fill={entry.fill || `var(--chart-${(index % 5) + 1})`} />
                   ))}
                 </Pie>
               </PieChart>
@@ -92,7 +92,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                   <div className="flex items-center gap-2 truncate">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                      style={{ backgroundColor: item.fill || "hsl(var(--primary))" }}
+                      style={{ backgroundColor: item.fill || "var(--primary)" }}
                     />
                     <span className="truncate text-muted-foreground">{item.buildingName}</span>
                   </div>

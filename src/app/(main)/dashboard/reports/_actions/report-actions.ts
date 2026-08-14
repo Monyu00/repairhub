@@ -13,16 +13,16 @@ import type {
   TechnicianPerformanceStat,
 } from "../_components/report-types";
 
-// Palette generator using CSS variables matching theme tokens
+// Palette generator using CSS variables matching theme preset tokens
 const THEME_CHART_COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-  "hsl(var(--primary))",
-  "hsl(var(--muted-foreground))",
-  "hsl(var(--accent-foreground))",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--primary)",
+  "var(--muted-foreground)",
+  "var(--accent-foreground)",
 ];
 
 export async function fetchReportData(filterParams?: {

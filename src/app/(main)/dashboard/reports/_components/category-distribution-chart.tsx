@@ -26,7 +26,7 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
     data.forEach((item, index) => {
       config[item.categoryId] = {
         label: item.categoryName,
-        color: item.fill || `hsl(var(--chart-${(index % 5) + 1}))`,
+        color: item.fill || `var(--chart-${(index % 5) + 1})`,
       };
     });
     return config;
@@ -75,11 +75,11 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
                   innerRadius={45}
                   outerRadius={80}
                   paddingAngle={2}
-                  stroke="hsl(var(--background))"
+                  stroke="var(--background)"
                   strokeWidth={2}
                 >
                   {data.map((entry, index) => (
-                    <Cell key={entry.categoryId} fill={entry.fill || `hsl(var(--chart-${(index % 5) + 1}))`} />
+                    <Cell key={entry.categoryId} fill={entry.fill || `var(--chart-${(index % 5) + 1})`} />
                   ))}
                 </Pie>
               </PieChart>
@@ -92,7 +92,7 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
                   <div className="flex items-center gap-1.5 truncate">
                     <span
                       className="h-2 w-2 shrink-0 rounded-xs"
-                      style={{ backgroundColor: item.fill || "hsl(var(--primary))" }}
+                      style={{ backgroundColor: item.fill || "var(--primary)" }}
                     />
                     <span className="truncate text-muted-foreground">{item.categoryName}</span>
                   </div>

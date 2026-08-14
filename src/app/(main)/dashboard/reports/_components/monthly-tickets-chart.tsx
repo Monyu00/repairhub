@@ -22,15 +22,15 @@ interface MonthlyTicketsChartProps {
 const chartConfig = {
   total: {
     label: "總通報數",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   completed: {
     label: "已完成/結案",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
   pendingOrProgress: {
     label: "處理中/待處理",
-    color: "hsl(var(--chart-4))",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig;
 

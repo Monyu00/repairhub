@@ -22,11 +22,11 @@ interface TechnicianPerformanceChartProps {
 const chartConfig = {
   completedCount: {
     label: "已完成工單",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
   inProgressCount: {
     label: "處理中工單",
-    color: "hsl(var(--chart-4))",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig;
 
