@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, LayoutDashboard, type LucideIcon, Package, Settings } from "lucide-react";
+import { BarChart3, ClipboardList, FileText, LayoutDashboard, type LucideIcon, Package, Settings } from "lucide-react";
 
 export type NavBadge = "new" | "soon";
 
@@ -78,6 +78,12 @@ export const sidebarItems: NavGroup[] = [
         title: "設備管理",
         url: "/dashboard/equipment",
         icon: Package,
+      },
+      {
+        id: "reports",
+        title: "統計報表",
+        url: "/dashboard/reports",
+        icon: BarChart3,
       },
       {
         id: "settings",
