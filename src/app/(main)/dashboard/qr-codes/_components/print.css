@@ -1,0 +1,51 @@
+@media print {
+  /* Hide dashboard navigation and non-printable elements */
+  nav,
+  header,
+  aside,
+  [data-slot="sidebar"],
+  .sidebar-trigger,
+  .qr-no-print {
+    display: none !important;
+  }
+
+  /* Reset layout constraints */
+  body,
+  html,
+  #root,
+  main {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  /* Printable container */
+  .qr-print-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Printable individual cards */
+  .qr-printable-card {
+    border: 1.5px solid #333333 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    padding: 14px !important;
+    border-radius: 8px !important;
+  }
+}
