@@ -7,7 +7,7 @@ import type { PrintableQRItem } from "./types";
 /**
  * Renders a single printable QR card onto an offscreen canvas at high resolution (300 DPI equivalent)
  */
-async function renderCardToCanvas(item: PrintableQRItem): Promise<string> {
+export async function renderCardToCanvas(item: PrintableQRItem): Promise<string> {
   const canvas = document.createElement("canvas");
   const width = 880;
   const height = 850;
@@ -177,5 +177,25 @@ export async function exportQRCodesToPDF(
   } catch (error) {
     console.error("Failed to generate PDF:", error);
     toast.error("產生 PDF 失敗，請稍後再試", { id: toastId });
+  }
+}
+
+/**
+ * Downloads a single card as a high-resolution PNG image.
+ */
+export async function downloadCardImage(item: PrintableQRItem): Promise<void> {
+  try {
+    const cardDataUrl = await renderCardToCanvas(item);
+    const a = document.createElement("a");
+    a.href = cardDataUrl;
+    const sanitizedTitle = item.title.replace(/[\s/\\:*?"<>|]/g, "_");
+    a.download = `QR_${item.type}_${sanitizedTitle}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success(`已下載 ${item.title} 卡片圖片`);
+  } catch (error) {
+    console.error("Failed to download card image:", error);
+    toast.error("下載卡片圖片失敗");
   }
 }

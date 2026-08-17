@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { downloadCardImage } from "./qr-pdf-export";
 import type { PrintableQRItem } from "./types";
 
 interface QRCardProps {
@@ -22,6 +23,7 @@ interface QRCardProps {
 export function QRCard({ item }: QRCardProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -57,16 +59,14 @@ export function QRCard({ item }: QRCardProps) {
     }
   };
 
-  const handleDownloadSingle = () => {
-    if (!qrDataUrl) return;
-    const a = document.createElement("a");
-    a.href = qrDataUrl;
-    const sanitizedTitle = item.title.replace(/[\s/\\:*?"<>|]/g, "_");
-    a.download = `QR_${item.type}_${sanitizedTitle}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success(`已下載 ${item.title} QR Code`);
+  const handleDownloadSingle = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await downloadCardImage(item);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -95,13 +95,14 @@ export function QRCard({ item }: QRCardProps) {
                 variant="ghost"
                 size="icon-xs"
                 onClick={handleDownloadSingle}
+                disabled={isDownloading}
                 className="size-7 rounded-md bg-background/80 backdrop-blur-xs hover:bg-muted"
-                aria-label="下載單張 PNG"
+                aria-label="下載卡片圖片"
               >
                 <Download className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">下載單張 PNG</TooltipContent>
+            <TooltipContent side="top">下載卡片圖片 (PNG)</TooltipContent>
           </Tooltip>
 
           <Tooltip>

@@ -246,7 +246,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
                     共 {printableItems.length} 張卡片
                   </Badge>
                 </div>
-                <span className="text-muted-foreground text-xs">支援單張下載 PNG 或批量下載 PDF</span>
+                <span className="text-muted-foreground text-xs">支援單張下載卡片圖片或批量下載 PDF</span>
               </div>
 
               {/* Cards Grid */}
