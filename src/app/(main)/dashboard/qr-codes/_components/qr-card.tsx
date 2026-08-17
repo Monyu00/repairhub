@@ -70,9 +70,9 @@ export function QRCard({ item }: QRCardProps) {
   };
 
   return (
-    <Card className="qr-printable-card group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-all hover:shadow-md print:border-black print:bg-white print:text-black print:shadow-none print:break-inside-avoid">
-      {/* Screen action bar (Hidden when printing) */}
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 print:hidden">
+    <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-all hover:shadow-md">
+      {/* Screen action bar */}
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -124,23 +124,23 @@ export function QRCard({ item }: QRCardProps) {
       </div>
 
       {/* Top Header / Branding */}
-      <div className="flex w-full items-center justify-between border-b border-border/60 pb-2.5 print:border-black/40">
+      <div className="flex w-full items-center justify-between border-b border-border/60 pb-2.5">
         <div className="flex items-center gap-1.5">
-          <div className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground print:border print:border-black print:bg-white print:text-black">
+          <div className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Wrench className="size-3" />
           </div>
           <span className="font-heading font-semibold text-xs tracking-tight">RepairHub 報修</span>
         </div>
         <Badge
           variant={item.type === "space" ? "secondary" : "outline"}
-          className="px-1.5 py-0 text-[10px] font-normal print:border-black print:text-black"
+          className="px-1.5 py-0 text-[10px] font-normal"
         >
           {item.type === "space" ? "空間 QR" : "設備 QR"}
         </Badge>
       </div>
 
       {/* Center QR Code Image */}
-      <div className="my-3 flex items-center justify-center rounded-lg bg-white p-2 shadow-xs ring-1 ring-border/50 print:p-1 print:shadow-none print:ring-0">
+      <div className="my-3 flex items-center justify-center rounded-lg bg-white p-2 shadow-xs ring-1 ring-border/50">
         {qrDataUrl ? (
           <Image
             src={qrDataUrl}
@@ -159,17 +159,13 @@ export function QRCard({ item }: QRCardProps) {
 
       {/* Card Info & Labels */}
       <div className="w-full space-y-1 text-center">
-        <h4 className="truncate font-heading font-bold text-base text-foreground tracking-tight print:text-black">
-          {item.title}
-        </h4>
-        <p className="truncate text-muted-foreground text-xs print:text-black/80">{item.subtitle}</p>
-        {item.code && (
-          <p className="font-mono text-[11px] text-muted-foreground/80 print:text-black/70">編號: {item.code}</p>
-        )}
+        <h4 className="truncate font-heading font-bold text-base text-foreground tracking-tight">{item.title}</h4>
+        <p className="truncate text-muted-foreground text-xs">{item.subtitle}</p>
+        {item.code && <p className="font-mono text-[11px] text-muted-foreground/80">編號: {item.code}</p>}
       </div>
 
       {/* Card Footer notice */}
-      <div className="mt-2.5 w-full rounded-md border border-dashed border-border/70 bg-muted/30 py-1 text-center text-[10px] text-muted-foreground print:border-black/30 print:bg-transparent print:text-black/70">
+      <div className="mt-2.5 w-full rounded-md border border-dashed border-border/70 bg-muted/30 py-1 text-center text-[10px] text-muted-foreground">
         手機掃描 QR Code 立即通報修繕
       </div>
     </Card>

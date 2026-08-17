@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Download, Layers, Package, Printer, QrCode } from "lucide-react";
+import { Download, Layers, Package, QrCode } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { QRCard } from "./qr-card";
 import { exportQRCodesToPDF } from "./qr-pdf-export";
 import { QRSelectionPanel } from "./qr-selection-panel";
 import type { BuildingOption, EquipmentOption, PrintableQRItem, QRTargetType } from "./types";
-import "./print.css";
 
 interface QRCodeDashboardProps {
   buildings: BuildingOption[];
@@ -33,7 +32,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
     }
   }, []);
 
-  // Pre-select all spaces on initial load for convenient fast-print
+  // Pre-select all spaces on initial load for convenient batch export
   useEffect(() => {
     const allSpaceIds = buildings.flatMap((b) => b.spaces.map((s) => s.id));
     setSelectedSpaceIds(allSpaceIds);
@@ -136,11 +135,6 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
     return items;
   }, [targetType, selectedSpaceIds, selectedEquipmentIds, spacesMap, equipmentMap, origin]);
 
-  const handlePrint = () => {
-    if (printableItems.length === 0) return;
-    window.print();
-  };
-
   const handleExportPDF = async () => {
     const prefix = targetType === "spaces" ? "RepairHub_空間報修QR" : "RepairHub_設備報修QR";
     await exportQRCodesToPDF(printableItems, prefix);
@@ -152,27 +146,14 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
   return (
     <div className="space-y-6">
       {/* Header & Action Bar */}
-      <div className="qr-no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">批量 QR Code 產生與列印</h1>
-          <p className="text-muted-foreground text-sm">
-            全校空間地點與設備資產報修條碼批量產生、即時預覽、瀏覽器列印與 PDF 下載。
-          </p>
+          <h1 className="font-bold text-2xl text-foreground tracking-tight">批量 QR Code 產生</h1>
+          <p className="text-muted-foreground text-sm">全校空間地點與設備資產報修條碼批量產生、即時預覽與 PDF 下載。</p>
         </div>
 
         {/* Global Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrint}
-            disabled={printableItems.length === 0}
-            className="h-9 gap-1.5"
-          >
-            <Printer className="size-4" />
-            <span>列印 ({printableItems.length})</span>
-          </Button>
-
           <Button
             variant="default"
             size="sm"
@@ -181,13 +162,13 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
             className="h-9 gap-1.5"
           >
             <Download className="size-4" />
-            <span>下載 PDF</span>
+            <span>下載 PDF ({printableItems.length})</span>
           </Button>
         </div>
       </div>
 
       {/* Tabs Selector */}
-      <div className="qr-no-print">
+      <div>
         <Tabs value={targetType} onValueChange={(val) => setTargetType(val as QRTargetType)} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="spaces" className="gap-1.5 text-xs sm:text-sm">
@@ -209,7 +190,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Column: Selection Panel */}
-        <div className="qr-no-print lg:col-span-4 xl:col-span-4">
+        <div className="lg:col-span-4 xl:col-span-4">
           <div className="sticky top-16 h-[calc(100vh-12rem)] min-h-[480px]">
             <QRSelectionPanel
               targetType={targetType}
@@ -226,7 +207,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
         {/* Right Column: Live Preview Grid */}
         <div className="lg:col-span-8 xl:col-span-8">
           {printableItems.length === 0 ? (
-            <Card className="qr-no-print flex min-h-[480px] items-center justify-center border-dashed p-8 text-center">
+            <Card className="flex min-h-[480px] items-center justify-center border-dashed p-8 text-center">
               <Empty className="max-w-md">
                 <EmptyMedia variant="icon">
                   <QrCode className="size-6" />
@@ -235,7 +216,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
                   <EmptyTitle>尚未選取任何項目</EmptyTitle>
                   <EmptyDescription>
                     請由左側面板勾選欲產生 QR Code 的{targetType === "spaces" ? "空間" : "設備"}
-                    ，選取後將在此處即時產生可列印卡片預覽。
+                    ，選取後將在此處即時產生卡片預覽。
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
@@ -258,18 +239,18 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
           ) : (
             <div className="space-y-4">
               {/* Preview Toolbar */}
-              <div className="qr-no-print flex items-center justify-between rounded-lg border border-border/80 bg-muted/40 px-4 py-2.5">
+              <div className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/40 px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground text-sm">即時預覽</span>
                   <Badge variant="secondary" className="px-2 py-0 text-xs">
                     共 {printableItems.length} 張卡片
                   </Badge>
                 </div>
-                <span className="text-muted-foreground text-xs">A4 列印適配（每頁 6 張 2×3 網格）</span>
+                <span className="text-muted-foreground text-xs">支援單張下載 PNG 或批量下載 PDF</span>
               </div>
 
-              {/* Cards Grid (Screen + Print) */}
-              <div className="qr-print-container grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {/* Cards Grid */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {printableItems.map((item) => (
                   <QRCard key={`${item.type}-${item.id}`} item={item} />
                 ))}

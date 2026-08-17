@@ -8,8 +8,8 @@ import { QRCodeDashboard } from "./_components/qr-code-dashboard";
 import type { BuildingOption, EquipmentOption } from "./_components/types";
 
 export const metadata: Metadata = {
-  title: "批量 QR Code 產生與列印 - RepairHub",
-  description: "全校空間與設備報修 QR Code 批量產生、即時預覽、瀏覽器列印與 PDF 下載。",
+  title: "批量 QR Code 產生 - RepairHub",
+  description: "全校空間與設備報修 QR Code 批量產生、即時預覽與 PDF 下載。",
 };
 
 export default async function QRCodesPage() {
