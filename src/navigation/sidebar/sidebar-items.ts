@@ -1,4 +1,13 @@
-import { BarChart3, ClipboardList, FileText, LayoutDashboard, type LucideIcon, Package, Settings } from "lucide-react";
+import {
+  BarChart3,
+  ClipboardList,
+  FileText,
+  LayoutDashboard,
+  type LucideIcon,
+  Package,
+  QrCode,
+  Settings,
+} from "lucide-react";
 
 export type NavBadge = "new" | "soon";
 
@@ -78,6 +87,12 @@ export const sidebarItems: NavGroup[] = [
         title: "設備管理",
         url: "/dashboard/equipment",
         icon: Package,
+      },
+      {
+        id: "qr-codes",
+        title: "QR Code 管理",
+        url: "/dashboard/qr-codes",
+        icon: QrCode,
       },
       {
         id: "reports",
