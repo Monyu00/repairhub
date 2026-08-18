@@ -9,6 +9,7 @@ import { BuildingDistributionChart } from "./building-distribution-chart";
 import { CategoryDistributionChart } from "./category-distribution-chart";
 import { DateRangeFilter } from "./date-range-filter";
 import { MonthlyTicketsChart } from "./monthly-tickets-chart";
+import { ReportExportActions } from "./report-export-actions";
 import type { ReportData } from "./report-types";
 import { TechnicianPerformanceChart } from "./technician-performance-chart";
 
@@ -30,10 +31,13 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-bold text-2xl text-foreground tracking-tight">統計報表與分析</h1>
           <p className="text-muted-foreground text-sm">全校報修趨勢、空間分佈、分類佔比與維修績效深度分析</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ReportExportActions data={initialData} />
         </div>
       </div>
 
