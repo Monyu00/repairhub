@@ -84,7 +84,7 @@ export function PhotoUpload({
       <div className="grid grid-cols-3 gap-3">
         {photos.map((src, index) => (
           <div
-            key={src.slice(0, 32)}
+            key={src.slice(-32)}
             className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
           >
             <Image src={src} alt={`完工照片預覽 #${index + 1}`} fill className="object-cover" />
