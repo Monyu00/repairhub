@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { DEFAULT_MAX_PHOTOS } from "@/lib/storage/constants";
 import { storeTicketPhotos } from "@/lib/storage/ticket-photos";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -263,10 +264,10 @@ export async function transitionTicket(
         };
       }
 
-      if (photosBase64.length > 3) {
+      if (photosBase64.length > DEFAULT_MAX_PHOTOS) {
         return {
           success: false,
-          error: "完工照片最多不可超過 3 張",
+          error: `完工照片最多不可超過 ${DEFAULT_MAX_PHOTOS} 張`,
           code: "VALIDATION_FAILED",
         };
       }

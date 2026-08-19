@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { MAX_PROCESSED_PHOTO_SIZE_BYTES } from "@/lib/storage/constants";
 import type { Database } from "@/lib/supabase/database.types";
 
 export type TicketPhotoPhase = "report" | "closure";
@@ -32,12 +33,36 @@ export function parseBase64Image(dataString: string): { buffer: Buffer; mimeType
     buffer = Buffer.from(dataString, "base64");
   }
 
-  const ext = mimeType.split("/")[1]?.replace("e-jpeg", "jpg") ?? "jpg";
+  const subtype = mimeType.split("/")[1]?.toLowerCase() ?? "jpg";
+  const ext = subtype === "jpeg" || subtype === "pjpeg" ? "jpg" : subtype;
   return { buffer, mimeType, extension: ext };
 }
 
 /**
+ * Rollback compensation helper: removes uploaded storage files and cleans up database rows.
+ * Fails silently with warnings to preserve the primary error.
+ */
+async function rollbackPhotos(supabase: SupabaseClient<Database>, paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+
+  try {
+    const { error: storageError } = await supabase.storage.from("ticket-photos").remove(paths);
+    if (storageError) {
+      console.warn("Rollback storage removal warning:", storageError);
+    }
+
+    const { error: dbError } = await supabase.from("ticket_photos").delete().in("storage_path", paths);
+    if (dbError) {
+      console.warn("Rollback database record removal warning:", dbError);
+    }
+  } catch (cleanupErr) {
+    console.warn("Unexpected error during photo rollback cleanup:", cleanupErr);
+  }
+}
+
+/**
  * Deep module: Store ticket photos into Supabase Storage and synchronize records in ticket_photos table.
+ * Includes buffer size verification, fail-fast mechanics, and full rollback compensation.
  */
 export async function storeTicketPhotos(
   supabase: SupabaseClient<Database>,
@@ -55,6 +80,20 @@ export async function storeTicketPhotos(
 
     try {
       const { buffer, mimeType, extension } = parseBase64Image(photoData);
+
+      if (buffer.length > MAX_PROCESSED_PHOTO_SIZE_BYTES) {
+        console.error(
+          `Photo #${i + 1} (${phase}) for ticket ${ticketId} exceeds max size: ${buffer.length} > ${MAX_PROCESSED_PHOTO_SIZE_BYTES} bytes`,
+        );
+        await rollbackPhotos(supabase, uploadedPaths);
+        return {
+          success: false,
+          uploadedCount: uploadedPaths.length,
+          storagePaths: uploadedPaths,
+          error: `照片 #${i + 1} 超過處理大小上限 (2MB)`,
+        };
+      }
+
       const storagePath = `${phase}/${ticketId}/${Date.now()}_${i}.${extension}`;
 
       const { error: uploadError } = await supabase.storage.from("ticket-photos").upload(storagePath, buffer, {
@@ -64,6 +103,7 @@ export async function storeTicketPhotos(
 
       if (uploadError) {
         console.error(`Failed to upload photo #${i + 1} (${phase}) for ticket ${ticketId}:`, uploadError);
+        await rollbackPhotos(supabase, uploadedPaths);
         return {
           success: false,
           uploadedCount: uploadedPaths.length,
@@ -80,11 +120,19 @@ export async function storeTicketPhotos(
 
       if (dbError) {
         console.error(`Failed to create ticket_photos record for ${storagePath}:`, dbError);
+        await rollbackPhotos(supabase, [...uploadedPaths, storagePath]);
+        return {
+          success: false,
+          uploadedCount: uploadedPaths.length,
+          storagePaths: uploadedPaths,
+          error: `照片 #${i + 1} 資料庫寫入失敗`,
+        };
       }
 
       uploadedPaths.push(storagePath);
     } catch (err) {
       console.error(`Unexpected error processing photo #${i + 1} for ticket ${ticketId}:`, err);
+      await rollbackPhotos(supabase, uploadedPaths);
       return {
         success: false,
         uploadedCount: uploadedPaths.length,

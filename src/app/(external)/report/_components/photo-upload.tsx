@@ -6,6 +6,7 @@ import Image from "next/image";
 
 import { UploadIcon, XIcon } from "lucide-react";
 
+import { DEFAULT_MAX_PHOTOS, MAX_RAW_PHOTO_SIZE_MB } from "@/lib/storage/constants";
 import { compressImage } from "@/lib/utils/compress-image";
 
 interface PhotoUploadProps {
@@ -13,7 +14,10 @@ interface PhotoUploadProps {
   maxFileSizeMB?: number;
 }
 
-export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadProps) {
+export function PhotoUpload({
+  maxPhotos = DEFAULT_MAX_PHOTOS,
+  maxFileSizeMB = MAX_RAW_PHOTO_SIZE_MB,
+}: PhotoUploadProps) {
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +31,7 @@ export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadPro
 
     if (photos.length + files.length > maxPhotos) {
       setError(`最多只能上傳 ${maxPhotos} 張圖片`);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      e.target.value = "";
       return;
     }
 
@@ -58,7 +62,7 @@ export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadPro
       setError("圖片壓縮處理失敗，請重試");
     } finally {
       setLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      e.target.value = "";
     }
   };
 
@@ -74,14 +78,14 @@ export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadPro
       <div className="grid grid-cols-3 gap-3">
         {photos.map((photo, i) => (
           <div
-            key={photo.slice(0, 32)}
-            className="group relative aspect-square rounded-lg border border-border bg-muted overflow-hidden"
+            key={photo.slice(-32)}
+            className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
           >
             <Image src={photo} alt={`預覽圖片 ${i + 1}`} fill className="object-cover" />
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
               aria-label="移除圖片"
             >
               <XIcon className="size-3.5" />
@@ -94,14 +98,14 @@ export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadPro
             type="button"
             disabled={loading}
             onClick={() => fileInputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-input bg-muted/40 p-3 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-input border-dashed bg-muted/40 p-3 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
               <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             ) : (
               <>
                 <UploadIcon className="size-5 text-muted-foreground" />
-                <span className="text-xs font-medium">上傳照片</span>
+                <span className="font-medium text-xs">上傳照片</span>
                 <span className="text-[10px] text-muted-foreground">
                   ({photos.length}/{maxPhotos})
                 </span>
@@ -113,8 +117,8 @@ export function PhotoUpload({ maxPhotos = 3, maxFileSizeMB = 5 }: PhotoUploadPro
 
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
-      <p className="text-xs text-muted-foreground">支援 JPG、PNG 格式，每張最大 5MB，最多 {maxPhotos} 張照片。</p>
+      {error && <p className="text-destructive text-xs">{error}</p>}
+      <p className="text-muted-foreground text-xs">支援 JPG、PNG、WebP 格式，每張最大 5MB，最多 {maxPhotos} 張照片。</p>
     </div>
   );
 }
