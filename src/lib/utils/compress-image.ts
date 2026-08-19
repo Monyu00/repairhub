@@ -1,3 +1,31 @@
+let webpSupportedCache: boolean | null = null;
+
+/**
+ * Lazy singleton detection for canvas WebP export support in current browser.
+ */
+function checkWebpSupport(): boolean {
+  if (webpSupportedCache !== null) {
+    return webpSupportedCache;
+  }
+
+  if (typeof document === "undefined") {
+    webpSupportedCache = false;
+    return false;
+  }
+
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const dataUrl = canvas.toDataURL("image/webp");
+    webpSupportedCache = dataUrl.startsWith("data:image/webp");
+  } catch {
+    webpSupportedCache = false;
+  }
+
+  return webpSupportedCache;
+}
+
 export interface CompressedImage {
   base64: string; // Data URL or base64 string
   fileName: string;
@@ -7,6 +35,7 @@ export interface CompressedImage {
 /**
  * Compresses an image file on the client side using HTML Canvas.
  * Resizes the image to a maximum width of 1920px while preserving aspect ratio.
+ * Prefers WebP format with automatic JPEG fallback.
  */
 export async function compressImage(file: File, maxWidth = 1920, quality = 0.8): Promise<CompressedImage> {
   return new Promise((resolve, reject) => {
@@ -44,12 +73,16 @@ export async function compressImage(file: File, maxWidth = 1920, quality = 0.8):
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        const mimeType = "image/jpeg";
+        const isWebpSupported = checkWebpSupport();
+        const mimeType = isWebpSupported ? "image/webp" : "image/jpeg";
+        const extension = isWebpSupported ? ".webp" : ".jpg";
         const dataUrl = canvas.toDataURL(mimeType, quality);
+
+        const baseFileName = file.name.replace(/\.[^/.]+$/, "");
 
         resolve({
           base64: dataUrl,
-          fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+          fileName: `${baseFileName}${extension}`,
           mimeType,
         });
       };
