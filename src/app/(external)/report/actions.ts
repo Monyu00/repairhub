@@ -1,5 +1,6 @@
 "use server";
 
+import { storeTicketPhotos } from "@/lib/storage/ticket-photos";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type FormState = {
@@ -86,41 +87,11 @@ export async function submitReport(_prevState: FormState, formData: FormData): P
     }
 
     if (photos.length > 0) {
-      for (let i = 0; i < photos.length; i++) {
-        const photoBase64 = photos[i];
-        // base64 data format e.g. "data:image/jpeg;base64,/9j/4AAQSk..."
-        const matches = photoBase64.match(/^data:(.+);base64,(.+)$/);
-
-        let buffer: Buffer;
-        let mimeType = "image/jpeg";
-
-        if (matches) {
-          mimeType = matches[1];
-          buffer = Buffer.from(matches[2], "base64");
-        } else {
-          buffer = Buffer.from(photoBase64, "base64");
-        }
-
-        const ext = mimeType.split("/")[1] || "jpg";
-        const storagePath = `report/${ticket.id}/${Date.now()}_${i}.${ext}`;
-
-        const { error: uploadError } = await supabase.storage.from("ticket-photos").upload(storagePath, buffer, {
-          contentType: mimeType,
-          upsert: true,
-        });
-
-        if (uploadError) {
-          console.error("Failed to upload photo:", uploadError);
-          continue;
-        }
-
-        // Insert into ticket_photos
-        await supabase.from("ticket_photos").insert({
-          ticket_id: ticket.id,
-          storage_path: storagePath,
-          phase: "report",
-        });
-      }
+      await storeTicketPhotos(supabase, {
+        ticketId: ticket.id,
+        phase: "report",
+        photosBase64: photos,
+      });
     }
 
     return {

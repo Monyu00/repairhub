@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { createClient } from "@/lib/supabase/client";
 
+import { claimTicket } from "../[id]/_actions/ticket-actions";
 import { PendingTicketCard } from "./pending-ticket-card";
 import type { TicketRow, TicketStatus } from "./ticket-types";
 
@@ -243,24 +244,16 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   const handleClaim = async (ticketId: string) => {
     try {
-      const { data: success, error } = await supabase.rpc("claim_ticket", {
-        p_ticket_id: ticketId,
-        p_technician_id: userId,
-      });
+      const res = await claimTicket(ticketId);
 
-      if (error) {
-        console.error("Claim ticket error:", error);
-        toast.error("接單時發生錯誤，請稍後再試");
+      if (!res.success) {
+        toast.error(res.error || "此案件已在處理中或接單失敗");
+        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
         return;
       }
 
-      if (success) {
-        toast.success("已成功接單");
-        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
-      } else {
-        toast.error("此案件已在處理中");
-        setTickets((prev) => prev.filter((t) => t.id !== ticketId));
-      }
+      toast.success("已成功接單");
+      setTickets((prev) => prev.filter((t) => t.id !== ticketId));
     } catch (err) {
       console.error("Failed to claim ticket:", err);
       toast.error("無法執行搶單，請檢查網路連線");
@@ -310,7 +303,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
     <div className="space-y-4">
       <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
         <span>
-          共 <strong className="text-foreground font-semibold">{tickets.length}</strong> 筆待處理案件 (即時連線中)
+          共 <strong className="font-semibold text-foreground">{tickets.length}</strong> 筆待處理案件 (即時連線中)
         </span>
       </div>
       <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

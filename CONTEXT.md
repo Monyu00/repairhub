@@ -56,6 +56,14 @@ _Avoid_: Dispatch, delegate, allocate
 The final resolution of a ticket. Happens when the reporter confirms the repair is satisfactory, or automatically after 7 days of no response following completion.
 _Avoid_: Resolution, completion (completion means repair is done, not that the ticket is closed)
 
+**Reopen**:
+The act of a reporter returning a completed ticket back to in-progress when the repair is incomplete or the issue persists.
+_Avoid_: Reject, refile, renew
+
+**Return to Pending**:
+An admin resetting an in-progress ticket back to pending status and clearing its assigned technician so it can be claimed or assigned again.
+_Avoid_: Unassign, reset, withdraw
+
 ### Ticket Statuses
 
 **Pending** (`pending`):
