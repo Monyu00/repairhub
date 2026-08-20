@@ -20,8 +20,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const error = params.error;
 
   return (
-    <div className="flex min-h-dvh flex-col justify-center bg-muted/40 p-4 md:p-8">
-      <div className="mx-auto w-full max-w-md space-y-6">
+    <div className="flex min-h-dvh flex-col justify-between bg-muted/40 p-4 md:p-8">
+      <div className="mx-auto my-auto w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Wrench className="size-6" />
@@ -62,9 +62,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             追蹤報修單 →
           </Link>
         </div>
-
-        <div className="text-center text-muted-foreground text-xs">{APP_CONFIG.copyright}</div>
       </div>
+
+      <footer className="pt-6 text-center text-muted-foreground text-xs">{APP_CONFIG.copyright}</footer>
     </div>
   );
 }

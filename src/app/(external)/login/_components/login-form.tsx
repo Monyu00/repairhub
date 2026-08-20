@@ -19,7 +19,12 @@ import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
+  email: z
+    .string()
+    .email({ message: "請輸入有效的 Email 地址。" })
+    .refine((email) => isAllowedEmailDomain(email), {
+      message: "僅限使用 @stust.edu.tw 學校信箱登入。",
+    }),
   password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
 });
 
@@ -110,13 +115,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="email"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="login-email">電子郵件</FieldLabel>
+                  <FieldLabel htmlFor="login-email">學校信箱</FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ""}
                     id="login-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="you@stust.edu.tw"
                     autoComplete="email"
                     aria-invalid={fieldState.invalid}
                   />

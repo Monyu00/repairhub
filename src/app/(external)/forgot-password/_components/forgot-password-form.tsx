@@ -11,11 +11,17 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 
 import { sendPasswordResetEmail } from "../_actions/actions";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
+  email: z
+    .string()
+    .email({ message: "請輸入有效的 Email 地址。" })
+    .refine((email) => isAllowedEmailDomain(email), {
+      message: "僅限使用 @stust.edu.tw 學校信箱。",
+    }),
 });
 
 export function ForgotPasswordForm() {

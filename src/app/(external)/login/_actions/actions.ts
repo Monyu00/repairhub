@@ -6,6 +6,10 @@ import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 import { createClient } from "@/lib/supabase/server";
 
 export async function loginWithEmail(formData: { email: string; password: string }) {
+  if (!isAllowedEmailDomain(formData.email)) {
+    return { success: false, error: "僅限使用 @stust.edu.tw 學校信箱登入" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
