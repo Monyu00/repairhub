@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -11,6 +12,18 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // 如果不是密碼重設流程，驗證 email 是否屬於允許的學校網域
+      const isResetPasswordFlow = next.startsWith("/reset-password");
+      if (!isResetPasswordFlow) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user?.email || !isAllowedEmailDomain(user.email)) {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(`${origin}/login?error=invalid-domain`);
+        }
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
 
