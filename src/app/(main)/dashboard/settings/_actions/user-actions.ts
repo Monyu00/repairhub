@@ -3,41 +3,21 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdmin, safeAction, type UserRole } from "@/server/auth";
 
 export interface UserItem {
   id: string;
   email: string;
   displayName: string | null;
-  role: "admin" | "technician" | null;
+  role: UserRole | null;
   createdAt: string;
   lastSignInAt: string | null;
 }
 
-async function verifyAdmin() {
-  const supabase = await createClient();
-  const { data: userRes, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !userRes.user) {
-    return { supabase, authorized: false, currentUser: null, error: "尚未登入，請先登入" };
-  }
-
-  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", userRes.user.id).maybeSingle();
-
-  if (profile?.user_role !== "admin") {
-    return { supabase, authorized: false, currentUser: userRes.user, error: "僅系統管理者可執行此操作" };
-  }
-
-  return { supabase, authorized: true, currentUser: userRes.user, error: undefined };
-}
-
 export async function fetchUsers(): Promise<{ success: boolean; error?: string; users: UserItem[] }> {
-  const { supabase, authorized, error } = await verifyAdmin();
-  if (!authorized || !supabase) {
-    return { success: false, error, users: [] };
-  }
+  const result = await safeAction(async () => {
+    const { supabase } = await requireAdmin();
 
-  try {
     const adminClient = createAdminClient();
     const { data: authData, error: authError } = await adminClient.auth.admin.listUsers();
 
@@ -75,7 +55,11 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
 
     // Sort by role (admin -> technician -> null) then by email
     users.sort((a, b) => {
-      const roleScore = (r: UserItem["role"]) => (r === "admin" ? 0 : r === "technician" ? 1 : 2);
+      const roleScore = (r: UserItem["role"]) => {
+        if (r === "admin") return 0;
+        if (r === "technician") return 1;
+        return 2;
+      };
       const scoreA = roleScore(a.role);
       const scoreB = roleScore(b.role);
       if (scoreA !== scoreB) return scoreA - scoreB;
@@ -83,62 +67,64 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
     });
 
     return { success: true, users };
-  } catch (err) {
-    console.error("Error in fetchUsers:", err);
-    return { success: false, error: "伺服器發生錯誤，無法載入使用者列表", users: [] };
+  });
+
+  if (!result.success) {
+    return { success: false, error: result.error, users: [] };
   }
+
+  return result;
 }
 
 export async function updateUserProfile(
   targetUserId: string,
   data: { displayName: string; role: "admin" | "technician" | null },
 ): Promise<{ success: boolean; error?: string }> {
-  const { supabase, authorized, error } = await verifyAdmin();
-  if (!authorized || !supabase) {
-    return { success: false, error };
-  }
+  return safeAction(async () => {
+    const { supabase } = await requireAdmin();
 
-  const trimmedDisplayName = data.displayName.trim();
+    const trimmedDisplayName = data.displayName.trim();
 
-  // 1. Check if demoting an admin and ensure at least one admin remains
-  const { data: targetProfile } = await supabase
-    .from("profiles")
-    .select("user_role")
-    .eq("id", targetUserId)
-    .maybeSingle();
-
-  const isCurrentlyAdmin = targetProfile?.user_role === "admin";
-  const willBeAdmin = data.role === "admin";
-
-  if (isCurrentlyAdmin && !willBeAdmin) {
-    const { count, error: countError } = await supabase
+    // 1. Check if demoting an admin and ensure at least one admin remains
+    const { data: targetProfile } = await supabase
       .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("user_role", "admin");
+      .select("user_role")
+      .eq("id", targetUserId)
+      .maybeSingle();
 
-    if (countError) {
-      console.error("Failed to count admins:", countError);
-      return { success: false, error: "檢查管理者數量失敗" };
+    const isCurrentlyAdmin = targetProfile?.user_role === "admin";
+    const willBeAdmin = data.role === "admin";
+
+    if (isCurrentlyAdmin && !willBeAdmin) {
+      const { count, error: countError } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("user_role", "admin");
+
+      if (countError) {
+        console.error("Failed to count admins:", countError);
+        return { success: false, error: "檢查管理者數量失敗" };
+      }
+
+      if ((count ?? 0) <= 1) {
+        return { success: false, error: "變更失敗：系統必須保留至少一位系統管理者 (Admin)" };
+      }
     }
 
-    if ((count ?? 0) <= 1) {
-      return { success: false, error: "變更失敗：系統必須保留至少一位系統管理者 (Admin)" };
-    }
-  }
+    // 2. Upsert profile
+    const { error: upsertError } = await supabase.from("profiles").upsert({
+      id: targetUserId,
+      display_name: trimmedDisplayName || null,
+      user_role: data.role,
+      updated_at: new Date().toISOString(),
+    });
 
-  // 2. Upsert profile
-  const { error: upsertError } = await supabase.from("profiles").upsert({
-    id: targetUserId,
-    display_name: trimmedDisplayName || null,
-    user_role: data.role,
-    updated_at: new Date().toISOString(),
+    if (upsertError) {
+      console.error("Failed to update user profile:", upsertError);
+      return { success: false, error: "更新使用者資料失敗，請稍後再試" };
+    }
+
+    revalidatePath("/dashboard/settings");
+    return { success: true };
   });
-
-  if (upsertError) {
-    console.error("Failed to update user profile:", upsertError);
-    return { success: false, error: "更新使用者資料失敗，請稍後再試" };
-  }
-
-  revalidatePath("/dashboard/settings");
-  return { success: true };
 }

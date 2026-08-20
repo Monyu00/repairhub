@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_MAX_PHOTOS } from "@/lib/storage/constants";
 import { storeTicketPhotos } from "@/lib/storage/ticket-photos";
 import type { Database } from "@/lib/supabase/database.types";
+import type { AuthenticatedUser } from "@/server/auth";
 
 export type TicketStatus = Database["public"]["Enums"]["ticket_status"];
 
@@ -22,6 +23,21 @@ export type ActorContext =
   | { type: "technician"; userId: string; displayName?: string }
   | { type: "reporter"; email: string }
   | { type: "system" };
+
+export function actorFromAuthUser(user: AuthenticatedUser): ActorContext {
+  if (user.role === "admin") {
+    return {
+      type: "admin",
+      userId: user.userId,
+      displayName: user.displayName ?? undefined,
+    };
+  }
+  return {
+    type: "technician",
+    userId: user.userId,
+    displayName: user.displayName ?? undefined,
+  };
+}
 
 export type TransitionPayload =
   | { transition: "claim" }
