@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-import { Wrench } from "lucide-react";
+import { AlertCircle, Wrench } from "lucide-react";
+
+import { APP_CONFIG } from "@/config/app-config";
 
 import { GoogleLoginButton } from "./_components/google-login-button";
 import { LoginForm } from "./_components/login-form";
@@ -15,6 +17,7 @@ interface LoginPageProps {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const redirectTo = params.redirectTo;
+  const error = params.error;
 
   return (
     <div className="flex min-h-dvh flex-col justify-center bg-muted/40 p-4 md:p-8">
@@ -27,17 +30,31 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <p className="text-muted-foreground text-sm">請輸入您的帳號密碼，或使用 Google 帳號快速登入</p>
         </div>
 
+        {error === "invalid-domain" && (
+          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>僅限使用 @stust.edu.tw 學校信箱登入，請切換帳號。</span>
+          </div>
+        )}
+
+        {error === "auth-callback-failed" && (
+          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>登入驗證失敗或已過期，請重新嘗試。</span>
+          </div>
+        )}
+
         <div className="rounded-xl border bg-card p-6 shadow-xs sm:p-8">
           <div className="space-y-4">
             <GoogleLoginButton className="w-full" redirectTo={redirectTo} />
-            <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
               <span className="relative z-10 bg-card px-2 text-muted-foreground">或使用 Email 登入</span>
             </div>
             <LoginForm redirectTo={redirectTo} />
           </div>
         </div>
 
-        <div className="flex justify-between px-2 text-xs text-muted-foreground">
+        <div className="flex justify-between px-2 text-muted-foreground text-xs">
           <Link href="/report" className="hover:underline">
             ← 我要報修 (免登入)
           </Link>
@@ -45,6 +62,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             追蹤報修單 →
           </Link>
         </div>
+
+        <div className="text-center text-muted-foreground text-xs">{APP_CONFIG.copyright}</div>
       </div>
     </div>
   );

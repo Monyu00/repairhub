@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,19 +14,25 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 
 import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
-  password: z.string().min(6, { message: "密碼至少需要 6 個字元。" }),
+  password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
 });
 
 const registerSchema = z
   .object({
-    email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
-    password: z.string().min(6, { message: "密碼至少需要 6 個字元。" }),
-    confirmPassword: z.string().min(6, { message: "確認密碼至少需要 6 個字元。" }),
+    email: z
+      .string()
+      .email({ message: "請輸入有效的 Email 地址。" })
+      .refine((email) => isAllowedEmailDomain(email), {
+        message: "僅限使用 @stust.edu.tw 學校信箱註冊。",
+      }),
+    password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
+    confirmPassword: z.string().min(8, { message: "確認密碼至少需要 8 個字元。" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "兩次輸入的密碼不一致。",
@@ -122,7 +129,15 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="password"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="login-password">密碼</FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor="login-password">密碼</FieldLabel>
+                    <Link
+                      href="/forgot-password"
+                      className="text-muted-foreground text-xs hover:text-primary hover:underline"
+                    >
+                      忘記密碼？
+                    </Link>
+                  </div>
                   <Input
                     {...field}
                     value={field.value ?? ""}
@@ -155,13 +170,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="email"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="register-email">電子郵件</FieldLabel>
+                  <FieldLabel htmlFor="register-email">學校信箱</FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ""}
                     id="register-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="you@stust.edu.tw"
                     autoComplete="email"
                     aria-invalid={fieldState.invalid}
                   />
@@ -174,7 +189,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="password"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="register-password">密碼</FieldLabel>
+                  <FieldLabel htmlFor="register-password">密碼（至少 8 字元）</FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ""}
@@ -215,7 +230,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         </form>
       )}
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-muted-foreground text-sm">
         {mode === "login" ? (
           <>
             還沒有帳號嗎？{" "}
