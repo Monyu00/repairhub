@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import type { FilterOptions, TicketRow, TicketStatus } from "./_components/ticket-types";
 import { TicketsDataTable } from "./_components/tickets-data-table";
@@ -35,14 +36,15 @@ export default async function Page({ searchParams }: PageProps) {
   const fromDate = params.from ?? null;
   const toDate = params.to ?? null;
 
-  const supabase = await createClient();
+  // 1. Get cached session (deduplicated from layout)
+  const session = await getSession();
+  const supabase = session?.supabase ?? (await createClient());
 
-  // 1. Start fetching user, categories, buildings, and tickets in parallel
-  const userPromise = supabase.auth.getUser();
+  // 2. Fetch categories, buildings, and tickets in parallel
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
   const buildingsPromise = supabase.from("buildings").select("id, name, code").order("code");
 
-  // 2. Build tickets query
+  // 3. Build tickets query
   const spaceJoin = buildingId ? "spaces!inner" : "spaces";
   const selectString = `
     id,
@@ -90,22 +92,14 @@ export default async function Page({ searchParams }: PageProps) {
   const toIndex = fromIndex + PAGE_SIZE - 1;
   const ticketsPromise = query.order("created_at", { ascending: false }).range(fromIndex, toIndex);
 
-  // 3. Resolve user promise first to launch profile query concurrently with remaining fetches
-  const userRes = await userPromise;
-  const user = userRes.data.user;
-  const profilePromise = user
-    ? supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle()
-    : Promise.resolve({ data: null });
-
-  // 4. Await all remaining queries concurrently
-  const [categoriesRes, buildingsRes, ticketsRes, profileRes] = await Promise.all([
+  // 4. Await all data queries concurrently
+  const [categoriesRes, buildingsRes, ticketsRes] = await Promise.all([
     categoriesPromise,
     buildingsPromise,
     ticketsPromise,
-    profilePromise,
   ]);
 
-  const userRole = profileRes.data?.user_role ?? null;
+  const userRole = session?.role ?? null;
   const canViewReporter = userRole === "admin" || userRole === "technician";
 
   const filterOptions: FilterOptions = {
@@ -178,7 +172,7 @@ export default async function Page({ searchParams }: PageProps) {
           pageSize={PAGE_SIZE}
           filterOptions={filterOptions}
           canViewReporter={canViewReporter}
-          userId={user?.id ?? null}
+          userId={session?.userId ?? null}
           userRole={userRole}
         />
       </Suspense>

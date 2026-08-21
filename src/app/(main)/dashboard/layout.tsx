@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { getSession } from "@/server/auth/session";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
@@ -17,27 +17,21 @@ import { UserMenu } from "./_components/sidebar/user-menu";
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
-  const supabase = await createClient();
 
-  const [variant, collapsible, userRes] = await Promise.all([
+  const [variant, collapsible, session] = await Promise.all([
     getPreference("sidebar_variant"),
     getPreference("sidebar_collapsible"),
-    supabase.auth.getUser(),
+    getSession(),
   ]);
 
-  const user = userRes.data.user;
-
-  let currentUserData = null;
-  if (user) {
-    const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-
-    currentUserData = {
-      email: user.email ?? "",
-      name: (user.user_metadata?.full_name as string) || (user.user_metadata?.name as string) || undefined,
-      avatarUrl: user.user_metadata?.avatar_url as string | undefined,
-      role: profile?.user_role ?? null,
-    };
-  }
+  const currentUserData = session
+    ? {
+        email: session.email,
+        name: session.displayName || undefined,
+        avatarUrl: session.avatarUrl,
+        role: session.role,
+      }
+    : null;
 
   return (
     <SidebarProvider

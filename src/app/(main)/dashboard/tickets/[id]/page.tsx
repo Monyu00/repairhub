@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import type { TimelineNote } from "./_components/status-timeline";
 import { TicketDetailView } from "./_components/ticket-detail-view";
@@ -31,12 +32,12 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  const supabase = await createClient();
+  const session = await getSession();
+  const supabase = session?.supabase ?? (await createClient());
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
-  // 1. Parallel fetch user, ticket, photos, and notes
-  const [userRes, ticketRes, photosRes, notesRes] = await Promise.all([
-    supabase.auth.getUser(),
+  // 1. Parallel fetch ticket, photos, and notes
+  const [ticketRes, photosRes, notesRes] = await Promise.all([
     supabase
       .from("tickets")
       .select(`
@@ -86,15 +87,8 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  const user = userRes.data.user;
-
-  // 2. Fetch current user profile if logged in
-  let userRole: "admin" | "technician" | null = null;
-  if (user) {
-    const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-
-    userRole = profile?.user_role ?? null;
-  }
+  const userRole = (session?.role as "admin" | "technician" | null) ?? null;
+  const userId = session?.userId ?? null;
 
   // 3. Process relations
   const spaceRaw = Array.isArray(ticket.space) ? ticket.space[0] : ticket.space;
@@ -182,7 +176,7 @@ export default async function Page({ params }: PageProps) {
       photos={photos}
       notes={formattedNotes}
       timelineNotes={timelineNotes}
-      userId={user?.id ?? null}
+      userId={userId}
       userRole={userRole}
       assignedTo={ticket.assigned_to}
       supabaseUrl={supabaseUrl}
