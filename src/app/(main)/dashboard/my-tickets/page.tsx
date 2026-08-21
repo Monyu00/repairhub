@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import { MyTicketsContent } from "./_components/my-tickets-content";
 
@@ -10,21 +10,17 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const supabase = await createClient();
+  const session = await getSession();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Middleware already enforces auth on /dashboard/*, so user should always be present.
-  // Guard defensively anyway.
-  if (!user?.email) {
+  if (!session?.email) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <p className="text-muted-foreground">無法取得使用者資訊，請重新登入。</p>
       </div>
     );
   }
+
+  const supabase = session.supabase;
 
   const { data: tickets, error } = await supabase
     .from("tickets")
@@ -41,7 +37,7 @@ export default async function Page() {
       )
     `,
     )
-    .ilike("reporter_email", user.email)
+    .ilike("reporter_email", session.email)
     .order("created_at", { ascending: false });
 
   if (error) {

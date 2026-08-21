@@ -1,4 +1,3 @@
-import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
@@ -135,6 +134,7 @@ export async function exportQRCodesToPDF(
   const toastId = toast.loading(`正在產生 ${items.length} 張 QR Code PDF...`);
 
   try {
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",

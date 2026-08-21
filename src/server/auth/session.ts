@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -10,6 +12,7 @@ export interface AuthenticatedUser {
   email: string;
   role: UserRole | null;
   displayName: string | null;
+  avatarUrl?: string;
   supabase: SupabaseClient<Database>;
 }
 
@@ -32,8 +35,9 @@ export class AuthError extends Error {
 /**
  * Retrieves the current authenticated user and profile without throwing.
  * Returns null if not logged in.
+ * Deduplicated per-request via React cache().
  */
-export async function getSession(): Promise<AuthenticatedUser | null> {
+export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -61,9 +65,10 @@ export async function getSession(): Promise<AuthenticatedUser | null> {
     email: user.email ?? "",
     role: profile?.user_role ?? null,
     displayName: profile?.display_name ?? metaName,
+    avatarUrl: user.user_metadata?.avatar_url as string | undefined,
     supabase,
   };
-}
+});
 
 /**
  * Guard that requires an authenticated user session.

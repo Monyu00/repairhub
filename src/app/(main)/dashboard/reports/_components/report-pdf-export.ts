@@ -1,4 +1,3 @@
-import { jsPDF } from "jspdf";
 import { toast } from "sonner";
 
 import type { ReportData } from "./report-types";
@@ -557,6 +556,7 @@ export async function exportReportToPDF(data: ReportData): Promise<void> {
   const toastId = toast.loading("正在產生 PDF 統計報表...");
 
   try {
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",

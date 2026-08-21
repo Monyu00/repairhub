@@ -20,12 +20,19 @@ interface QRCardProps {
   item: PrintableQRItem;
 }
 
+const qrDataUrlCache = new Map<string, string>();
+
 export function QRCard({ item }: QRCardProps) {
-  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [qrDataUrl, setQrDataUrl] = useState<string>(() => qrDataUrlCache.get(item.url) ?? "");
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
+    if (qrDataUrlCache.has(item.url)) {
+      setQrDataUrl(qrDataUrlCache.get(item.url)!);
+      return;
+    }
+
     let isMounted = true;
     QRCode.toDataURL(item.url, {
       width: 320,
@@ -37,6 +44,7 @@ export function QRCard({ item }: QRCardProps) {
       },
     })
       .then((url) => {
+        qrDataUrlCache.set(item.url, url);
         if (isMounted) setQrDataUrl(url);
       })
       .catch((err) => {

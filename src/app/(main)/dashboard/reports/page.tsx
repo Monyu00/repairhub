@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import { fetchReportData } from "./_actions/report-actions";
 import { ReportsDashboard } from "./_components/reports-dashboard";
@@ -21,25 +21,17 @@ interface ReportsPageProps {
 }
 
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
-  const supabase = await createClient();
+  const session = await getSession();
 
-  // 1. Authenticate user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!session) {
     redirect("/login");
   }
 
-  // 2. Authorize admin role
-  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-
-  if (profile?.user_role !== "admin") {
+  if (session.role !== "admin") {
     redirect("/dashboard");
   }
 
-  // 3. Resolve search params and fetch aggregated statistics
+  // 2. Resolve search params and fetch aggregated statistics
   const params = await searchParams;
   const data = await fetchReportData(params);
 

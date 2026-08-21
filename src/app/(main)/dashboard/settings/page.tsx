@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import type { CategoryItem } from "./_actions/category-actions";
 import type { BuildingItem, BuildingWithSpaces, SpaceItem } from "./_actions/location-actions";
@@ -16,25 +16,19 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const supabase = await createClient();
+  const session = await getSession();
 
-  // 1. Fetch authenticated user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!session) {
     redirect("/login");
   }
 
-  // 2. Fetch user role from profiles
-  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-
-  if (profile?.user_role !== "admin") {
+  if (session.role !== "admin") {
     redirect("/dashboard");
   }
 
-  // 3. Fetch categories, buildings, users, and technician categories in parallel
+  const supabase = session.supabase;
+
+  // 2. Fetch categories, buildings, users, and technician categories in parallel
   const [categoriesRes, buildingsRes, usersRes, techCategoriesRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order", { ascending: true }),
     supabase.from("buildings").select("*, spaces(*)").order("name", { ascending: true }),

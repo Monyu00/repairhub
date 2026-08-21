@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 import { fetchEquipmentList } from "./_actions/equipment-actions";
 import type { BuildingOption } from "./_components/equipment-dialog";
@@ -14,25 +14,19 @@ export const metadata: Metadata = {
 };
 
 export default async function EquipmentPage() {
-  const supabase = await createClient();
+  const session = await getSession();
 
-  // 1. Fetch authenticated user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!session) {
     redirect("/login");
   }
 
-  // 2. Fetch user role from profiles
-  const { data: profile } = await supabase.from("profiles").select("user_role").eq("id", user.id).maybeSingle();
-
-  if (profile?.user_role !== "admin") {
+  if (session.role !== "admin") {
     redirect("/dashboard");
   }
 
-  // 3. Fetch equipment list and buildings in parallel
+  const supabase = session.supabase;
+
+  // 2. Fetch equipment list and buildings in parallel
   const [equipmentRes, buildingsRes] = await Promise.all([
     fetchEquipmentList(),
     supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name"),

@@ -1,5 +1,4 @@
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 
 import type { ReportData } from "./report-types";
 
@@ -21,6 +20,7 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
   const toastId = toast.loading("正在產生 Excel 報表試算表...");
 
   try {
+    const XLSX = await import("xlsx");
     const wb = XLSX.utils.book_new();
 
     // 1. Sheet 1: 總覽摘要 (KPIs)
