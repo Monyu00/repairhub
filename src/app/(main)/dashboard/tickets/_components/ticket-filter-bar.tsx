@@ -1,15 +1,18 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { CalendarIcon, FilterX, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { FilterOptions, TicketStatus } from "./ticket-types";
+
 import { STATUS_CONFIG } from "./ticket-status-badge";
+import type { FilterOptions, TicketStatus } from "./ticket-types";
 
 const ALL_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed", "closed", "cancelled"];
 
@@ -23,7 +26,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const selectedStatuses = searchParams.get("status")?.split(",").filter(Boolean) as TicketStatus[] ?? [];
+  const selectedStatuses = (searchParams.get("status")?.split(",").filter(Boolean) ?? []) as TicketStatus[];
   const selectedCategory = searchParams.get("category") ?? "all";
   const selectedBuilding = searchParams.get("building") ?? "all";
   const fromDateStr = searchParams.get("from") ?? "";
@@ -94,7 +97,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
               <SlidersHorizontal className="size-3.5 text-muted-foreground" />
               <span>狀態</span>
               {selectedStatuses.length > 0 && (
-                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
+                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 font-medium text-[10px] text-primary-foreground">
                   {selectedStatuses.length}
                 </span>
               )}
@@ -102,13 +105,14 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
           </PopoverTrigger>
           <PopoverContent className="w-48 p-3" align="start">
             <div className="space-y-2">
-              <div className="font-medium text-xs text-muted-foreground pb-1 border-b">篩選狀態</div>
+              <div className="border-b pb-1 font-medium text-muted-foreground text-xs">篩選狀態</div>
               {ALL_STATUSES.map((status) => {
                 const isChecked = selectedStatuses.includes(status);
                 return (
                   <label
                     key={status}
-                    className="flex cursor-pointer items-center gap-2 rounded-md p-1.5 text-xs hover:bg-muted transition-colors"
+                    htmlFor={`status-${status}`}
+                    className="flex cursor-pointer items-center gap-2 rounded-md p-1.5 text-xs transition-colors hover:bg-muted"
                   >
                     <Checkbox
                       checked={isChecked}
@@ -158,16 +162,12 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-8 gap-1.5 border-dashed">
               <CalendarIcon className="size-3.5 text-muted-foreground" />
-              <span>
-                {fromDateStr || toDateStr
-                  ? `${fromDateStr || "不限"} ~ ${toDateStr || "不限"}`
-                  : "日期區間"}
-              </span>
+              <span>{fromDateStr || toDateStr ? `${fromDateStr || "不限"} ~ ${toDateStr || "不限"}` : "日期區間"}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" align="start">
             <div className="space-y-3">
-              <div className="font-medium text-xs text-muted-foreground pb-1 border-b">日期條件</div>
+              <div className="border-b pb-1 font-medium text-muted-foreground text-xs">日期條件</div>
               <div className="grid gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="w-12 text-muted-foreground">起始日:</span>
@@ -175,7 +175,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                     type="date"
                     value={fromDateStr}
                     onChange={(e) => updateQueryParams({ from: e.target.value || null })}
-                    className="rounded border border-input px-2 py-1 text-xs bg-background"
+                    className="rounded border border-input bg-background px-2 py-1 text-xs"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -184,7 +184,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                     type="date"
                     value={toDateStr}
                     onChange={(e) => updateQueryParams({ to: e.target.value || null })}
-                    className="rounded border border-input px-2 py-1 text-xs bg-background"
+                    className="rounded border border-input bg-background px-2 py-1 text-xs"
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                 <Button
                   variant="ghost"
                   size="xs"
-                  className="w-full text-xs text-muted-foreground hover:text-foreground"
+                  className="w-full text-muted-foreground text-xs hover:text-foreground"
                   onClick={() => updateQueryParams({ from: null, to: null })}
                 >
                   清除日期條件
@@ -208,7 +208,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
             variant="ghost"
             size="sm"
             onClick={handleResetFilters}
-            className="h-8 gap-1 text-muted-foreground hover:text-foreground px-2"
+            className="h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
           >
             <FilterX className="size-3.5" />
             <span>清除篩選 ({activeFilterCount})</span>
@@ -216,7 +216,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
         )}
       </div>
 
-      {isPending && <span className="text-xs text-muted-foreground animate-pulse">更新中...</span>}
+      {isPending && <span className="animate-pulse text-muted-foreground text-xs">更新中...</span>}
     </div>
   );
 }

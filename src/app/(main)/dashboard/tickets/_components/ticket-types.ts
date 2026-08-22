@@ -27,6 +27,8 @@ export interface TicketRow {
   category: TicketCategory;
   space: TicketSpace;
   description: string;
+  reporter_name?: string | null;
+  reporter_department?: string | null;
   reporter_email?: string | null;
   reporter_phone?: string | null;
   created_at: string;

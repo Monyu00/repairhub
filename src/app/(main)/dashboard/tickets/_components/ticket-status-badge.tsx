@@ -53,8 +53,8 @@ export function TicketStatusBadge({ status, className }: TicketStatusBadgeProps)
   };
 
   return (
-    <Badge variant={config.variant} className={cn("gap-1.5 font-normal px-2.5 py-0.5", config.bgClass, className)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", config.dotClass)} />
+    <Badge variant={config.variant} className={cn("gap-1.5 px-2.5 py-0.5 font-normal", config.bgClass, className)}>
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", config.dotClass)} />
       <span>{config.label}</span>
     </Badge>
   );

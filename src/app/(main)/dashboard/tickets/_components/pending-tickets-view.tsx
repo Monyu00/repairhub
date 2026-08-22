@@ -23,6 +23,8 @@ type RawTicketRecord = {
   category_id: string;
   space_id: string;
   description: string;
+  reporter_name: string | null;
+  reporter_department: string | null;
   reporter_email: string | null;
   reporter_phone: string | null;
   created_at: string;
@@ -73,16 +75,18 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
         category_id: t.category_id,
         category: categoryData,
         space: {
-          id: String(spaceData.id ?? ""),
-          name: String(spaceData.name ?? "未知空間"),
-          floor: Number(spaceData.floor ?? 0),
+          id: String(spaceData.id),
+          name: String(spaceData.name),
+          floor: Number(spaceData.floor),
           building: buildingData,
         },
-        description: String(t.description ?? ""),
+        description: String(t.description),
+        reporter_name: canViewReporter ? (t.reporter_name as string | null) : null,
+        reporter_department: canViewReporter ? (t.reporter_department as string | null) : null,
         reporter_email: canViewReporter ? (t.reporter_email as string | null) : null,
         reporter_phone: canViewReporter ? (t.reporter_phone as string | null) : null,
-        created_at: String(t.created_at ?? ""),
-        updated_at: String(t.updated_at ?? ""),
+        created_at: String(t.created_at),
+        updated_at: String(t.updated_at),
       };
     },
     [canViewReporter],
@@ -98,6 +102,8 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
           category_id,
           space_id,
           description,
+          reporter_name,
+          reporter_department,
           reporter_email,
           reporter_phone,
           created_at,
@@ -158,6 +164,8 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
           category_id,
           space_id,
           description,
+          reporter_name,
+          reporter_department,
           reporter_email,
           reporter_phone,
           created_at,
@@ -247,7 +255,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
       const res = await claimTicket(ticketId);
 
       if (!res.success) {
-        toast.error(res.error || "此案件已在處理中或接單失敗");
+        toast.error(res.error ?? "此案件已在處理中或接單失敗");
         setTickets((prev) => prev.filter((t) => t.id !== ticketId));
         return;
       }
@@ -262,16 +270,16 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+      <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
         <Loader2 className="size-6 animate-spin text-primary" />
-        <span className="text-sm font-medium">載入待處理案件中...</span>
+        <span className="font-medium text-sm">載入待處理案件中...</span>
       </div>
     );
   }
 
   if (subscribedCategoryIds.length === 0) {
     return (
-      <Empty className="my-8 border border-dashed py-12 bg-card/40">
+      <Empty className="my-8 border border-dashed bg-card/40 py-12">
         <EmptyMedia variant="icon">
           <ClipboardCheck className="size-6 text-muted-foreground" />
         </EmptyMedia>
@@ -287,7 +295,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   if (tickets.length === 0) {
     return (
-      <Empty className="my-8 border border-dashed py-12 bg-card/40">
+      <Empty className="my-8 border border-dashed bg-card/40 py-12">
         <EmptyMedia variant="icon">
           <ClipboardCheck className="size-6 text-muted-foreground" />
         </EmptyMedia>
@@ -301,7 +309,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+      <div className="flex items-center justify-between px-1 text-muted-foreground text-xs">
         <span>
           共 <strong className="font-semibold text-foreground">{tickets.length}</strong> 筆待處理案件 (即時連線中)
         </span>

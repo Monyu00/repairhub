@@ -38,8 +38,8 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
       if (result.success) {
         toast.success("已成功完成結案");
       } else {
-        setErrorMsg(result.error || "提交結案失敗");
-        toast.error(result.error || "提交結案失敗");
+        setErrorMsg(result.error ?? "提交結案失敗");
+        toast.error(result.error ?? "提交結案失敗");
       }
     } catch (err) {
       console.error("Closure error:", err);
@@ -67,7 +67,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
                 完工照片上傳
                 <span className="text-destructive">*</span>
               </span>
-              <span className="font-normal text-[11px] text-muted-foreground font-normal">(至少 1 張，至多 3 張)</span>
+              <span className="font-normal font-normal text-[11px] text-muted-foreground">(至少 1 張，至多 3 張)</span>
             </div>
 
             <PhotoUpload

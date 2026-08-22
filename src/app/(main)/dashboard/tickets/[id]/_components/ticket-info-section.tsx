@@ -16,6 +16,8 @@ export interface TicketInfoData {
   floor: number;
   equipmentName?: string | null;
   description: string;
+  reporterName?: string | null;
+  reporterDepartment?: string | null;
   reporterEmail: string | null;
   reporterPhone: string | null;
   createdAt: string;
@@ -108,7 +110,24 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
             通報者聯絡資訊
           </span>
           {canViewReporter ? (
-            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm">
+              {ticket.reporterName && (
+                <div className="flex items-center gap-1.5 font-medium text-foreground">
+                  <User className="size-3.5 text-muted-foreground" />
+                  <span>
+                    {ticket.reporterName}
+                    {ticket.reporterDepartment && (
+                      <span className="ml-1 font-normal text-muted-foreground">（{ticket.reporterDepartment}）</span>
+                    )}
+                  </span>
+                </div>
+              )}
+              {!ticket.reporterName && ticket.reporterDepartment && (
+                <div className="flex items-center gap-1.5 font-medium text-foreground">
+                  <Building2 className="size-3.5 text-muted-foreground" />
+                  <span>{ticket.reporterDepartment}</span>
+                </div>
+              )}
               {ticket.reporterEmail && (
                 <div className="flex items-center gap-1.5 font-medium text-foreground">
                   <Mail className="size-3.5 text-muted-foreground" />
@@ -121,7 +140,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
                   <span>{ticket.reporterPhone}</span>
                 </div>
               )}
-              {!ticket.reporterEmail && !ticket.reporterPhone && (
+              {!ticket.reporterName && !ticket.reporterDepartment && !ticket.reporterEmail && !ticket.reporterPhone && (
                 <span className="text-muted-foreground italic">未提供聯絡資訊</span>
               )}
             </div>

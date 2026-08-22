@@ -54,7 +54,7 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
         toast.success("已新增進度備註");
         setContent("");
       } else {
-        toast.error(result.error || "新增備註失敗");
+        toast.error(result.error ?? "新增備註失敗");
       }
     } catch (err) {
       console.error("Error adding note:", err);
