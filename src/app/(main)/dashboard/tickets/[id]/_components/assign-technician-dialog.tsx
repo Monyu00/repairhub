@@ -79,7 +79,7 @@ export function AssignTechnicianDialog({ ticketId }: AssignTechnicianDialogProps
         setOpen(false);
         setSelectedTechId("");
       } else {
-        toast.error(result.error || "指派技師失敗");
+        toast.error(result.error ?? "指派技師失敗");
       }
     } catch (err) {
       console.error("Assign technician error:", err);
@@ -94,13 +94,13 @@ export function AssignTechnicianDialog({ ticketId }: AssignTechnicianDialogProps
       return (
         <div className="flex items-center justify-center py-4">
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-xs text-muted-foreground">載入技師列表...</span>
+          <span className="ml-2 text-muted-foreground text-xs">載入技師列表...</span>
         </div>
       );
     }
 
     if (technicians.length === 0) {
-      return <p className="text-center text-xs text-muted-foreground py-2">目前系統中無註冊的技師</p>;
+      return <p className="py-2 text-center text-muted-foreground text-xs">目前系統中無註冊的技師</p>;
     }
 
     return (

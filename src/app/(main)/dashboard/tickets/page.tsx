@@ -52,6 +52,8 @@ export default async function Page({ searchParams }: PageProps) {
     category_id,
     space_id,
     description,
+    reporter_name,
+    reporter_department,
     reporter_email,
     reporter_phone,
     created_at,
@@ -144,6 +146,8 @@ export default async function Page({ searchParams }: PageProps) {
         building: buildingData,
       },
       description: String(t.description ?? ""),
+      reporter_name: canViewReporter ? (t.reporter_name as string | null) : null,
+      reporter_department: canViewReporter ? (t.reporter_department as string | null) : null,
       reporter_email: canViewReporter ? (t.reporter_email as string | null) : null,
       reporter_phone: canViewReporter ? (t.reporter_phone as string | null) : null,
       created_at: String(t.created_at ?? ""),
@@ -158,13 +162,13 @@ export default async function Page({ searchParams }: PageProps) {
       {/* Page Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">報修單管理</h1>
-          <p className="text-sm text-muted-foreground">檢視並管理全校設施設備通報單據</p>
+          <h1 className="font-bold text-2xl text-foreground tracking-tight">報修單管理</h1>
+          <p className="text-muted-foreground text-sm">檢視並管理全校設施設備通報單據</p>
         </div>
       </div>
 
       {/* Main Data Table */}
-      <Suspense fallback={<div className="text-sm text-muted-foreground p-8 text-center">載入資料中...</div>}>
+      <Suspense fallback={<div className="p-8 text-center text-muted-foreground text-sm">載入資料中...</div>}>
         <TicketsDataTable
           tickets={tickets}
           totalCount={totalCount}

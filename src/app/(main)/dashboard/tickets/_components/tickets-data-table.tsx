@@ -91,7 +91,7 @@ export function TicketsDataTable({
 
       {/* Main Content Area */}
       {tickets.length === 0 ? (
-        <Empty className="my-8 border border-dashed py-12 bg-card/40">
+        <Empty className="my-8 border border-dashed bg-card/40 py-12">
           <EmptyMedia variant="icon">
             <ClipboardX className="size-6 text-muted-foreground" />
           </EmptyMedia>
@@ -105,13 +105,13 @@ export function TicketsDataTable({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden rounded-xl border bg-card/70 shadow-2xs backdrop-blur-xs">
+          <div className="hidden overflow-hidden rounded-xl border bg-card/70 shadow-2xs backdrop-blur-xs md:block">
             <Table>
               <TableHeader className="bg-muted/40">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="h-10 text-xs font-semibold">
+                      <TableHead key={header.id} className="h-10 font-semibold text-xs">
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     ))}
@@ -151,15 +151,15 @@ export function TicketsDataTable({
           </div>
 
           {/* Pagination & Count Info */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-            <div className="text-xs text-muted-foreground">
+          <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
+            <div className="text-muted-foreground text-xs">
               顯示第 <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> 到{" "}
               <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, totalCount)}</span> 筆，共{" "}
               <span className="font-medium text-foreground">{totalCount}</span> 筆報修單
             </div>
 
             {totalPages > 1 && (
-              <Pagination className="w-auto mx-0">
+              <Pagination className="mx-0 w-auto">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
@@ -168,7 +168,7 @@ export function TicketsDataTable({
                       className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>
-                  <PaginationItem className="px-3 text-xs font-medium text-muted-foreground">
+                  <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>
@@ -194,12 +194,12 @@ export function TicketsDataTable({
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
       <TabsList className="h-9 p-1">
-        <TabsTrigger value="all" className="text-xs gap-1.5 px-3">
+        <TabsTrigger value="all" className="gap-1.5 px-3 text-xs">
           <ListFilter className="size-3.5" />
           <span>全校報修單據</span>
         </TabsTrigger>
-        <TabsTrigger value="pending" className="text-xs gap-1.5 px-3">
-          <Zap className="size-3.5 text-amber-500 fill-amber-500/20" />
+        <TabsTrigger value="pending" className="gap-1.5 px-3 text-xs">
+          <Zap className="size-3.5 fill-amber-500/20 text-amber-500" />
           <span>待處理接單 (即時)</span>
         </TabsTrigger>
       </TabsList>

@@ -64,7 +64,7 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
         setCancelOpen(false);
         setCancelReason("");
       } else {
-        toast.error(result.error || "取消單據失敗");
+        toast.error(result.error ?? "取消單據失敗");
       }
     } catch (err) {
       console.error("Cancel ticket error:", err);
@@ -84,7 +84,7 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
         toast.success("已成功將單據退回待處理狀態");
         setReturnOpen(false);
       } else {
-        toast.error(result.error || "退回待處理失敗");
+        toast.error(result.error ?? "退回待處理失敗");
       }
     } catch (err) {
       console.error("Return to pending error:", err);

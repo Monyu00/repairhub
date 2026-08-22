@@ -12,6 +12,8 @@ export interface AuthenticatedUser {
   email: string;
   role: UserRole | null;
   displayName: string | null;
+  department: string | null;
+  phone: string | null;
   avatarUrl?: string;
   supabase: SupabaseClient<Database>;
 }
@@ -50,7 +52,7 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("user_role, display_name")
+    .select("user_role, display_name, department, phone")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -65,6 +67,8 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
     email: user.email ?? "",
     role: profile?.user_role ?? null,
     displayName: profile?.display_name ?? metaName,
+    department: profile?.department ?? (user.user_metadata?.department as string | undefined) ?? null,
+    phone: profile?.phone ?? (user.user_metadata?.phone as string | undefined) ?? null,
     avatarUrl: user.user_metadata?.avatar_url as string | undefined,
     supabase,
   };

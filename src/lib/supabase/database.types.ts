@@ -94,18 +94,24 @@ export interface Database {
           id: string;
           user_role: Database["public"]["Enums"]["user_role"] | null;
           display_name: string | null;
+          department: string | null;
+          phone: string | null;
           updated_at: string;
         };
         Insert: {
           id: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
           display_name?: string | null;
+          department?: string | null;
+          phone?: string | null;
           updated_at?: string;
         };
         Update: {
           id?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
           display_name?: string | null;
+          department?: string | null;
+          phone?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -199,7 +205,10 @@ export interface Database {
           category_id: string;
           space_id: string;
           equipment_id: string | null;
+          equipment_name: string | null;
           description: string;
+          reporter_name: string | null;
+          reporter_department: string | null;
           reporter_email: string;
           reporter_phone: string | null;
           assigned_to: string | null;
@@ -212,7 +221,10 @@ export interface Database {
           category_id: string;
           space_id: string;
           equipment_id?: string | null;
+          equipment_name?: string | null;
           description: string;
+          reporter_name?: string | null;
+          reporter_department?: string | null;
           reporter_email: string;
           reporter_phone?: string | null;
           assigned_to?: string | null;
@@ -225,7 +237,10 @@ export interface Database {
           category_id?: string;
           space_id?: string;
           equipment_id?: string | null;
+          equipment_name?: string | null;
           description?: string;
+          reporter_name?: string | null;
+          reporter_department?: string | null;
           reporter_email?: string;
           reporter_phone?: string | null;
           assigned_to?: string | null;

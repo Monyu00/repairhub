@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
-import { type EquipmentInfo, ReportForm } from "./_components/report-form";
+import { type EquipmentInfo, type EquipmentOption, ReportForm } from "./_components/report-form";
 
 interface ReportPageProps {
   searchParams: Promise<{
@@ -17,6 +18,10 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
 
+  const allEquipmentPromise = supabase.from("equipment").select("id, name, code, space_id").order("name");
+
+  const sessionPromise = getSession();
+
   const equipmentPromise = equipment_id
     ? supabase
         .from("equipment")
@@ -25,14 +30,17 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         .single()
     : Promise.resolve({ data: null });
 
-  const [buildingsRes, categoriesRes, eqRes] = await Promise.all([
+  const [buildingsRes, categoriesRes, allEquipmentRes, eqRes, session] = await Promise.all([
     buildingsPromise,
     categoriesPromise,
+    allEquipmentPromise,
     equipmentPromise,
+    sessionPromise,
   ]);
 
   const buildingsData = buildingsRes.data;
   const categoriesData = categoriesRes.data;
+  const allEquipmentData = (allEquipmentRes.data || []) as EquipmentOption[];
   const eqData = eqRes.data;
 
   let initialEquipment: EquipmentInfo | null = null;
@@ -57,19 +65,23 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const categories = categoriesData || [];
 
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">線上設施報修系統</h1>
-        <p className="mt-1 text-sm text-muted-foreground">請填寫以下報修資訊，我們將儘速安排專業人員處理。</p>
-      </div>
+  const userInfo = session
+    ? {
+        name: session.displayName ?? "",
+        department: session.department ?? "",
+        email: session.email ?? "",
+        phone: session.phone ?? "",
+      }
+    : undefined;
 
-      <ReportForm
-        buildings={buildings}
-        categories={categories}
-        initialSpaceId={location_id}
-        initialEquipment={initialEquipment}
-      />
-    </div>
+  return (
+    <ReportForm
+      buildings={buildings}
+      categories={categories}
+      equipmentList={allEquipmentData}
+      initialSpaceId={location_id}
+      initialEquipment={initialEquipment}
+      userInfo={userInfo}
+    />
   );
 }

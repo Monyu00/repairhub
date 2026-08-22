@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
-import { ArrowUpDown, Mail, Phone } from "lucide-react";
+import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
       header: "Ticket ID",
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
-        return <span className="font-mono text-xs font-semibold text-primary">#{id.slice(0, 8)}</span>;
+        return <span className="font-mono font-semibold text-primary text-xs">#{id.slice(0, 8)}</span>;
       },
     },
     {
@@ -28,36 +28,35 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
       },
     },
     {
-      accessorKey: "category",
-      header: "類別",
-      cell: ({ row }) => {
-        return <span className="text-xs font-medium">{row.original.category.name}</span>;
-      },
-    },
-    {
       accessorKey: "location",
-      header: "地點 (大樓 / 空間)",
+      header: "地點",
       cell: ({ row }) => {
         const space = row.original.space;
-        const bldgName = space.building.name;
-        const spaceName = space.name;
-        const floor = space.floor ? `${space.floor}F` : "";
         return (
           <div className="flex flex-col text-xs">
-            <span className="font-medium text-foreground">{bldgName}</span>
+            <span className="font-medium text-foreground">
+              {space.building.name} ({space.building.code})
+            </span>
             <span className="text-muted-foreground">
-              {spaceName} {floor}
+              {space.name} ({space.floor}F)
             </span>
           </div>
         );
       },
     },
     {
+      accessorKey: "category",
+      header: "類別",
+      cell: ({ row }) => {
+        return <span className="font-medium text-foreground text-xs">{row.original.category.name}</span>;
+      },
+    },
+    {
       accessorKey: "description",
-      header: "說明摘要",
+      header: "故障描述",
       cell: ({ row }) => {
         return (
-          <span className="line-clamp-1 max-w-[240px] text-xs text-muted-foreground">{row.original.description}</span>
+          <span className="line-clamp-1 max-w-[240px] text-muted-foreground text-xs">{row.original.description}</span>
         );
       },
     },
@@ -68,13 +67,22 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
       accessorKey: "reporter",
       header: "通報人聯絡資訊",
       cell: ({ row }) => {
+        const name = row.original.reporter_name;
+        const dept = row.original.reporter_department;
         const email = row.original.reporter_email;
         const phone = row.original.reporter_phone;
         return (
           <div className="flex flex-col gap-0.5 text-xs">
+            {(name || dept) && (
+              <span className="flex items-center gap-1 font-medium text-foreground">
+                <User className="size-3 text-muted-foreground" />
+                {name || dept}
+                {name && dept && <span className="font-normal text-muted-foreground">（{dept}）</span>}
+              </span>
+            )}
             {email && (
-              <span className="flex items-center gap-1 text-foreground">
-                <Mail className="size-3 text-muted-foreground" />
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Mail className="size-3" />
                 {email}
               </span>
             )}
@@ -84,7 +92,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
                 {phone}
               </span>
             )}
-            {!email && !phone && <span className="text-muted-foreground italic">-</span>}
+            {!name && !dept && !email && !phone && <span className="text-muted-foreground italic">-</span>}
           </div>
         );
       },
@@ -99,7 +107,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
           variant="ghost"
           size="sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="-ml-3 h-8 gap-1 text-xs font-medium"
+          className="-ml-3 h-8 gap-1 font-medium text-xs"
         >
           通報時間
           <ArrowUpDown className="size-3" />
@@ -109,7 +117,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
     cell: ({ row }) => {
       const dateStr = row.getValue("created_at") as string;
       const formattedDate = dateStr ? format(new Date(dateStr), "yyyy/MM/dd HH:mm", { locale: zhTW }) : "-";
-      return <span className="text-xs text-muted-foreground whitespace-nowrap">{formattedDate}</span>;
+      return <span className="whitespace-nowrap text-muted-foreground text-xs">{formattedDate}</span>;
     },
   });
 
