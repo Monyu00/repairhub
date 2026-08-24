@@ -17,7 +17,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import type { NavMainItem } from "@/navigation/sidebar/sidebar-items";
+import type { NavItem } from "@/navigation/sidebar/sidebar-items";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
 type SearchItem = {
@@ -25,49 +25,18 @@ type SearchItem = {
   group: string;
   label: string;
   url: string;
-  icon?: NavMainItem["icon"];
-  disabled?: boolean;
-  newTab?: boolean;
+  icon?: NavItem["icon"];
 };
 
-const sidebarGroupLabels = new Set(sidebarItems.flatMap((group) => (group.label ? [group.label] : [])));
-
-function getSubItemGroup(groupLabel: string | undefined, itemTitle: string) {
-  return sidebarGroupLabels.has(itemTitle) ? (groupLabel ?? "Other") : itemTitle;
-}
-
 const searchItems: SearchItem[] = sidebarItems.flatMap((group) =>
-  group.items.flatMap((item) => {
-    if (item.subItems) {
-      return item.subItems.map((sub) => ({
-        id: sub.id,
-        group: getSubItemGroup(group.label, item.title),
-        label: sub.title,
-        url: sub.url,
-        icon: item.icon,
-        disabled: sub.disabled,
-        newTab: sub.newTab,
-      }));
-    }
-    return [
-      {
-        id: item.id,
-        group: group.label ?? "Other",
-        label: item.title,
-        url: item.url,
-        icon: item.icon,
-        disabled: item.disabled,
-        newTab: item.newTab,
-      },
-    ];
-  }),
+  group.items.map((item) => ({
+    id: item.id,
+    group: group.label ?? "Other",
+    label: item.title,
+    url: item.url,
+    icon: item.icon,
+  })),
 );
-
-function getAvailableItems(items: SearchItem[]) {
-  return items.filter((item) => !item.disabled && !item.url.includes("coming-soon"));
-}
-
-const recommendations = getAvailableItems(searchItems);
 
 function groupBy(items: SearchItem[]) {
   const groups = [...new Set(items.map((item) => item.group))];
@@ -99,13 +68,8 @@ export function SearchDialog() {
   };
 
   const handleSelect = (item: SearchItem) => {
-    if (item.disabled) return;
     handleOpenChange(false);
-    if (item.newTab) {
-      window.open(item.url, "_blank", "noopener,noreferrer");
-    } else {
-      router.push(item.url);
-    }
+    router.push(item.url);
   };
 
   const renderGroups = (items: SearchItem[]) =>
@@ -115,7 +79,6 @@ export function SearchDialog() {
         <CommandGroup heading={group}>
           {groupItems.map((item) => (
             <CommandItem
-              disabled={item.disabled}
               key={`${group}-${item.id}`}
               value={`${item.group} ${item.label}`}
               onSelect={() => handleSelect(item)}
@@ -148,7 +111,7 @@ export function SearchDialog() {
           <CommandInput placeholder="Search dashboards, users, and more…" value={query} onValueChange={setQuery} />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-            {query ? renderGroups(searchItems) : renderGroups(recommendations)}
+            {renderGroups(searchItems)}
           </CommandList>
         </Command>
       </CommandDialog>
