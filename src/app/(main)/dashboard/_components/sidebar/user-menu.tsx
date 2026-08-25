@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 
-import { LogOut, Shield, User as UserIcon } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 
 import { signOutAction } from "@/app/(external)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,16 +25,17 @@ interface UserMenuProps {
   };
 }
 
+function getRoleLabel(role?: "admin" | "technician" | null) {
+  if (role === "admin") return "系統管理員 (Admin)";
+  if (role === "technician") return "維修技師 (Technician)";
+  return "一般使用者";
+}
+
 export function UserMenu({ user }: UserMenuProps) {
   const [isPending, startTransition] = useTransition();
 
   const displayName = user.name || user.email.split("@")[0];
-  const roleLabel =
-    user.role === "admin"
-      ? "系統管理員 (Admin)"
-      : user.role === "technician"
-        ? "維修技師 (Technician)"
-        : "一般使用者";
+  const roleLabel = getRoleLabel(user.role);
 
   return (
     <DropdownMenu>
@@ -44,7 +45,7 @@ export function UserMenu({ user }: UserMenuProps) {
           className="flex items-center gap-2 rounded-lg p-1 text-left transition-colors hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Avatar className="size-8 rounded-lg">
-            <AvatarImage src={user.avatarUrl || undefined} alt={displayName} />
+            <AvatarImage src={user.avatarUrl ?? undefined} alt={displayName} />
             <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
           </Avatar>
         </button>
@@ -53,12 +54,12 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="size-9 rounded-lg">
-              <AvatarImage src={user.avatarUrl || undefined} alt={displayName} />
+              <AvatarImage src={user.avatarUrl ?? undefined} alt={displayName} />
               <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{displayName}</span>
-              <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+              <span className="truncate text-muted-foreground text-xs">{user.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
