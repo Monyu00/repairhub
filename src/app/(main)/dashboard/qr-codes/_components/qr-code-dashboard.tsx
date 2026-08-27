@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { Download, Layers, Package, QrCode } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,13 +20,19 @@ import type { BuildingOption, EquipmentOption, PrintableQRItem, QRTargetType } f
 interface QRCodeDashboardProps {
   buildings: BuildingOption[];
   equipment: EquipmentOption[];
+  defaultTab?: string;
 }
 
-export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) {
-  const [targetType, setTargetType] = useState<QRTargetType>("spaces");
+export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDashboardProps) {
+  const router = useRouter();
+  const targetType: QRTargetType = defaultTab === "equipment" ? "equipment" : "spaces";
   const [selectedSpaceIds, setSelectedSpaceIds] = useState<string[]>([]);
   const [selectedEquipmentIds, setSelectedEquipmentIds] = useState<string[]>([]);
   const [origin, setOrigin] = useState<string>("");
+
+  const handleTabChange = (val: string) => {
+    router.replace(`/dashboard/qr-codes?tab=${val}`, { scroll: false });
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -169,7 +177,7 @@ export function QRCodeDashboard({ buildings, equipment }: QRCodeDashboardProps) 
 
       {/* Tabs Selector */}
       <div>
-        <Tabs value={targetType} onValueChange={(val) => setTargetType(val as QRTargetType)} className="w-full">
+        <Tabs value={targetType} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="spaces" className="gap-1.5 text-xs sm:text-sm">
               <Layers className="size-4" />

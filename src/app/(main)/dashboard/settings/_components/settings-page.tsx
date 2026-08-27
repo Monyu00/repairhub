@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { MapPin, Tag, Users } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,9 +18,19 @@ interface SettingsPageProps {
   buildings: BuildingWithSpaces[];
   users: UserItem[];
   technicianCategoryMap?: Record<string, string[]>;
+  defaultTab?: string;
 }
 
-export function SettingsPage({ categories, buildings, users, technicianCategoryMap = {} }: SettingsPageProps) {
+export function SettingsPage({
+  categories,
+  buildings,
+  users,
+  technicianCategoryMap = {},
+  defaultTab = "categories",
+}: SettingsPageProps) {
+  const router = useRouter();
+  const currentTab = ["categories", "locations", "users"].includes(defaultTab) ? defaultTab : "categories";
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,17 +38,21 @@ export function SettingsPage({ categories, buildings, users, technicianCategoryM
         <p className="text-sm text-muted-foreground">管理系統維護與核心參數設定</p>
       </div>
 
-      <Tabs defaultValue="categories" className="w-full space-y-6">
+      <Tabs
+        value={currentTab}
+        onValueChange={(nextTab) => router.replace(`/dashboard/settings?tab=${nextTab}`, { scroll: false })}
+        className="w-full space-y-6"
+      >
         <TabsList className="w-full justify-start sm:w-auto">
-          <TabsTrigger value="categories" className="gap-2">
+          <TabsTrigger value="categories" className="gap-2 cursor-pointer">
             <Tag className="h-4 w-4" />
             類別管理
           </TabsTrigger>
-          <TabsTrigger value="locations" className="gap-2">
+          <TabsTrigger value="locations" className="gap-2 cursor-pointer">
             <MapPin className="h-4 w-4" />
             地點管理
           </TabsTrigger>
-          <TabsTrigger value="users" className="gap-2">
+          <TabsTrigger value="users" className="gap-2 cursor-pointer">
             <Users className="h-4 w-4" />
             使用者管理
           </TabsTrigger>

@@ -12,8 +12,12 @@ export const metadata: Metadata = {
   description: "全校空間與設備報修 QR Code 批量產生、即時預覽與 PDF 下載。",
 };
 
-export default async function QRCodesPage() {
-  const session = await getSession();
+interface PageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+export default async function QRCodesPage(props: PageProps) {
+  const [session, searchParams] = await Promise.all([getSession(), props.searchParams]);
 
   if (!session) {
     redirect("/login");
@@ -83,5 +87,5 @@ export default async function QRCodesPage() {
     };
   });
 
-  return <QRCodeDashboard buildings={buildings} equipment={equipment} />;
+  return <QRCodeDashboard buildings={buildings} equipment={equipment} defaultTab={searchParams.tab} />;
 }
