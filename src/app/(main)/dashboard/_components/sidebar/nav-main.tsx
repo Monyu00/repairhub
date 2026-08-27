@@ -86,16 +86,13 @@ function NavMainContent({ items, userRole }: NavMainProps) {
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
-                            asChild
                             tooltip={item.title}
-                            isActive={pathname === item.url && !isAnyChildActive}
+                            isActive={pathname.startsWith(item.url)}
                             className="h-10 text-[15px] px-3 gap-3 font-medium [&_svg]:size-5 cursor-pointer"
                           >
-                            <Link href={item.url}>
-                              {item.icon && <item.icon className="shrink-0" />}
-                              <span className="flex-1 truncate">{item.title}</span>
-                              <ChevronRight className="ml-auto size-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            </Link>
+                            {item.icon && <item.icon className="shrink-0" />}
+                            <span className="flex-1 truncate">{item.title}</span>
+                            <ChevronRight className="ml-auto size-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
