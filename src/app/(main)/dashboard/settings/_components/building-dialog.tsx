@@ -95,7 +95,7 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
                 disabled={isPending}
               />
             </div>
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-xs">{error}</p>}
           </div>
 
           <DialogFooter>

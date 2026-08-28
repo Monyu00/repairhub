@@ -179,7 +179,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-xl">校園地點與空間管理</CardTitle>
-          <CardDescription className="mt-1 text-sm text-muted-foreground">
+          <CardDescription className="mt-1 text-muted-foreground text-sm">
             維護全校大樓建築與其所屬空間層級結構。刪除前系統會自動檢查相關報修單與設備關聯。
           </CardDescription>
         </div>
@@ -191,7 +191,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
       <CardContent className="space-y-4">
         {buildings.length === 0 ? (
-          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
             目前尚未建立任何校園大樓。
           </div>
         ) : (
@@ -219,7 +219,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                         )}
                         <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" />
-                        <span className="text-base font-semibold text-foreground">{building.name}</span>
+                        <span className="font-semibold text-base text-foreground">{building.name}</span>
                         <Badge variant="outline" className="font-mono text-xs uppercase">
                           {building.code}
                         </Badge>
@@ -265,7 +265,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
                   <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
                     {spaceCount === 0 ? (
-                      <div className="my-2 flex h-20 items-center justify-center rounded-md border border-dashed text-xs text-muted-foreground">
+                      <div className="my-2 flex h-20 items-center justify-center rounded-md border border-dashed text-muted-foreground text-xs">
                         此大樓目前無任何空間設定。
                       </div>
                     ) : (
