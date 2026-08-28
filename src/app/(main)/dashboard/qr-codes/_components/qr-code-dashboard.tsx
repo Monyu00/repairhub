@@ -2,15 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
-import { Download, Layers, Package, QrCode } from "lucide-react";
+import { Download, QrCode } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { QRCard } from "./qr-card";
 import { exportQRCodesToPDF } from "./qr-pdf-export";
@@ -24,15 +21,10 @@ interface QRCodeDashboardProps {
 }
 
 export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDashboardProps) {
-  const router = useRouter();
   const targetType: QRTargetType = defaultTab === "equipment" ? "equipment" : "spaces";
   const [selectedSpaceIds, setSelectedSpaceIds] = useState<string[]>([]);
   const [selectedEquipmentIds, setSelectedEquipmentIds] = useState<string[]>([]);
   const [origin, setOrigin] = useState<string>("");
-
-  const handleTabChange = (val: string) => {
-    router.replace(`/dashboard/qr-codes?tab=${val}`, { scroll: false });
-  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -65,18 +57,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
     return map;
   }, [buildings]);
 
-  // Lookup map for equipment
-  const equipmentMap = useMemo(() => {
-    const map = new Map<string, EquipmentOption>();
-    for (const eq of equipment) {
-      map.set(eq.id, eq);
-    }
-    return map;
-  }, [equipment]);
-
-  // Active selected IDs based on current target type
-  const activeSelectedIds = targetType === "spaces" ? selectedSpaceIds : selectedEquipmentIds;
-
+  // Handle selection toggles
   const handleToggleItem = (id: string) => {
     if (targetType === "spaces") {
       setSelectedSpaceIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
@@ -85,11 +66,13 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
     }
   };
 
-  const handleSelectAll = (ids: string[]) => {
+  const handleSelectAll = () => {
     if (targetType === "spaces") {
-      setSelectedSpaceIds(ids);
+      const allSpaceIds = buildings.flatMap((b) => b.spaces.map((s) => s.id));
+      setSelectedSpaceIds(allSpaceIds);
     } else {
-      setSelectedEquipmentIds(ids);
+      const allEqIds = equipment.map((eq) => eq.id);
+      setSelectedEquipmentIds(allEqIds);
     }
   };
 
@@ -103,61 +86,67 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
 
   // Convert active selection to PrintableQRItem[]
   const printableItems: PrintableQRItem[] = useMemo(() => {
-    const base = origin || "";
+    if (!origin) return [];
 
     if (targetType === "spaces") {
       const items: PrintableQRItem[] = [];
-      for (const id of selectedSpaceIds) {
-        const info = spacesMap.get(id);
-        if (info) {
-          items.push({
-            id,
-            type: "space",
-            title: info.spaceName,
-            subtitle: `${info.buildingName} · ${info.floor}F`,
-            buildingName: info.buildingName,
-            spaceName: info.spaceName,
-            url: `${base}/report?location_id=${id}`,
-          });
-        }
+      for (const spaceId of selectedSpaceIds) {
+        const info = spacesMap.get(spaceId);
+        if (!info) continue;
+        items.push({
+          id: spaceId,
+          type: "space",
+          title: `${info.buildingName} ${info.spaceName}`,
+          subtitle: `${info.floor >= 0 ? `${info.floor}F` : `B${Math.abs(info.floor)}`} - ${info.spaceName}`,
+          code: `${info.buildingCode}-${info.spaceName}`,
+          buildingName: info.buildingName,
+          spaceName: info.spaceName,
+          url: `${origin}/report?space_id=${spaceId}`,
+        });
       }
       return items;
     }
 
     const items: PrintableQRItem[] = [];
-    for (const id of selectedEquipmentIds) {
-      const eq = equipmentMap.get(id);
-      if (eq) {
-        items.push({
-          id,
-          type: "equipment",
-          title: eq.name,
-          subtitle: `${eq.buildingName} · ${eq.spaceName}`,
-          code: eq.code,
-          buildingName: eq.buildingName,
-          spaceName: eq.spaceName,
-          url: `${base}/report?equipment_id=${id}`,
-        });
-      }
+    for (const eqId of selectedEquipmentIds) {
+      const eq = equipment.find((e) => e.id === eqId);
+      if (!eq) continue;
+      items.push({
+        id: eq.id,
+        type: "equipment",
+        title: eq.name,
+        subtitle: `${eq.buildingName} - ${eq.spaceName}`,
+        code: eq.code || eq.name,
+        buildingName: eq.buildingName,
+        spaceName: eq.spaceName,
+        url: `${origin}/report?space_id=${eq.spaceId}&equipment_id=${eq.id}`,
+      });
     }
     return items;
-  }, [targetType, selectedSpaceIds, selectedEquipmentIds, spacesMap, equipmentMap, origin]);
+  }, [targetType, selectedSpaceIds, selectedEquipmentIds, spacesMap, equipment, origin]);
 
+  // Export PDF
   const handleExportPDF = async () => {
-    const prefix = targetType === "spaces" ? "RepairHub_空間報修QR" : "RepairHub_設備報修QR";
+    if (printableItems.length === 0) return;
+    const prefix = targetType === "spaces" ? "空間" : "設備";
     await exportQRCodesToPDF(printableItems, prefix);
   };
 
-  const totalAvailableSpaces = useMemo(() => buildings.reduce((acc, b) => acc + b.spaces.length, 0), [buildings]);
-  const totalAvailableEquipment = equipment.length;
+  const activeSelectedIds = targetType === "spaces" ? selectedSpaceIds : selectedEquipmentIds;
 
   return (
     <div className="space-y-6">
       {/* Header & Action Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">批量 QR Code 產生</h1>
-          <p className="text-muted-foreground text-sm">全校空間地點與設備資產報修條碼批量產生、即時預覽與 PDF 下載。</p>
+          <h1 className="font-bold text-2xl text-foreground tracking-tight">
+            {targetType === "spaces" ? "空間 QR Code 產生" : "設備 QR Code 產生"}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {targetType === "spaces"
+              ? "全校各大樓空間地點報修條碼批量產生、即時預覽與 PDF 下載。"
+              : "全校設施設備資產報修條碼批量產生、即時預覽與 PDF 下載。"}
+          </p>
         </div>
 
         {/* Global Action Buttons */}
@@ -173,26 +162,6 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
             <span>下載 PDF ({printableItems.length})</span>
           </Button>
         </div>
-      </div>
-
-      {/* Tabs Selector */}
-      <div>
-        <Tabs value={targetType} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="spaces" className="gap-1.5 text-xs sm:text-sm">
-              <Layers className="size-4" />
-              <span>
-                空間 QR Code ({selectedSpaceIds.length}/{totalAvailableSpaces})
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="equipment" className="gap-1.5 text-xs sm:text-sm">
-              <Package className="size-4" />
-              <span>
-                設備 QR Code ({selectedEquipmentIds.length}/{totalAvailableEquipment})
-              </span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
 
       {/* Main Two-Column Layout */}
@@ -212,53 +181,42 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
           </div>
         </div>
 
-        {/* Right Column: Live Preview Grid */}
+        {/* Right Column: Live Grid Preview */}
         <div className="lg:col-span-8 xl:col-span-8">
           {printableItems.length === 0 ? (
-            <Card className="flex min-h-[480px] items-center justify-center border-dashed p-8 text-center">
-              <Empty className="max-w-md">
-                <EmptyMedia variant="icon">
-                  <QrCode className="size-6" />
+            <Card className="flex h-full min-h-[480px] items-center justify-center p-8 border-dashed">
+              <Empty>
+                <EmptyMedia>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <QrCode className="size-6" />
+                  </div>
                 </EmptyMedia>
                 <EmptyHeader>
                   <EmptyTitle>尚未選取任何項目</EmptyTitle>
                   <EmptyDescription>
-                    請由左側面板勾選欲產生 QR Code 的{targetType === "spaces" ? "空間" : "設備"}
-                    ，選取後將在此處即時產生卡片預覽。
+                    請從左側面板勾選要列印的空間或設備，以即時產生並預覽 QR Code 卡片。
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (targetType === "spaces") {
-                        setSelectedSpaceIds(buildings.flatMap((b) => b.spaces.map((s) => s.id)));
-                      } else {
-                        setSelectedEquipmentIds(equipment.map((eq) => eq.id));
-                      }
-                    }}
-                  >
-                    選取全部{targetType === "spaces" ? "空間" : "設備"}
+                  <Button variant="outline" size="sm" onClick={handleSelectAll}>
+                    全選所有項目
                   </Button>
                 </EmptyContent>
               </Empty>
             </Card>
           ) : (
             <div className="space-y-4">
-              {/* Preview Toolbar */}
-              <div className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/40 px-4 py-2.5">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground text-sm">即時預覽</span>
-                  <Badge variant="secondary" className="px-2 py-0 text-xs">
+                  <h3 className="font-semibold text-sm text-foreground">預覽輸出卡片</h3>
+                  <Badge variant="secondary" className="font-mono text-xs">
                     共 {printableItems.length} 張卡片
                   </Badge>
                 </div>
-                <span className="text-muted-foreground text-xs">支援單張下載卡片圖片或批量下載 PDF</span>
+                <p className="text-muted-foreground text-xs">A4 列印每頁排版 6 張（2×3 網格）</p>
               </div>
 
-              {/* Cards Grid */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                 {printableItems.map((item) => (
                   <QRCard key={`${item.type}-${item.id}`} item={item} />
                 ))}
