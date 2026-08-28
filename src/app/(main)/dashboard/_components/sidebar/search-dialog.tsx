@@ -18,7 +18,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import type { NavItem } from "@/navigation/sidebar/sidebar-items";
-import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import { reportAction, sidebarItems } from "@/navigation/sidebar/sidebar-items";
 
 type SearchItem = {
   id: string;
@@ -28,15 +28,40 @@ type SearchItem = {
   icon?: NavItem["icon"];
 };
 
-const searchItems: SearchItem[] = sidebarItems.flatMap((group) =>
-  group.items.map((item) => ({
-    id: item.id,
-    group: group.label ?? "Other",
-    label: item.title,
-    url: item.url,
-    icon: item.icon,
-  })),
-);
+const searchItems: SearchItem[] = [
+  {
+    id: "report-action",
+    group: "快速操作",
+    label: reportAction.title,
+    url: reportAction.url,
+    icon: reportAction.icon,
+  },
+  ...sidebarItems.flatMap((group) =>
+    group.items.flatMap((item) => {
+      const items: SearchItem[] = [
+        {
+          id: item.id,
+          group: group.label ?? "主要",
+          label: item.title,
+          url: item.url,
+          icon: item.icon,
+        },
+      ];
+      if (item.children) {
+        for (const child of item.children) {
+          items.push({
+            id: child.id,
+            group: group.label ?? item.title,
+            label: `${item.title} - ${child.title}`,
+            url: child.url,
+            icon: item.icon,
+          });
+        }
+      }
+      return items;
+    }),
+  ),
+];
 
 function groupBy(items: SearchItem[]) {
   const groups = [...new Set(items.map((item) => item.group))];

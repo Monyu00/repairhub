@@ -15,8 +15,12 @@ export const metadata: Metadata = {
   description: "全校設施設備報修系統核心維護、地點管理與使用者權限設定。",
 };
 
-export default async function Page() {
-  const session = await getSession();
+interface PageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+export default async function Page(props: PageProps) {
+  const [session, searchParams] = await Promise.all([getSession(), props.searchParams]);
 
   if (!session) {
     redirect("/login");
@@ -62,6 +66,7 @@ export default async function Page() {
       buildings={buildings}
       users={users}
       technicianCategoryMap={technicianCategoryMap}
+      defaultTab={searchParams.tab}
     />
   );
 }
