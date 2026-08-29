@@ -3,19 +3,29 @@
 import { useMemo, useState, useTransition } from "react";
 
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Ban,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Edit2,
   Eye,
   KeyRound,
   Loader2,
+  MoreHorizontal,
   Power,
+  RotateCcw,
   Search,
+  ShieldCheck,
   Tag,
   UserCheck,
   UserPlus,
   Users,
-  UserX,
   Wrench,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,12 +42,26 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import type { CategoryItem } from "../_actions/category-actions";
-import { fetchUsers, toggleUserActive, type UserItem, updateUserProfile } from "../_actions/user-actions";
+import {
+  batchToggleUserActive,
+  fetchUsers,
+  toggleUserActive,
+  type UserItem,
+  updateUserProfile,
+} from "../_actions/user-actions";
 import { TechnicianCategoryDialog } from "./technician-category-dialog";
 import { UserCreateDialog } from "./user-create-dialog";
 import { UserCreateSuccessDialog } from "./user-create-success-dialog";
@@ -52,6 +76,9 @@ interface UserManagementProps {
   initialTechnicianCategoryMap?: Record<string, string[]>;
 }
 
+type SortField = "name" | "status" | "role" | "createdAt" | "lastSignInAt";
+type SortDirection = "asc" | "desc";
+
 export function UserManagement({ initialUsers, categories, initialTechnicianCategoryMap = {} }: UserManagementProps) {
   const [users, setUsers] = useState<UserItem[]>(initialUsers);
   const [technicianCategoryMap, setTechnicianCategoryMap] =
@@ -61,6 +88,17 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("active"); // default: 'active'
+
+  // Sorting state
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Dialog & Sheet states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -76,6 +114,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
   const [selectedTechUser, setSelectedTechUser] = useState<UserItem | null>(null);
 
   const [confirmToggleUser, setConfirmToggleUser] = useState<UserItem | null>(null);
+  const [confirmBatchToggleAction, setConfirmBatchToggleAction] = useState<boolean | null>(null);
   const [isTogglingActive, startToggleTransition] = useTransition();
 
   // Create a map of category ID to category object for fast lookup
@@ -101,9 +140,9 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
     }
   };
 
-  // Filtered users
+  // Filtered & Sorted users
   const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
+    const filtered = users.filter((user) => {
       // 1. Search Query (Name, Email, Department, Phone)
       if (searchQuery.trim()) {
         const query = searchQuery.trim().toLowerCase();
@@ -127,27 +166,130 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
       return true;
     });
-  }, [users, searchQuery, roleFilter, statusFilter]);
 
-  // Statistics
+    // Sort
+    return [...filtered].sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case "name": {
+          const nameA = (a.displayName ?? a.email).toLowerCase();
+          const nameB = (b.displayName ?? b.email).toLowerCase();
+          comparison = nameA.localeCompare(nameB, "zh-Hant");
+          break;
+        }
+        case "status": {
+          comparison = (a.isActive ? 1 : 0) - (b.isActive ? 1 : 0);
+          break;
+        }
+        case "role": {
+          const getRoleScore = (r: UserItem["role"]) => {
+            if (r === "admin") return 0;
+            if (r === "technician") return 1;
+            return 2;
+          };
+          comparison = getRoleScore(a.role) - getRoleScore(b.role);
+          break;
+        }
+        case "createdAt": {
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        }
+        case "lastSignInAt": {
+          const timeA = a.lastSignInAt ? new Date(a.lastSignInAt).getTime() : 0;
+          const timeB = b.lastSignInAt ? new Date(b.lastSignInAt).getTime() : 0;
+          comparison = timeA - timeB;
+          break;
+        }
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [users, searchQuery, roleFilter, statusFilter, sortField, sortDirection]);
+
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
+
+  // Statistics: Total, Admin, Technician, User
   const stats = useMemo(() => {
     let adminCount = 0;
     let techCount = 0;
-    let activeCount = 0;
-    let inactiveCount = 0;
+    let userCount = 0;
 
     users.forEach((u) => {
-      if (u.isActive) activeCount++;
-      else inactiveCount++;
-
       if (u.role === "admin") adminCount++;
       else if (u.role === "technician") techCount++;
+      else userCount++;
     });
 
-    return { total: users.length, activeCount, inactiveCount, adminCount, techCount };
+    return { total: users.length, adminCount, techCount, userCount };
   }, [users]);
 
-  // Handlers
+  // Checkbox Selection Logic
+  const allCurrentPageSelected = paginatedUsers.length > 0 && paginatedUsers.every((u) => selectedIds.has(u.id));
+  const someCurrentPageSelected = paginatedUsers.some((u) => selectedIds.has(u.id)) && !allCurrentPageSelected;
+
+  const selectAllCheckedState = useMemo(() => {
+    if (allCurrentPageSelected) return true;
+    if (someCurrentPageSelected) return "indeterminate";
+    return false;
+  }, [allCurrentPageSelected, someCurrentPageSelected]);
+
+  const handleSelectAllCurrentPage = (checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        for (const u of paginatedUsers) {
+          next.add(u.id);
+        }
+      } else {
+        for (const u of paginatedUsers) {
+          next.delete(u.id);
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleSelectRow = (userId: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(userId);
+      } else {
+        next.delete(userId);
+      }
+      return next;
+    });
+  };
+
+  const handleClearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  // Sorting Handler
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="ml-1 h-3.5 w-3.5 text-muted-foreground/60" />;
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp className="ml-1 h-3.5 w-3.5 text-foreground" />
+    ) : (
+      <ArrowDown className="ml-1 h-3.5 w-3.5 text-foreground" />
+    );
+  };
+
+  // Action Handlers
   const handleViewProfile = (user: UserItem) => {
     setSelectedUser(user);
     setProfileSheetOpen(true);
@@ -185,6 +327,33 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         setConfirmToggleUser(null);
       } else {
         toast.error(res.error ?? "更新啟用狀態失敗");
+      }
+    });
+  };
+
+  const handleBatchToggleClick = (targetActive: boolean) => {
+    if (selectedIds.size === 0) return;
+    setConfirmBatchToggleAction(targetActive);
+  };
+
+  const handleConfirmBatchToggle = () => {
+    if (confirmBatchToggleAction === null || selectedIds.size === 0) return;
+    const targetActive = confirmBatchToggleAction;
+    const idsArray = Array.from(selectedIds);
+
+    startToggleTransition(async () => {
+      const res = await batchToggleUserActive(idsArray, targetActive);
+      if (res.success) {
+        toast.success(
+          targetActive
+            ? `已批次啟用 ${res.modifiedCount ?? idsArray.length} 位使用者`
+            : `已批次停用 ${res.modifiedCount ?? idsArray.length} 位使用者`,
+        );
+        setUsers((prev) => prev.map((u) => (selectedIds.has(u.id) ? { ...u, isActive: targetActive } : u)));
+        setSelectedIds(new Set());
+        setConfirmBatchToggleAction(null);
+      } else {
+        toast.error(res.error ?? "批次操作失敗");
       }
     });
   };
@@ -231,6 +400,15 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
     }));
   };
 
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setRoleFilter("all");
+    setStatusFilter("active");
+    setCurrentPage(1);
+  };
+
+  const isFiltersModified = searchQuery !== "" || roleFilter !== "all" || statusFilter !== "active";
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "未曾登入";
     try {
@@ -249,7 +427,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {/* 4 Summary Cards: 總數、管理員、維修技師、一般使用者 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -258,18 +436,18 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">{stats.total}</div>
-            <p className="text-muted-foreground text-xs">系統中註冊的帳號總和</p>
+            <p className="text-muted-foreground text-xs">已註冊使用者的帳號總和</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">正常啟用中</CardTitle>
-            <UserCheck className="h-4 w-4 text-emerald-500" />
+            <CardTitle className="font-medium text-muted-foreground text-sm">系統管理者</CardTitle>
+            <ShieldCheck className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-emerald-600 dark:text-emerald-400">{stats.activeCount}</div>
-            <p className="text-muted-foreground text-xs">可正常登入使用系統之帳號</p>
+            <div className="font-bold text-2xl text-destructive">{stats.adminCount}</div>
+            <p className="text-muted-foreground text-xs">擁有完整設定與派單權限</p>
           </CardContent>
         </Card>
 
@@ -280,18 +458,18 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl text-blue-600 dark:text-blue-400">{stats.techCount}</div>
-            <p className="text-muted-foreground text-xs">可指派或接領工單之維修人員</p>
+            <p className="text-muted-foreground text-xs">可被指派工單並進行維修簽核</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">已停用帳號</CardTitle>
-            <UserX className="h-4 w-4 text-destructive" />
+            <CardTitle className="font-medium text-muted-foreground text-sm">一般使用者</CardTitle>
+            <UserCheck className="h-4 w-4 text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-destructive">{stats.inactiveCount}</div>
-            <p className="text-muted-foreground text-xs">已被停權無法登入之帳號</p>
+            <div className="font-bold text-2xl text-foreground">{stats.userCount}</div>
+            <p className="text-muted-foreground text-xs">可進行問題通報與進度查詢</p>
           </CardContent>
         </Card>
       </div>
@@ -302,7 +480,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           <div>
             <CardTitle className="font-semibold text-lg">使用者與權限管理</CardTitle>
             <CardDescription className="text-sm">
-              管理系統帳號、指派權限角色（管理員、技師或一般使用者）、設定技師負責類別與帳號啟用狀態。
+              管理系統帳號、指派權限角色、設定技師負責類別與帳號啟用狀態。
             </CardDescription>
           </div>
 
@@ -313,22 +491,31 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Filters Bar */}
+          {/* Filters Bar: 搜尋框 + 狀態篩選 + 角色篩選 對齊設計 */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="搜尋姓名、Email、部門或電話..."
-                className="pl-9"
+                className="h-9 pl-9"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="w-full sm:w-[150px]">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(val) => {
+                    setStatusFilter(val);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-9">
                     <SelectValue placeholder="帳號狀態" />
                   </SelectTrigger>
                   <SelectContent>
@@ -340,8 +527,14 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
               </div>
 
               <div className="w-full sm:w-[170px]">
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger>
+                <Select
+                  value={roleFilter}
+                  onValueChange={(val) => {
+                    setRoleFilter(val);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-9">
                     <SelectValue placeholder="篩選角色" />
                   </SelectTrigger>
                   <SelectContent>
@@ -352,42 +545,163 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   </SelectContent>
                 </Select>
               </div>
+
+              {isFiltersModified && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-9 px-2.5 text-muted-foreground hover:text-foreground"
+                  title="重設篩選條件"
+                >
+                  <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                  重設
+                </Button>
+              )}
             </div>
           </div>
+
+          {/* Batch Selection Action Bar (when items are selected) */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="px-2 py-0.5 font-semibold">
+                  已選取 {selectedIds.size} 位使用者
+                </Badge>
+                <span className="text-muted-foreground text-xs">（跨頁選取）</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-emerald-600 text-xs hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+                  onClick={() => handleBatchToggleClick(true)}
+                >
+                  <Power className="mr-1.5 h-3.5 w-3.5" />
+                  批次啟用
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => handleBatchToggleClick(false)}
+                >
+                  <Ban className="mr-1.5 h-3.5 w-3.5" />
+                  批次停用
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-muted-foreground text-xs hover:text-foreground"
+                  onClick={handleClearSelection}
+                >
+                  <X className="mr-1 h-3.5 w-3.5" />
+                  取消選取
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Table */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>使用者姓名 / Email</TableHead>
-                  <TableHead>狀態</TableHead>
-                  <TableHead>權限角色</TableHead>
+                  <TableHead className="w-[44px] text-center">
+                    <Checkbox
+                      checked={selectAllCheckedState}
+                      onCheckedChange={(checked) => handleSelectAllCurrentPage(checked === true)}
+                      aria-label="選取目前頁面所有使用者"
+                    />
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => handleSort("name")}
+                    >
+                      使用者姓名 / Email
+                      {renderSortIcon("name")}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => handleSort("status")}
+                    >
+                      狀態
+                      {renderSortIcon("status")}
+                    </button>
+                  </TableHead>
+                  <TableHead>
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => handleSort("role")}
+                    >
+                      權限角色
+                      {renderSortIcon("role")}
+                    </button>
+                  </TableHead>
                   <TableHead className="hidden lg:table-cell">負責報修類別</TableHead>
-                  <TableHead className="hidden md:table-cell">建立日期</TableHead>
-                  <TableHead className="hidden sm:table-cell">最後登入</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => handleSort("createdAt")}
+                    >
+                      建立日期
+                      {renderSortIcon("createdAt")}
+                    </button>
+                  </TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    <button
+                      type="button"
+                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      onClick={() => handleSort("lastSignInAt")}
+                    >
+                      最後登入
+                      {renderSortIcon("lastSignInAt")}
+                    </button>
+                  </TableHead>
+                  <TableHead className="w-[60px] text-right">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.length === 0 ? (
+                {paginatedUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       {searchQuery || roleFilter !== "all" || statusFilter !== "active"
                         ? "找不到符合篩選條件的使用者"
                         : "目前系統中無使用者資料"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredUsers.map((user) => {
+                  paginatedUsers.map((user) => {
                     const isTech = user.role === "technician";
+                    const isSelected = selectedIds.has(user.id);
                     const subscribedIds = isTech ? (technicianCategoryMap[user.id] ?? []) : [];
                     const subscribedCategories = subscribedIds
                       .map((id) => categoryMap.get(id))
                       .filter((c): c is CategoryItem => Boolean(c));
 
                     return (
-                      <TableRow key={user.id} className={!user.isActive ? "bg-muted/30 opacity-75" : undefined}>
+                      <TableRow
+                        key={user.id}
+                        data-state={isSelected ? "selected" : undefined}
+                        className={!user.isActive ? "bg-muted/30 opacity-75" : undefined}
+                      >
+                        <TableCell className="text-center">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectRow(user.id, checked === true)}
+                            aria-label={`選取 ${user.displayName ?? user.email}`}
+                          />
+                        </TableCell>
                         <TableCell>
                           <button
                             type="button"
@@ -396,7 +710,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           >
                             <div className="flex items-center gap-1.5">
                               <span className="font-medium text-foreground transition-colors group-hover:text-primary">
-                                {user.displayName || "（未設定姓名）"}
+                                {user.displayName ?? "（未設定姓名）"}
                               </span>
                               {user.department && (
                                 <span className="rounded bg-muted px-1.5 py-0.2 text-[11px] text-muted-foreground">
@@ -453,61 +767,56 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           {formatDate(user.lastSignInAt)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleViewProfile(user)}
-                              title="查看使用者詳細檔案與統計"
-                            >
-                              <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                              <span className="sr-only">詳細資料</span>
-                            </Button>
-                            {isTech && (
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => handleCategoryClick(user)}
-                                title="設定負責報修類別"
-                                className="text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/40"
-                              >
-                                <Tag className="h-4 w-4" />
-                                <span className="sr-only">類別設定</span>
+                          {/* Meatballs dropdown action menu */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon-sm" className="h-8 w-8 p-0" title="操作選項">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">開啟操作選單</span>
                               </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleEditClick(user)}
-                              title="編輯使用者資料與角色"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                              <span className="sr-only">編輯</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleResetPasswordClick(user)}
-                              title="重設登入密碼"
-                            >
-                              <KeyRound className="h-4 w-4" />
-                              <span className="sr-only">重設密碼</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleToggleActiveClick(user)}
-                              title={user.isActive ? "停用此帳號" : "啟用此帳號"}
-                              className={
-                                user.isActive
-                                  ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                                  : "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
-                              }
-                            >
-                              {user.isActive ? <Ban className="h-4 w-4" /> : <Power className="h-4 w-4" />}
-                              <span className="sr-only">{user.isActive ? "停用" : "啟用"}</span>
-                            </Button>
-                          </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => handleViewProfile(user)}>
+                                <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+                                查看詳細檔案
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                                <Edit2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                                編輯基本資料
+                              </DropdownMenuItem>
+                              {isTech && (
+                                <DropdownMenuItem onClick={() => handleCategoryClick(user)}>
+                                  <Tag className="mr-2 h-4 w-4 text-blue-500" />
+                                  設定負責類別
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => handleResetPasswordClick(user)}>
+                                <KeyRound className="mr-2 h-4 w-4 text-muted-foreground" />
+                                重設登入密碼
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleToggleActiveClick(user)}
+                                className={
+                                  user.isActive
+                                    ? "text-destructive focus:text-destructive"
+                                    : "text-emerald-600 focus:text-emerald-600 dark:text-emerald-400"
+                                }
+                              >
+                                {user.isActive ? (
+                                  <>
+                                    <Ban className="mr-2 h-4 w-4" />
+                                    停用此帳號
+                                  </>
+                                ) : (
+                                  <>
+                                    <Power className="mr-2 h-4 w-4" />
+                                    啟用此帳號
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
@@ -515,6 +824,94 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Bottom Pagination & Page Size Toolbar */}
+          <div className="flex flex-col items-center justify-between gap-4 py-2 sm:flex-row">
+            <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
+              <span>
+                顯示第 <strong className="text-foreground">{filteredUsers.length === 0 ? 0 : startIndex + 1}</strong> 至{" "}
+                <strong className="text-foreground">{Math.min(startIndex + pageSize, filteredUsers.length)}</strong>{" "}
+                筆，共 <strong className="text-foreground">{filteredUsers.length}</strong> 筆
+              </span>
+
+              <div className="flex items-center gap-1.5">
+                <span>每頁顯示</span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(val) => {
+                    setPageSize(Number(val));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[72px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>筆</span>
+              </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(1)}
+                disabled={safeCurrentPage <= 1}
+                title="第一頁"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+                <span className="sr-only">第一頁</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safeCurrentPage <= 1}
+                title="上一頁"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">上一頁</span>
+              </Button>
+
+              <div className="flex items-center px-2 text-xs">
+                <span className="font-medium text-foreground">
+                  第 {safeCurrentPage} / {totalPages} 頁
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safeCurrentPage >= totalPages}
+                title="下一頁"
+              >
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">下一頁</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={safeCurrentPage >= totalPages}
+                title="最後一頁"
+              >
+                <ChevronsRight className="h-4 w-4" />
+                <span className="sr-only">最後一頁</span>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -583,7 +980,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         onSuccess={handleTechCategorySuccess}
       />
 
-      {/* Toggle Active Confirmation Alert Dialog */}
+      {/* Single Toggle Active Confirmation Alert Dialog */}
       <AlertDialog
         open={Boolean(confirmToggleUser)}
         onOpenChange={(open) => {
@@ -621,6 +1018,49 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
             >
               {isTogglingActive && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {confirmToggleUser?.isActive ? "確認停用" : "確認啟用"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Batch Toggle Active Confirmation Alert Dialog */}
+      <AlertDialog
+        open={confirmBatchToggleAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmBatchToggleAction(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmBatchToggleAction ? "確認批次啟用已選取的帳號？" : "確認批次停用已選取的帳號？"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmBatchToggleAction ? (
+                <>
+                  您即將批次啟用 <strong className="text-foreground">{selectedIds.size}</strong>{" "}
+                  位使用者的帳號。啟用後這些使用者將可立即恢復登入。
+                </>
+              ) : (
+                <>
+                  您即將批次停用 <strong className="text-foreground">{selectedIds.size}</strong>{" "}
+                  位使用者的帳號。停用後這些使用者將無法登入系統（系統將自動跳過您自己的管理員帳號）。
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isTogglingActive}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              variant={confirmBatchToggleAction ? "default" : "destructive"}
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmBatchToggle();
+              }}
+              disabled={isTogglingActive}
+            >
+              {isTogglingActive && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {confirmBatchToggleAction ? "確認批次啟用" : "確認批次停用"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

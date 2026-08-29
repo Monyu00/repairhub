@@ -299,6 +299,85 @@ export async function toggleUserActive(
   });
 }
 
+export async function batchToggleUserActive(
+  targetUserIds: string[],
+  isActive: boolean,
+): Promise<{ success: boolean; error?: string; modifiedCount?: number }> {
+  return safeAction(async () => {
+    const admin = await requireAdmin();
+
+    // 1. Filter out self if deactivating
+    const filteredUserIds = isActive ? targetUserIds : targetUserIds.filter((id) => id !== admin.userId);
+
+    if (filteredUserIds.length === 0) {
+      return { success: false, error: "無法停用您自己的管理員帳號" };
+    }
+
+    const supabase = admin.supabase;
+
+    // 2. If deactivating, ensure at least one active admin remains
+    if (!isActive) {
+      const { data: targetAdmins } = await supabase
+        .from("profiles")
+        .select("id")
+        .in("id", filteredUserIds)
+        .eq("user_role", "admin")
+        .eq("is_active", true);
+
+      const targetAdminIds = new Set((targetAdmins ?? []).map((a) => a.id));
+
+      if (targetAdminIds.size > 0) {
+        const { count, error: countError } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("user_role", "admin")
+          .eq("is_active", true);
+
+        if (countError) {
+          console.error("Failed to count active admins:", countError);
+          return { success: false, error: "檢查管理員數量失敗" };
+        }
+
+        const remainingActiveAdmins = (count ?? 0) - targetAdminIds.size;
+        if (remainingActiveAdmins <= 0) {
+          return { success: false, error: "操作失敗：系統必須保留至少一位啟用的系統管理者 (Admin)" };
+        }
+      }
+    }
+
+    // 3. Batch update profiles
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        is_active: isActive,
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", filteredUserIds);
+
+    if (updateError) {
+      console.error("Failed to batch toggle is_active:", updateError);
+      return { success: false, error: "批次更新使用者狀態失敗" };
+    }
+
+    // 4. Batch update Supabase Auth bans
+    try {
+      const adminClient = createAdminClient();
+      await Promise.all(
+        filteredUserIds.map((id) =>
+          adminClient.auth.admin.updateUserById(id, {
+            ban_duration: isActive ? "none" : "876000h",
+          }),
+        ),
+      );
+    } catch (authBanError) {
+      console.warn("Supabase auth ban batch update warning:", authBanError);
+    }
+
+    revalidatePath("/dashboard/settings");
+    return { success: true, modifiedCount: filteredUserIds.length };
+  });
+}
+
 export async function resetUserPassword(
   targetUserId: string,
   newPassword: string,
