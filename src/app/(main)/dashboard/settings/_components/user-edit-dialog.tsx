@@ -34,18 +34,6 @@ interface UserEditDialogProps {
   ) => Promise<{ success: boolean; error?: string }>;
 }
 
-function resolveRoleSelection(role: UserItem["role"]): "admin" | "technician" | "user" {
-  if (role === "admin") return "admin";
-  if (role === "technician") return "technician";
-  return "user";
-}
-
-function resolveDbRole(role: "admin" | "technician" | "user"): "admin" | "technician" | null {
-  if (role === "admin") return "admin";
-  if (role === "technician") return "technician";
-  return null;
-}
-
 export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditDialogProps) {
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<"admin" | "technician" | "user">("user");
@@ -57,7 +45,7 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
   useEffect(() => {
     if (open && user) {
       setDisplayName(user.displayName ?? "");
-      setRole(resolveRoleSelection(user.role));
+      setRole(user.role ?? "user");
       setDepartment(user.department ?? "");
       setPhone(user.phone ?? "");
       setError(null);
@@ -70,7 +58,7 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
     e.preventDefault();
     setError(null);
 
-    const targetRole = resolveDbRole(role);
+    const targetRole = role === "user" ? null : role;
 
     startTransition(async () => {
       const res = await onSubmit(user.id, {

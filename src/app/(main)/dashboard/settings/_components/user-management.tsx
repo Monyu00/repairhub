@@ -278,6 +278,11 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
     }
   };
 
+  const getAriaSort = (field: SortField): "none" | "ascending" | "descending" => {
+    if (sortField !== field) return "none";
+    return sortDirection === "asc" ? "ascending" : "descending";
+  };
+
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
       return <ArrowUpDown className="ml-1 h-3.5 w-3.5 text-muted-foreground/60" />;
@@ -617,7 +622,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                       aria-label="選取目前頁面所有使用者"
                     />
                   </TableHead>
-                  <TableHead>
+                  <TableHead aria-sort={getAriaSort("name")}>
                     <button
                       type="button"
                       className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
@@ -627,7 +632,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                       {renderSortIcon("name")}
                     </button>
                   </TableHead>
-                  <TableHead>
+                  <TableHead aria-sort={getAriaSort("status")}>
                     <button
                       type="button"
                       className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
@@ -637,7 +642,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                       {renderSortIcon("status")}
                     </button>
                   </TableHead>
-                  <TableHead>
+                  <TableHead aria-sort={getAriaSort("role")}>
                     <button
                       type="button"
                       className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
@@ -648,7 +653,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                     </button>
                   </TableHead>
                   <TableHead className="hidden lg:table-cell">負責報修類別</TableHead>
-                  <TableHead className="hidden md:table-cell">
+                  <TableHead className="hidden md:table-cell" aria-sort={getAriaSort("createdAt")}>
                     <button
                       type="button"
                       className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
@@ -658,7 +663,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                       {renderSortIcon("createdAt")}
                     </button>
                   </TableHead>
-                  <TableHead className="hidden sm:table-cell">
+                  <TableHead className="hidden sm:table-cell" aria-sort={getAriaSort("lastSignInAt")}>
                     <button
                       type="button"
                       className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"

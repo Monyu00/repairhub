@@ -38,7 +38,10 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
     const { supabase } = await requireAdmin();
 
     const adminClient = createAdminClient();
-    const { data: authData, error: authError } = await adminClient.auth.admin.listUsers();
+    const { data: authData, error: authError } = await adminClient.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
 
     if (authError) {
       console.error("Failed to fetch auth users via admin client:", authError);

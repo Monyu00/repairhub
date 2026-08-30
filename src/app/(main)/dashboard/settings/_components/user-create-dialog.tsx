@@ -57,12 +57,6 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
     setError(null);
   };
 
-  function resolveDbRole(role: "admin" | "technician" | "user"): "admin" | "technician" | null {
-    if (role === "admin") return "admin";
-    if (role === "technician") return "technician";
-    return null;
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -78,7 +72,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
 
     const trimmedPassword = password.trim();
     const trimmedEmail = email.trim();
-    const targetRole = resolveDbRole(role);
+    const targetRole = role === "user" ? null : role;
 
     startTransition(async () => {
       const res = await createUser({
