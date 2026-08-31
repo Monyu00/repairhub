@@ -35,7 +35,7 @@ export interface UserStats {
 
 export async function fetchUsers(): Promise<{ success: boolean; error?: string; users: UserItem[] }> {
   const result = await safeAction(async () => {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
 
     const adminClient = createAdminClient();
     const { data: authData, error: authError } = await adminClient.auth.admin.listUsers({
@@ -48,7 +48,7 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
       return { success: false, error: "無法讀取使用者帳號資料", users: [] };
     }
 
-    const { data: profiles, error: profileError } = await supabase.from("profiles").select("*");
+    const { data: profiles, error: profileError } = await adminClient.from("profiles").select("*");
 
     if (profileError) {
       console.error("Failed to fetch profiles:", profileError);
@@ -64,12 +64,13 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
         (authUser.user_metadata?.name as string) ||
         (authUser.user_metadata?.display_name as string) ||
         null;
+      const metaRole = (authUser.user_metadata?.user_role as UserRole | undefined) || null;
 
       return {
         id: authUser.id,
         email: authUser.email ?? "",
         displayName: profile?.display_name ?? metaName,
-        role: profile?.user_role ?? null,
+        role: profile?.user_role ?? metaRole ?? null,
         department: profile?.department ?? (authUser.user_metadata?.department as string | undefined) ?? null,
         phone: profile?.phone ?? (authUser.user_metadata?.phone as string | undefined) ?? null,
         isActive: profile?.is_active ?? true,
@@ -113,7 +114,7 @@ export async function createUser(data: {
   phone?: string;
 }): Promise<{ success: boolean; error?: string; userId?: string }> {
   return safeAction(async () => {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
 
     const email = data.email.trim().toLowerCase();
     const password = data.password.trim();
@@ -139,6 +140,7 @@ export async function createUser(data: {
         display_name: displayName,
         department,
         phone,
+        user_role: data.role,
       },
     });
 
@@ -149,8 +151,8 @@ export async function createUser(data: {
 
     const newUserId = authUser.user.id;
 
-    // 2. Upsert profile in DB
-    const { error: profileError } = await supabase.from("profiles").upsert({
+    // 2. Upsert profile in DB using adminClient to bypass user-scoped RLS
+    const { error: profileError } = await adminClient.from("profiles").upsert({
       id: newUserId,
       display_name: displayName,
       user_role: data.role,
@@ -183,6 +185,7 @@ export async function updateUserProfile(
 ): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
     const { supabase } = await requireAdmin();
+    const adminClient = createAdminClient();
 
     const trimmedDisplayName = data.displayName.trim();
     const department = data.department?.trim() || null;
@@ -215,8 +218,8 @@ export async function updateUserProfile(
       }
     }
 
-    // 2. Upsert profile
-    const { error: upsertError } = await supabase.from("profiles").upsert({
+    // 2. Upsert profile using adminClient
+    const { error: upsertError } = await adminClient.from("profiles").upsert({
       id: targetUserId,
       display_name: trimmedDisplayName || null,
       user_role: data.role,
@@ -241,6 +244,7 @@ export async function toggleUserActive(
 ): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
     const admin = await requireAdmin();
+    const adminClient = createAdminClient();
 
     // 1. Prevent deactivating self
     if (targetUserId === admin.userId && !isActive) {
@@ -272,8 +276,8 @@ export async function toggleUserActive(
       }
     }
 
-    // 3. Update DB profile is_active
-    const { error: updateError } = await supabase
+    // 3. Update DB profile is_active using adminClient
+    const { error: updateError } = await adminClient
       .from("profiles")
       .update({
         is_active: isActive,
@@ -288,13 +292,11 @@ export async function toggleUserActive(
 
     // 4. Ban / Unban in Supabase Auth as secondary defense
     try {
-      const adminClient = createAdminClient();
       await adminClient.auth.admin.updateUserById(targetUserId, {
         ban_duration: isActive ? "none" : "876000h",
       });
     } catch (authBanError) {
       console.warn("Supabase auth ban update warning:", authBanError);
-      // DB profile is_active is primary, log warning if auth ban fails
     }
 
     revalidatePath("/dashboard/settings");
@@ -308,6 +310,7 @@ export async function batchToggleUserActive(
 ): Promise<{ success: boolean; error?: string; modifiedCount?: number }> {
   return safeAction(async () => {
     const admin = await requireAdmin();
+    const adminClient = createAdminClient();
 
     // 1. Filter out self if deactivating
     const filteredUserIds = isActive ? targetUserIds : targetUserIds.filter((id) => id !== admin.userId);
@@ -348,8 +351,8 @@ export async function batchToggleUserActive(
       }
     }
 
-    // 3. Batch update profiles
-    const { error: updateError } = await supabase
+    // 3. Batch update profiles using adminClient
+    const { error: updateError } = await adminClient
       .from("profiles")
       .update({
         is_active: isActive,

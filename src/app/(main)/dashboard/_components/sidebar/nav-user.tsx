@@ -17,6 +17,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUser } from "@/hooks/use-user";
 import { getInitials } from "@/lib/utils";
+import type { UserRole } from "@/navigation/sidebar/sidebar-items";
 
 interface NavUserProps {
   user?: {
@@ -24,29 +25,32 @@ interface NavUserProps {
     readonly email?: string;
     readonly avatar?: string;
   };
+  userRole?: UserRole | null;
 }
 
-export function NavUser({ user: propUser }: NavUserProps) {
+function getRoleLabel(role?: UserRole | null) {
+  if (role === "admin") return "系統管理員 (Admin)";
+  if (role === "technician") return "維修技師 (Technician)";
+  return "一般使用者";
+}
+
+export function NavUser({ user: propUser, userRole: propRole }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { user: authUser, profile } = useUser();
   const [isPending, startTransition] = useTransition();
 
   const email = authUser?.email ?? propUser?.email ?? "";
   const name =
-    (authUser?.user_metadata?.full_name as string) ||
-    (authUser?.user_metadata?.name as string) ||
-    propUser?.name ||
-    email.split("@")[0] ||
+    (authUser?.user_metadata?.full_name as string | undefined) ??
+    (authUser?.user_metadata?.name as string | undefined) ??
+    propUser?.name ??
+    (email ? email.split("@")[0] : undefined) ??
     "使用者";
 
-  const avatar = (authUser?.user_metadata?.avatar_url as string) || propUser?.avatar || "";
+  const avatar = (authUser?.user_metadata?.avatar_url as string | undefined) ?? propUser?.avatar ?? "";
 
-  const roleLabel =
-    profile?.user_role === "admin"
-      ? "系統管理員 (Admin)"
-      : profile?.user_role === "technician"
-        ? "維修技師 (Technician)"
-        : "一般使用者";
+  const effectiveRole = profile?.user_role ?? propRole;
+  const roleLabel = getRoleLabel(effectiveRole);
 
   if (!email && !authUser) {
     return null;

@@ -34,7 +34,7 @@ function getRoleLabel(role?: "admin" | "technician" | null) {
 export function UserMenu({ user }: UserMenuProps) {
   const [isPending, startTransition] = useTransition();
 
-  const displayName = user.name || user.email.split("@")[0];
+  const displayName = user.name ?? user.email.split("@")[0];
   const roleLabel = getRoleLabel(user.role);
 
   return (

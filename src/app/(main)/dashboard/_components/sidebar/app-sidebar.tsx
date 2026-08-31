@@ -77,7 +77,7 @@ export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarPr
         <NavMain items={sidebarItems} userRole={activeRole} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser userRole={activeRole} />
       </SidebarFooter>
     </Sidebar>
   );

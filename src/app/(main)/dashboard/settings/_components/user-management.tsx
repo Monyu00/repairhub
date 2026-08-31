@@ -765,10 +765,16 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="hidden text-muted-foreground text-xs md:table-cell">
+                        <TableCell
+                          className="hidden text-muted-foreground text-xs md:table-cell"
+                          suppressHydrationWarning
+                        >
                           {formatDate(user.createdAt)}
                         </TableCell>
-                        <TableCell className="hidden text-muted-foreground text-xs sm:table-cell">
+                        <TableCell
+                          className="hidden text-muted-foreground text-xs sm:table-cell"
+                          suppressHydrationWarning
+                        >
                           {formatDate(user.lastSignInAt)}
                         </TableCell>
                         <TableCell className="text-right">
