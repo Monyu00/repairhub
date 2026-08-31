@@ -64,6 +64,10 @@ _Avoid_: Reject, refile, renew
 An admin resetting an in-progress ticket back to pending status and clearing its assigned technician so it can be claimed or assigned again.
 _Avoid_: Unassign, reset, withdraw
 
+**Deactivation**:
+An admin disabling a user account. The account and all its data are preserved, but the user can no longer log in. Reversible — an admin can reactivate the account at any time.
+_Avoid_: Ban, suspend, delete, block
+
 ### Ticket Statuses
 
 **Pending** (`pending`):

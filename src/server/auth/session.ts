@@ -52,9 +52,13 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("user_role, display_name, department, phone")
+    .select("user_role, display_name, department, phone, is_active")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profile && profile.is_active === false) {
+    return null;
+  }
 
   const metaName =
     (user.user_metadata?.full_name as string) ||

@@ -16,7 +16,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
       <Badge
         variant="outline"
         className={cn(
-          "gap-1.5 font-normal px-2.5 py-0.5 bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
+          "gap-1.5 border-rose-500/20 bg-rose-500/10 px-2.5 py-0.5 font-normal text-rose-700 dark:text-rose-400",
           className,
         )}
       >
@@ -31,7 +31,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
       <Badge
         variant="outline"
         className={cn(
-          "gap-1.5 font-normal px-2.5 py-0.5 bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+          "gap-1.5 border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-normal text-blue-700 dark:text-blue-400",
           className,
         )}
       >
@@ -45,7 +45,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
     <Badge
       variant="outline"
       className={cn(
-        "gap-1.5 font-normal px-2.5 py-0.5 bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20",
+        "gap-1.5 border-slate-500/20 bg-slate-500/10 px-2.5 py-0.5 font-normal text-slate-700 dark:text-slate-400",
         className,
       )}
     >

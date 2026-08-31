@@ -225,7 +225,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-xl">報修類別列表</CardTitle>
-          <CardDescription className="mt-1 text-sm text-muted-foreground">
+          <CardDescription className="mt-1 text-muted-foreground text-sm">
             管理前端報修表單顯示的故障類別項目，可按住左側圖示拖拉調整顯示順序或設定啟用狀態。
           </CardDescription>
         </div>
@@ -236,7 +236,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       </CardHeader>
       <CardContent>
         {categories.length === 0 ? (
-          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
             目前尚未建立任何報修類別。
           </div>
         ) : (

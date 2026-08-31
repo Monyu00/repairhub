@@ -97,7 +97,7 @@ export function SpaceDialog({ open, onOpenChange, mode, buildingName, initialDat
                 disabled={isPending}
               />
             </div>
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-xs">{error}</p>}
           </div>
 
           <DialogFooter>

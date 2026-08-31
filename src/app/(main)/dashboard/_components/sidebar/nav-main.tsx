@@ -82,7 +82,12 @@ function NavMainContent({ items, userRole }: NavMainProps) {
                   );
 
                   return (
-                    <Collapsible key={item.id} asChild defaultOpen={isParentOpen} className="group/collapsible">
+                    <Collapsible
+                      key={item.id}
+                      asChild
+                      defaultOpen={isParentOpen || isAnyChildActive}
+                      className="group/collapsible"
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton

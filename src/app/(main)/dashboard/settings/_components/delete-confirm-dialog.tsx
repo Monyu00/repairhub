@@ -51,7 +51,7 @@ export function DeleteConfirmDialog({ open, onOpenChange, title, description, on
         </AlertDialogHeader>
 
         {errorMessage && (
-          <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">{errorMessage}</div>
+          <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{errorMessage}</div>
         )}
 
         <AlertDialogFooter>

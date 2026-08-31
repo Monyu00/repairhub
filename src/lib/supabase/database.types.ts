@@ -96,6 +96,7 @@ export interface Database {
           display_name: string | null;
           department: string | null;
           phone: string | null;
+          is_active: boolean;
           updated_at: string;
         };
         Insert: {
@@ -104,6 +105,7 @@ export interface Database {
           display_name?: string | null;
           department?: string | null;
           phone?: string | null;
+          is_active?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -112,6 +114,7 @@ export interface Database {
           display_name?: string | null;
           department?: string | null;
           phone?: string | null;
+          is_active?: boolean;
           updated_at?: string;
         };
         Relationships: [

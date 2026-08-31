@@ -138,15 +138,21 @@ export function TechnicianCategoryDialog({
               </Button>
             </div>
 
-            {/* Loading / Category List */}
-            {isLoading ? (
+            {/* Loading */}
+            {isLoading && (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
                 <span className="text-sm">載入中...</span>
               </div>
-            ) : activeCategories.length === 0 ? (
+            )}
+
+            {/* Empty Categories */}
+            {!isLoading && activeCategories.length === 0 && (
               <div className="py-6 text-center text-muted-foreground text-sm">目前系統無啟用的報修類別</div>
-            ) : (
+            )}
+
+            {/* Category List */}
+            {!isLoading && activeCategories.length > 0 && (
               <div className="grid max-h-[280px] grid-cols-1 gap-2.5 overflow-y-auto pr-1">
                 {activeCategories.map((cat) => {
                   const isChecked = selectedCategoryIds.includes(cat.id);

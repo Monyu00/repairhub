@@ -77,7 +77,7 @@ export function CategoryDialog({ open, onOpenChange, mode, initialName = "", onS
                 disabled={isPending}
                 autoFocus
               />
-              {error && <p className="text-xs text-destructive">{error}</p>}
+              {error && <p className="text-destructive text-xs">{error}</p>}
             </div>
           </div>
 
