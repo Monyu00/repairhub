@@ -7,122 +7,31 @@ import { toast } from "sonner";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { createClient } from "@/lib/supabase/client";
+import { getTicketById, queryTickets, type TicketRecord } from "@/server/tickets/query";
 
 import { claimTicket } from "../[id]/_actions/ticket-actions";
 import { PendingTicketCard } from "./pending-ticket-card";
-import type { TicketRow, TicketStatus } from "./ticket-types";
 
 interface PendingTicketsViewProps {
   userId: string;
   canViewReporter: boolean;
 }
 
-type RawTicketRecord = {
-  id: string;
-  status: string;
-  category_id: string;
-  space_id: string;
-  description: string;
-  reporter_name: string | null;
-  reporter_department: string | null;
-  reporter_email: string | null;
-  reporter_phone: string | null;
-  created_at: string;
-  updated_at: string;
-  category: { id: string; name: string } | { id: string; name: string }[] | null;
-  space:
-    | {
-        id: string;
-        name: string;
-        floor: number;
-        building: { id: string; name: string; code: string } | { id: string; name: string; code: string }[] | null;
-      }
-    | {
-        id: string;
-        name: string;
-        floor: number;
-        building: { id: string; name: string; code: string } | { id: string; name: string; code: string }[] | null;
-      }[]
-    | null;
-};
-
 export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsViewProps) {
-  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [tickets, setTickets] = useState<TicketRecord[]>([]);
   const [subscribedCategoryIds, setSubscribedCategoryIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const supabase = createClient();
 
-  const formatTicketRecord = useCallback(
-    (t: RawTicketRecord): TicketRow => {
-      const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
-      const spaceData = spaceRaw ?? { id: "", name: "未知空間", floor: 0, building: null };
-
-      let buildingData = { id: "", name: "未知大樓", code: "" };
-      if (spaceData.building) {
-        const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
-        if (bRaw && typeof bRaw === "object") {
-          buildingData = bRaw as { id: string; name: string; code: string };
-        }
-      }
-
-      const catRaw = Array.isArray(t.category) ? t.category[0] : t.category;
-      const categoryData = (catRaw ?? { id: t.category_id ?? "", name: "未分類" }) as { id: string; name: string };
-
-      return {
-        id: String(t.id),
-        status: (t.status ?? "pending") as TicketStatus,
-        category_id: t.category_id,
-        category: categoryData,
-        space: {
-          id: String(spaceData.id),
-          name: String(spaceData.name),
-          floor: Number(spaceData.floor),
-          building: buildingData,
-        },
-        description: String(t.description),
-        reporter_name: canViewReporter ? (t.reporter_name as string | null) : null,
-        reporter_department: canViewReporter ? (t.reporter_department as string | null) : null,
-        reporter_email: canViewReporter ? (t.reporter_email as string | null) : null,
-        reporter_phone: canViewReporter ? (t.reporter_phone as string | null) : null,
-        created_at: String(t.created_at),
-        updated_at: String(t.updated_at),
-      };
-    },
-    [canViewReporter],
-  );
-
   const fetchSingleTicket = useCallback(
-    async (ticketId: string): Promise<TicketRow | null> => {
-      const { data, error } = await supabase
-        .from("tickets")
-        .select(`
-          id,
-          status,
-          category_id,
-          space_id,
-          description,
-          reporter_name,
-          reporter_department,
-          reporter_email,
-          reporter_phone,
-          created_at,
-          updated_at,
-          category:categories(id, name),
-          space:spaces(
-            id,
-            name,
-            floor,
-            building:buildings(id, name, code)
-          )
-        `)
-        .eq("id", ticketId)
-        .maybeSingle();
-
-      if (error || !data) return null;
-      return formatTicketRecord(data as unknown as RawTicketRecord);
+    async (ticketId: string): Promise<TicketRecord | null> => {
+      return getTicketById(supabase, ticketId, {
+        role: canViewReporter ? "technician" : null,
+        userId,
+      });
     },
-    [formatTicketRecord, supabase],
+    [supabase, canViewReporter, userId],
   );
 
   // Initial data fetch
@@ -155,40 +64,18 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
         return;
       }
 
-      // 2. Fetch pending tickets in subscribed categories
-      const { data: rawTickets, error: ticketsError } = await supabase
-        .from("tickets")
-        .select(`
-          id,
-          status,
-          category_id,
-          space_id,
-          description,
-          reporter_name,
-          reporter_department,
-          reporter_email,
-          reporter_phone,
-          created_at,
-          updated_at,
-          category:categories(id, name),
-          space:spaces(
-            id,
-            name,
-            floor,
-            building:buildings(id, name, code)
-          )
-        `)
-        .eq("status", "pending")
-        .in("category_id", catIds)
-        .order("created_at", { ascending: false });
-
-      if (ticketsError) {
-        console.error("Error fetching pending tickets:", ticketsError);
-      }
+      // 2. Fetch pending tickets in subscribed categories using deep queryTickets
+      const { tickets: pendingTickets } = await queryTickets(supabase, {
+        status: "pending",
+        categoryId: catIds,
+        viewerContext: {
+          role: canViewReporter ? "technician" : null,
+          userId,
+        },
+      });
 
       if (isMounted) {
-        const formatted = ((rawTickets ?? []) as unknown as RawTicketRecord[]).map(formatTicketRecord);
-        setTickets(formatted);
+        setTickets(pendingTickets);
         setIsLoading(false);
       }
     }
@@ -198,7 +85,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
     return () => {
       isMounted = false;
     };
-  }, [userId, supabase, formatTicketRecord]);
+  }, [userId, supabase, canViewReporter]);
 
   // Realtime subscription setup
   useEffect(() => {

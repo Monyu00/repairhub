@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { TicketStatusBadge } from "./ticket-status-badge";
-import type { TicketRow } from "./ticket-types";
+import type { TicketRecord } from "./ticket-types";
 
 interface PendingTicketCardProps {
-  ticket: TicketRow;
+  ticket: TicketRecord;
   canViewReporter: boolean;
   onClaim: (ticketId: string) => Promise<void>;
 }
@@ -24,8 +24,8 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
   const router = useRouter();
   const [isClaiming, setIsClaiming] = useState(false);
 
-  const formattedDate = ticket.created_at
-    ? format(new Date(ticket.created_at), "yyyy/MM/dd HH:mm", { locale: zhTW })
+  const formattedDate = ticket.createdAt
+    ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
     : "-";
 
   const handleCardClick = () => {
@@ -100,22 +100,22 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
 
           {canViewReporter ? (
             <div className="flex flex-wrap items-center gap-2">
-              {ticket.reporter_name && (
+              {ticket.reporterName && (
                 <span className="flex items-center gap-1 font-medium text-foreground">
                   <User className="size-3" />
-                  <span className="max-w-[100px] truncate">{ticket.reporter_name}</span>
+                  <span className="max-w-[100px] truncate">{ticket.reporterName}</span>
                 </span>
               )}
-              {ticket.reporter_email && (
+              {ticket.reporterEmail && (
                 <span className="flex items-center gap-1">
                   <Mail className="size-3" />
-                  <span className="max-w-[120px] truncate">{ticket.reporter_email}</span>
+                  <span className="max-w-[120px] truncate">{ticket.reporterEmail}</span>
                 </span>
               )}
-              {ticket.reporter_phone && (
+              {ticket.reporterPhone && (
                 <span className="flex items-center gap-1">
                   <Phone className="size-3" />
-                  <span>{ticket.reporter_phone}</span>
+                  <span>{ticket.reporterPhone}</span>
                 </span>
               )}
             </div>

@@ -3,9 +3,10 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/server/auth/session";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
+import { queryTickets } from "@/server/tickets/query";
 
 import { RepairRecordsContent } from "./_components/repair-records-content";
-import type { RepairRecordItem, TechnicianOption } from "./_components/repair-records-types";
+import type { TechnicianOption } from "./_components/repair-records-types";
 
 export const metadata: Metadata = {
   title: "維修紀錄 - RepairHub",
@@ -73,97 +74,24 @@ export default async function Page({ searchParams }: PageProps) {
       ? [requestedStatus as TicketStatus]
       : VALID_STATUSES;
 
-  // Build query
-  const selectQuery = `
-    id,
-    status,
-    category_id,
-    space_id,
-    description,
-    reporter_name,
-    reporter_department,
-    reporter_email,
-    reporter_phone,
-    assigned_to,
-    created_at,
-    updated_at,
-    category:categories(id, name),
-    space:spaces(
-      id,
-      name,
-      floor,
-      building:buildings(id, name, code)
-    ),
-    assigned_technician:profiles!tickets_assigned_to_fkey(
-      id,
-      display_name
-    )
-  `;
-
-  let query = supabase.from("tickets").select(selectQuery, { count: "exact" }).in("status", statusFilter);
-
+  let assignedTo: string | undefined;
   if (isTechnician) {
-    // Technician can only see tickets assigned to them
-    query = query.eq("assigned_to", session.userId);
+    assignedTo = session.userId;
   } else if (isAdmin && params.technician && params.technician !== "all") {
-    // Admin filter by technician
-    query = query.eq("assigned_to", params.technician);
+    assignedTo = params.technician;
   }
 
-  const fromIndex = (page - 1) * PAGE_SIZE;
-  const toIndex = fromIndex + PAGE_SIZE - 1;
-
-  const {
-    data: rawTickets,
-    count,
-    error,
-  } = await query.order("created_at", { ascending: false }).range(fromIndex, toIndex);
-
-  if (error) {
-    console.error("Error fetching repair records:", error);
-  }
-
-  type RawRecord = Record<string, unknown>;
-  const records: RepairRecordItem[] = ((rawTickets ?? []) as unknown[]).map((raw) => {
-    const t = (raw ?? {}) as RawRecord;
-
-    const space = (Array.isArray(t.space) ? t.space[0] : t.space) as Record<string, unknown> | null;
-    const building = (Array.isArray(space?.building) ? space?.building[0] : space?.building) as Record<
-      string,
-      string
-    > | null;
-    const category = (Array.isArray(t.category) ? t.category[0] : t.category) as { name?: string } | null;
-    const tech = (Array.isArray(t.assigned_technician) ? t.assigned_technician[0] : t.assigned_technician) as {
-      display_name?: string;
-    } | null;
-
-    return {
-      id: String(t.id ?? ""),
-      status: (t.status ?? "in_progress") as TicketStatus,
-      category: { id: "", name: category?.name ?? "未分類" },
-      space: {
-        id: String(space?.id ?? ""),
-        name: String(space?.name ?? "未知空間"),
-        floor: Number(space?.floor ?? 0),
-        building: {
-          id: String(building?.id ?? ""),
-          name: String(building?.name ?? "未知大樓"),
-          code: String(building?.code ?? ""),
-        },
-      },
-      description: String(t.description ?? ""),
-      reporterName: (t.reporter_name as string | null) ?? null,
-      reporterDepartment: (t.reporter_department as string | null) ?? null,
-      reporterEmail: (t.reporter_email as string | null) ?? null,
-      reporterPhone: (t.reporter_phone as string | null) ?? null,
-      assignedTo: (t.assigned_to as string | null) ?? null,
-      technicianName: tech?.display_name || (t.assigned_to ? `技師 (${String(t.assigned_to).slice(0, 8)})` : null),
-      createdAt: String(t.created_at ?? ""),
-      updatedAt: String(t.updated_at ?? ""),
-    };
+  const { tickets: records, totalCount } = await queryTickets(supabase, {
+    status: statusFilter,
+    assignedTo,
+    page,
+    pageSize: PAGE_SIZE,
+    viewerContext: {
+      role: userRole,
+      userId: session.userId,
+      email: session.email,
+    },
   });
-
-  const totalCount = count ?? 0;
 
   return (
     <div className="space-y-6">
