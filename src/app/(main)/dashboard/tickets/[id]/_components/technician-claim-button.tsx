@@ -49,10 +49,12 @@ export function TechnicianClaimButton({ ticketId, status, isAssignedToMe }: Tech
     if (status === "in_progress") {
       return isAssignedToMe ? "您已接此單據（維修中）" : "此案件已被其他技師接單處理中";
     }
-    if (status === "completed") return "此案件維修已完工";
-    if (status === "closed") return "此案件已結案";
-    if (status === "cancelled") return "此案件已取消";
-    return "此案件目前狀態無法接單";
+    const reasons: Record<string, string> = {
+      completed: "此案件維修已完工",
+      closed: "此案件已結案",
+      cancelled: "此案件已取消",
+    };
+    return reasons[status] ?? "此案件目前狀態無法接單";
   };
 
   const claimButton = (

@@ -127,32 +127,29 @@ export default async function Page({ searchParams }: PageProps) {
   const records: RepairRecordItem[] = ((rawTickets ?? []) as unknown[]).map((raw) => {
     const t = (raw ?? {}) as RawRecord;
 
-    const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
-    const spaceData = (spaceRaw ?? {}) as Record<string, unknown>;
-
-    let buildingData = { id: "", name: "未知大樓", code: "" };
-    if (spaceData.building) {
-      const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
-      if (bRaw && typeof bRaw === "object") {
-        buildingData = bRaw as { id: string; name: string; code: string };
-      }
-    }
-
-    const catRaw = Array.isArray(t.category) ? t.category[0] : t.category;
-    const categoryData = (catRaw ?? { id: "", name: "未分類" }) as { id: string; name: string };
-
-    const techRaw = Array.isArray(t.assigned_technician) ? t.assigned_technician[0] : t.assigned_technician;
-    const techData = techRaw as { id: string; display_name: string | null } | null;
+    const space = (Array.isArray(t.space) ? t.space[0] : t.space) as Record<string, unknown> | null;
+    const building = (Array.isArray(space?.building) ? space?.building[0] : space?.building) as Record<
+      string,
+      string
+    > | null;
+    const category = (Array.isArray(t.category) ? t.category[0] : t.category) as { name?: string } | null;
+    const tech = (Array.isArray(t.assigned_technician) ? t.assigned_technician[0] : t.assigned_technician) as {
+      display_name?: string;
+    } | null;
 
     return {
       id: String(t.id ?? ""),
       status: (t.status ?? "in_progress") as TicketStatus,
-      category: categoryData,
+      category: { id: "", name: category?.name ?? "未分類" },
       space: {
-        id: String(spaceData.id ?? ""),
-        name: String(spaceData.name ?? "未知空間"),
-        floor: Number(spaceData.floor ?? 0),
-        building: buildingData,
+        id: String(space?.id ?? ""),
+        name: String(space?.name ?? "未知空間"),
+        floor: Number(space?.floor ?? 0),
+        building: {
+          id: String(building?.id ?? ""),
+          name: String(building?.name ?? "未知大樓"),
+          code: String(building?.code ?? ""),
+        },
       },
       description: String(t.description ?? ""),
       reporterName: (t.reporter_name as string | null) ?? null,
@@ -160,7 +157,7 @@ export default async function Page({ searchParams }: PageProps) {
       reporterEmail: (t.reporter_email as string | null) ?? null,
       reporterPhone: (t.reporter_phone as string | null) ?? null,
       assignedTo: (t.assigned_to as string | null) ?? null,
-      technicianName: techData?.display_name || (t.assigned_to ? `技師 (${String(t.assigned_to).slice(0, 8)})` : null),
+      technicianName: tech?.display_name || (t.assigned_to ? `技師 (${String(t.assigned_to).slice(0, 8)})` : null),
       createdAt: String(t.created_at ?? ""),
       updatedAt: String(t.updated_at ?? ""),
     };
