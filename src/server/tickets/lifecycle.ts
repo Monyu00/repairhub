@@ -79,6 +79,44 @@ export type TransitionResult =
       code: TransitionErrorCode;
     };
 
+export type CreateTicketFieldKey =
+  | "category_id"
+  | "space_id"
+  | "description"
+  | "reporter_name"
+  | "reporter_email"
+  | "reporter_phone";
+export type CreateTicketInput = {
+  categoryId: string;
+  spaceId: string;
+  description: string;
+  reporterName: string;
+  reporterEmail: string;
+  equipmentId?: string | null;
+  equipmentName?: string | null;
+  reporterDepartment?: string | null;
+  reporterPhone?: string | null;
+  photosBase64?: string[];
+  authenticatedUser?: { id: string; displayName?: string | null } | null;
+  skipRevalidation?: boolean;
+};
+
+export type CreateTicketErrorCode = "VALIDATION_FAILED" | "PHOTO_UPLOAD_FAILED" | "DATABASE_ERROR";
+
+export type CreateTicketResult =
+  | {
+      success: true;
+      data: {
+        ticketId: string;
+      };
+    }
+  | {
+      success: false;
+      error: string;
+      code: CreateTicketErrorCode;
+      fieldErrors?: Partial<Record<CreateTicketFieldKey, string>>;
+    };
+
 /**
  * Automatically revalidates affected Next.js dashboard and tracking route caches.
  */
@@ -92,6 +130,141 @@ function revalidateTicketPaths(ticketId: string) {
     // revalidatePath may throw if executed outside of Next.js request context (e.g. background worker)
     console.warn("revalidatePath skipped:", err);
   }
+}
+
+/**
+ * Deep module: Ticket Intake
+ * Validates reporter and ticket fields, inserts ticket in initial 'pending' status,
+ * coordinates photo attachments, synchronizes reporter profile info, and invalidates route caches.
+ */
+export async function createTicket(
+  supabase: SupabaseClient<Database>,
+  input: CreateTicketInput,
+): Promise<CreateTicketResult> {
+  const categoryId = input.categoryId.trim();
+  const spaceId = input.spaceId.trim();
+  const description = input.description.trim();
+  const reporterName = input.reporterName.trim();
+  const reporterEmail = input.reporterEmail.trim();
+  const reporterDepartment = input.reporterDepartment?.trim() || null;
+  const reporterPhone = input.reporterPhone?.trim() || null;
+  const equipmentId = input.equipmentId?.trim() || null;
+  const equipmentName = input.equipmentName?.trim() || null;
+
+  // 1. Field validation
+  const fieldErrors: Partial<Record<CreateTicketFieldKey, string>> = {};
+
+  if (!categoryId) {
+    fieldErrors.category_id = "請選擇報修類別";
+  }
+  if (!spaceId) {
+    fieldErrors.space_id = "請選擇故障地點（空間）";
+  }
+  if (!description) {
+    fieldErrors.description = "請輸入故障狀況描述";
+  }
+  if (!reporterName) {
+    fieldErrors.reporter_name = "請輸入通報人姓名";
+  }
+  if (!reporterEmail) {
+    fieldErrors.reporter_email = "請輸入電子郵件";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(reporterEmail)) {
+    fieldErrors.reporter_email = "請輸入有效的電子郵件格式";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      success: false,
+      error: "表單資料驗證失敗，請檢查填寫內容",
+      code: "VALIDATION_FAILED",
+      fieldErrors,
+    };
+  }
+
+  // 2. Insert ticket (pending status enforced by aggregate / RLS)
+  const { data: ticket, error: ticketError } = await supabase
+    .from("tickets")
+    .insert({
+      category_id: categoryId,
+      space_id: spaceId,
+      equipment_id: equipmentId,
+      equipment_name: equipmentName,
+      description,
+      reporter_name: reporterName,
+      reporter_department: reporterDepartment,
+      reporter_email: reporterEmail,
+      reporter_phone: reporterPhone,
+      status: "pending",
+    })
+    .select("id")
+    .single();
+
+  if (ticketError || !ticket) {
+    console.error("Failed to create ticket in lifecycle:", ticketError);
+    return {
+      success: false,
+      error: "目前無法處理您的請求，請稍後再試",
+      code: "DATABASE_ERROR",
+    };
+  }
+
+  // 3. Coordinate photo attachments if provided
+  const photos = input.photosBase64?.filter(Boolean) ?? [];
+  if (photos.length > 0) {
+    if (photos.length > DEFAULT_MAX_PHOTOS) {
+      await supabase.from("tickets").delete().eq("id", ticket.id);
+      return {
+        success: false,
+        error: `報修照片最多不可超過 ${DEFAULT_MAX_PHOTOS} 張`,
+        code: "VALIDATION_FAILED",
+      };
+    }
+
+    const photoResult = await storeTicketPhotos(supabase, {
+      ticketId: ticket.id,
+      phase: "report",
+      photosBase64: photos,
+    });
+
+    if (!photoResult.success) {
+      console.error("Failed to store report photos, rolling back ticket:", photoResult.error);
+      await supabase.from("tickets").delete().eq("id", ticket.id);
+      return {
+        success: false,
+        error: photoResult.error ?? "照片上傳失敗，請稍後再試",
+        code: "PHOTO_UPLOAD_FAILED",
+      };
+    }
+  }
+
+  // 4. Synchronize profile info if user is authenticated
+  if (input.authenticatedUser?.id) {
+    try {
+      const updatePayload = {
+        ...(reporterDepartment !== null && { department: reporterDepartment }),
+        ...(reporterPhone !== null && { phone: reporterPhone }),
+        ...(reporterName && !input.authenticatedUser.displayName && { display_name: reporterName }),
+      };
+
+      if (Object.keys(updatePayload).length > 0) {
+        await supabase.from("profiles").update(updatePayload).eq("id", input.authenticatedUser.id);
+      }
+    } catch (syncError) {
+      console.error("Failed to sync profile info during ticket intake:", syncError);
+    }
+  }
+
+  // 5. Revalidate cache
+  if (!input.skipRevalidation) {
+    revalidateTicketPaths(ticket.id);
+  }
+
+  return {
+    success: true,
+    data: {
+      ticketId: ticket.id,
+    },
+  };
 }
 
 /**

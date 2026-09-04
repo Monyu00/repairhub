@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdmin, safeAction, type UserRole } from "@/server/auth";
+import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus, type UserRole } from "@/server/auth";
 
 export interface UserItem {
   id: string;
@@ -191,7 +191,7 @@ export async function updateUserProfile(
     const department = data.department?.trim() || null;
     const phone = data.phone?.trim() || null;
 
-    // 1. Check if demoting an admin and ensure at least one admin remains
+    // 1. Check if demoting an admin and ensure at least one active admin remains
     const { data: targetProfile } = await supabase
       .from("profiles")
       .select("user_role")
@@ -202,19 +202,13 @@ export async function updateUserProfile(
     const willBeAdmin = data.role === "admin";
 
     if (isCurrentlyAdmin && !willBeAdmin) {
-      const { count, error: countError } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("user_role", "admin")
-        .eq("is_active", true);
+      const retentionCheck = await checkActiveAdminRetention({
+        excludeUserIds: [targetUserId],
+        client: supabase,
+      });
 
-      if (countError) {
-        console.error("Failed to count admins:", countError);
-        return { success: false, error: "檢查管理者數量失敗" };
-      }
-
-      if ((count ?? 0) <= 1) {
-        return { success: false, error: "變更失敗：系統必須保留至少一位啟用的系統管理者 (Admin)" };
+      if (!retentionCheck.allowed) {
+        return { success: false, error: `變更失敗：${retentionCheck.error}` };
       }
     }
 
@@ -244,59 +238,14 @@ export async function toggleUserActive(
 ): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
     const admin = await requireAdmin();
-    const adminClient = createAdminClient();
+    const result = await setUserActiveStatus({
+      actor: admin,
+      userIds: [targetUserId],
+      isActive,
+    });
 
-    // 1. Prevent deactivating self
-    if (targetUserId === admin.userId && !isActive) {
-      return { success: false, error: "無法停用您自己的管理員帳號" };
-    }
-
-    const supabase = admin.supabase;
-    const { data: targetProfile } = await supabase
-      .from("profiles")
-      .select("user_role, is_active")
-      .eq("id", targetUserId)
-      .maybeSingle();
-
-    // 2. Prevent deactivating the last active admin
-    if (targetProfile?.user_role === "admin" && !isActive) {
-      const { count, error: countError } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("user_role", "admin")
-        .eq("is_active", true);
-
-      if (countError) {
-        console.error("Failed to count active admins:", countError);
-        return { success: false, error: "檢查管理員數量失敗" };
-      }
-
-      if ((count ?? 0) <= 1) {
-        return { success: false, error: "操作失敗：系統必須保留至少一位啟用的系統管理者 (Admin)" };
-      }
-    }
-
-    // 3. Update DB profile is_active using adminClient
-    const { error: updateError } = await adminClient
-      .from("profiles")
-      .update({
-        is_active: isActive,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", targetUserId);
-
-    if (updateError) {
-      console.error("Failed to toggle is_active:", updateError);
-      return { success: false, error: "更新使用者啟用狀態失敗" };
-    }
-
-    // 4. Ban / Unban in Supabase Auth as secondary defense
-    try {
-      await adminClient.auth.admin.updateUserById(targetUserId, {
-        ban_duration: isActive ? "none" : "876000h",
-      });
-    } catch (authBanError) {
-      console.warn("Supabase auth ban update warning:", authBanError);
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
 
     revalidatePath("/dashboard/settings");
@@ -310,77 +259,18 @@ export async function batchToggleUserActive(
 ): Promise<{ success: boolean; error?: string; modifiedCount?: number }> {
   return safeAction(async () => {
     const admin = await requireAdmin();
-    const adminClient = createAdminClient();
+    const result = await setUserActiveStatus({
+      actor: admin,
+      userIds: targetUserIds,
+      isActive,
+    });
 
-    // 1. Filter out self if deactivating
-    const filteredUserIds = isActive ? targetUserIds : targetUserIds.filter((id) => id !== admin.userId);
-
-    if (filteredUserIds.length === 0) {
-      return { success: false, error: "無法停用您自己的管理員帳號" };
-    }
-
-    const supabase = admin.supabase;
-
-    // 2. If deactivating, ensure at least one active admin remains
-    if (!isActive) {
-      const { data: targetAdmins } = await supabase
-        .from("profiles")
-        .select("id")
-        .in("id", filteredUserIds)
-        .eq("user_role", "admin")
-        .eq("is_active", true);
-
-      const targetAdminIds = new Set((targetAdmins ?? []).map((a) => a.id));
-
-      if (targetAdminIds.size > 0) {
-        const { count, error: countError } = await supabase
-          .from("profiles")
-          .select("id", { count: "exact", head: true })
-          .eq("user_role", "admin")
-          .eq("is_active", true);
-
-        if (countError) {
-          console.error("Failed to count active admins:", countError);
-          return { success: false, error: "檢查管理員數量失敗" };
-        }
-
-        const remainingActiveAdmins = (count ?? 0) - targetAdminIds.size;
-        if (remainingActiveAdmins <= 0) {
-          return { success: false, error: "操作失敗：系統必須保留至少一位啟用的系統管理者 (Admin)" };
-        }
-      }
-    }
-
-    // 3. Batch update profiles using adminClient
-    const { error: updateError } = await adminClient
-      .from("profiles")
-      .update({
-        is_active: isActive,
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", filteredUserIds);
-
-    if (updateError) {
-      console.error("Failed to batch toggle is_active:", updateError);
-      return { success: false, error: "批次更新使用者狀態失敗" };
-    }
-
-    // 4. Batch update Supabase Auth bans
-    try {
-      const adminClient = createAdminClient();
-      await Promise.all(
-        filteredUserIds.map((id) =>
-          adminClient.auth.admin.updateUserById(id, {
-            ban_duration: isActive ? "none" : "876000h",
-          }),
-        ),
-      );
-    } catch (authBanError) {
-      console.warn("Supabase auth ban batch update warning:", authBanError);
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
 
     revalidatePath("/dashboard/settings");
-    return { success: true, modifiedCount: filteredUserIds.length };
+    return { success: true, modifiedCount: result.data.modifiedCount };
   });
 }
 

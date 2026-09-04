@@ -8,10 +8,10 @@ import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { TicketStatusBadge } from "./ticket-status-badge";
-import type { TicketRow } from "./ticket-types";
+import type { TicketRecord } from "./ticket-types";
 
-export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>[] {
-  const columns: ColumnDef<TicketRow>[] = [
+export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRecord>[] {
+  const columns: ColumnDef<TicketRecord>[] = [
     {
       accessorKey: "id",
       header: "Ticket ID",
@@ -67,10 +67,10 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
       accessorKey: "reporter",
       header: "通報人聯絡資訊",
       cell: ({ row }) => {
-        const name = row.original.reporter_name;
-        const dept = row.original.reporter_department;
-        const email = row.original.reporter_email;
-        const phone = row.original.reporter_phone;
+        const name = row.original.reporterName;
+        const dept = row.original.reporterDepartment;
+        const email = row.original.reporterEmail;
+        const phone = row.original.reporterPhone;
         return (
           <div className="flex flex-col gap-0.5 text-xs">
             {(name || dept) && (
@@ -100,7 +100,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
   }
 
   columns.push({
-    accessorKey: "created_at",
+    accessorKey: "createdAt",
     header: ({ column }) => {
       return (
         <Button
@@ -115,7 +115,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRow>
       );
     },
     cell: ({ row }) => {
-      const dateStr = row.getValue("created_at") as string;
+      const dateStr = row.getValue("createdAt") as string;
       const formattedDate = dateStr ? format(new Date(dateStr), "yyyy/MM/dd HH:mm", { locale: zhTW }) : "-";
       return <span className="whitespace-nowrap text-muted-foreground text-xs">{formattedDate}</span>;
     },

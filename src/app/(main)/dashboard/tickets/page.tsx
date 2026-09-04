@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/server/auth/session";
+import { queryTickets } from "@/server/tickets/query";
 
-import type { FilterOptions, TicketRow, TicketStatus } from "./_components/ticket-types";
+import type { FilterOptions, TicketStatus } from "./_components/ticket-types";
 import { TicketsDataTable } from "./_components/tickets-data-table";
 
 export const metadata: Metadata = {
@@ -31,131 +32,47 @@ export default async function Page({ searchParams }: PageProps) {
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
   const statusArray = params.status ? (params.status.split(",").filter(Boolean) as TicketStatus[]) : [];
-  const categoryId = params.category && params.category !== "all" ? params.category : null;
-  const buildingId = params.building && params.building !== "all" ? params.building : null;
-  const fromDate = params.from ?? null;
-  const toDate = params.to ?? null;
+  const categoryId = params.category && params.category !== "all" ? params.category : undefined;
+  const buildingId = params.building && params.building !== "all" ? params.building : undefined;
+  const fromDate = params.from ?? undefined;
+  const toDate = params.to ?? undefined;
 
   // 1. Get cached session (deduplicated from layout)
   const session = await getSession();
   const supabase = session?.supabase ?? (await createClient());
 
-  // 2. Fetch categories, buildings, and tickets in parallel
+  // 2. Fetch categories, buildings, and tickets concurrently
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
   const buildingsPromise = supabase.from("buildings").select("id, name, code").order("code");
 
-  // 3. Build tickets query
-  const spaceJoin = buildingId ? "spaces!inner" : "spaces";
-  const selectString = `
-    id,
-    status,
-    category_id,
-    space_id,
-    description,
-    reporter_name,
-    reporter_department,
-    reporter_email,
-    reporter_phone,
-    created_at,
-    updated_at,
-    category:categories(id, name),
-    space:${spaceJoin}(
-      id,
-      name,
-      floor,
-      building_id,
-      building:buildings(id, name, code)
-    )
-  `;
+  const userRole = session?.role ?? null;
+  const canViewReporter = userRole === "admin" || userRole === "technician";
 
-  let query = supabase.from("tickets").select(selectString, { count: "exact" });
+  const ticketsPromise = queryTickets(supabase, {
+    status: statusArray.length > 0 ? statusArray : undefined,
+    categoryId,
+    buildingId,
+    fromDate,
+    toDate,
+    page,
+    pageSize: PAGE_SIZE,
+    viewerContext: {
+      role: userRole,
+      userId: session?.userId,
+      email: session?.email,
+    },
+  });
 
-  if (statusArray.length > 0) {
-    query = query.in("status", statusArray);
-  }
-
-  if (categoryId) {
-    query = query.eq("category_id", categoryId);
-  }
-
-  if (buildingId) {
-    query = query.eq("space.building_id", buildingId);
-  }
-
-  if (fromDate) {
-    query = query.gte("created_at", `${fromDate}T00:00:00.000Z`);
-  }
-
-  if (toDate) {
-    query = query.lte("created_at", `${toDate}T23:59:59.999Z`);
-  }
-
-  const fromIndex = (page - 1) * PAGE_SIZE;
-  const toIndex = fromIndex + PAGE_SIZE - 1;
-  const ticketsPromise = query.order("created_at", { ascending: false }).range(fromIndex, toIndex);
-
-  // 4. Await all data queries concurrently
-  const [categoriesRes, buildingsRes, ticketsRes] = await Promise.all([
+  const [categoriesRes, buildingsRes, { tickets, totalCount }] = await Promise.all([
     categoriesPromise,
     buildingsPromise,
     ticketsPromise,
   ]);
 
-  const userRole = session?.role ?? null;
-  const canViewReporter = userRole === "admin" || userRole === "technician";
-
   const filterOptions: FilterOptions = {
     categories: categoriesRes.data ?? [],
     buildings: buildingsRes.data ?? [],
   };
-
-  const rawTickets = ticketsRes.data;
-  const count = ticketsRes.count;
-  const error = ticketsRes.error;
-
-  if (error) {
-    console.error("Error fetching tickets:", error);
-  }
-
-  // 4. Sanitize sensitive fields if user is not admin/technician
-  type RawTicket = Record<string, unknown>;
-  const tickets: TicketRow[] = ((rawTickets ?? []) as unknown[]).map((raw) => {
-    const t = (raw ?? {}) as RawTicket;
-    const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
-    const spaceData = (spaceRaw ?? {}) as Record<string, unknown>;
-
-    let buildingData = { id: "", name: "未知大樓", code: "" };
-    if (spaceData.building) {
-      const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
-      if (bRaw && typeof bRaw === "object") {
-        buildingData = bRaw as { id: string; name: string; code: string };
-      }
-    }
-
-    const catRaw = Array.isArray(t.category) ? t.category[0] : t.category;
-    const categoryData = (catRaw ?? { id: "", name: "未分類" }) as { id: string; name: string };
-
-    return {
-      id: String(t.id ?? ""),
-      status: (t.status ?? "pending") as TicketStatus,
-      category: categoryData,
-      space: {
-        id: String(spaceData.id ?? ""),
-        name: String(spaceData.name ?? "未知空間"),
-        floor: Number(spaceData.floor ?? 0),
-        building: buildingData,
-      },
-      description: String(t.description ?? ""),
-      reporter_name: canViewReporter ? (t.reporter_name as string | null) : null,
-      reporter_department: canViewReporter ? (t.reporter_department as string | null) : null,
-      reporter_email: canViewReporter ? (t.reporter_email as string | null) : null,
-      reporter_phone: canViewReporter ? (t.reporter_phone as string | null) : null,
-      created_at: String(t.created_at ?? ""),
-      updated_at: String(t.updated_at ?? ""),
-    };
-  });
-
-  const totalCount = count ?? 0;
 
   return (
     <div className="space-y-6">
