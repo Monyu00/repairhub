@@ -98,6 +98,10 @@ export async function claimTicket(ticketId: string): Promise<{ success: boolean;
   return safeAction(async () => {
     const user = await requireAuth();
 
+    if (user.role !== "technician") {
+      return { success: false, error: "僅技師身分可進行接單" };
+    }
+
     const result = await transitionTicket(user.supabase, {
       ticketId,
       transition: "claim",

@@ -147,9 +147,12 @@ export async function transitionTicket(
       });
 
       if (rpcError || !success) {
+        if (rpcError) {
+          console.error("claim_ticket RPC error:", rpcError);
+        }
         return {
           success: false,
-          error: "接單失敗或該案件已被其他技師接單",
+          error: rpcError?.message || "接單失敗或該案件已被其他技師接單",
           code: "CONCURRENCY_CONFLICT",
         };
       }
