@@ -102,6 +102,12 @@ Triage labels use default mapping: needs-triage, needs-info, ready-for-agent, re
 
 The repository uses a single-context domain documentation layout. See `docs/agents/domain.md`.
 
+### Code exploration & reading (Codegraph MCP)
+
+Prioritize using the **codegraph** MCP tool (`codegraph_explore` via `call_mcp_tool`, passing `projectPath: "d:\\RepairHub"`) for code exploration, symbol navigation, call-path analysis, and reading implementations.
+- Always reach for `codegraph_explore` first before falling back to `grep_search` or manual `view_file` loops.
+- It returns line-numbered symbol sources, cross-references, and blast-radius in a single call.
+
 ## Browser Automation
 
 Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
