@@ -32,6 +32,13 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
     router.push(`/dashboard/tickets/${ticket.id}`);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
+      e.preventDefault();
+      handleCardClick();
+    }
+  };
+
   const handleClaimClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsClaiming(true);
@@ -44,8 +51,11 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
 
   return (
     <Card
+      role="button"
+      tabIndex={0}
       onClick={handleCardClick}
-      className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40"
+      onKeyDown={handleKeyDown}
+      className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
     >
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">

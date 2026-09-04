@@ -1,13 +1,11 @@
 "use client";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, MapPin, User, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { RepairRecordItem } from "./repair-records-types";
+import { formatRepairRecordDate, type RepairRecordItem } from "./repair-records-types";
 
 interface RepairRecordMobileCardProps {
   record: RepairRecordItem;
@@ -15,9 +13,7 @@ interface RepairRecordMobileCardProps {
 }
 
 export function RepairRecordMobileCard({ record, isAdmin }: RepairRecordMobileCardProps) {
-  const formattedDate = record.createdAt
-    ? format(new Date(record.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedDate = formatRepairRecordDate(record.createdAt);
 
   return (
     <Card className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40">

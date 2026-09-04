@@ -4,8 +4,6 @@ import { useTransition } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { ClipboardX, FilterX, User, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
@@ -22,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { RepairRecordMobileCard } from "./repair-record-mobile-card";
-import type { RepairRecordItem, TechnicianOption } from "./repair-records-types";
+import { formatRepairRecordDate, type RepairRecordItem, type TechnicianOption } from "./repair-records-types";
 
 interface RepairRecordsContentProps {
   records: RepairRecordItem[];
@@ -187,15 +185,20 @@ export function RepairRecordsContent({
               </TableHeader>
               <TableBody>
                 {records.map((record) => {
-                  const formattedDate = record.createdAt
-                    ? format(new Date(record.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-                    : "-";
+                  const formattedDate = formatRepairRecordDate(record.createdAt);
 
                   return (
                     <TableRow
                       key={record.id}
                       onClick={() => handleRowClick(record.id)}
-                      className="cursor-pointer transition-colors hover:bg-muted/60"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleRowClick(record.id);
+                        }
+                      }}
+                      tabIndex={0}
+                      className="cursor-pointer transition-colors hover:bg-muted/60 focus-visible:outline-hidden focus-visible:bg-muted/70"
                     >
                       <TableCell className="py-3 font-mono font-medium text-xs">#{record.id.slice(0, 8)}</TableCell>
                       <TableCell className="py-3">

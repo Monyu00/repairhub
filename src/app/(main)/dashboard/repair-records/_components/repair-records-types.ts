@@ -1,3 +1,6 @@
+import { format } from "date-fns";
+import { zhTW } from "date-fns/locale/zh-TW";
+
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 export interface RepairRecordItem {
@@ -31,4 +34,9 @@ export interface RepairRecordItem {
 export interface TechnicianOption {
   id: string;
   displayName: string;
+}
+
+export function formatRepairRecordDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-";
+  return format(new Date(dateStr), "yyyy/MM/dd HH:mm", { locale: zhTW });
 }
