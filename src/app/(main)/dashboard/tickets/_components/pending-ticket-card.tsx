@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, Hand, Loader2, Mail, MapPin, Phone, User } from "lucide-react";
@@ -19,13 +21,19 @@ interface PendingTicketCardProps {
 }
 
 export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingTicketCardProps) {
+  const router = useRouter();
   const [isClaiming, setIsClaiming] = useState(false);
 
   const formattedDate = ticket.created_at
     ? format(new Date(ticket.created_at), "yyyy/MM/dd HH:mm", { locale: zhTW })
     : "-";
 
-  const handleClaimClick = async () => {
+  const handleCardClick = () => {
+    router.push(`/dashboard/tickets/${ticket.id}`);
+  };
+
+  const handleClaimClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsClaiming(true);
     try {
       await onClaim(ticket.id);
@@ -35,11 +43,16 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
   };
 
   return (
-    <Card className="shadow-2xs transition-colors hover:border-primary/40">
+    <Card
+      onClick={handleCardClick}
+      className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40"
+    >
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
-            <span className="font-mono font-semibold text-primary text-xs">#{ticket.id.slice(0, 8)}</span>
+            <span className="font-mono font-semibold text-muted-foreground text-xs transition-colors group-hover:text-primary">
+              #{ticket.id.slice(0, 8)}
+            </span>
             <span className="block font-medium text-foreground text-xs">{ticket.category.name}</span>
           </div>
 
@@ -53,7 +66,7 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
               disabled={isClaiming}
             >
               {isClaiming ? <Loader2 className="size-3 animate-spin" /> : <Hand className="size-3" />}
-              {isClaiming ? "接單中..." : "我要接單"}
+              {isClaiming ? "接單中..." : "立即接單"}
             </Button>
           </div>
         </div>

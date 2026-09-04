@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  ClipboardCheck,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -77,6 +78,13 @@ export const sidebarItems: NavGroup[] = [
         title: "報修單管理",
         url: "/dashboard/tickets",
         icon: ClipboardList,
+        roles: ["admin", "technician"],
+      },
+      {
+        id: "repair-records",
+        title: "維修紀錄",
+        url: "/dashboard/repair-records",
+        icon: ClipboardCheck,
         roles: ["admin", "technician"],
       },
     ],

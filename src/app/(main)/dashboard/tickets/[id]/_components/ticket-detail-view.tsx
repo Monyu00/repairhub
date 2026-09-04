@@ -11,6 +11,7 @@ import type { TicketStatus } from "../../_components/ticket-types";
 import { AdminActions } from "./admin-actions";
 import { ClosureSection } from "./closure-section";
 import { StatusTimeline, type TimelineNote } from "./status-timeline";
+import { TechnicianClaimButton } from "./technician-claim-button";
 import { type TicketInfoData, TicketInfoSection } from "./ticket-info-section";
 import { type ProgressNote, TicketNotesSection } from "./ticket-notes-section";
 import { type PhotoItem, TicketPhotosSection } from "./ticket-photos-section";
@@ -69,8 +70,17 @@ export function TicketDetailView({
             </p>
           </div>
 
-          {/* Admin Actions */}
-          {isAdmin && <AdminActions ticketId={ticket.id} status={ticket.status} />}
+          {/* Header Actions */}
+          <div className="flex items-center gap-2">
+            {isAdmin && <AdminActions ticketId={ticket.id} status={ticket.status} />}
+            {userRole === "technician" && (
+              <TechnicianClaimButton
+                ticketId={ticket.id}
+                status={ticket.status}
+                isAssignedToMe={userId !== null && assignedTo === userId}
+              />
+            )}
+          </div>
         </div>
       </div>
 
