@@ -62,8 +62,8 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
             </Button>
           </form>
 
-          <Button variant="outline" asChild className="w-full">
-            <a href="/report">返回報修表單</a>
+          <Button variant="outline" type="button" onClick={() => router.back()} className="w-full">
+            返回上一頁
           </Button>
         </div>
 
