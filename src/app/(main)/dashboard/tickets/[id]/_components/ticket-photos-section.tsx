@@ -21,7 +21,9 @@ interface TicketPhotosSectionProps {
 }
 
 function getPublicUrl(supabaseUrl: string, storagePath: string) {
-  return `${supabaseUrl}/storage/v1/object/public/ticket-photos/${storagePath}`;
+  const base = supabaseUrl.replace(/\/+$/, "");
+  const path = storagePath.replace(/^\/+/, "");
+  return `${base}/storage/v1/object/public/ticket-photos/${path}`;
 }
 
 export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: TicketPhotosSectionProps) {
