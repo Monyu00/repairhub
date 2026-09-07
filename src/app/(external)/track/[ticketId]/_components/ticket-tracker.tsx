@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { ArrowLeftIcon, WrenchIcon } from "lucide-react";
 
@@ -56,6 +56,7 @@ export function TicketTracker({
   notes,
   supabaseUrl,
 }: TicketTrackerProps) {
+  const router = useRouter();
   const isClosedOrCompleted = status === "completed" || status === "closed";
   const technicianNotes = notes.filter((n) => n.type === "note");
 
@@ -127,11 +128,9 @@ export function TicketTracker({
 
         {/* Back button */}
         <div className="flex justify-center pt-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/report">
-              <ArrowLeftIcon className="mr-1.5 size-4" />
-              返回報修表單
-            </Link>
+          <Button variant="ghost" size="sm" type="button" onClick={() => router.back()}>
+            <ArrowLeftIcon className="mr-1.5 size-4" />
+            返回上一頁
           </Button>
         </div>
 
