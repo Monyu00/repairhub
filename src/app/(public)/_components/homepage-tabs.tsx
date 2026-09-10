@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { ClipboardList, UserCheck } from "lucide-react";
 
@@ -15,7 +15,6 @@ interface HomepageTabsProps {
 export function HomepageTabs({ activeTab, isLoggedIn, myTicketsCount }: HomepageTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const _searchParams = useSearchParams();
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams();

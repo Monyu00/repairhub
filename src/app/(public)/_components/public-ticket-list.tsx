@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Calendar, ChevronRight, Inbox, MapPin, Plus, User } from "lucide-react";
 
@@ -23,6 +24,8 @@ interface PublicTicketListProps {
 }
 
 export function PublicTicketList({ tickets, currentPage, totalPages, totalCount, pageSize }: PublicTicketListProps) {
+  const router = useRouter();
+
   if (tickets.length === 0) {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-border border-dashed bg-card/40 p-8 text-center">
@@ -65,49 +68,37 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
               const formattedDate = formatTicketDate(ticket.createdAt);
 
               return (
-                <TableRow key={ticket.id} className="group cursor-pointer transition-colors hover:bg-muted/40">
+                <TableRow
+                  key={ticket.id}
+                  onClick={() => router.push(`/track/${ticket.id}`)}
+                  className="group cursor-pointer transition-colors hover:bg-muted/40"
+                >
                   <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
-                    <Link href={`/track/${ticket.id}`} className="block">
-                      #{ticket.id.slice(0, 8)}
-                    </Link>
+                    #{ticket.id.slice(0, 8)}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/track/${ticket.id}`} className="block">
-                      <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
-                        {ticket.category.name}
-                      </Badge>
-                    </Link>
+                    <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
+                      {ticket.category.name}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="font-medium text-foreground text-xs">
-                    <Link href={`/track/${ticket.id}`} className="block truncate">
-                      {ticket.space.building.name} - {ticket.space.name}
-                    </Link>
+                  <TableCell className="truncate font-medium text-foreground text-xs">
+                    {ticket.space.building.name} - {ticket.space.name}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    <Link href={`/track/${ticket.id}`} className="line-clamp-1 block max-w-[320px]">
-                      {ticket.description}
-                    </Link>
+                  <TableCell className="line-clamp-1 max-w-[320px] text-muted-foreground text-xs">
+                    {ticket.description}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/track/${ticket.id}`} className="block">
-                      <TicketStatusBadge status={ticket.status} />
-                    </Link>
+                    <TicketStatusBadge status={ticket.status} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    <Link href={`/track/${ticket.id}`} className="flex items-center gap-1.5 truncate">
+                    <div className="flex items-center gap-1.5 truncate">
                       <User className="size-3 shrink-0 text-muted-foreground/60" />
                       <span>{ticket.technicianName || "待指派"}</span>
-                    </Link>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right text-muted-foreground text-xs">
-                    <Link href={`/track/${ticket.id}`} className="block">
-                      {formattedDate}
-                    </Link>
-                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground text-xs">{formattedDate}</TableCell>
                   <TableCell className="p-2 text-right">
-                    <Link href={`/track/${ticket.id}`} className="inline-flex">
-                      <ChevronRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </Link>
+                    <ChevronRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                   </TableCell>
                 </TableRow>
               );
