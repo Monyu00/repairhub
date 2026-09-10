@@ -23,6 +23,7 @@ interface HomePageProps {
   searchParams: Promise<{
     tab?: string;
     page?: string;
+    pageSize?: string;
     status?: string;
     building?: string;
     category?: string;
@@ -30,12 +31,16 @@ interface HomePageProps {
   }>;
 }
 
-const PAGE_SIZE = 15;
+const DEFAULT_PAGE_SIZE = 15;
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const activeTab = params.tab === "my-tickets" ? "my-tickets" : "all";
   const currentPage = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const pageSize = Math.max(
+    1,
+    Math.min(100, Number.parseInt(params.pageSize ?? String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE),
+  );
 
   const activeStatuses: TicketStatus[] = ["pending", "in_progress", "completed"];
   const status = params.status && params.status !== "all" ? (params.status as TicketStatus) : activeStatuses;
@@ -77,7 +82,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       ticketsResult = await queryTickets(supabase, {
         reporterEmail: session.email,
         page: currentPage,
-        pageSize: PAGE_SIZE,
+        pageSize,
         sort: { field: "created_at", ascending: false },
         viewerContext: {
           role: session.role,
@@ -94,7 +99,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       categoryId,
       search: searchTerm,
       page: currentPage,
-      pageSize: PAGE_SIZE,
+      pageSize,
       sort: { field: "created_at", ascending: false },
       viewerContext: {
         role: session?.role ?? null,
@@ -104,7 +109,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     });
   }
 
-  const totalPages = Math.ceil(ticketsResult.totalCount / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(ticketsResult.totalCount / pageSize));
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -151,7 +156,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               currentPage={currentPage}
               totalPages={totalPages}
               totalCount={ticketsResult.totalCount}
-              pageSize={PAGE_SIZE}
+              pageSize={pageSize}
             />
           </div>
         )}
@@ -164,7 +169,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             currentPage={currentPage}
             totalPages={totalPages}
             totalCount={ticketsResult.totalCount}
-            pageSize={PAGE_SIZE}
+            pageSize={pageSize}
           />
         )}
       </div>
