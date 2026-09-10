@@ -2,7 +2,6 @@ import {
   BarChart3,
   ClipboardCheck,
   ClipboardList,
-  FileText,
   LayoutDashboard,
   type LucideIcon,
   Package,
@@ -53,18 +52,6 @@ export const sidebarItems: NavGroup[] = [
         title: "總覽儀表板",
         url: "/dashboard",
         icon: LayoutDashboard,
-      },
-    ],
-  },
-  {
-    id: 1,
-    label: "個人",
-    items: [
-      {
-        id: "my-tickets",
-        title: "我的報修紀錄",
-        url: "/dashboard/my-tickets",
-        icon: FileText,
       },
     ],
   },

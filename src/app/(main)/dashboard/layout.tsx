@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +24,10 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     getPreference("sidebar_collapsible"),
     getSession(),
   ]);
+
+  if (!session || (session.role !== "admin" && session.role !== "technician")) {
+    redirect("/");
+  }
 
   const currentUserData = session
     ? {
