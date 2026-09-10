@@ -5,8 +5,6 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, CheckCircle2, ExternalLink, Inbox, Loader2, Lock, MapPin, Plus, RotateCcw } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
@@ -22,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 import { confirmFix, reopenTicket } from "../track/[ticketId]/_actions/track-actions";
@@ -114,9 +113,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
       {/* Cards list */}
       <div className="grid gap-3">
         {tickets.map((ticket) => {
-          const formattedDate = ticket.createdAt
-            ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-            : "-";
+          const formattedDate = formatTicketDate(ticket.createdAt);
           const isCompleted = ticket.status === "completed";
 
           return (

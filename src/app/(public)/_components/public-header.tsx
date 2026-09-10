@@ -7,7 +7,6 @@ import Link from "next/link";
 import { FileText, LayoutDashboard, LogOut, Shield, User, Wrench } from "lucide-react";
 
 import { ThemeSwitcher } from "@/app/(main)/dashboard/_components/sidebar/theme-switcher";
-import { signOutAction } from "@/app/(public)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import { signOutAction } from "@/server/auth/actions";
 
 interface PublicHeaderProps {
   user: {

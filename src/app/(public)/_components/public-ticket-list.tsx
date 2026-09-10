@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, ChevronRight, Inbox, MapPin, Plus, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
@@ -11,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 import { TicketPagination } from "./ticket-pagination";
@@ -63,9 +62,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
           </TableHeader>
           <TableBody>
             {tickets.map((ticket) => {
-              const formattedDate = ticket.createdAt
-                ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-                : "-";
+              const formattedDate = formatTicketDate(ticket.createdAt);
 
               return (
                 <TableRow key={ticket.id} className="group cursor-pointer transition-colors hover:bg-muted/40">
@@ -122,9 +119,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
       {/* Mobile Cards View */}
       <div className="grid gap-3 md:hidden">
         {tickets.map((ticket) => {
-          const formattedDate = ticket.createdAt
-            ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-            : "-";
+          const formattedDate = formatTicketDate(ticket.createdAt);
 
           return (
             <Link key={ticket.id} href={`/track/${ticket.id}`} className="group block">

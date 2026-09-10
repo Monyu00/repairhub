@@ -4,7 +4,6 @@ import { useTransition } from "react";
 
 import { LogOut, Shield } from "lucide-react";
 
-import { signOutAction } from "@/app/(public)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import { signOutAction } from "@/server/auth/actions";
 
 interface UserMenuProps {
   user: {

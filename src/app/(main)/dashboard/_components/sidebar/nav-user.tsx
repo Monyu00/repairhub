@@ -4,7 +4,6 @@ import { useTransition } from "react";
 
 import { LogOut, Shield } from "lucide-react";
 
-import { signOutAction } from "@/app/(public)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,6 +17,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/c
 import { useUser } from "@/hooks/use-user";
 import { getInitials } from "@/lib/utils";
 import type { UserRole } from "@/navigation/sidebar/sidebar-items";
+import { signOutAction } from "@/server/auth/actions";
 
 interface NavUserProps {
   user?: {

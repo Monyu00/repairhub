@@ -7,7 +7,6 @@ import {
   Package,
   QrCode,
   Settings,
-  Wrench,
 } from "lucide-react";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -36,12 +35,6 @@ export interface NavGroup {
   roles?: UserRole[];
   items: NavItem[];
 }
-
-export const reportAction = {
-  title: "我要報修",
-  url: "/report",
-  icon: Wrench,
-};
 
 export const sidebarItems: NavGroup[] = [
   {
