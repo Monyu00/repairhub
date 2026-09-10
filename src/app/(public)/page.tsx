@@ -37,7 +37,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const activeTab = params.tab === "my-tickets" ? "my-tickets" : "all";
   const currentPage = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
-  const status = params.status && params.status !== "all" ? (params.status as TicketStatus) : undefined;
+  const activeStatuses: TicketStatus[] = ["pending", "in_progress", "completed"];
+  const status = params.status && params.status !== "all" ? (params.status as TicketStatus) : activeStatuses;
   const buildingId = params.building && params.building !== "all" ? params.building : undefined;
   const categoryId = params.category && params.category !== "all" ? params.category : undefined;
   const searchTerm = params.q?.trim() || undefined;

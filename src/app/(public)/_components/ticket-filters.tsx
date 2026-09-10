@@ -91,7 +91,7 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
           <Input
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="搜尋案件描述..."
+            placeholder="搜尋報修單號或描述..."
             className="h-9 pr-8 pl-9"
           />
           {searchValue && (
@@ -116,11 +116,10 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
               <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">所有狀態</SelectItem>
+              <SelectItem value="all">所有未結案</SelectItem>
               <SelectItem value="pending">待處理</SelectItem>
               <SelectItem value="in_progress">維修中</SelectItem>
               <SelectItem value="completed">已完工</SelectItem>
-              <SelectItem value="closed">已結案</SelectItem>
             </SelectContent>
           </Select>
 

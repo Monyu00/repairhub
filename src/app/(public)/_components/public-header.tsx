@@ -4,10 +4,10 @@ import { useTransition } from "react";
 
 import Link from "next/link";
 
-import { FileText, LayoutDashboard, LogOut, Plus, Shield, User, Wrench } from "lucide-react";
+import { FileText, LayoutDashboard, LogOut, Shield, User, Wrench } from "lucide-react";
 
-import { signOutAction } from "@/app/(external)/login/_actions/actions";
 import { ThemeSwitcher } from "@/app/(main)/dashboard/_components/sidebar/theme-switcher";
+import { signOutAction } from "@/app/(public)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,14 +67,6 @@ export function PublicHeader({ user }: PublicHeaderProps) {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Report CTA */}
-          <Button asChild size="sm" className="gap-1.5 shadow-xs">
-            <Link href="/report">
-              <Plus className="size-4" />
-              <span>我要報修</span>
-            </Link>
-          </Button>
-
           {/* Admin / Technician Backstage Entrance */}
           {isStaff && (
             <Button asChild variant="outline" size="sm" className="hidden gap-1.5 sm:inline-flex">

@@ -231,7 +231,8 @@ export async function queryTickets(
   }
 
   if (search?.trim()) {
-    query = query.ilike("description", `%${search.trim()}%`);
+    const cleanSearch = search.trim().replace(/^#/, "");
+    query = query.or(`description.ilike.%${cleanSearch}%,ticket_number.ilike.%${cleanSearch}%`);
   }
 
   if (status) {

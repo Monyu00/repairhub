@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Command } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_CONFIG } from "@/config/app-config";
 import { useUser } from "@/hooks/use-user";
-import { reportAction, sidebarItems, type UserRole } from "@/navigation/sidebar/sidebar-items";
+import { sidebarItems, type UserRole } from "@/navigation/sidebar/sidebar-items";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
@@ -59,19 +58,6 @@ export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarPr
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-
-        <div className="px-1 group-data-[collapsible=icon]:px-0">
-          <Button
-            asChild
-            size="lg"
-            className="w-full justify-start gap-2.5 font-semibold shadow-sm text-base h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all rounded-lg group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
-          >
-            <Link href={reportAction.url}>
-              <reportAction.icon className="size-5 shrink-0" />
-              <span className="group-data-[collapsible=icon]:hidden">{reportAction.title}</span>
-            </Link>
-          </Button>
-        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={sidebarItems} userRole={activeRole} />
