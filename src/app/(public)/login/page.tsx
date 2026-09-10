@@ -1,8 +1,4 @@
-import Link from "next/link";
-
 import { AlertCircle, Wrench } from "lucide-react";
-
-import { APP_CONFIG } from "@/config/app-config";
 
 import { GoogleLoginButton } from "./_components/google-login-button";
 import { LoginForm } from "./_components/login-form";
@@ -20,8 +16,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const error = params.error;
 
   return (
-    <div className="flex min-h-dvh flex-col justify-between bg-muted/40 p-4 md:p-8">
-      <div className="mx-auto my-auto w-full max-w-md space-y-6">
+    <div className="px-4 py-8 sm:py-12">
+      <div className="mx-auto w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Wrench className="size-6" />
@@ -53,18 +49,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <LoginForm redirectTo={redirectTo} />
           </div>
         </div>
-
-        <div className="flex justify-between px-2 text-muted-foreground text-xs">
-          <Link href="/report" className="hover:underline">
-            ← 我要報修 (免登入)
-          </Link>
-          <Link href="/track" className="hover:underline">
-            追蹤報修單 →
-          </Link>
-        </div>
       </div>
-
-      <footer className="pt-6 text-center text-muted-foreground text-xs">{APP_CONFIG.copyright}</footer>
     </div>
   );
 }

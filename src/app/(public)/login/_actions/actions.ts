@@ -1,7 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 import { createClient } from "@/lib/supabase/server";
 
@@ -65,10 +63,4 @@ export async function getGoogleOAuthUrl(redirectTo?: string) {
   }
 
   return { success: true, url: data.url };
-}
-
-export async function signOutAction() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/login");
 }

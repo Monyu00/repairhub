@@ -4,7 +4,6 @@ import { useTransition } from "react";
 
 import { LogOut, Shield } from "lucide-react";
 
-import { signOutAction } from "@/app/(external)/login/_actions/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import { signOutAction } from "@/server/auth/actions";
 
 interface UserMenuProps {
   user: {
@@ -64,7 +64,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <div className="px-2 py-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 px-2 py-1.5 text-muted-foreground text-xs">
           <Shield className="size-3.5" />
           <span>身分：{roleLabel}</span>
         </div>
@@ -76,7 +76,7 @@ export function UserMenu({ user }: UserMenuProps) {
               await signOutAction();
             });
           }}
-          className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+          className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
         >
           <LogOut className="mr-2 size-4" />
           登出

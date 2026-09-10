@@ -2,11 +2,10 @@
 
 import { useRouter } from "next/navigation";
 
-import { ArrowLeftIcon, WrenchIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 import { ReporterActions } from "./reporter-actions";
 import { StatusTimeline } from "./status-timeline";
@@ -61,16 +60,8 @@ export function TicketTracker({
   const technicianNotes = notes.filter((n) => n.type === "note");
 
   return (
-    <div className="min-h-screen bg-muted/30 py-6 px-4 sm:py-10">
+    <div className="py-6 px-4 sm:py-10">
       <div className="mx-auto max-w-xl space-y-4">
-        {/* Brand Header */}
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
-            <WrenchIcon className="size-5" />
-          </div>
-          <span className="font-heading text-lg font-bold tracking-tight text-foreground">RepairHub</span>
-        </div>
-
         {/* Search Bar */}
         <TicketSearch currentTicketId={ticketId} />
 
@@ -132,13 +123,6 @@ export function TicketTracker({
             <ArrowLeftIcon className="mr-1.5 size-4" />
             返回上一頁
           </Button>
-        </div>
-
-        <Separator />
-
-        {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground pb-4">
-          © {new Date().getFullYear()} RepairHub. All rights reserved.
         </div>
       </div>
     </div>

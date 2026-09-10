@@ -56,6 +56,7 @@ export interface ViewerContext {
 
 export interface QueryTicketsOptions {
   id?: string;
+  search?: string;
   status?: TicketStatus | TicketStatus[];
   categoryId?: string | string[];
   spaceId?: string;
@@ -180,6 +181,7 @@ export async function queryTickets(
 ): Promise<QueryTicketsResult> {
   const {
     id,
+    search,
     status,
     categoryId,
     spaceId,
@@ -226,6 +228,11 @@ export async function queryTickets(
 
   if (id) {
     query = query.eq("id", id);
+  }
+
+  if (search?.trim()) {
+    const cleanSearch = search.trim().replace(/^#/, "");
+    query = query.or(`description.ilike.%${cleanSearch}%,ticket_number.ilike.%${cleanSearch}%`);
   }
 
   if (status) {
