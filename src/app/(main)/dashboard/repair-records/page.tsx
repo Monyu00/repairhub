@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{
+    q?: string;
     status?: string;
     technician?: string;
     page?: string;
@@ -81,7 +82,10 @@ export default async function Page({ searchParams }: PageProps) {
     assignedTo = params.technician;
   }
 
+  const search = params.q?.trim() || undefined;
+
   const { tickets: records, totalCount } = await queryTickets(supabase, {
+    search,
     status: statusFilter,
     assignedTo,
     page,

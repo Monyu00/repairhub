@@ -18,11 +18,13 @@ export interface TimelineNote {
   type: "note" | "status_change";
   createdAt: string;
   authorRole?: string | null;
+  authorName?: string | null;
 }
 
 interface StatusTimelineProps {
   createdAt: string;
   notes: TimelineNote[];
+  reporterName?: string | null;
 }
 
 function formatDateTime(iso: string) {
@@ -77,8 +79,10 @@ function getNodeStyle(isNewest: boolean, isCreation: boolean) {
   return "border-border bg-card text-muted-foreground";
 }
 
-export function StatusTimeline({ createdAt, notes }: StatusTimelineProps) {
+export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelineProps) {
   const statusEvents = notes.filter((n) => n.type === "status_change");
+
+  const creationLabel = reporterName ? `${reporterName}（通報人）` : "通報人";
 
   // Build full chronological history (newest on top)
   const items = [
@@ -87,15 +91,27 @@ export function StatusTimeline({ createdAt, notes }: StatusTimelineProps) {
       content: "報修單由通報人提交建立",
       createdAt: createdAt,
       isCreation: true,
-      authorRole: "通報人",
+      authorRole: creationLabel,
     },
-    ...statusEvents.map((e) => ({
-      id: e.id,
-      content: translateStatusNote(e.content),
-      createdAt: e.createdAt,
-      isCreation: false,
-      authorRole: getRoleLabel(e.authorRole),
-    })),
+    ...statusEvents.map((e) => {
+      const role = getRoleLabel(e.authorRole);
+      let label: string | null = null;
+      if (e.authorName && role) {
+        label = `${e.authorName}（${role}）`;
+      } else if (e.authorName) {
+        label = e.authorName;
+      } else if (role) {
+        label = role;
+      }
+
+      return {
+        id: e.id,
+        content: translateStatusNote(e.content),
+        createdAt: e.createdAt,
+        isCreation: false,
+        authorRole: label,
+      };
+    }),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (

@@ -106,7 +106,7 @@ export function TicketDetailView({
 
         {/* Right Column (1 col) - Timeline */}
         <div className="space-y-6">
-          <StatusTimeline createdAt={ticket.createdAt} notes={timelineNotes} />
+          <StatusTimeline createdAt={ticket.createdAt} notes={timelineNotes} reporterName={ticket.reporterName} />
         </div>
       </div>
     </div>

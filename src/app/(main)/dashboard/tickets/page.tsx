@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{
+    q?: string;
     status?: string;
     category?: string;
     building?: string;
@@ -31,6 +32,7 @@ export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
+  const search = params.q?.trim() || undefined;
   const statusArray = params.status ? (params.status.split(",").filter(Boolean) as TicketStatus[]) : [];
   const categoryId = params.category && params.category !== "all" ? params.category : undefined;
   const buildingId = params.building && params.building !== "all" ? params.building : undefined;
@@ -49,6 +51,7 @@ export default async function Page({ searchParams }: PageProps) {
   const canViewReporter = userRole === "admin" || userRole === "technician";
 
   const ticketsPromise = queryTickets(supabase, {
+    search,
     status: statusArray.length > 0 ? statusArray : undefined,
     categoryId,
     buildingId,

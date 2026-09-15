@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { CalendarIcon, FilterX, SlidersHorizontal } from "lucide-react";
+import { CalendarIcon, FilterX, Search, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -25,6 +26,9 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const searchParamQuery = searchParams.get("q") ?? "";
+  const [searchTerm, setSearchTerm] = useState(searchParamQuery);
 
   const selectedStatuses = (searchParams.get("status")?.split(",").filter(Boolean) ?? []) as TicketStatus[];
   const selectedCategory = searchParams.get("category") ?? "all";
@@ -56,6 +60,23 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
     [pathname, router, searchParams],
   );
 
+  // Sync searchTerm if URL search param changes externally
+  useEffect(() => {
+    setSearchTerm(searchParams.get("q") ?? "");
+  }, [searchParams]);
+
+  // Debounced search query update
+  useEffect(() => {
+    const currentParam = searchParams.get("q") ?? "";
+    if (searchTerm.trim() === currentParam.trim()) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      updateQueryParams({ q: searchTerm.trim() || null });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm, searchParams, updateQueryParams]);
+
   const handleStatusToggle = (status: TicketStatus) => {
     let next: TicketStatus[];
     if (selectedStatuses.includes(status)) {
@@ -75,12 +96,14 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
   };
 
   const handleResetFilters = () => {
+    setSearchTerm("");
     startTransition(() => {
       router.push(pathname);
     });
   };
 
   const activeFilterCount =
+    (searchParamQuery ? 1 : 0) +
     (selectedStatuses.length > 0 ? 1 : 0) +
     (selectedCategory !== "all" ? 1 : 0) +
     (selectedBuilding !== "all" ? 1 : 0) +
@@ -90,6 +113,18 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
       <div className="flex flex-wrap items-center gap-2.5">
+        {/* Search Input */}
+        <div className="relative w-full sm:w-56 md:w-64">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="搜尋單號、描述、通報人..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-8 pl-8 text-xs"
+          />
+        </div>
+
         {/* Status Multi-Select Popover */}
         <Popover>
           <PopoverTrigger asChild>

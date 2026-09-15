@@ -1,14 +1,15 @@
 "use client";
 
-import { useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { ClipboardX, FilterX, User, Wrench } from "lucide-react";
+import { ClipboardX, FilterX, Search, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -44,30 +45,51 @@ export function RepairRecordsContent({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  const searchParamQuery = searchParams.get("q") ?? "";
+  const [searchTerm, setSearchTerm] = useState(searchParamQuery);
+
   const selectedStatus = searchParams.get("status") ?? "all";
   const selectedTechnician = searchParams.get("technician") ?? "all";
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
-  const updateFilters = (updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
+  const updateFilters = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    if (!("page" in updates)) {
-      params.delete("page");
-    }
-
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === null || value === "" || value === "all") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
+      if (!("page" in updates)) {
+        params.delete("page");
       }
-    }
 
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  };
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "" || value === "all") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get("q") ?? "");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const currentParam = searchParams.get("q") ?? "";
+    if (searchTerm.trim() === currentParam.trim()) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      updateFilters({ q: searchTerm.trim() || null });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm, searchParams, updateFilters]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
@@ -78,15 +100,42 @@ export function RepairRecordsContent({
     router.push(`/dashboard/tickets/${id}`);
   };
 
-  const hasActiveFilters = selectedStatus !== "all" || (isAdmin && selectedTechnician !== "all");
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    startTransition(() => {
+      router.push(pathname);
+    });
+  };
+
+  const hasActiveFilters =
+    Boolean(searchParamQuery) || selectedStatus !== "all" || (isAdmin && selectedTechnician !== "all");
+
+  let emptyDescription = "您目前尚未接單或被指派任何維修案件。可至「報修單管理」的待處理接單分頁查看可承接案件。";
+  if (hasActiveFilters) {
+    emptyDescription = "找不到符合目前篩選條件的維修紀錄，請嘗試切換狀態、維修人員或搜尋關鍵字。";
+  } else if (isAdmin) {
+    emptyDescription = "目前系統中尚無進行中或已完成的維修單據紀錄。";
+  }
 
   return (
     <div className="space-y-4">
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3 shadow-2xs backdrop-blur-xs">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-56 md:w-64">
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="搜尋單號、描述、通報人..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
+
           {/* Status Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-muted-foreground text-xs">狀態：</span>
             <Select value={selectedStatus} onValueChange={(val) => updateFilters({ status: val })} disabled={isPending}>
               <SelectTrigger className="h-8 w-[130px] text-xs">
@@ -103,7 +152,7 @@ export function RepairRecordsContent({
 
           {/* Technician Filter (Admin only) */}
           {isAdmin && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground text-xs">維修人員：</span>
               <Select
                 value={selectedTechnician}
@@ -130,11 +179,7 @@ export function RepairRecordsContent({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                startTransition(() => {
-                  router.push(pathname);
-                });
-              }}
+              onClick={handleResetFilters}
               disabled={isPending}
               className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
             >
@@ -157,13 +202,7 @@ export function RepairRecordsContent({
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>目前無維修紀錄</EmptyTitle>
-            <EmptyDescription>
-              {hasActiveFilters
-                ? "找不到符合目前篩選條件的維修紀錄，請嘗試切換狀態或維修人員篩選。"
-                : isAdmin
-                  ? "目前系統中尚無進行中或已完成的維修單據紀錄。"
-                  : "您目前尚未接單或被指派任何維修案件。可至「報修單管理」的待處理接單分頁查看可承接案件。"}
-            </EmptyDescription>
+            <EmptyDescription>{emptyDescription}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
