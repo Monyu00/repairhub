@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Edit2, FilterX, HardDrive, History, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -90,10 +90,18 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
   }, [equipmentList, searchQuery, buildingFilter, warrantyFilter]);
 
   const totalPages = Math.ceil(filteredEquipment.length / PAGE_SIZE) || 1;
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const paginatedEquipment = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
+    const start = (safeCurrentPage - 1) * PAGE_SIZE;
     return filteredEquipment.slice(start, start + PAGE_SIZE);
-  }, [filteredEquipment, currentPage]);
+  }, [filteredEquipment, safeCurrentPage]);
 
   // Handlers
   const handleCreateOpen = () => {
@@ -167,6 +175,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 <Input
                   type="search"
                   placeholder="搜尋設備名稱或代碼..."
+                  aria-label="搜尋設備名稱或代碼"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -337,9 +346,9 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
               {/* Pagination & Count Info */}
               <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
                 <div className="text-muted-foreground text-xs">
-                  顯示第 <span className="font-medium text-foreground">{(currentPage - 1) * PAGE_SIZE + 1}</span> 到{" "}
+                  顯示第 <span className="font-medium text-foreground">{(safeCurrentPage - 1) * PAGE_SIZE + 1}</span> 到{" "}
                   <span className="font-medium text-foreground">
-                    {Math.min(currentPage * PAGE_SIZE, filteredEquipment.length)}
+                    {Math.min(safeCurrentPage * PAGE_SIZE, filteredEquipment.length)}
                   </span>{" "}
                   筆，共 <span className="font-medium text-foreground">{filteredEquipment.length}</span> 筆設備
                 </div>
@@ -351,17 +360,23 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                         <PaginationPrevious
                           text="上一頁"
                           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                          className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          aria-disabled={safeCurrentPage <= 1}
+                          tabIndex={safeCurrentPage <= 1 ? -1 : undefined}
+                          className={safeCurrentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
                       <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
-                        頁次 {currentPage} / {totalPages}
+                        頁次 {safeCurrentPage} / {totalPages}
                       </PaginationItem>
                       <PaginationItem>
                         <PaginationNext
                           text="下一頁"
                           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                          className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          aria-disabled={safeCurrentPage >= totalPages}
+                          tabIndex={safeCurrentPage >= totalPages ? -1 : undefined}
+                          className={
+                            safeCurrentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                          }
                         />
                       </PaginationItem>
                     </PaginationContent>

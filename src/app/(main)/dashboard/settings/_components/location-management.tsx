@@ -249,6 +249,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
               <Input
                 type="search"
                 placeholder="搜尋大樓名稱、代碼或空間..."
+                aria-label="搜尋大樓名稱、代碼或空間"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="h-8 pl-8 text-xs"

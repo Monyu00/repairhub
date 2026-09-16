@@ -215,6 +215,7 @@ export interface Database {
           reporter_email: string;
           reporter_phone: string | null;
           assigned_to: string | null;
+          ticket_number: string;
           created_at: string;
           updated_at: string;
         };

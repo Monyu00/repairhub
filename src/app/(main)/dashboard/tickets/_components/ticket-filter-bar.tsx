@@ -119,6 +119,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
           <Input
             type="search"
             placeholder="搜尋單號、描述、通報人..."
+            aria-label="搜尋單號、描述、通報人"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-8 pl-8 text-xs"
