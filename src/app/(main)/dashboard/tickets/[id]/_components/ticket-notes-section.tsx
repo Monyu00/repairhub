@@ -20,6 +20,7 @@ export interface ProgressNote {
   createdAt: string;
   authorRole?: string | null;
   authorId?: string | null;
+  authorName?: string | null;
 }
 
 interface TicketNotesSectionProps {
@@ -94,6 +95,7 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
                 <div key={note.id} className="space-y-1 rounded-lg border border-border/40 bg-muted/40 p-3">
                   <div className="flex items-center justify-between text-muted-foreground text-xs">
                     <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                      {note.authorName && <span>{note.authorName}</span>}
                       <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                         {roleLabel}
                       </span>

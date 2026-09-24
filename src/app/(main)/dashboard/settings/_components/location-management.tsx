@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { Building2, ChevronDown, ChevronRight, Edit2, MapPin, Plus, Trash2 } from "lucide-react";
+import { Building2, ChevronDown, ChevronRight, Edit2, FilterX, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import {
@@ -31,6 +32,10 @@ interface LocationManagementProps {
 
 export function LocationManagement({ initialBuildings }: LocationManagementProps) {
   const [buildings, setBuildings] = useState<BuildingWithSpaces[]>(initialBuildings);
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [closedInSearch, setClosedInSearch] = useState<string[]>([]);
 
   // Expanded building states
   const [openBuildingIds, setOpenBuildingIds] = useState<string[]>(
@@ -61,9 +66,55 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     setBuildings(initialBuildings);
   }
 
-  const toggleBuildingOpen = (id: string) => {
-    setOpenBuildingIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  const isSearching = Boolean(searchQuery.trim());
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setClosedInSearch([]);
   };
+
+  const toggleBuildingOpen = (id: string) => {
+    if (isSearching) {
+      setClosedInSearch((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+    } else {
+      setOpenBuildingIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+    }
+  };
+
+  const isBuildingOpen = (id: string) => {
+    if (isSearching) {
+      return !closedInSearch.includes(id);
+    }
+    return openBuildingIds.includes(id);
+  };
+
+  const filteredBuildings = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return buildings;
+
+    return buildings
+      .map((b) => {
+        const matchBuilding = b.name.toLowerCase().includes(q) || b.code.toLowerCase().includes(q);
+        const matchedSpaces = (b.spaces || []).filter((s) => {
+          const floorStr = s.floor > 0 ? `${s.floor}f` : `b${Math.abs(s.floor)}`;
+          return s.name.toLowerCase().includes(q) || floorStr.includes(q) || String(s.floor).includes(q);
+        });
+
+        if (matchBuilding) {
+          return b;
+        }
+
+        if (matchedSpaces.length > 0) {
+          return {
+            ...b,
+            spaces: matchedSpaces,
+          };
+        }
+
+        return null;
+      })
+      .filter((b): b is BuildingWithSpaces => b !== null);
+  }, [buildings, searchQuery]);
 
   // Building Handlers
   const handleCreateBuildingOpen = () => {
@@ -190,14 +241,56 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {buildings.length === 0 ? (
+        {/* Search Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="搜尋大樓名稱、代碼或空間..."
+                aria-label="搜尋大樓名稱、代碼或空間"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="h-8 pl-8 text-xs"
+              />
+            </div>
+
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+                onClick={() => handleSearchChange("")}
+              >
+                <FilterX className="size-3.5" />
+                <span>清除搜尋</span>
+              </Button>
+            )}
+          </div>
+
+          <div className="text-muted-foreground text-xs">
+            共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 棟大樓
+            {searchQuery && (
+              <span className="ml-1">
+                （含{" "}
+                <span className="font-semibold text-foreground">
+                  {filteredBuildings.reduce((acc, b) => acc + (b.spaces?.length ?? 0), 0)}
+                </span>{" "}
+                個空間）
+              </span>
+            )}
+          </div>
+        </div>
+
+        {filteredBuildings.length === 0 ? (
           <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
-            目前尚未建立任何校園大樓。
+            {buildings.length === 0 ? "目前尚未建立任何校園大樓。" : "找不到符合條件的大樓或空間。請嘗試其他關鍵字。"}
           </div>
         ) : (
           <div className="space-y-3">
-            {buildings.map((building) => {
-              const isOpen = openBuildingIds.includes(building.id);
+            {filteredBuildings.map((building) => {
+              const isOpen = isBuildingOpen(building.id);
               const spaceCount = building.spaces?.length ?? 0;
 
               return (

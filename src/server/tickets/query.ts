@@ -231,8 +231,16 @@ export async function queryTickets(
   }
 
   if (search?.trim()) {
-    const cleanSearch = search.trim().replace(/^#/, "");
-    query = query.or(`description.ilike.%${cleanSearch}%,ticket_number.ilike.%${cleanSearch}%`);
+    const cleanSearch = search
+      .trim()
+      .replace(/^#/, "")
+      .replace(/[,()"\\]/g, "")
+      .replace(/[%_]/g, "\\$&");
+    if (cleanSearch) {
+      query = query.or(
+        `description.ilike.%${cleanSearch}%,ticket_number.ilike.%${cleanSearch}%,reporter_name.ilike.%${cleanSearch}%`,
+      );
+    }
   }
 
   if (status) {

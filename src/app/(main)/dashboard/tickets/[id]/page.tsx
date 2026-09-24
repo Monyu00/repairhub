@@ -78,7 +78,8 @@ export default async function Page({ params }: PageProps) {
         author_id,
         author:profiles!ticket_notes_author_id_fkey(
           id,
-          user_role
+          user_role,
+          display_name
         )
       `)
       .eq("ticket_id", ticketId)
@@ -145,8 +146,8 @@ export default async function Page({ params }: PageProps) {
     created_at: string;
     author_id: string | null;
     author:
-      | { id: string; user_role: "admin" | "technician" | null }
-      | { id: string; user_role: "admin" | "technician" | null }[]
+      | { id: string; user_role: "admin" | "technician" | null; display_name: string | null }
+      | { id: string; user_role: "admin" | "technician" | null; display_name: string | null }[]
       | null;
   };
 
@@ -161,6 +162,7 @@ export default async function Page({ params }: PageProps) {
       createdAt: n.created_at,
       authorId: n.author_id,
       authorRole: authorRaw?.user_role ?? null,
+      authorName: authorRaw?.display_name ?? null,
     };
   });
 
@@ -172,6 +174,7 @@ export default async function Page({ params }: PageProps) {
       type: n.type,
       createdAt: n.created_at,
       authorRole: authorRaw?.user_role ?? null,
+      authorName: authorRaw?.display_name ?? null,
     };
   });
 
