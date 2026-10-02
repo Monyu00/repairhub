@@ -44,23 +44,3 @@ export async function registerWithEmail(formData: { email: string; password: str
 
   return { success: true };
 }
-
-export async function getGoogleOAuthUrl(redirectTo?: string) {
-  const supabase = await createClient();
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const callbackUrl = `${siteUrl}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ""}`;
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: callbackUrl,
-    },
-  });
-
-  if (error || !data.url) {
-    return { success: false, error: error?.message ?? "無法啟動 Google 登入流程" };
-  }
-
-  return { success: true, url: data.url };
-}

@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Home } from "lucide-react";
+
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -75,9 +79,15 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               <SearchDialog />
             </div>
             <div className="flex items-center gap-2">
-              <LayoutControls />
-              <ThemeSwitcher />
+              <Button asChild variant="ghost" size="sm" className="gap-1.5">
+                <Link href="/">
+                  <Home className="size-4" />
+                  <span className="hidden sm:inline">前台首頁</span>
+                </Link>
+              </Button>
               {currentUserData && <UserMenu user={currentUserData} />}
+              <ThemeSwitcher />
+              <LayoutControls />
             </div>
           </div>
         </header>
