@@ -1,6 +1,5 @@
 import { AlertCircle, Wrench } from "lucide-react";
 
-import { GoogleLoginButton } from "./_components/google-login-button";
 import { LoginForm } from "./_components/login-form";
 
 interface LoginPageProps {
@@ -23,7 +22,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <Wrench className="size-6" />
           </div>
           <h1 className="font-bold text-2xl tracking-tight">登入 RepairHub 報修管理系統</h1>
-          <p className="text-muted-foreground text-sm">請輸入您的帳號密碼，或使用 Google 帳號快速登入</p>
+          <p className="text-muted-foreground text-sm">請輸入您的帳號密碼登入</p>
         </div>
 
         {error === "invalid-domain" && (
@@ -41,13 +40,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         )}
 
         <div className="rounded-xl border bg-card p-6 shadow-xs sm:p-8">
-          <div className="space-y-4">
-            <GoogleLoginButton className="w-full" redirectTo={redirectTo} />
-            <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-border after:border-t">
-              <span className="relative z-10 bg-card px-2 text-muted-foreground">或使用 Email 登入</span>
-            </div>
-            <LoginForm redirectTo={redirectTo} />
-          </div>
+          <LoginForm redirectTo={redirectTo} />
         </div>
       </div>
     </div>

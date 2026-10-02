@@ -21,11 +21,11 @@ interface UserMenuProps {
     email: string;
     name?: string;
     avatarUrl?: string;
-    role?: "admin" | "technician" | null;
+    role?: "admin" | "technician" | "user" | null;
   };
 }
 
-function getRoleLabel(role?: "admin" | "technician" | null) {
+function getRoleLabel(role?: "admin" | "technician" | "user" | null) {
   if (role === "admin") return "系統管理員 (Admin)";
   if (role === "technician") return "維修技師 (Technician)";
   return "一般使用者";
