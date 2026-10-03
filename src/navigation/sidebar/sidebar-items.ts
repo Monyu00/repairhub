@@ -4,6 +4,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   type LucideIcon,
+  Megaphone,
   Package,
   QrCode,
   Settings,
@@ -106,6 +107,13 @@ export const sidebarItems: NavGroup[] = [
             url: "/dashboard/qr-codes?tab=equipment",
           },
         ],
+      },
+      {
+        id: "announcements",
+        title: "公告管理",
+        url: "/dashboard/announcements",
+        icon: Megaphone,
+        roles: ["admin"],
       },
       {
         id: "settings",
