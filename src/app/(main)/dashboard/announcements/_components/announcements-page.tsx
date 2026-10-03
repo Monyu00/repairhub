@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 
-import { CheckCircle2, Clock, Edit2, Globe, Lock, Megaphone, Pin, Plus, Radio, Search, Trash2 } from "lucide-react";
+import { Edit2, Globe, Lock, Megaphone, Pin, Plus, Radio, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -40,28 +40,6 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingAnnouncement, setDeletingAnnouncement] = useState<AnnouncementItem | null>(null);
-
-  const [_isPending, _startTransition] = useTransition();
-
-  // Statistics calculation
-  const stats = useMemo(() => {
-    const now = Date.now();
-    let active = 0;
-    let expired = 0;
-    let pinned = 0;
-
-    for (const a of announcements) {
-      if (a.is_pinned) pinned++;
-      const isExp = a.expires_at ? new Date(a.expires_at).getTime() <= now : false;
-      if (isExp) {
-        expired++;
-      } else {
-        active++;
-      }
-    }
-
-    return { total: announcements.length, active, expired, pinned };
-  }, [announcements]);
 
   // Filtered announcements
   const filteredAnnouncements = useMemo(() => {
@@ -217,49 +195,6 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
           <Plus className="size-4" />
           發佈新公告
         </Button>
-      </div>
-
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-xs">全部公告</CardTitle>
-            <Megaphone className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-foreground">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-xs">生效中</CardTitle>
-            <CheckCircle2 className="size-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-emerald-600 dark:text-emerald-400">{stats.active}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-xs">置頂公告</CardTitle>
-            <Pin className="size-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-primary">{stats.pinned}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-xs">已到期</CardTitle>
-            <Clock className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="font-bold text-2xl text-muted-foreground">{stats.expired}</div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filter and Search Bar */}
