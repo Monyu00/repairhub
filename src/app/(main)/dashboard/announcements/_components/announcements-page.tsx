@@ -90,21 +90,6 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     });
   }, [announcements, searchQuery, audienceFilter, statusFilter]);
 
-  const handleCreateOpen = () => {
-    setEditingAnnouncement(null);
-    setDialogOpen(true);
-  };
-
-  const handleEditOpen = (item: AnnouncementItem) => {
-    setEditingAnnouncement(item);
-    setDialogOpen(true);
-  };
-
-  const handleDeleteOpen = (item: AnnouncementItem) => {
-    setDeletingAnnouncement(item);
-    setDeleteDialogOpen(true);
-  };
-
   const handleDialogSubmit = async (
     data: CreateAnnouncementInput | UpdateAnnouncementInput,
   ): Promise<{ success: boolean; error?: string | null }> => {
@@ -222,7 +207,13 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
           </p>
         </div>
 
-        <Button onClick={handleCreateOpen} className="gap-1.5 self-start sm:self-auto">
+        <Button
+          onClick={() => {
+            setEditingAnnouncement(null);
+            setDialogOpen(true);
+          }}
+          className="gap-1.5 self-start sm:self-auto"
+        >
           <Plus className="size-4" />
           發佈新公告
         </Button>
@@ -432,13 +423,24 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon-sm" onClick={() => handleEditOpen(item)} title="編輯">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => {
+                                setEditingAnnouncement(item);
+                                setDialogOpen(true);
+                              }}
+                              title="編輯"
+                            >
                               <Edit2 className="size-3.5 text-muted-foreground" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => handleDeleteOpen(item)}
+                              onClick={() => {
+                                setDeletingAnnouncement(item);
+                                setDeleteDialogOpen(true);
+                              }}
                               title="刪除"
                               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >

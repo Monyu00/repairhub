@@ -49,12 +49,7 @@ function revalidateAllAnnouncementPaths() {
   revalidatePath("/report");
 }
 
-/**
- * 取得公開有效的公告（供前台首頁、報修頁使用）
- * 條件：audience in ('public', 'all') 且在有效期間內
- * 排序：置頂優先，依發布時間降序
- */
-export async function fetchPublicAnnouncements(limit = 10): Promise<AnnouncementItem[]> {
+async function fetchActiveAnnouncements(audiences: AnnouncementAudience[], limit: number): Promise<AnnouncementItem[]> {
   try {
     const supabase = await createClient();
     const now = new Date().toISOString();
@@ -62,7 +57,7 @@ export async function fetchPublicAnnouncements(limit = 10): Promise<Announcement
     const { data, error } = await supabase
       .from("announcements")
       .select("id, title, body, audience, is_pinned, author_id, published_at, expires_at, created_at, updated_at")
-      .in("audience", ["public", "all"])
+      .in("audience", audiences)
       .lte("published_at", now)
       .or(`expires_at.is.null,expires_at.gt.${now}`)
       .order("is_pinned", { ascending: false })
@@ -70,47 +65,29 @@ export async function fetchPublicAnnouncements(limit = 10): Promise<Announcement
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching public announcements:", error);
+      console.error("Error fetching announcements:", error);
       return [];
     }
 
     return (data ?? []) as unknown as AnnouncementItem[];
   } catch (err) {
-    console.error("fetchPublicAnnouncements unexpected error:", err);
+    console.error("fetchActiveAnnouncements unexpected error:", err);
     return [];
   }
 }
 
 /**
+ * 取得公開有效的公告（供前台首頁、報修頁使用）
+ */
+export async function fetchPublicAnnouncements(limit = 10): Promise<AnnouncementItem[]> {
+  return fetchActiveAnnouncements(["public", "all"], limit);
+}
+
+/**
  * 取得內部有效的公告（供 Dashboard 首頁使用）
- * 條件：audience in ('internal', 'all') 且在有效期間內
- * 排序：置頂優先，依發布時間降序
  */
 export async function fetchInternalAnnouncements(limit = 5): Promise<AnnouncementItem[]> {
-  try {
-    const supabase = await createClient();
-    const now = new Date().toISOString();
-
-    const { data, error } = await supabase
-      .from("announcements")
-      .select("id, title, body, audience, is_pinned, author_id, published_at, expires_at, created_at, updated_at")
-      .in("audience", ["internal", "all"])
-      .lte("published_at", now)
-      .or(`expires_at.is.null,expires_at.gt.${now}`)
-      .order("is_pinned", { ascending: false })
-      .order("published_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error("Error fetching internal announcements:", error);
-      return [];
-    }
-
-    return (data ?? []) as unknown as AnnouncementItem[];
-  } catch (err) {
-    console.error("fetchInternalAnnouncements unexpected error:", err);
-    return [];
-  }
+  return fetchActiveAnnouncements(["internal", "all"], limit);
 }
 
 /**
