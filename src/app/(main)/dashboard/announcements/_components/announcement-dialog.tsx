@@ -20,6 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type {
   AnnouncementAudience,
+  AnnouncementCategory,
   AnnouncementItem,
   CreateAnnouncementInput,
   UpdateAnnouncementInput,
@@ -38,6 +39,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
   const isEditing = Boolean(announcement);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [category, setCategory] = useState<AnnouncementCategory>("general");
   const [audience, setAudience] = useState<AnnouncementAudience>("all");
   const [isPinned, setIsPinned] = useState(false);
   const [expiresAt, setExpiresAt] = useState("");
@@ -49,6 +51,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
       if (announcement) {
         setTitle(announcement.title);
         setBody(announcement.body);
+        setCategory(announcement.category ?? "general");
         setAudience(announcement.audience);
         setIsPinned(announcement.is_pinned);
         // Format ISO timestamp to YYYY-MM-DDTHH:mm for datetime-local input
@@ -62,6 +65,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
       } else {
         setTitle("");
         setBody("");
+        setCategory("general");
         setAudience("all");
         setIsPinned(false);
         setExpiresAt("");
@@ -100,6 +104,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
       const payload: CreateAnnouncementInput = {
         title: cleanTitle,
         body: cleanBody,
+        category,
         audience,
         is_pinned: isPinned,
         expires_at: parsedExpiresAt,
@@ -122,7 +127,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
             <DialogTitle>{isEditing ? "編輯公告" : "發佈新公告"}</DialogTitle>
             <DialogDescription>
               {isEditing
-                ? "更新現有公告內容、可見範圍或到期設定。"
+                ? "更新現有公告內容、分類、可見範圍或到期設定。"
                 : "填寫公告標題與內容，發佈後將依受眾設定於前台或後台顯示。"}
             </DialogDescription>
           </DialogHeader>
@@ -141,8 +146,27 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
               />
             </div>
 
-            {/* Audience & Pin row */}
+            {/* Category & Audience row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="announcement-category">公告分類</Label>
+                <Select
+                  value={category}
+                  onValueChange={(val) => setCategory(val as AnnouncementCategory)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="announcement-category">
+                    <SelectValue placeholder="選擇分類" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">一般公告</SelectItem>
+                    <SelectItem value="system_maintenance">系統維護</SelectItem>
+                    <SelectItem value="outage">停機通知</SelectItem>
+                    <SelectItem value="policy">政策公告</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid gap-1.5">
                 <Label htmlFor="announcement-audience">發佈受眾</Label>
                 <Select
@@ -160,15 +184,17 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <div className="flex flex-col justify-end gap-1.5">
-                <div className="flex h-9 items-center justify-between rounded-md border border-input px-3">
-                  <Label htmlFor="announcement-pin" className="cursor-pointer text-sm">
-                    置頂顯示
-                  </Label>
-                  <Switch id="announcement-pin" checked={isPinned} onCheckedChange={setIsPinned} disabled={isPending} />
-                </div>
+            {/* Pin switch */}
+            <div className="flex h-10 items-center justify-between rounded-md border border-input px-3">
+              <div>
+                <Label htmlFor="announcement-pin" className="cursor-pointer font-medium text-sm">
+                  置頂顯示
+                </Label>
+                <p className="text-muted-foreground text-xs">置頂公告將排在列表最前端</p>
               </div>
+              <Switch id="announcement-pin" checked={isPinned} onCheckedChange={setIsPinned} disabled={isPending} />
             </div>
 
             {/* Expires At */}

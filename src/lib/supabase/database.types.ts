@@ -13,6 +13,7 @@ export type Database = {
           audience: Database["public"]["Enums"]["announcement_audience"];
           author_id: string;
           body: string;
+          category: Database["public"]["Enums"]["announcement_category"];
           created_at: string;
           expires_at: string | null;
           id: string;
@@ -25,6 +26,7 @@ export type Database = {
           audience: Database["public"]["Enums"]["announcement_audience"];
           author_id: string;
           body: string;
+          category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;
           expires_at?: string | null;
           id?: string;
@@ -37,6 +39,7 @@ export type Database = {
           audience?: Database["public"]["Enums"]["announcement_audience"];
           author_id?: string;
           body?: string;
+          category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;
           expires_at?: string | null;
           id?: string;
@@ -447,6 +450,7 @@ export type Database = {
     };
     Enums: {
       announcement_audience: "internal" | "public" | "all";
+      announcement_category: "general" | "system_maintenance" | "outage" | "policy";
       ticket_note_type: "note" | "status_change";
       ticket_photo_phase: "report" | "closure";
       ticket_status: "pending" | "in_progress" | "completed" | "closed" | "cancelled";
@@ -571,6 +575,7 @@ export const Constants = {
   public: {
     Enums: {
       announcement_audience: ["internal", "public", "all"],
+      announcement_category: ["general", "system_maintenance", "outage", "policy"],
       ticket_note_type: ["note", "status_change"],
       ticket_photo_phase: ["report", "closure"],
       ticket_status: ["pending", "in_progress", "completed", "closed", "cancelled"],

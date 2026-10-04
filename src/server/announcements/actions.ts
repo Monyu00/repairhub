@@ -7,11 +7,13 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, safeAction } from "@/server/auth";
 
 export type AnnouncementAudience = Database["public"]["Enums"]["announcement_audience"];
+export type AnnouncementCategory = Database["public"]["Enums"]["announcement_category"];
 
 export interface AnnouncementItem {
   id: string;
   title: string;
   body: string;
+  category: AnnouncementCategory;
   audience: AnnouncementAudience;
   is_pinned: boolean;
   author_id: string;
@@ -27,6 +29,7 @@ export interface AnnouncementItem {
 export interface CreateAnnouncementInput {
   title: string;
   body: string;
+  category?: AnnouncementCategory;
   audience: AnnouncementAudience;
   is_pinned?: boolean;
   published_at?: string;
@@ -36,6 +39,7 @@ export interface CreateAnnouncementInput {
 export interface UpdateAnnouncementInput {
   title?: string;
   body?: string;
+  category?: AnnouncementCategory;
   audience?: AnnouncementAudience;
   is_pinned?: boolean;
   published_at?: string;
@@ -56,7 +60,9 @@ async function fetchActiveAnnouncements(audiences: AnnouncementAudience[], limit
 
     const { data, error } = await supabase
       .from("announcements")
-      .select("id, title, body, audience, is_pinned, author_id, published_at, expires_at, created_at, updated_at")
+      .select(
+        "id, title, body, category, audience, is_pinned, author_id, published_at, expires_at, created_at, updated_at",
+      )
       .in("audience", audiences)
       .lte("published_at", now)
       .or(`expires_at.is.null,expires_at.gt.${now}`)
@@ -150,6 +156,7 @@ export async function createAnnouncement(
     const payload: Database["public"]["Tables"]["announcements"]["Insert"] = {
       title,
       body,
+      category: input.category ?? "general",
       audience: input.audience,
       is_pinned: input.is_pinned ?? false,
       author_id: userId,
@@ -190,6 +197,10 @@ export async function updateAnnouncement(
       const body = input.body.trim();
       if (!body) return { success: false, error: "公告內文不可為空白" };
       updates.body = body;
+    }
+
+    if (input.category !== undefined) {
+      updates.category = input.category;
     }
 
     if (input.audience !== undefined) {

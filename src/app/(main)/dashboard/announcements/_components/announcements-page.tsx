@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Edit2, Globe, Lock, Megaphone, Pin, Plus, Radio, Search, Trash2 } from "lucide-react";
+import { Edit2, Globe, Lock, Pin, Plus, Radio, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   type AnnouncementAudience,
+  type AnnouncementCategory,
   type AnnouncementItem,
   type CreateAnnouncementInput,
   createAnnouncement,
@@ -33,6 +34,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(initialAnnouncements);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FilterStatus>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [audienceFilter, setAudienceFilter] = useState<string>("all");
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,6 +55,11 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         if (!matchTitle && !matchBody) return false;
       }
 
+      // Category filter
+      if (categoryFilter !== "all" && a.category !== categoryFilter) {
+        return false;
+      }
+
       // Audience filter
       if (audienceFilter !== "all" && a.audience !== audienceFilter) {
         return false;
@@ -66,7 +73,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
 
       return true;
     });
-  }, [announcements, searchQuery, audienceFilter, statusFilter]);
+  }, [announcements, searchQuery, categoryFilter, audienceFilter, statusFilter]);
 
   const handleDialogSubmit = async (
     data: CreateAnnouncementInput | UpdateAnnouncementInput,
@@ -99,6 +106,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         id: res.id,
         title: data.title ?? "",
         body: data.body ?? "",
+        category: (data as CreateAnnouncementInput).category ?? "general",
         audience: (data.audience as AnnouncementAudience) ?? "all",
         is_pinned: Boolean(data.is_pinned),
         author_id: "",
@@ -169,17 +177,50 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     }
   };
 
+  const renderCategoryBadge = (category: AnnouncementCategory) => {
+    switch (category) {
+      case "system_maintenance":
+        return (
+          <Badge
+            variant="outline"
+            className="shrink-0 border-sky-500/30 bg-sky-500/10 text-sky-600 text-xs dark:text-sky-400"
+          >
+            系統維護
+          </Badge>
+        );
+      case "outage":
+        return (
+          <Badge
+            variant="outline"
+            className="shrink-0 border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs dark:text-rose-400"
+          >
+            停機通知
+          </Badge>
+        );
+      case "policy":
+        return (
+          <Badge
+            variant="outline"
+            className="shrink-0 border-violet-500/30 bg-violet-500/10 text-violet-600 text-xs dark:text-violet-400"
+          >
+            政策公告
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary" className="shrink-0 bg-muted text-muted-foreground text-xs">
+            一般公告
+          </Badge>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Top Header Card */}
-      <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-xs sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Megaphone className="size-5" />
-            </div>
-            <h1 className="font-bold font-heading text-2xl text-foreground tracking-tight">公告管理</h1>
-          </div>
+      {/* Page Header */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-bold text-2xl text-foreground tracking-tight">公告管理</h1>
           <p className="text-muted-foreground text-sm">
             發佈全校修繕營運通知、重要停機提醒，並可自訂可見對象與置頂排程。
           </p>
@@ -260,6 +301,18 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               </div>
 
               <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus:outline-hidden"
+              >
+                <option value="all">所有分類</option>
+                <option value="general">一般公告</option>
+                <option value="system_maintenance">系統維護</option>
+                <option value="outage">停機通知</option>
+                <option value="policy">政策公告</option>
+              </select>
+
+              <select
                 value={audienceFilter}
                 onChange={(e) => setAudienceFilter(e.target.value)}
                 className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus:outline-hidden"
@@ -319,7 +372,8 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
 
                         <TableCell>
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {renderCategoryBadge(item.category)}
                               <span className="font-semibold text-foreground">{item.title}</span>
                               {isExp && (
                                 <Badge variant="secondary" className="px-1.5 py-0 text-[10px] text-muted-foreground">
