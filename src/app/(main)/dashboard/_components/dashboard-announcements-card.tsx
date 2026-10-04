@@ -91,6 +91,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
               <button
                 type="button"
                 aria-expanded={isExpanded}
+                aria-controls={`announcement-body-${item.id}`}
                 className="flex w-full cursor-pointer items-start justify-between gap-3 rounded-md text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => setExpandedId(isExpanded ? null : item.id)}
               >
@@ -129,7 +130,10 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
               </button>
 
               {isExpanded && (
-                <div className="mt-3 whitespace-pre-wrap border-border/40 border-t pt-2 text-foreground text-xs leading-relaxed">
+                <div
+                  id={`announcement-body-${item.id}`}
+                  className="mt-3 whitespace-pre-wrap border-border/40 border-t pt-2 text-foreground text-xs leading-relaxed"
+                >
                   {item.body}
                 </div>
               )}

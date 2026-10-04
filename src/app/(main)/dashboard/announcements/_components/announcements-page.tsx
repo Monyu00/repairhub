@@ -82,8 +82,8 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
       const res = await updateAnnouncement(editingAnnouncement.id, data);
       if (res.success) {
         toast.success("公告已成功更新");
-        setAnnouncements((prev) =>
-          prev.map((item) =>
+        setAnnouncements((prev) => {
+          const next = prev.map((item) =>
             item.id === editingAnnouncement.id
               ? {
                   ...item,
@@ -91,8 +91,12 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                   updated_at: new Date().toISOString(),
                 }
               : item,
-          ),
-        );
+          );
+          return next.sort((a, b) => {
+            if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+        });
         return { success: true };
       }
       return { success: false, error: res.error };
@@ -116,7 +120,13 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         updated_at: new Date().toISOString(),
         author: { display_name: "我" },
       };
-      setAnnouncements((prev) => [newItem, ...prev]);
+      setAnnouncements((prev) => {
+        const next = [newItem, ...prev];
+        return next.sort((a, b) => {
+          if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      });
       return { success: true };
     }
     return { success: false, error: res.error };
@@ -260,6 +270,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               <div className="flex rounded-lg border border-border bg-muted/30 p-1">
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "all"}
                   onClick={() => setStatusFilter("all")}
                   className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "all"
@@ -271,6 +282,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "active"}
                   onClick={() => setStatusFilter("active")}
                   className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "active"
@@ -282,6 +294,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "pinned"}
                   onClick={() => setStatusFilter("pinned")}
                   className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "pinned"
@@ -293,6 +306,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "expired"}
                   onClick={() => setStatusFilter("expired")}
                   className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "expired"

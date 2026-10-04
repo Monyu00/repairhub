@@ -77,11 +77,16 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                     key={item.id}
                     type="button"
                     onClick={() => setActiveItemIndex(idx)}
-                    className={`size-2 rounded-full transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
-                      idx === activeItemIndex ? "w-4 bg-primary" : "bg-primary/20 hover:bg-primary/40"
-                    }`}
+                    aria-current={idx === activeItemIndex ? "true" : undefined}
+                    className="flex size-6 items-center justify-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label={`切換至公告 ${idx + 1}`}
-                  />
+                  >
+                    <span
+                      className={`block h-1.5 rounded-full transition-all ${
+                        idx === activeItemIndex ? "w-3.5 bg-primary" : "w-1.5 bg-primary/25 hover:bg-primary/40"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
             </div>
