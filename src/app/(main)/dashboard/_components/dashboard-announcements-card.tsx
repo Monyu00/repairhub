@@ -64,7 +64,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
           <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Megaphone className="size-3.5" />
+            <Megaphone className="size-3.5" aria-hidden="true" />
           </div>
           <div>
             <CardTitle className="text-base">系統與營運公告</CardTitle>
@@ -90,14 +90,15 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
             >
               <button
                 type="button"
-                className="flex w-full cursor-pointer items-start justify-between gap-3 text-left"
+                aria-expanded={isExpanded}
+                className="flex w-full cursor-pointer items-start justify-between gap-3 rounded-md text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={() => setExpandedId(isExpanded ? null : item.id)}
               >
-                <div className="space-y-1">
+                <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     {item.is_pinned && (
                       <Badge variant="default" className="gap-0.5 px-1.5 py-0 font-normal text-[10px]">
-                        <Pin className="size-2.5" />
+                        <Pin className="size-2.5" aria-hidden="true" />
                         置頂
                       </Badge>
                     )}
@@ -118,7 +119,11 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-muted-foreground text-xs">{formatDateTime(item.published_at)}</span>
                   <span className="text-muted-foreground transition-transform">
-                    {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                    {isExpanded ? (
+                      <ChevronUp className="size-4" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="size-4" aria-hidden="true" />
+                    )}
                   </span>
                 </div>
               </button>

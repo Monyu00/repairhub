@@ -138,9 +138,11 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
               <Label htmlFor="announcement-title">公告標題</Label>
               <Input
                 id="announcement-title"
+                name="title"
+                autoComplete="off"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="例如：系統定期維護停機通知"
+                placeholder="例如：系統定期維護停機通知…"
                 disabled={isPending}
                 autoFocus
               />
@@ -216,6 +218,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
               </div>
               <Input
                 id="announcement-expires"
+                name="expires_at"
                 type="datetime-local"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
@@ -231,9 +234,10 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
               <Label htmlFor="announcement-body">公告內文</Label>
               <Textarea
                 id="announcement-body"
+                name="body"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="請輸入公告詳細說明內容..."
+                placeholder="請輸入公告詳細說明內容…"
                 rows={5}
                 disabled={isPending}
               />
@@ -247,7 +251,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
               取消
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {isEditing ? "儲存更新" : "立即發佈"}
             </Button>
           </DialogFooter>

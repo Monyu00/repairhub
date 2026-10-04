@@ -41,7 +41,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Megaphone className="size-4" />
+            <Megaphone className="size-4" aria-hidden="true" />
           </div>
 
           <div className="space-y-1">
@@ -49,7 +49,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
               <span className="font-semibold text-primary text-xs uppercase tracking-wider">系統公告</span>
               {currentAnnouncement.is_pinned && (
                 <Badge variant="default" className="gap-1 px-1.5 py-0 font-normal text-[10px]">
-                  <Pin className="size-2.5" />
+                  <Pin className="size-2.5" aria-hidden="true" />
                   置頂
                 </Badge>
               )}
@@ -77,7 +77,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                     key={item.id}
                     type="button"
                     onClick={() => setActiveItemIndex(idx)}
-                    className={`size-2 rounded-full transition-all ${
+                    className={`size-2 rounded-full transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
                       idx === activeItemIndex ? "w-4 bg-primary" : "bg-primary/20 hover:bg-primary/40"
                     }`}
                     aria-label={`切換至公告 ${idx + 1}`}
@@ -91,16 +91,17 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
             type="button"
             variant="ghost"
             size="sm"
+            aria-expanded={expanded}
             onClick={() => setExpanded(!expanded)}
             className="h-7 px-2 text-muted-foreground text-xs hover:text-foreground"
           >
             {expanded ? (
               <>
-                收合 <ChevronUp className="ml-1 size-3.5" />
+                收合 <ChevronUp className="ml-1 size-3.5" aria-hidden="true" />
               </>
             ) : (
               <>
-                查看完整內文 <ChevronDown className="ml-1 size-3.5" />
+                查看完整內文 <ChevronDown className="ml-1 size-3.5" aria-hidden="true" />
               </>
             )}
           </Button>
