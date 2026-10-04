@@ -197,7 +197,7 @@ export async function fetchReportData(filterParams?: {
     const date = new Date(t.created_at);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
-    const current = monthlyMap.get(monthKey) || {
+    const current = monthlyMap.get(monthKey) ?? {
       total: 0,
       completed: 0,
       pendingOrProgress: 0,
@@ -257,7 +257,7 @@ export async function fetchReportData(filterParams?: {
     const bName = buildingObj?.name || "未指定建築";
     const bCode = buildingObj?.code || "N/A";
 
-    const current = buildingMap.get(bId) || { id: bId, name: bName, code: bCode, count: 0 };
+    const current = buildingMap.get(bId) ?? { id: bId, name: bName, code: bCode, count: 0 };
     current.count++;
     buildingMap.set(bId, current);
   });
@@ -280,7 +280,7 @@ export async function fetchReportData(filterParams?: {
     const catId = catObj?.id || "unknown";
     const catName = catObj?.name || "未分類";
 
-    const current = categoryMap.get(catId) || { id: catId, name: catName, count: 0 };
+    const current = categoryMap.get(catId) ?? { id: catId, name: catName, count: 0 };
     current.count++;
     categoryMap.set(catId, current);
   });
@@ -307,7 +307,7 @@ export async function fetchReportData(filterParams?: {
     const techId = t.assigned_to;
     const techName = techObj?.display_name || "未知技師";
 
-    const current = techMap.get(techId) || {
+    const current = techMap.get(techId) ?? {
       id: techId,
       name: techName,
       completed: 0,

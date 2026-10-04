@@ -82,8 +82,8 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
       const res = await updateAnnouncement(editingAnnouncement.id, data);
       if (res.success) {
         toast.success("公告已成功更新");
-        setAnnouncements((prev) =>
-          prev.map((item) =>
+        setAnnouncements((prev) => {
+          const next = prev.map((item) =>
             item.id === editingAnnouncement.id
               ? {
                   ...item,
@@ -91,8 +91,12 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                   updated_at: new Date().toISOString(),
                 }
               : item,
-          ),
-        );
+          );
+          return next.sort((a, b) => {
+            if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          });
+        });
         return { success: true };
       }
       return { success: false, error: res.error };
@@ -116,7 +120,13 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         updated_at: new Date().toISOString(),
         author: { display_name: "我" },
       };
-      setAnnouncements((prev) => [newItem, ...prev]);
+      setAnnouncements((prev) => {
+        const next = [newItem, ...prev];
+        return next.sort((a, b) => {
+          if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+      });
       return { success: true };
     }
     return { success: false, error: res.error };
@@ -153,14 +163,14 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
       case "all":
         return (
           <Badge variant="outline" className="gap-1 border-primary/30 bg-primary/5 text-primary text-xs">
-            <Radio className="size-3" />
+            <Radio className="size-3" aria-hidden="true" />
             全體對象
           </Badge>
         );
       case "internal":
         return (
           <Badge variant="secondary" className="gap-1 bg-muted text-foreground text-xs">
-            <Lock className="size-3" />
+            <Lock className="size-3" aria-hidden="true" />
             僅內部
           </Badge>
         );
@@ -170,7 +180,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
             variant="outline"
             className="gap-1 border-amber-500/30 bg-amber-500/10 text-amber-600 text-xs dark:text-amber-400"
           >
-            <Globe className="size-3" />
+            <Globe className="size-3" aria-hidden="true" />
             前台公開
           </Badge>
         );
@@ -233,7 +243,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
           }}
           className="gap-1.5 self-start sm:self-auto"
         >
-          <Plus className="size-4" />
+          <Plus className="size-4" aria-hidden="true" />
           發佈新公告
         </Button>
       </div>
@@ -243,9 +253,13 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         <CardContent className="p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
-              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search
+                className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Input
-                placeholder="搜尋公告標題或內容關鍵字..."
+                placeholder="搜尋公告標題或內容關鍵字…"
+                aria-label="搜尋公告標題或內容關鍵字"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -256,8 +270,9 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               <div className="flex rounded-lg border border-border bg-muted/30 p-1">
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "all"}
                   onClick={() => setStatusFilter("all")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors ${
+                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "all"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -267,8 +282,9 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "active"}
                   onClick={() => setStatusFilter("active")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors ${
+                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "active"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -278,8 +294,9 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "pinned"}
                   onClick={() => setStatusFilter("pinned")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors ${
+                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "pinned"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -289,8 +306,9 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 </button>
                 <button
                   type="button"
+                  aria-pressed={statusFilter === "expired"}
                   onClick={() => setStatusFilter("expired")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors ${
+                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
                     statusFilter === "expired"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -303,7 +321,8 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus:outline-hidden"
+                aria-label="公告分類篩選"
+                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="all">所有分類</option>
                 <option value="general">一般公告</option>
@@ -315,7 +334,8 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               <select
                 value={audienceFilter}
                 onChange={(e) => setAudienceFilter(e.target.value)}
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus:outline-hidden"
+                aria-label="公告受眾篩選"
+                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="all">所有受眾</option>
                 <option value="internal">僅內部</option>
@@ -364,7 +384,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                       <TableRow key={item.id} className={isExp ? "bg-muted/20 opacity-60" : ""}>
                         <TableCell className="text-center">
                           {item.is_pinned ? (
-                            <Pin className="inline size-4 text-primary" />
+                            <Pin className="inline size-4 text-primary" aria-hidden="true" />
                           ) : (
                             <span className="text-muted-foreground/30">-</span>
                           )}
@@ -419,9 +439,10 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                                 setEditingAnnouncement(item);
                                 setDialogOpen(true);
                               }}
+                              aria-label="編輯公告"
                               title="編輯"
                             >
-                              <Edit2 className="size-3.5 text-muted-foreground" />
+                              <Edit2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -430,10 +451,11 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                                 setDeletingAnnouncement(item);
                                 setDeleteDialogOpen(true);
                               }}
+                              aria-label="刪除公告"
                               title="刪除"
                               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
-                              <Trash2 className="size-3.5" />
+                              <Trash2 className="size-3.5" aria-hidden="true" />
                             </Button>
                           </div>
                         </TableCell>

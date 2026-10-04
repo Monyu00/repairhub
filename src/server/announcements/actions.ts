@@ -219,6 +219,10 @@ export async function updateAnnouncement(
       updates.expires_at = input.expires_at;
     }
 
+    if (Object.keys(updates).length === 0) {
+      return { success: true };
+    }
+
     const { supabase } = await requireAdmin();
 
     const { error } = await supabase.from("announcements").update(updates).eq("id", id);
