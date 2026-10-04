@@ -5,6 +5,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   ExternalLink,
+  Megaphone,
   Package,
   QrCode,
   Settings,
@@ -15,10 +16,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchInternalAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 
+import { DashboardAnnouncementsCard } from "./_components/dashboard-announcements-card";
+
 export default async function DashboardPage() {
-  const session = await getSession();
+  const [session, internalAnnouncements] = await Promise.all([getSession(), fetchInternalAnnouncements(5)]);
   const isAdmin = session?.role === "admin";
   const roleName = isAdmin ? "系統管理者" : "維修技師";
 
@@ -56,6 +60,13 @@ export default async function DashboardPage() {
       description: "產生並管理空間與設備的快速報修 QR 標籤",
       href: "/dashboard/qr-codes",
       icon: QrCode,
+      roles: ["admin"],
+    },
+    {
+      title: "公告管理",
+      description: "發佈校園修繕營運通知、重要停機提醒與公告設定",
+      href: "/dashboard/announcements",
+      icon: Megaphone,
       roles: ["admin"],
     },
     {
@@ -102,6 +113,9 @@ export default async function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* Internal Announcements Card */}
+      <DashboardAnnouncementsCard announcements={internalAnnouncements} isAdmin={isAdmin} />
 
       {/* Quick Access Grid */}
       <div>

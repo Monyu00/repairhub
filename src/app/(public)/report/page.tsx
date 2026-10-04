@@ -1,4 +1,6 @@
+import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
 import { createClient } from "@/lib/supabase/server";
+import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 
 import { type EquipmentInfo, type EquipmentOption, ReportForm } from "./_components/report-form";
@@ -22,6 +24,8 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const sessionPromise = getSession();
 
+  const announcementsPromise = fetchPublicAnnouncements(3);
+
   const equipmentPromise = equipment_id
     ? supabase
         .from("equipment")
@@ -30,12 +34,13 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         .single()
     : Promise.resolve({ data: null });
 
-  const [buildingsRes, categoriesRes, allEquipmentRes, eqRes, session] = await Promise.all([
+  const [buildingsRes, categoriesRes, allEquipmentRes, eqRes, session, announcements] = await Promise.all([
     buildingsPromise,
     categoriesPromise,
     allEquipmentPromise,
     equipmentPromise,
     sessionPromise,
+    announcementsPromise,
   ]);
 
   const buildingsData = buildingsRes.data;
@@ -75,13 +80,16 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
     : undefined;
 
   return (
-    <ReportForm
-      buildings={buildings}
-      categories={categories}
-      equipmentList={allEquipmentData}
-      initialSpaceId={location_id}
-      initialEquipment={initialEquipment}
-      userInfo={userInfo}
-    />
+    <div className="space-y-6">
+      <PublicAnnouncementsBanner announcements={announcements} />
+      <ReportForm
+        buildings={buildings}
+        categories={categories}
+        equipmentList={allEquipmentData}
+        initialSpaceId={location_id}
+        initialEquipment={initialEquipment}
+        userInfo={userInfo}
+      />
+    </div>
   );
 }

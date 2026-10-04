@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Plus, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 
+import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 import { type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
@@ -52,8 +54,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const isLoggedIn = Boolean(session?.email);
   const supabase = createAdminClient();
 
-  // Concurrently fetch metadata for filters
-  const [buildingsRes, categoriesRes, myTicketsSummary] = await Promise.all([
+  // Concurrently fetch metadata for filters and public announcements
+  const [buildingsRes, categoriesRes, myTicketsSummary, announcements] = await Promise.all([
     supabase.from("buildings").select("id, name, code").order("code"),
     supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order"),
     isLoggedIn && session?.email
@@ -68,6 +70,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           },
         })
       : Promise.resolve(null),
+    fetchPublicAnnouncements(3),
   ]);
 
   const buildings = buildingsRes.data ?? [];
@@ -139,6 +142,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
         </div>
       </div>
+
+      {/* Public Announcements Banner */}
+      <PublicAnnouncementsBanner announcements={announcements} />
 
       {/* Main Content Area */}
       <div className="space-y-4">
