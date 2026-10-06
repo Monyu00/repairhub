@@ -44,6 +44,8 @@ export interface TicketRecord {
   assignedTo: string | null;
   assignedTechnician: TicketTechnician | null;
   technicianName: string | null;
+  rating: number | null;
+  ratedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -167,6 +169,8 @@ function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketRecord {
     assignedTo: assignedToId,
     assignedTechnician,
     technicianName: assignedTechnician?.displayName ?? null,
+    rating: typeof t.rating === "number" ? t.rating : null,
+    ratedAt: typeof t.rated_at === "string" ? t.rated_at : null,
     createdAt: String(t.created_at ?? ""),
     updatedAt: String(t.updated_at ?? ""),
   };
@@ -208,6 +212,8 @@ export async function queryTickets(
     reporter_email,
     reporter_phone,
     assigned_to,
+    rating,
+    rated_at,
     created_at,
     updated_at,
     category:categories(id, name),

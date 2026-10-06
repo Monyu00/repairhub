@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { calculateSatisfactionStats } from "@/server/tickets/rating-stats";
 
 import type {
   AvgResolutionTimeStat,
@@ -74,6 +75,8 @@ export async function fetchReportData(filterParams?: {
     category_id,
     space_id,
     assigned_to,
+    rating,
+    rated_at,
     created_at,
     updated_at,
     category:categories(id, name),
@@ -115,6 +118,15 @@ export async function fetchReportData(filterParams?: {
       categoryDistribution: [],
       resolutionTrends: [],
       technicianPerformance: [],
+      satisfaction: {
+        avgRating: 0,
+        totalRated: 0,
+        totalClosed: 0,
+        responseRate: 0,
+        distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percentage: 0 })),
+        monthlyTrends: [],
+        technicianRankings: [],
+      },
       filter: { preset, from: customFrom, to: customTo },
     };
   }
@@ -125,6 +137,8 @@ export async function fetchReportData(filterParams?: {
     category_id: string;
     space_id: string;
     assigned_to: string | null;
+    rating: number | null;
+    rated_at: string | null;
     created_at: string;
     updated_at: string;
     category: { id: string; name: string } | { id: string; name: string }[] | null;
@@ -341,6 +355,8 @@ export async function fetchReportData(filterParams?: {
       avgDaysToResolve: tech.resolvedCount > 0 ? Number((tech.totalHours / tech.resolvedCount / 24).toFixed(1)) : 0,
     }));
 
+  const satisfaction = await calculateSatisfactionStats(tickets);
+
   return {
     kpi,
     monthlyTrends,
@@ -348,6 +364,7 @@ export async function fetchReportData(filterParams?: {
     categoryDistribution,
     resolutionTrends,
     technicianPerformance,
+    satisfaction,
     filter: {
       preset,
       from: customFrom,

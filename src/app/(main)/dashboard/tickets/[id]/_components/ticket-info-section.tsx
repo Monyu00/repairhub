@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
-import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Tag, User } from "lucide-react";
+import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -23,6 +23,8 @@ export interface TicketInfoData {
   createdAt: string;
   updatedAt: string;
   assignedToRole?: string | null;
+  rating?: number | null;
+  ratedAt?: string | null;
 }
 
 interface TicketInfoSectionProps {
@@ -94,6 +96,36 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
             <p className="font-medium text-foreground">{formattedUpdatedAt}</p>
           </div>
         </div>
+
+        {/* Satisfaction Rating (If provided) */}
+        {ticket.rating != null && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                <Star className="size-4 fill-amber-400 text-amber-500" />
+                通報人完工服務評分
+              </span>
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={`size-3.5 ${
+                      s <= (ticket.rating ?? 0)
+                        ? "fill-amber-400 text-amber-500"
+                        : "fill-transparent text-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+                <span className="ml-1 font-bold text-xs text-foreground">{ticket.rating} / 5</span>
+              </div>
+            </div>
+            {ticket.ratedAt && (
+              <span className="text-[11px] text-muted-foreground">
+                評分時間：{format(new Date(ticket.ratedAt), "yyyy/MM/dd HH:mm", { locale: zhTW })}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         <div className="space-y-1.5 border-border/40 border-t pt-2">

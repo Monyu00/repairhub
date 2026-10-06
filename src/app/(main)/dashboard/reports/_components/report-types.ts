@@ -45,6 +45,36 @@ export interface TechnicianPerformanceStat {
   avgDaysToResolve: number;
 }
 
+export interface RatingDistributionStat {
+  star: number; // 1 - 5
+  count: number;
+  percentage: number;
+}
+
+export interface MonthlyRatingTrendStat {
+  month: string; // e.g. "2026-03"
+  avgRating: number;
+  count: number;
+}
+
+export interface TechnicianRatingRankingStat {
+  technicianId: string;
+  displayName: string;
+  avgRating: number;
+  ratedCount: number;
+  completedCount: number;
+}
+
+export interface SatisfactionReportData {
+  avgRating: number;
+  totalRated: number;
+  totalClosed: number;
+  responseRate: number; // percentage, e.g. 78.5
+  distribution: RatingDistributionStat[];
+  monthlyTrends: MonthlyRatingTrendStat[];
+  technicianRankings: TechnicianRatingRankingStat[];
+}
+
 export interface ReportKpiSummary {
   totalTickets: number;
   completedOrClosedCount: number;
@@ -62,5 +92,6 @@ export interface ReportData {
   categoryDistribution: CategoryDistributionStat[];
   resolutionTrends: AvgResolutionTimeStat[];
   technicianPerformance: TechnicianPerformanceStat[];
+  satisfaction: SatisfactionReportData;
   filter: DateRangeFilterState;
 }

@@ -22,7 +22,7 @@ export default async function TrackPage({ params }: TrackPageProps) {
   const { data: ticket } = await supabase
     .from("tickets")
     .select(
-      "id, status, description, created_at, equipment_id, equipment_name, category:categories(name), space:spaces(name, building:buildings(name)), equipment:equipment(name)",
+      "id, status, description, created_at, rating, rated_at, equipment_id, equipment_name, category:categories(name), space:spaces(name, building:buildings(name)), equipment:equipment(name)",
     )
     .eq("id", ticketId)
     .single();
@@ -64,6 +64,8 @@ export default async function TrackPage({ params }: TrackPageProps) {
       space={spaceObj?.name ?? "未知空間"}
       description={ticket.description}
       equipment={ticket.equipment_name || equipmentObj?.name || null}
+      rating={ticket.rating}
+      ratedAt={ticket.rated_at}
       photos={(photosData ?? []) as { id: string; storage_path: string; phase: "report" | "closure" }[]}
       notes={(notesData ?? []) as { id: string; content: string; type: "note" | "status_change"; created_at: string }[]}
       supabaseUrl={supabaseUrl}

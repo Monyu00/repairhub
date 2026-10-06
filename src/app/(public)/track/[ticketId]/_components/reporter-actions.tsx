@@ -4,7 +4,14 @@ import { useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { CheckCircle2Icon, Loader2Icon, MailIcon, MessageSquareWarningIcon, RotateCcwIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  Loader2Icon,
+  MailIcon,
+  MessageSquareWarningIcon,
+  RotateCcwIcon,
+  StarIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 import { confirmFix, reopenTicket } from "../_actions/track-actions";
 
@@ -26,6 +34,14 @@ interface ReporterActionsProps {
   ticketId: string;
 }
 
+const RATING_LABELS: Record<number, string> = {
+  1: "非常不滿意",
+  2: "不滿意",
+  3: "普通",
+  4: "滿意",
+  5: "非常滿意",
+};
+
 export function ReporterActions({ ticketId }: ReporterActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -33,6 +49,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
   const [actionType, setActionType] = useState<ActionType>("confirm");
   const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState<number | null>(null);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -52,7 +70,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
       let result: { success: boolean; error?: string };
 
       if (actionType === "confirm") {
-        result = await confirmFix(ticketId, email);
+        result = await confirmFix(ticketId, email, rating ?? undefined);
       } else {
         result = await reopenTicket(ticketId, email, feedback);
       }
@@ -71,12 +89,61 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
   }
 
   const isConfirm = actionType === "confirm";
+  const activeRating = hoverRating ?? rating;
 
   return (
     <>
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">維修驗收</h2>
-        <p className="text-xs text-muted-foreground">技師已完成維修，請確認問題是否已解決。</p>
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">維修驗收</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">技師已完成維修，請確認問題是否已解決。</p>
+        </div>
+
+        {/* 5-star Rating selector (Optional) */}
+        <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-foreground">維修服務評分（選填）</span>
+            <span className="text-xs text-muted-foreground transition-colors">
+              {activeRating ? `${activeRating} 星 - ${RATING_LABELS[activeRating]}` : "點選星星評分"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {[1, 2, 3, 4, 5].map((star) => {
+              const isFilled = (activeRating ?? 0) >= star;
+              return (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating((prev) => (prev === star ? null : star))}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(null)}
+                  className="group rounded p-1 transition-transform hover:scale-115 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                  aria-label={`${star} 星 - ${RATING_LABELS[star]}`}
+                >
+                  <StarIcon
+                    className={cn(
+                      "size-6 transition-colors",
+                      isFilled
+                        ? "fill-amber-400 text-amber-500"
+                        : "fill-transparent text-muted-foreground/30 group-hover:text-amber-400/70",
+                    )}
+                  />
+                </button>
+              );
+            })}
+            {rating !== null && (
+              <button
+                type="button"
+                onClick={() => setRating(null)}
+                className="ml-2 text-[11px] text-muted-foreground hover:text-foreground underline"
+              >
+                清除
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="flex gap-3">
           <Button className="flex-1" onClick={() => openDialog("confirm")}>
             <CheckCircle2Icon className="mr-1.5 size-4" />
@@ -107,6 +174,21 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Rating reminder in confirmation dialog */}
+              {isConfirm && (
+                <div className="flex items-center justify-between rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-xs">
+                  <span className="text-muted-foreground">服務評分</span>
+                  {rating ? (
+                    <span className="flex items-center gap-1 font-medium text-foreground">
+                      <StarIcon className="size-3.5 fill-amber-400 text-amber-500" />
+                      {rating} 星（{RATING_LABELS[rating]}）
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground/70 italic">未評分（選填）</span>
+                  )}
+                </div>
+              )}
+
               {/* Email verification */}
               <div className="space-y-2">
                 <label htmlFor="reporter-email" className="text-sm font-medium text-foreground">

@@ -11,7 +11,7 @@ interface ActionResult {
 /**
  * Thin Adapter: Confirms repair fix and closes the ticket (Reporter).
  */
-export async function confirmFix(ticketId: string, email: string): Promise<ActionResult> {
+export async function confirmFix(ticketId: string, email: string, rating?: number): Promise<ActionResult> {
   if (!email.trim()) {
     return { success: false, error: "請輸入電子郵件地址" };
   }
@@ -21,6 +21,7 @@ export async function confirmFix(ticketId: string, email: string): Promise<Actio
   const result = await transitionTicket(supabase, {
     ticketId,
     transition: "confirm_fix",
+    rating,
     actor: { type: "reporter", email: email.trim() },
   });
 

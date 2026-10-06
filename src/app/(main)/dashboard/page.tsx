@@ -20,6 +20,7 @@ import { fetchInternalAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 
 import { DashboardAnnouncementsCard } from "./_components/dashboard-announcements-card";
+import { DashboardSatisfactionCard } from "./_components/dashboard-satisfaction-card";
 
 export default async function DashboardPage() {
   const [session, internalAnnouncements] = await Promise.all([getSession(), fetchInternalAnnouncements(5)]);
@@ -116,6 +117,9 @@ export default async function DashboardPage() {
 
       {/* Internal Announcements Card */}
       <DashboardAnnouncementsCard announcements={internalAnnouncements} isAdmin={isAdmin} />
+
+      {/* Satisfaction Overview Widget */}
+      <DashboardSatisfactionCard role={session?.role ?? null} userId={session?.userId} />
 
       {/* Quick Access Grid */}
       <div>

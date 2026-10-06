@@ -95,6 +95,11 @@ _Avoid_: Unassign, reset, withdraw
 _An admin disabling a user account. The account and all its data are preserved, but the user can no longer log in. Reversible — an admin can reactivate the account at any time._
 _Avoid_: Ban, suspend, delete, block
 
+**Rating**:
+通報人於確認修復時對維修結果的選填 1–5 星等評價。存於工單上，僅在通報人主動確認結案時收集；自動結案與未評分的工單不計入統計。工單被重新開啟時清除既有評分。
+_An optional 1–5 star score a reporter provides when confirming a fix. Stored on the ticket. Collected only during reporter-initiated closure; auto-closed and unrated tickets are excluded from statistics. Cleared when a ticket is reopened._
+_Avoid_: Review, feedback, survey, satisfaction score
+
 ### Ticket Statuses
 
 **Pending** (`pending`):
