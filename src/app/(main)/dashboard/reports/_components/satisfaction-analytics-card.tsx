@@ -1,11 +1,10 @@
 "use client";
 
 import { Award, BarChart2, Star, TrendingUp, Users } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 import type { SatisfactionReportData } from "./report-types";

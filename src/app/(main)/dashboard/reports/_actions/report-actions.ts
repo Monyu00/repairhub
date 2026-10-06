@@ -355,7 +355,7 @@ export async function fetchReportData(filterParams?: {
       avgDaysToResolve: tech.resolvedCount > 0 ? Number((tech.totalHours / tech.resolvedCount / 24).toFixed(1)) : 0,
     }));
 
-  const satisfaction = await calculateSatisfactionStats(tickets);
+  const satisfaction = calculateSatisfactionStats(tickets);
 
   return {
     kpi,

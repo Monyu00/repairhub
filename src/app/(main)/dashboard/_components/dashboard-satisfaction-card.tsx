@@ -4,9 +4,8 @@ import { ArrowRight, Star, TrendingUp, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { cn } from "@/lib/utils";
-import { fetchTechnicianPersonalRating } from "@/server/tickets/rating-stats";
+import { fetchGlobalRatingSummary, fetchTechnicianPersonalRating } from "@/server/tickets/rating-stats";
 
 interface DashboardSatisfactionCardProps {
   role: "admin" | "technician" | null;
@@ -19,26 +18,7 @@ export async function DashboardSatisfactionCard({ role, userId }: DashboardSatis
   }
 
   if (role === "admin") {
-    const supabase = createAdminClient();
-    const { data: tickets } = await supabase
-      .from("tickets")
-      .select("rating, status")
-      .in("status", ["closed", "completed"]);
-
-    let ratedCount = 0;
-    let ratingSum = 0;
-    let closedCount = 0;
-
-    (tickets ?? []).forEach((t) => {
-      if (t.status === "closed") closedCount++;
-      if (typeof t.rating === "number" && t.rating >= 1 && t.rating <= 5) {
-        ratedCount++;
-        ratingSum += t.rating;
-      }
-    });
-
-    const avgRating = ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0;
-    const responseRate = closedCount > 0 ? Number(((ratedCount / closedCount) * 100).toFixed(1)) : 0;
+    const { avgRating, responseRate, ratedCount, closedCount } = await fetchGlobalRatingSummary();
 
     return (
       <Card className="border border-border/80 shadow-xs">

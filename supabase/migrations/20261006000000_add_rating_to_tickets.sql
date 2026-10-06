@@ -6,6 +6,10 @@ ALTER TABLE public.tickets
 COMMENT ON COLUMN public.tickets.rating IS '通報人確認修復時的選填 1-5 星評分';
 COMMENT ON COLUMN public.tickets.rated_at IS '評分提交時間';
 
+-- Partial indexes for rating queries and technician rankings
+CREATE INDEX IF NOT EXISTS idx_tickets_rating_partial ON public.tickets (rating) WHERE rating IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_tickets_assigned_to_rating ON public.tickets (assigned_to, rating) WHERE rating IS NOT NULL;
+
 -- Seed ratings for a subset of existing closed tickets for reports and analytics demonstration
 UPDATE public.tickets
 SET 

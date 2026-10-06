@@ -108,7 +108,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <fieldset className="flex items-center gap-1.5 border-0 m-0 p-0" aria-label="服務評分星等選擇">
             {[1, 2, 3, 4, 5].map((star) => {
               const isFilled = (activeRating ?? 0) >= star;
               return (
@@ -118,8 +118,9 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                   onClick={() => setRating((prev) => (prev === star ? null : star))}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(null)}
-                  className="group rounded p-1 transition-transform hover:scale-115 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                  className="group rounded p-1 transition-transform hover:scale-110 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label={`${star} 星 - ${RATING_LABELS[star]}`}
+                  aria-pressed={rating === star}
                 >
                   <StarIcon
                     className={cn(
@@ -141,7 +142,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                 清除
               </button>
             )}
-          </div>
+          </fieldset>
         </div>
 
         <div className="flex gap-3">

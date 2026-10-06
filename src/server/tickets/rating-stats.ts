@@ -11,10 +11,17 @@ export interface TechnicianPersonalRatingSummary {
   distribution: { star: number; count: number }[];
 }
 
+export interface GlobalRatingSummary {
+  avgRating: number;
+  responseRate: number;
+  ratedCount: number;
+  closedCount: number;
+}
+
 /**
  * Calculates satisfaction report data for a given date range.
  */
-export async function calculateSatisfactionStats(
+export function calculateSatisfactionStats(
   tickets: Array<{
     id: string;
     status: string;
@@ -24,7 +31,7 @@ export async function calculateSatisfactionStats(
     assigned_to: string | null;
     technician: { id: string; display_name: string | null } | { id: string; display_name: string | null }[] | null;
   }>,
-): Promise<SatisfactionReportData> {
+): SatisfactionReportData {
   let totalClosed = 0;
   let totalRatingSum = 0;
   let totalRated = 0;
@@ -137,6 +144,49 @@ export async function calculateSatisfactionStats(
 }
 
 /**
+ * Fetches high-level global satisfaction summary for the admin dashboard.
+ */
+export async function fetchGlobalRatingSummary(): Promise<GlobalRatingSummary> {
+  const supabase = createAdminClient();
+
+  const { data: tickets, error } = await supabase
+    .from("tickets")
+    .select("status, rating")
+    .in("status", ["closed", "completed"]);
+
+  if (error || !tickets) {
+    return {
+      avgRating: 0,
+      responseRate: 0,
+      ratedCount: 0,
+      closedCount: 0,
+    };
+  }
+
+  let closedCount = 0;
+  let ratedCount = 0;
+  let ratingSum = 0;
+
+  tickets.forEach((t) => {
+    if (t.status === "closed") closedCount++;
+    if (typeof t.rating === "number" && t.rating >= 1 && t.rating <= 5) {
+      ratedCount++;
+      ratingSum += t.rating;
+    }
+  });
+
+  const avgRating = ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0;
+  const responseRate = closedCount > 0 ? Number(((ratedCount / closedCount) * 100).toFixed(1)) : 0;
+
+  return {
+    avgRating,
+    responseRate,
+    ratedCount,
+    closedCount,
+  };
+}
+
+/**
  * Fetches satisfaction summary specifically for an individual technician.
  */
 export async function fetchTechnicianPersonalRating(technicianId: string): Promise<TechnicianPersonalRatingSummary> {
@@ -153,7 +203,7 @@ export async function fetchTechnicianPersonalRating(technicianId: string): Promi
       ratedCount: 0,
       closedCount: 0,
       responseRate: 0,
-      distribution: [1, 2, 3, 4, 5].map((star) => ({ star, count: 0 })),
+      distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0 })),
     };
   }
 

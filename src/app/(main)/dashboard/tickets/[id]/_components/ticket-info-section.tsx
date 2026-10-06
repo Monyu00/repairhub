@@ -5,6 +5,7 @@ import { zhTW } from "date-fns/locale/zh-TW";
 import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export interface TicketInfoData {
   id: string;
@@ -109,11 +110,12 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star
                     key={s}
-                    className={`size-3.5 ${
+                    className={cn(
+                      "size-3.5",
                       s <= (ticket.rating ?? 0)
                         ? "fill-amber-400 text-amber-500"
-                        : "fill-transparent text-muted-foreground/30"
-                    }`}
+                        : "fill-transparent text-muted-foreground/30",
+                    )}
                   />
                 ))}
                 <span className="ml-1 font-bold text-xs text-foreground">{ticket.rating} / 5</span>
