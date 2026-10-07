@@ -1,22 +1,6 @@
 import "server-only";
 
 import type { SatisfactionReportData } from "@/app/(main)/dashboard/reports/_components/report-types";
-import { createAdminClient } from "@/lib/supabase/admin";
-
-export interface TechnicianPersonalRatingSummary {
-  avgRating: number;
-  ratedCount: number;
-  closedCount: number;
-  responseRate: number;
-  distribution: { star: number; count: number }[];
-}
-
-export interface GlobalRatingSummary {
-  avgRating: number;
-  responseRate: number;
-  ratedCount: number;
-  closedCount: number;
-}
 
 /**
  * Calculates satisfaction report data for a given date range.
@@ -140,102 +124,5 @@ export function calculateSatisfactionStats(
     distribution,
     monthlyTrends,
     technicianRankings,
-  };
-}
-
-/**
- * Fetches high-level global satisfaction summary for the admin dashboard.
- */
-export async function fetchGlobalRatingSummary(): Promise<GlobalRatingSummary> {
-  const supabase = createAdminClient();
-
-  const { data: tickets, error } = await supabase
-    .from("tickets")
-    .select("status, rating")
-    .in("status", ["closed", "completed"]);
-
-  if (error || !tickets) {
-    return {
-      avgRating: 0,
-      responseRate: 0,
-      ratedCount: 0,
-      closedCount: 0,
-    };
-  }
-
-  let closedCount = 0;
-  let ratedCount = 0;
-  let ratingSum = 0;
-
-  tickets.forEach((t) => {
-    if (t.status === "closed") closedCount++;
-    if (typeof t.rating === "number" && t.rating >= 1 && t.rating <= 5) {
-      ratedCount++;
-      ratingSum += t.rating;
-    }
-  });
-
-  const avgRating = ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0;
-  const responseRate = closedCount > 0 ? Number(((ratedCount / closedCount) * 100).toFixed(1)) : 0;
-
-  return {
-    avgRating,
-    responseRate,
-    ratedCount,
-    closedCount,
-  };
-}
-
-/**
- * Fetches satisfaction summary specifically for an individual technician.
- */
-export async function fetchTechnicianPersonalRating(technicianId: string): Promise<TechnicianPersonalRatingSummary> {
-  const supabase = createAdminClient();
-
-  const { data: tickets, error } = await supabase
-    .from("tickets")
-    .select("id, status, rating, rated_at")
-    .eq("assigned_to", technicianId);
-
-  if (error || !tickets) {
-    return {
-      avgRating: 0,
-      ratedCount: 0,
-      closedCount: 0,
-      responseRate: 0,
-      distribution: [5, 4, 3, 2, 1].map((star) => ({ star, count: 0 })),
-    };
-  }
-
-  let closedCount = 0;
-  let ratedCount = 0;
-  let ratingSum = 0;
-  const starCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-  tickets.forEach((t) => {
-    if (t.status === "closed") {
-      closedCount++;
-    }
-    if (typeof t.rating === "number" && t.rating >= 1 && t.rating <= 5) {
-      ratedCount++;
-      ratingSum += t.rating;
-      starCounts[t.rating] = (starCounts[t.rating] ?? 0) + 1;
-    }
-  });
-
-  const avgRating = ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0;
-  const responseRate = closedCount > 0 ? Number(((ratedCount / closedCount) * 100).toFixed(1)) : 0;
-
-  const distribution = [5, 4, 3, 2, 1].map((star) => ({
-    star,
-    count: starCounts[star] ?? 0,
-  }));
-
-  return {
-    avgRating,
-    ratedCount,
-    closedCount,
-    responseRate,
-    distribution,
   };
 }
