@@ -11,6 +11,7 @@ import { DateRangeFilter } from "./date-range-filter";
 import { MonthlyTicketsChart } from "./monthly-tickets-chart";
 import { ReportExportActions } from "./report-export-actions";
 import type { ReportData } from "./report-types";
+import { SatisfactionAnalyticsCard } from "./satisfaction-analytics-card";
 import { TechnicianPerformanceChart } from "./technician-performance-chart";
 
 interface ReportsDashboardProps {
@@ -25,6 +26,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
     categoryDistribution,
     resolutionTrends,
     technicianPerformance,
+    satisfaction,
     filter,
   } = initialData;
 
@@ -130,7 +132,12 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
           <CategoryDistributionChart data={categoryDistribution} />
         </div>
 
-        {/* Row 3: Technician Performance */}
+        {/* Row 3: Satisfaction Analytics & Technician Performance */}
+        <div>
+          <SatisfactionAnalyticsCard data={satisfaction} />
+        </div>
+
+        {/* Row 4: Technician Performance */}
         <div>
           <TechnicianPerformanceChart data={technicianPerformance} />
         </div>

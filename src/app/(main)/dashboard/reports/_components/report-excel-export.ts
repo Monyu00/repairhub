@@ -32,6 +32,12 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       { 項目: "處理中工單數", 數值: data.kpi.inProgressCount, 備註: "件" },
       { 項目: "結案率", 數值: `${data.kpi.completionRate}%`, 備註: "已完成工單佔總數比例" },
       { 項目: "平均修復天數", 數值: `${data.kpi.overallAvgDaysToResolve} 天`, 備註: "從通報至完工平均耗時" },
+      {
+        項目: "平均服務滿意度",
+        數值: data.satisfaction.avgRating > 0 ? `${data.satisfaction.avgRating} / 5.0 星` : "無評分",
+        備註: `共 ${data.satisfaction.totalRated} 筆有效評分`,
+      },
+      { 項目: "評分回應率", 數值: `${data.satisfaction.responseRate}%`, 備註: "結案案件提供評分之比例" },
       { 項目: "報表匯出時間", 數值: new Date().toLocaleString("zh-TW"), 備註: "系統自動產出" },
     ];
     const wsKpi = XLSX.utils.json_to_sheet(kpiRows);
@@ -92,6 +98,20 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
     const wsTechnician = XLSX.utils.json_to_sheet(technicianRows.length > 0 ? technicianRows : [{ 狀態: "無資料" }]);
     wsTechnician["!cols"] = [{ wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 16 }];
     XLSX.utils.book_append_sheet(wb, wsTechnician, "技師績效");
+
+    // 7. Sheet 7: 滿意度分析 (Satisfaction Metrics)
+    const satisfactionRows = data.satisfaction.technicianRankings.map((item, idx) => ({
+      排名: idx + 1,
+      技師姓名: item.displayName,
+      平均滿意度: item.avgRating > 0 ? `${item.avgRating} 星` : "無評分",
+      已評分件數: item.ratedCount,
+      已完工件數: item.completedCount,
+    }));
+    const wsSatisfaction = XLSX.utils.json_to_sheet(
+      satisfactionRows.length > 0 ? satisfactionRows : [{ 狀態: "無資料" }],
+    );
+    wsSatisfaction["!cols"] = [{ wch: 8 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, wsSatisfaction, "滿意度分析");
 
     // Filename: repairhub-report-{preset}-{YYYYMMDD}.xlsx
     const preset = data.filter.preset;

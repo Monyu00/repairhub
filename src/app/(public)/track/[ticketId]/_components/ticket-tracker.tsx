@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, StarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 import { ReporterActions } from "./reporter-actions";
 import { StatusTimeline } from "./status-timeline";
@@ -37,6 +38,8 @@ interface TicketTrackerProps {
   space: string;
   description: string;
   equipment: string | null;
+  rating?: number | null;
+  ratedAt?: string | null;
   photos: Photo[];
   notes: Note[];
   supabaseUrl: string;
@@ -51,6 +54,8 @@ export function TicketTracker({
   space,
   description,
   equipment,
+  rating,
+  ratedAt,
   photos,
   notes,
   supabaseUrl,
@@ -113,6 +118,34 @@ export function TicketTracker({
           {isClosedOrCompleted && photos.some((p) => p.phase === "closure") && (
             <div className="p-5 sm:p-6">
               <TicketPhotosGallery photos={photos} supabaseUrl={supabaseUrl} phase="closure" title="完工照片" />
+            </div>
+          )}
+
+          {/* Rating display on closed ticket */}
+          {status === "closed" && rating != null && (
+            <div className="p-5 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5">
+                <div className="space-y-1">
+                  <span className="text-xs font-semibold text-foreground">通報人完工服務評分</span>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <StarIcon
+                        key={s}
+                        className={cn(
+                          "size-4",
+                          s <= rating ? "fill-amber-400 text-amber-500" : "fill-transparent text-muted-foreground/30",
+                        )}
+                      />
+                    ))}
+                    <span className="ml-1.5 text-xs font-bold text-foreground">{rating} / 5</span>
+                  </div>
+                </div>
+                {ratedAt && (
+                  <span className="text-[11px] text-muted-foreground">
+                    評分於 {new Date(ratedAt).toLocaleDateString("zh-TW")}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </Card>

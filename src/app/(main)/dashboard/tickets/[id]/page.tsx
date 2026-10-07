@@ -50,6 +50,8 @@ export default async function Page({ params }: PageProps) {
         reporter_email,
         reporter_phone,
         assigned_to,
+        rating,
+        rated_at,
         created_at,
         updated_at,
         category:categories(id, name),
@@ -129,6 +131,8 @@ export default async function Page({ params }: PageProps) {
     reporterPhone: ticket.reporter_phone,
     createdAt: ticket.created_at,
     updatedAt: ticket.updated_at,
+    rating: ticket.rating,
+    ratedAt: ticket.rated_at,
   };
 
   // 5. Format photos

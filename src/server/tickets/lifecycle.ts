@@ -43,7 +43,7 @@ export type TransitionPayload =
   | { transition: "claim" }
   | { transition: "assign"; technicianId: string }
   | { transition: "submit_closure"; summary?: string; photosBase64: string[] }
-  | { transition: "confirm_fix" }
+  | { transition: "confirm_fix"; rating?: number }
   | { transition: "reopen"; feedback: string }
   | { transition: "return_to_pending" }
   | { transition: "cancel"; reason: string };
@@ -537,9 +537,32 @@ export async function transitionTicket(
         }
       }
 
+      if (options.rating != null) {
+        if (!Number.isInteger(options.rating) || options.rating < 1 || options.rating > 5) {
+          return {
+            success: false,
+            error: "評分必須為 1 至 5 之間的整數",
+            code: "VALIDATION_FAILED",
+          };
+        }
+      }
+
+      const updateData: {
+        status: "closed";
+        rating?: number | null;
+        rated_at?: string | null;
+      } = {
+        status: "closed",
+      };
+
+      if (options.rating != null) {
+        updateData.rating = options.rating;
+        updateData.rated_at = new Date().toISOString();
+      }
+
       const { error: updateError } = await supabase
         .from("tickets")
-        .update({ status: "closed" })
+        .update(updateData)
         .eq("id", ticketId)
         .eq("status", "completed");
 
@@ -553,8 +576,11 @@ export async function transitionTicket(
       }
 
       const authorId = actor.type === "admin" || actor.type === "technician" ? actor.userId : null;
+      const ratingLabel = options.rating != null ? `（評分：${options.rating} 星）` : "";
       const noteContent =
-        actor.type === "system" ? "系統自動結案（完工逾 7 日無異議）" : "通報人已確認修復完成，報修單結案";
+        actor.type === "system"
+          ? "系統自動結案（完工逾 7 日無異議）"
+          : `通報人已確認修復完成${ratingLabel}，報修單結案`;
 
       await supabase.from("ticket_notes").insert({
         ticket_id: ticketId,
@@ -605,7 +631,11 @@ export async function transitionTicket(
 
       const { error: updateError } = await supabase
         .from("tickets")
-        .update({ status: "in_progress" })
+        .update({
+          status: "in_progress",
+          rating: null,
+          rated_at: null,
+        })
         .eq("id", ticketId)
         .eq("status", "completed");
 
