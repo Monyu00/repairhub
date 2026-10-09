@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T21:30:00.000Z",
+  "title": "Design System: RepairHub",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Carbon Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.65 0 0)",
+          "oklch(0.80 0 0)",
+          "oklch(0.90 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "destructive": {
+        "role": "destructive",
+        "displayName": "Signal Crimson",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.25 0.15 27.3)",
+          "oklch(0.38 0.20 27.3)",
+          "oklch(0.48 0.23 27.3)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.68 0.20 27.3)",
+          "oklch(0.78 0.15 27.3)",
+          "oklch(0.88 0.10 27.3)",
+          "oklch(0.95 0.04 27.3)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.145 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.40 0 0)",
+          "oklch(0.556 0 0)",
+          "oklch(0.708 0 0)",
+          "oklch(0.85 0 0)",
+          "oklch(0.922 0 0)",
+          "oklch(1 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "全站 Hero 主標題與重要宣傳看板大字"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "模組頁面大標題與重大彈窗標頭"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "卡片標題、表頭欄位名稱與區塊抬頭"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "標準閱讀內文、資料欄位與表單輸入"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "狀態膠囊 Badge、詮釋性文字與時間戳記"
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-xs",
+        "value": "0px 1px 3px 0px hsl(0 0% 0% / 0.05)",
+        "purpose": "微幅抬升浮動卡片與重要 Banner"
+      },
+      {
+        "name": "structural-ring",
+        "value": "0 0 0 1px oklch(0.145 0 0 / 10%)",
+        "purpose": "取代模糊投影之標準 1px 精密外環線"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-tactile",
+        "value": "all 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "按鈕點擊下壓微動效與狀態過渡"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主要操作按鈕，深沉碳墨表面，具備 1px 點擊下壓觸感回饋。",
+      "html": "<button class=\"ds-btn-primary\">通報修繕</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: oklch(0.985 0 0); background-color: oklch(0.205 0 0); border: 1px solid transparent; border-radius: 10px; cursor: pointer; outline: none; transition: all 0.15s ease; user-select: none; white-space: nowrap; } .ds-btn-primary:hover { background-color: oklch(0.205 0 0 / 80%); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { box-shadow: 0 0 0 3px oklch(0.708 0 0 / 50%); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "次要操作與導航按鈕，以細線外框維持輕盈節奏。",
+      "html": "<button class=\"ds-btn-outline\">前台首頁</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: oklch(0.145 0 0); background-color: transparent; border: 1px solid oklch(0.922 0 0); border-radius: 10px; cursor: pointer; outline: none; transition: all 0.15s ease; user-select: none; white-space: nowrap; } .ds-btn-outline:hover { background-color: oklch(0.97 0 0); } .ds-btn-outline:active { transform: translateY(1px); } .ds-btn-outline:focus-visible { box-shadow: 0 0 0 3px oklch(0.708 0 0 / 50%); }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "危險操作或退單按鈕，半透明信號赤紅底色與高警示字色。",
+      "html": "<button class=\"ds-btn-destructive\">退回待處理</button>",
+      "css": ".ds-btn-destructive { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: oklch(0.577 0.245 27.325); background-color: oklch(0.577 0.245 27.325 / 10%); border: 1px solid transparent; border-radius: 10px; cursor: pointer; outline: none; transition: all 0.15s ease; user-select: none; white-space: nowrap; } .ds-btn-destructive:hover { background-color: oklch(0.577 0.245 27.325 / 20%); } .ds-btn-destructive:active { transform: translateY(1px); } .ds-btn-destructive:focus-visible { box-shadow: 0 0 0 3px oklch(0.577 0.245 27.325 / 20%); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "標準單行輸入框，具備 10px 圓角與清晰聚焦光環。",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"輸入報修單號或設備名稱...\" />",
+      "css": ".ds-input { display: block; width: 100%; height: 32px; padding: 4px 10px; font-family: inherit; font-size: 14px; color: oklch(0.145 0 0); background-color: transparent; border: 1px solid oklch(0.922 0 0); border-radius: 10px; outline: none; box-sizing: border-box; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input::placeholder { color: oklch(0.556 0 0); } .ds-input:focus-visible { border-color: oklch(0.708 0 0); box-shadow: 0 0 0 3px oklch(0.708 0 0 / 50%); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "全圓形膠囊狀狀態識別標籤，專門呈現工單狀態或權限角色。",
+      "html": "<span class=\"ds-badge\">處理中</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; justify-content: center; height: 20px; padding: 0 8px; font-size: 12px; font-weight: 500; color: oklch(0.205 0 0); background-color: oklch(0.97 0 0); border: 1px solid oklch(0.922 0 0); border-radius: 9999px; white-space: nowrap; }"
+    },
+    {
+      "name": "Tonal Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "以 1px 晶透環線與階調底色構建的結構卡片容器。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">水電修繕</h3><span class=\"ds-card-meta\">2026-10-09</span></div><p class=\"ds-card-body\">綜合大樓 3F 洗手間洗手台水管滲水，需技師現場更換閥門。</p></div>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; background-color: oklch(1 0 0); color: oklch(0.145 0 0); border-radius: 14px; box-shadow: 0 0 0 1px oklch(0.145 0 0 / 10%), 0 1px 3px 0 rgba(0, 0, 0, 0.05); font-family: inherit; } .ds-card-header { display: flex; align-items: center; justify-content: space-between; } .ds-card-title { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; } .ds-card-meta { font-size: 12px; color: oklch(0.556 0 0); } .ds-card-body { margin: 0; font-size: 14px; color: oklch(0.556 0 0); line-height: 1.5; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Transparent Ledger",
+    "overview": "RepairHub（透明維修公約）是專為現代校園打造的設施報修、資產履歷與修繕調度管理系統。系統以「公共信任」、「透明閉環」與「精準可讀性」為核心美學基調，屏除花俏繁複的漸層裝飾，以純淨高對比的版面建構出如工程公約與精密手冊般的專業權威感。\n\n整體視覺風格呈現沉穩精準的現代工藝質感：介面以深沉碳墨（Carbon Ink）與極簡紙白（Paper White）形成堅實的閱讀基底，輔以高辨識度的信號赤紅（Signal Crimson）標註緊急與異常狀態。在空間布局上，系統兼顧雙軌操作實境——現場行動端（Reporter 與 Technician）講求 10 秒通報的零阻力直覺流程，而總務調度桌面端（Admin）則維持俐落、高資訊密度且結構緊密的儀表板節奏。",
+    "keyCharacteristics": [
+      "極簡透明 (Radical Transparency)：全域工單狀態流轉與歷史進程清晰呈現在高對比排版中，杜絕資訊黑盒。",
+      "精密手感 (Precise & Tactile Feedback)：全域組件維持緊湊高度（32px）、細緻點擊下壓微動效（1px 物理下沉）與清晰輪廓聚焦環。",
+      "語意 Token 統一 (Semantic-First Architecture)：嚴格依循 shadcn radix-nova 語意變數，保證深淺色模式與主題預設檔（Default / Tangerine / Soft Pop / Brutalist）無縫切換。",
+      "結構區隔取代厚重陰影 (Tonal Rings over Blurry Shadows)：採用 1px 微外框（ring-1 ring-foreground/10）與階調底色區隔層次，維持介面清晰俐落。"
+    ],
+    "rules": [
+      {
+        "name": "The Ink and Signal Rule",
+        "body": "全站介面除基礎灰階階調外，飽和彩色僅限於明確的工單狀態指示（如信號赤紅代表緊急/故障），嚴禁在非狀態性元件上添加裝飾性彩色背景。",
+        "section": "colors"
+      },
+      {
+        "name": "The Zero-Hardcode Rule",
+        "body": "所有顏色必須使用 Tailwind 語意化類別或 CSS 變數（如 bg-primary, text-muted-foreground, border-border），嚴禁寫死任意十六進位色碼或非主題顏色。",
+        "section": "colors"
+      },
+      {
+        "name": "The Numeric Alignment Rule",
+        "body": "所有工單編號（Ticket Code）、建築空間代碼（Location Code）、金額數字與時間戳記一律使用等寬數字或 Mono 字體，確保表格跨列垂直對齊與掃讀精確度。",
+        "section": "typography"
+      },
+      {
+        "name": "The Tonal-Over-Shadow Rule",
+        "body": "介面元件層次優先以色階差異與 1px 細外框表現，禁止在標準主題下疊加深度模糊的裝飾性陰影。",
+        "section": "elevation"
+      },
+      {
+        "name": "The Capsule-for-Status Rule",
+        "body": "狀態指示標籤、角色識別 Badge 與分類 Tag 一律使用全圓膠囊狀（rounded-4xl）；按鈕與卡片則使用結構幾何圓角（rounded-lg / rounded-xl）。嚴禁將可操作之主按鈕設定為膠囊圓角，以明確區隔「操作控制」與「狀態資訊」。",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do 一律使用系統語意 Token（bg-background, text-primary, border-border），維持多主題預設與暗色模式的相容性。",
+      "Do 遵循 32px 標準高度（h-8）與緊湊空間節奏，維持高效率管理後台的資訊密度。",
+      "Do 狀態標籤一律使用全圓膠囊狀（rounded-4xl），並搭配對應的 Lucide 狀態圖示。",
+      "Do 數字序號、時間戳記與工單代號使用等寬或 Mono 字型顯示。",
+      "Do 為所有可互動元素保留清晰的 focus-visible:ring-3 鍵盤無障礙支援。"
+    ],
+    "donts": [
+      "Don't 寫死任何非主題色彩碼（如 #2563eb、bg-blue-600 或任意 OKLCH 常數）。",
+      "Don't 使用大半徑高模糊的擴散陰影（如 shadow-2xl），破壞平面層疊與公約設計的俐落質感。",
+      "Don't 將操作按鈕設定為全圓膠囊形（Pill shape），造成控制項與狀態標籤的認知混淆。",
+      "Don't 隨意修改 src/components/ui/ 核心組件代碼，保持 shadcn 組件庫原汁原味。",
+      "Don't 在無狀態意義的卡片或容器上任意疊加飽和色彩背景。"
+    ]
+  }
+}
