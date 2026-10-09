@@ -33,6 +33,7 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
+      "!.agents",
       "!.github",
       "!.husky",
       "!node_modules",
