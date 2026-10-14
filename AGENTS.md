@@ -102,12 +102,6 @@ Triage labels use default mapping: needs-triage, needs-info, ready-for-agent, re
 
 The repository uses a single-context domain documentation layout. See `docs/agents/domain.md`.
 
-### Code exploration & reading (Codegraph MCP)
-
-Prioritize using the **codegraph** MCP tool (`codegraph_explore` via `call_mcp_tool`, passing `projectPath: "d:\\RepairHub"`) for code exploration, symbol navigation, call-path analysis, and reading implementations.
-- Always reach for `codegraph_explore` first before falling back to `grep_search` or manual `view_file` loops.
-- It returns line-numbered symbol sources, cross-references, and blast-radius in a single call.
-
 ## Browser Automation
 
 Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
@@ -131,3 +125,14 @@ Follow Ponytail principles for ALL coding tasks:
 - Bug fixes: fix root cause where all callers route through, not just the symptom caller
 - Output format: Code first, then at most 3 short lines (`[code] -> skipped: [X], add when [Y]`)
 <!-- ponytail-end -->
+
+<!-- CODEGRAPH_START -->
+## CodeGraph
+
+In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
+
+- **MCP tool** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them, including dynamic-dispatch hops grep can't follow. Name a file or symbol in the query to read its current line-numbered source. If it's listed but deferred, load it by name via tool search.
+- **Shell** (always works): `codegraph explore "<symbol names or question>"` prints the same output.
+
+If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+<!-- CODEGRAPH_END -->
