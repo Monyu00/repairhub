@@ -4,6 +4,7 @@ import { ArrowRight, Inbox } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
 import type { TicketRecord } from "@/server/tickets/query";
 
 import { TicketStatusBadge } from "../tickets/_components/ticket-status-badge";
@@ -40,10 +41,14 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
       </CardHeader>
       <CardContent className="p-0">
         {tickets.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-8 text-center">
-            <Inbox className="size-5 text-muted-foreground" aria-hidden="true" />
-            <p className="text-muted-foreground text-sm">目前沒有開放中的維修單</p>
-          </div>
+          <Empty className="border-dashed bg-muted/30 py-8">
+            <EmptyMedia variant="icon">
+              <Inbox />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyDescription>目前沒有開放中的維修單</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <ul className="flex flex-col gap-2">
             {tickets.map((ticket) => (

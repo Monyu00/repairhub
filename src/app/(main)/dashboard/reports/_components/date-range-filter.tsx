@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import type { DateRangeFilterState, DateRangePreset } from "./report-types";
 
@@ -28,6 +29,15 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [fromDate, setFromDate] = useState(currentFilter.from ?? "");
+  const [toDate, setToDate] = useState(currentFilter.to ?? "");
+  const [hasInvalidRange, setHasInvalidRange] = useState(false);
+
+  useEffect(() => {
+    setFromDate(currentFilter.from ?? "");
+    setToDate(currentFilter.to ?? "");
+    setHasInvalidRange(false);
+  }, [currentFilter.from, currentFilter.to]);
 
   const handlePresetChange = (preset: DateRangePreset) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -45,6 +55,12 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
     const formData = new FormData(e.currentTarget);
     const from = formData.get("from") as string;
     const to = formData.get("to") as string;
+
+    if (from && to && from > to) {
+      setHasInvalidRange(true);
+      return;
+    }
+    setHasInvalidRange(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("range", "custom");
@@ -94,18 +110,40 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
       {/* Custom Date Form */}
       <form onSubmit={handleCustomDateApply} className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">
+          <Label htmlFor="report-range-from" className="sr-only">
+            開始日期
+          </Label>
           <Input
             type="date"
             name="from"
-            defaultValue={currentFilter.from ?? ""}
+            id="report-range-from"
+            value={fromDate}
+            max={toDate || undefined}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              setHasInvalidRange(false);
+            }}
+            aria-invalid={hasInvalidRange}
+            aria-describedby={hasInvalidRange ? "report-range-error" : undefined}
             className="h-8 w-34 text-xs"
             disabled={isPending}
           />
           <span className="text-muted-foreground text-xs">至</span>
+          <Label htmlFor="report-range-to" className="sr-only">
+            結束日期
+          </Label>
           <Input
             type="date"
             name="to"
-            defaultValue={currentFilter.to ?? ""}
+            id="report-range-to"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              setHasInvalidRange(false);
+            }}
+            aria-invalid={hasInvalidRange}
+            aria-describedby={hasInvalidRange ? "report-range-error" : undefined}
             className="h-8 w-34 text-xs"
             disabled={isPending}
           />
@@ -119,11 +157,17 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label="重設篩選"
             onClick={handleReset}
             title="重設篩選"
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </Button>
+        )}
+        {hasInvalidRange && (
+          <p id="report-range-error" role="alert" className="w-full text-destructive text-xs">
+            結束日期不得早於開始日期。
+          </p>
         )}
       </form>
     </div>

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import {
   Pagination,
@@ -251,9 +252,19 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
 
         <CardContent className="space-y-4">
           {filteredEquipment.length === 0 ? (
-            <div className="flex h-40 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
-              {equipmentList.length === 0 ? "目前尚無任何設備資料，請點擊右上角新增。" : "找不到符合條件的設備資產。"}
-            </div>
+            <Empty className="border-dashed bg-card/40 py-10">
+              <EmptyMedia variant="icon">
+                <HardDrive />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>{equipmentList.length === 0 ? "尚未建立設備資產" : "找不到符合條件的設備"}</EmptyTitle>
+                <EmptyDescription>
+                  {equipmentList.length === 0
+                    ? "目前尚無任何設備資料，請點擊右上角新增。"
+                    : "找不到符合條件的設備資產。"}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <>
               <div className="overflow-hidden rounded-md border bg-background">

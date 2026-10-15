@@ -6,6 +6,7 @@ import { Calendar, ClipboardList, Loader2, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
 import { Badge } from "@/components/ui/badge";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import {
@@ -73,9 +74,15 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
           ) : error ? (
             <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">{error}</div>
           ) : tickets.length === 0 ? (
-            <div className="flex h-40 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">
-              此設備目前尚無任何報修紀錄。
-            </div>
+            <Empty className="border-dashed bg-card/40 py-10">
+              <EmptyMedia variant="icon">
+                <ClipboardList />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>尚無維修紀錄</EmptyTitle>
+                <EmptyDescription>此設備目前尚無任何報修紀錄。</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <div className="space-y-3">
               <div className="text-xs font-medium text-muted-foreground">共 {tickets.length} 筆維修通報</div>

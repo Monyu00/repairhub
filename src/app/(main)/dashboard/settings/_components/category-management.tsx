@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -236,9 +237,11 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       </CardHeader>
       <CardContent>
         {categories.length === 0 ? (
-          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
-            目前尚未建立任何報修類別。
-          </div>
+          <Empty className="border-dashed bg-card/40 py-10">
+            <EmptyHeader>
+              <EmptyDescription>目前尚未建立任何報修類別。</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="rounded-md border">
             <DndContext

@@ -5,6 +5,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 
 import type { SatisfactionReportData } from "./report-types";
@@ -112,9 +113,14 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
         </div>
 
         {!hasData ? (
-          <div className="flex h-40 items-center justify-center rounded-lg border border-border/60 border-dashed text-muted-foreground text-xs">
-            此篩選時段內尚無已評分之結案工單
-          </div>
+          <Empty className="border-dashed py-10">
+            <EmptyMedia variant="icon">
+              <Star />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyDescription>此篩選時段內尚無已評分之結案工單</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Rating Distribution */}
