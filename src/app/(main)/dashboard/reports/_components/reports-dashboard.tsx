@@ -72,11 +72,11 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
               <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
                 {kpi.completionRate}%
               </div>
-              <p className="flex items-center gap-0.5 text-[11px] text-emerald-600 dark:text-emerald-400">
+              <p className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
                 <CheckCircle2 className="inline h-3 w-3" />共 {kpi.completedOrClosedCount} 件結案
               </p>
             </div>
-            <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-500">
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <TrendingUp className="h-5 w-5" />
             </div>
           </CardContent>
@@ -92,7 +92,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
               </div>
               <p className="text-[11px] text-muted-foreground">通報至完工平均耗時</p>
             </div>
-            <div className="rounded-xl bg-amber-500/10 p-2.5 text-amber-500">
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <Clock className="h-5 w-5" />
             </div>
           </CardContent>
@@ -111,7 +111,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
                 待處理 {kpi.pendingCount} | 進行中 {kpi.inProgressCount}
               </p>
             </div>
-            <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-500">
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <Hourglass className="h-5 w-5" />
             </div>
           </CardContent>
