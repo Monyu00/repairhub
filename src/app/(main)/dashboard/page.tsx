@@ -1,84 +1,33 @@
 import Link from "next/link";
 
-import {
-  BarChart3,
-  ClipboardCheck,
-  ClipboardList,
-  ExternalLink,
-  Megaphone,
-  Package,
-  QrCode,
-  Settings,
-  ShieldCheck,
-  Wrench,
-} from "lucide-react";
+import { ExternalLink, ShieldCheck, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchInternalAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 
+import { fetchDashboardOpenTickets, fetchDashboardSummary } from "./_actions/dashboard-summary";
 import { DashboardAnnouncementsCard } from "./_components/dashboard-announcements-card";
+import { DashboardOpenQueue } from "./_components/dashboard-open-queue";
+import { DashboardQuickLinks } from "./_components/dashboard-quick-links";
+import { DashboardSummaryCards } from "./_components/dashboard-summary-cards";
 
 export default async function DashboardPage() {
-  const [session, internalAnnouncements] = await Promise.all([getSession(), fetchInternalAnnouncements(5)]);
-  const isAdmin = session?.role === "admin";
+  const session = await getSession();
+
+  if (!session || (session.role !== "admin" && session.role !== "technician")) {
+    return null;
+  }
+
+  const isAdmin = session.role === "admin";
   const roleName = isAdmin ? "系統管理者" : "維修技師";
-
-  const quickLinks = [
-    {
-      title: "報修單管理",
-      description: "檢視、審核、指派與更新所有案件進度",
-      href: "/dashboard/tickets",
-      icon: ClipboardList,
-      roles: ["admin", "technician"],
-    },
-    {
-      title: "維修紀錄",
-      description: "查詢技師維修紀錄、工單歷史與回報細節",
-      href: "/dashboard/repair-records",
-      icon: ClipboardCheck,
-      roles: ["admin", "technician"],
-    },
-    {
-      title: "統計報表",
-      description: "報修案件趨勢、完修率與分類統計分析",
-      href: "/dashboard/reports",
-      icon: BarChart3,
-      roles: ["admin"],
-    },
-    {
-      title: "設備管理",
-      description: "維護校園設備清冊、保養狀態與位置對應",
-      href: "/dashboard/equipment",
-      icon: Package,
-      roles: ["admin"],
-    },
-    {
-      title: "QR Code 管理",
-      description: "產生並管理空間與設備的快速報修 QR 標籤",
-      href: "/dashboard/qr-codes",
-      icon: QrCode,
-      roles: ["admin"],
-    },
-    {
-      title: "公告管理",
-      description: "發佈校園修繕營運通知、重要停機提醒與公告設定",
-      href: "/dashboard/announcements",
-      icon: Megaphone,
-      roles: ["admin"],
-    },
-    {
-      title: "系統設定",
-      description: "維護報修類別、校舍空間地點與使用者權限",
-      href: "/dashboard/settings",
-      icon: Settings,
-      roles: ["admin"],
-    },
-  ];
-
-  const visibleLinks = quickLinks.filter((item) => item.roles.includes(session?.role ?? ""));
+  const viewerContext = { role: session.role, userId: session.userId };
+  const [summary, openTickets, internalAnnouncements] = await Promise.all([
+    fetchDashboardSummary(session.supabase, viewerContext),
+    fetchDashboardOpenTickets(session.supabase, viewerContext),
+    fetchInternalAnnouncements(5),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -93,8 +42,8 @@ export default async function DashboardPage() {
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm">
-            歡迎回來，<span className="font-medium text-foreground">{session?.displayName ?? session?.email}</span>
-            。請選擇下方模組進行管理操作。
+            歡迎回來，<span className="font-medium text-foreground">{session.displayName ?? session.email}</span>
+            。以下是目前修繕營運概況。
           </p>
         </div>
 
@@ -114,35 +63,14 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Internal Announcements Card */}
-      <DashboardAnnouncementsCard announcements={internalAnnouncements} isAdmin={isAdmin} />
+      <DashboardSummaryCards summary={summary} isAdmin={isAdmin} />
 
-      {/* Quick Access Grid */}
-      <div>
-        <h2 className="mb-3 font-semibold text-foreground text-lg">快速導航</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleLinks.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} className="group block">
-                <Card className="h-full border border-border transition-all hover:border-primary/40 hover:shadow-xs">
-                  <CardHeader className="flex flex-row items-center gap-3 space-y-0 pb-2">
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <Icon className="size-5" />
-                    </div>
-                    <CardTitle className="font-semibold text-base text-foreground group-hover:text-primary">
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-xs leading-relaxed">{item.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <DashboardOpenQueue tickets={openTickets} />
+        <DashboardAnnouncementsCard announcements={internalAnnouncements} isAdmin={isAdmin} />
       </div>
+
+      <DashboardQuickLinks role={session.role} />
     </div>
   );
 }

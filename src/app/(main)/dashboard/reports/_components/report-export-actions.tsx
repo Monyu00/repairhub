@@ -64,14 +64,14 @@ export function ReportExportActions({ data }: ReportExportActionsProps) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={handleExportExcel} disabled={isExporting} className="cursor-pointer gap-2">
-            <FileSpreadsheet className="text-emerald-600 dark:text-emerald-400" />
+            <FileSpreadsheet className="text-muted-foreground" />
             <div className="flex flex-col">
               <span className="font-medium text-xs">Excel 活頁簿 (.xlsx)</span>
               <span className="text-[10px] text-muted-foreground">多工作表結構化數據</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting} className="cursor-pointer gap-2">
-            <FileText className="text-rose-600 dark:text-rose-400" />
+            <FileText className="text-muted-foreground" />
             <div className="flex flex-col">
               <span className="font-medium text-xs">PDF 統計報表 (.pdf)</span>
               <span className="text-[10px] text-muted-foreground">A4 雙頁排版與摘要</span>
