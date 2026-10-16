@@ -80,7 +80,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
           ) : error ? (
             <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{error}</div>
           ) : tickets.length === 0 ? (
-            <Empty className="border-dashed bg-card/40 py-10">
+            <Empty className="border border-dashed bg-card/40 py-10">
               <EmptyMedia variant="icon">
                 <ClipboardList />
               </EmptyMedia>

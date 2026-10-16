@@ -237,7 +237,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       </CardHeader>
       <CardContent>
         {categories.length === 0 ? (
-          <Empty className="border-dashed bg-card/40 py-10">
+          <Empty className="border border-dashed bg-card/40 py-10">
             <EmptyHeader>
               <EmptyDescription>目前尚未建立任何報修類別。</EmptyDescription>
             </EmptyHeader>

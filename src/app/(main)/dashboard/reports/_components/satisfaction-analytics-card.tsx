@@ -113,7 +113,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
         </div>
 
         {!hasData ? (
-          <Empty className="border-dashed py-10">
+          <Empty className="border border-dashed py-10">
             <EmptyMedia variant="icon">
               <Star />
             </EmptyMedia>

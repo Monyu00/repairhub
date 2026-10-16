@@ -252,7 +252,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
 
         <CardContent className="space-y-4">
           {filteredEquipment.length === 0 ? (
-            <Empty className="border-dashed bg-card/40 py-10">
+            <Empty className="border border-dashed bg-card/40 py-10">
               <EmptyMedia variant="icon">
                 <HardDrive />
               </EmptyMedia>

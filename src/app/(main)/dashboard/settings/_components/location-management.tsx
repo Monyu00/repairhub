@@ -285,7 +285,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         </div>
 
         {filteredBuildings.length === 0 ? (
-          <Empty className="border-dashed bg-card/40 py-10">
+          <Empty className="border border-dashed bg-card/40 py-10">
             <EmptyHeader>
               <EmptyDescription>
                 {buildings.length === 0
@@ -365,7 +365,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
                   <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
                     {spaceCount === 0 ? (
-                      <Empty className="my-2 border-dashed py-6">
+                      <Empty className="my-2 border border-dashed py-6">
                         <EmptyHeader>
                           <EmptyDescription>此大樓目前無任何空間設定。</EmptyDescription>
                         </EmptyHeader>

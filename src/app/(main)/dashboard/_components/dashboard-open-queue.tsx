@@ -41,7 +41,7 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
       </CardHeader>
       <CardContent className="p-0">
         {tickets.length === 0 ? (
-          <Empty className="border-dashed bg-muted/30 py-8">
+          <Empty className="border border-dashed bg-muted/30 py-8">
             <EmptyMedia variant="icon">
               <Inbox />
             </EmptyMedia>
