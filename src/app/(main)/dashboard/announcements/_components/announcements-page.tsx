@@ -439,7 +439,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               onClick={() => {
                                 setEditingAnnouncement(item);
                                 setDialogOpen(true);
@@ -451,7 +451,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                             </Button>
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               onClick={() => {
                                 setDeletingAnnouncement(item);
                                 setDeleteDialogOpen(true);
