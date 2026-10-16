@@ -34,14 +34,19 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
     if (open && equipment) {
       setErrorMessage(null);
       setIsChecking(true);
-      checkEquipmentTicketsCount(equipment.id).then((res) => {
-        setIsChecking(false);
-        if (res.success) {
-          setTicketCount(res.count);
-        } else {
+      checkEquipmentTicketsCount(equipment.id)
+        .then((res) => {
+          setIsChecking(false);
+          if (res.success) {
+            setTicketCount(res.count);
+          } else {
+            setTicketCount(0);
+          }
+        })
+        .catch(() => {
+          setIsChecking(false);
           setTicketCount(0);
-        }
-      });
+        });
     }
   }, [open, equipment]);
 
