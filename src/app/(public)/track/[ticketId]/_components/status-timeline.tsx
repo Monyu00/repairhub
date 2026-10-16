@@ -89,6 +89,9 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
           const isLast = index === allItems.length - 1;
           const Icon = item.isCreation ? PlusCircleIcon : getStatusIcon(item.content);
           const isNewest = index === 0;
+          const dotClasses = item.isCreation
+            ? "border-muted-foreground/40 bg-muted text-muted-foreground"
+            : "border-border bg-card text-muted-foreground";
 
           return (
             <div key={item.id} className="flex gap-3">
@@ -96,11 +99,7 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
               <div className="flex flex-col items-center">
                 <div
                   className={`z-10 flex size-7 shrink-0 items-center justify-center rounded-full border-2 ${
-                    isNewest
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : item.isCreation
-                        ? "border-muted-foreground/40 bg-muted text-muted-foreground"
-                        : "border-border bg-card text-muted-foreground"
+                    isNewest ? "border-primary bg-primary text-primary-foreground" : dotClasses
                   }`}
                 >
                   <Icon className="size-3.5" />

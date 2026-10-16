@@ -79,12 +79,13 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
                 這將會從系統中移除設備紀錄（代碼：<span className="font-mono">{equipment?.code}</span>）。
               </p>
 
-              {isChecking ? (
+              {isChecking && (
                 <div className="flex items-center gap-2 pt-1 text-muted-foreground text-xs">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   檢查報修紀錄中...
                 </div>
-              ) : ticketCount > 0 ? (
+              )}
+              {!isChecking && ticketCount > 0 && (
                 <div className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 text-xs dark:text-amber-400">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <div>
@@ -92,7 +93,7 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
                     刪除設備後，相關報修單的設備關聯將自動設為空值（報修單仍會保留）。
                   </div>
                 </div>
-              ) : null}
+              )}
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -244,16 +244,14 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                 disabled={isPending || !email.trim() || (!isConfirm && !feedback.trim())}
                 variant={isConfirm ? "default" : "destructive"}
               >
-                {isPending ? (
+                {isPending && (
                   <>
                     <Loader2Icon className="mr-1.5 size-4 animate-spin" />
                     處理中…
                   </>
-                ) : isConfirm ? (
-                  "確認修復"
-                ) : (
-                  "回報問題仍在"
                 )}
+                {!isPending && isConfirm && "確認修復"}
+                {!isPending && !isConfirm && "回報問題仍在"}
               </Button>
             </DialogFooter>
           )}

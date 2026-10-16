@@ -72,14 +72,16 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
         </SheetHeader>
 
         <div className="mt-6 space-y-4 px-1">
-          {isLoading ? (
+          {isLoading && (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground text-sm">
               <Loader2 className="h-5 w-5 animate-spin" />
               載入歷史紀錄中...
             </div>
-          ) : error ? (
+          )}
+          {!isLoading && error && (
             <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{error}</div>
-          ) : tickets.length === 0 ? (
+          )}
+          {!isLoading && !error && tickets.length === 0 && (
             <Empty className="border border-dashed bg-card/40 py-10">
               <EmptyMedia variant="icon">
                 <ClipboardList />
@@ -89,7 +91,8 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
                 <EmptyDescription>此設備目前尚無任何報修紀錄。</EmptyDescription>
               </EmptyHeader>
             </Empty>
-          ) : (
+          )}
+          {!isLoading && !error && tickets.length > 0 && (
             <div className="space-y-3">
               <div className="font-medium text-muted-foreground text-xs">共 {tickets.length} 筆維修通報</div>
               {tickets.map((ticket) => (

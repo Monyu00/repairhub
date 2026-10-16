@@ -66,7 +66,10 @@ export function TechnicianClaimButton({ ticketId, status, isAssignedToMe }: Tech
       className="gap-1.5 text-xs shadow-xs"
     >
       {isClaiming ? <Loader2 className="size-3.5 animate-spin" /> : <Hand className="size-3.5" />}
-      <span>{isPending ? (isClaiming ? "接單中..." : "立即接單") : "已不可接單"}</span>
+      <span>
+        {isPending && (isClaiming ? "接單中..." : "立即接單")}
+        {!isPending && "已不可接單"}
+      </span>
     </Button>
   );
 
