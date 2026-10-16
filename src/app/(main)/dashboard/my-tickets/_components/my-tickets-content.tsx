@@ -9,6 +9,7 @@ import { Calendar, ClipboardList, ExternalLink, MapPin, Plus } from "lucide-reac
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 import type { TicketRecord } from "@/server/tickets/query";
 
@@ -109,23 +110,23 @@ function EmptyState() {
         <p className="text-muted-foreground text-sm">查看您提交過的所有報修案件</p>
       </div>
 
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-            <ClipboardList className="size-7" />
-          </div>
-          <div className="space-y-1">
-            <p className="font-medium text-foreground">目前尚無報修案件紀錄</p>
-            <p className="text-muted-foreground text-sm">您提交的報修案件會顯示在這裡</p>
-          </div>
-          <Button asChild className="mt-2">
+      <Empty className="my-8 border border-dashed bg-card/40 py-12">
+        <EmptyMedia variant="icon">
+          <ClipboardList className="size-6 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyHeader>
+          <EmptyTitle>目前尚無報修案件紀錄</EmptyTitle>
+          <EmptyDescription>您提交的報修案件會顯示在這裡</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild>
             <Link href="/report">
               <Plus className="mr-1.5 size-4" />
               我要報修
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        </EmptyContent>
+      </Empty>
     </div>
   );
 }

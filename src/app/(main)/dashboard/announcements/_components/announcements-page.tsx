@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -372,7 +373,11 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 {filteredAnnouncements.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-32 text-center text-muted-foreground text-sm">
-                      查無符合條件的公告
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyDescription>查無符合條件的公告</EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -434,7 +439,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               onClick={() => {
                                 setEditingAnnouncement(item);
                                 setDialogOpen(true);
@@ -446,7 +451,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                             </Button>
                             <Button
                               variant="ghost"
-                              size="icon-sm"
+                              size="icon"
                               onClick={() => {
                                 setDeletingAnnouncement(item);
                                 setDeleteDialogOpen(true);

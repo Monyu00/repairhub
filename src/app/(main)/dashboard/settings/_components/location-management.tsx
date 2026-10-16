@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -284,9 +285,15 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         </div>
 
         {filteredBuildings.length === 0 ? (
-          <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed p-4 text-center text-muted-foreground text-sm">
-            {buildings.length === 0 ? "目前尚未建立任何校園大樓。" : "找不到符合條件的大樓或空間。請嘗試其他關鍵字。"}
-          </div>
+          <Empty className="border border-dashed bg-card/40 py-10">
+            <EmptyHeader>
+              <EmptyDescription>
+                {buildings.length === 0
+                  ? "目前尚未建立任何校園大樓。"
+                  : "找不到符合條件的大樓或空間。請嘗試其他關鍵字。"}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="space-y-3">
             {filteredBuildings.map((building) => {
@@ -358,9 +365,11 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
                   <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
                     {spaceCount === 0 ? (
-                      <div className="my-2 flex h-20 items-center justify-center rounded-md border border-dashed text-muted-foreground text-xs">
-                        此大樓目前無任何空間設定。
-                      </div>
+                      <Empty className="my-2 border border-dashed py-6">
+                        <EmptyHeader>
+                          <EmptyDescription>此大樓目前無任何空間設定。</EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     ) : (
                       <div className="mt-2 rounded-md border bg-background">
                         <Table>
