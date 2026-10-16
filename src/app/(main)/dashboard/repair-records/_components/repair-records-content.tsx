@@ -213,14 +213,14 @@ export function RepairRecordsContent({
             <Table>
               <TableHeader className="bg-muted/40">
                 <TableRow>
-                  <TableHead className="w-[110px] h-10 font-semibold text-xs">單據編號</TableHead>
-                  <TableHead className="w-[100px] h-10 font-semibold text-xs">狀態</TableHead>
-                  <TableHead className="w-[120px] h-10 font-semibold text-xs">類別</TableHead>
+                  <TableHead className="h-10 w-[110px] font-semibold text-xs">單據編號</TableHead>
+                  <TableHead className="h-10 w-[100px] font-semibold text-xs">狀態</TableHead>
+                  <TableHead className="h-10 w-[120px] font-semibold text-xs">類別</TableHead>
                   <TableHead className="h-10 font-semibold text-xs">地點</TableHead>
-                  <TableHead className="min-w-[200px] h-10 font-semibold text-xs">報修描述</TableHead>
-                  {isAdmin && <TableHead className="w-[130px] h-10 font-semibold text-xs">負責技師</TableHead>}
-                  <TableHead className="w-[130px] h-10 font-semibold text-xs">報修人</TableHead>
-                  <TableHead className="w-[140px] h-10 font-semibold text-xs">通報時間</TableHead>
+                  <TableHead className="h-10 min-w-[200px] font-semibold text-xs">報修描述</TableHead>
+                  {isAdmin && <TableHead className="h-10 w-[130px] font-semibold text-xs">負責技師</TableHead>}
+                  <TableHead className="h-10 w-[130px] font-semibold text-xs">報修人</TableHead>
+                  <TableHead className="h-10 w-[140px] font-semibold text-xs">通報時間</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -238,13 +238,13 @@ export function RepairRecordsContent({
                         }
                       }}
                       tabIndex={0}
-                      className="cursor-pointer transition-colors hover:bg-muted/60 focus-visible:outline-hidden focus-visible:bg-muted/70"
+                      className="cursor-pointer transition-colors hover:bg-muted/60 focus-visible:bg-muted/70 focus-visible:outline-hidden"
                     >
-                      <TableCell className="py-3 font-mono font-medium text-xs">#{record.id.slice(0, 8)}</TableCell>
+                      <TableCell className="py-3 font-medium font-mono text-xs">#{record.id.slice(0, 8)}</TableCell>
                       <TableCell className="py-3">
                         <TicketStatusBadge status={record.status} />
                       </TableCell>
-                      <TableCell className="py-3 text-xs font-medium">{record.category.name}</TableCell>
+                      <TableCell className="py-3 font-medium text-xs">{record.category.name}</TableCell>
                       <TableCell className="py-3 text-xs">
                         <span className="font-medium text-foreground">{record.space.building.name}</span>
                         <span className="text-muted-foreground">
@@ -270,9 +270,9 @@ export function RepairRecordsContent({
                       <TableCell className="py-3 text-xs">
                         {record.reporterName ? (
                           <div className="space-y-0.5">
-                            <span className="font-medium text-foreground block truncate">{record.reporterName}</span>
+                            <span className="block truncate font-medium text-foreground">{record.reporterName}</span>
                             {record.reporterDepartment && (
-                              <span className="text-[11px] text-muted-foreground block truncate">
+                              <span className="block truncate text-[11px] text-muted-foreground">
                                 {record.reporterDepartment}
                               </span>
                             )}
@@ -281,7 +281,7 @@ export function RepairRecordsContent({
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap py-3 text-muted-foreground text-xs">
                         {formattedDate}
                       </TableCell>
                     </TableRow>

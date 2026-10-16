@@ -313,7 +313,7 @@ export function QRSelectionPanel({
                           />
                           <Label
                             htmlFor={`eq-${eq.id}`}
-                            className="cursor-pointer truncate select-none font-normal text-xs leading-none"
+                            className="cursor-pointer select-none truncate font-normal text-xs leading-none"
                           >
                             {eq.name}
                           </Label>
@@ -339,7 +339,7 @@ export function QRSelectionPanel({
   return (
     <Card className="flex h-full flex-col overflow-hidden border border-border bg-card shadow-xs">
       {/* Search and Header Controls */}
-      <div className="space-y-3 border-b border-border/80 p-3.5 sm:p-4">
+      <div className="space-y-3 border-border/80 border-b p-3.5 sm:p-4">
         <div className="relative">
           <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
           <Input
@@ -347,7 +347,7 @@ export function QRSelectionPanel({
             placeholder={targetType === "spaces" ? "搜尋大樓名稱、空間名稱或樓層..." : "搜尋設備名稱、編號或空間..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8.5 pr-8 text-sm"
+            className="pr-8 pl-8.5 text-sm"
           />
           {searchTerm && (
             <button
@@ -374,7 +374,7 @@ export function QRSelectionPanel({
                   onSelectAll(unique);
                 }
               }}
-              className="h-7 text-xs font-normal"
+              className="h-7 font-normal text-xs"
             >
               {allVisibleSelected ? (
                 <>
@@ -390,15 +390,15 @@ export function QRSelectionPanel({
             </Button>
 
             {selectedIds.length > 0 && (
-              <Button variant="ghost" size="xs" onClick={onClearAll} className="h-7 text-xs text-muted-foreground">
+              <Button variant="ghost" size="xs" onClick={onClearAll} className="h-7 text-muted-foreground text-xs">
                 全部清除
               </Button>
             )}
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Badge variant="secondary" className="px-2 py-0.5 text-xs font-normal">
-              已選 <span className="ml-1 mr-0.5 font-semibold text-primary">{selectedIds.length}</span> 項
+            <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
+              已選 <span className="mr-0.5 ml-1 font-semibold text-primary">{selectedIds.length}</span> 項
             </Badge>
           </div>
         </div>

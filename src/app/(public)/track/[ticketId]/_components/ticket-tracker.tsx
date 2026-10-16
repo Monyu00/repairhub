@@ -65,13 +65,13 @@ export function TicketTracker({
   const technicianNotes = notes.filter((n) => n.type === "note");
 
   return (
-    <div className="py-6 px-4 sm:py-10">
+    <div className="px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-xl space-y-4">
         {/* Search Bar */}
         <TicketSearch currentTicketId={ticketId} />
 
         {/* Main Card */}
-        <Card className="border border-border bg-card shadow-sm divide-y divide-border">
+        <Card className="divide-y divide-border border border-border bg-card shadow-sm">
           {/* Header section */}
           <div className="p-5 sm:p-6">
             <TicketHeader ticketId={ticketId} status={status} createdAt={createdAt} />
@@ -126,7 +126,7 @@ export function TicketTracker({
             <div className="p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5">
                 <div className="space-y-1">
-                  <span className="text-xs font-semibold text-foreground">通報人完工服務評分</span>
+                  <span className="font-semibold text-foreground text-xs">通報人完工服務評分</span>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <StarIcon
@@ -137,7 +137,7 @@ export function TicketTracker({
                         )}
                       />
                     ))}
-                    <span className="ml-1.5 text-xs font-bold text-foreground">{rating} / 5</span>
+                    <span className="ml-1.5 font-bold text-foreground text-xs">{rating} / 5</span>
                   </div>
                 </div>
                 {ratedAt && (

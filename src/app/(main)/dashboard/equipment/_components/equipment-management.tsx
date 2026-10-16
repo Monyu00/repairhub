@@ -152,8 +152,8 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">設備資產管理</h1>
-          <p className="text-sm text-muted-foreground">管理全校設備資產、追蹤保固期限與查看歷史維修紀錄</p>
+          <h1 className="font-bold text-2xl text-foreground tracking-tight">設備資產管理</h1>
+          <p className="text-muted-foreground text-sm">管理全校設備資產、追蹤保固期限與查看歷史維修紀錄</p>
         </div>
         <Button onClick={handleCreateOpen} className="shrink-0 gap-1.5">
           <Plus className="h-4 w-4" />
@@ -172,7 +172,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Search Input */}
               <div className="relative w-full sm:w-56 md:w-64">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="搜尋設備名稱或代碼..."

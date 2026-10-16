@@ -133,7 +133,7 @@ export function QRCard({ item }: QRCardProps) {
       </div>
 
       {/* Top Header / Branding */}
-      <div className="flex w-full items-center justify-between border-b border-border/60 pb-2.5">
+      <div className="flex w-full items-center justify-between border-border/60 border-b pb-2.5">
         <div className="flex items-center gap-1.5">
           <div className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Wrench className="size-3" />
@@ -142,7 +142,7 @@ export function QRCard({ item }: QRCardProps) {
         </div>
         <Badge
           variant={item.type === "space" ? "secondary" : "outline"}
-          className="px-1.5 py-0 text-[10px] font-normal"
+          className="px-1.5 py-0 font-normal text-[10px]"
         >
           {item.type === "space" ? "空間 QR" : "設備 QR"}
         </Badge>
@@ -168,13 +168,13 @@ export function QRCard({ item }: QRCardProps) {
 
       {/* Card Info & Labels */}
       <div className="w-full space-y-1 text-center">
-        <h4 className="truncate font-heading font-bold text-base text-foreground tracking-tight">{item.title}</h4>
+        <h4 className="truncate font-bold font-heading text-base text-foreground tracking-tight">{item.title}</h4>
         <p className="truncate text-muted-foreground text-xs">{item.subtitle}</p>
         {item.code && <p className="font-mono text-[11px] text-muted-foreground/80">編號: {item.code}</p>}
       </div>
 
       {/* Card Footer notice */}
-      <div className="mt-2.5 w-full rounded-md border border-dashed border-border/70 bg-muted/30 py-1 text-center text-[10px] text-muted-foreground">
+      <div className="mt-2.5 w-full rounded-md border border-border/70 border-dashed bg-muted/30 py-1 text-center text-[10px] text-muted-foreground">
         手機掃描 QR Code 立即通報修繕
       </div>
     </Card>

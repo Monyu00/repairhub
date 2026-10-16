@@ -115,7 +115,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Search Input */}
         <div className="relative w-full sm:w-56 md:w-64">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             placeholder="搜尋單號、描述、通報人..."

@@ -26,25 +26,25 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 py-6 px-4 sm:py-12">
+    <div className="min-h-screen bg-muted/30 px-4 py-6 sm:py-12">
       <div className="mx-auto max-w-xl">
         {/* Brand Header */}
         <div className="mb-6 flex items-center justify-center gap-2">
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <WrenchIcon className="size-5" />
           </div>
-          <span className="font-heading text-lg font-bold tracking-tight text-foreground">RepairHub</span>
+          <span className="font-bold font-heading text-foreground text-lg tracking-tight">RepairHub</span>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-8 shadow-sm text-center space-y-6">
+        <div className="space-y-6 rounded-xl border border-border bg-card p-8 text-center shadow-sm">
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
             <SearchIcon className="size-8 text-muted-foreground" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-xl font-bold text-foreground">找不到此報修單</h1>
-            <p className="text-sm text-muted-foreground">
-              工單編號 <span className="font-mono font-medium text-foreground">{ticketId}</span>{" "}
+            <h1 className="font-bold text-foreground text-xl">找不到此報修單</h1>
+            <p className="text-muted-foreground text-sm">
+              工單編號 <span className="font-medium font-mono text-foreground">{ticketId}</span>{" "}
               不存在，請確認編號是否正確。
             </p>
           </div>
@@ -67,7 +67,7 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
           </Button>
         </div>
 
-        <div className="mt-8 text-center text-xs text-muted-foreground">
+        <div className="mt-8 text-center text-muted-foreground text-xs">
           © {new Date().getFullYear()} RepairHub. All rights reserved.
         </div>
       </div>

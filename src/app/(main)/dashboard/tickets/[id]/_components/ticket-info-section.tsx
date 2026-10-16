@@ -102,7 +102,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
         {ticket.rating != null && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground text-xs">
                 <Star className="size-4 fill-amber-400 text-amber-500" />
                 通報人完工服務評分
               </span>
@@ -118,7 +118,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
                     )}
                   />
                 ))}
-                <span className="ml-1 font-bold text-xs text-foreground">{ticket.rating} / 5</span>
+                <span className="ml-1 font-bold text-foreground text-xs">{ticket.rating} / 5</span>
               </div>
             </div>
             {ticket.ratedAt && (

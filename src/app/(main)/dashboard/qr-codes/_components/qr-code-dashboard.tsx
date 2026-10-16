@@ -184,7 +184,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
         {/* Right Column: Live Grid Preview */}
         <div className="lg:col-span-8 xl:col-span-8">
           {printableItems.length === 0 ? (
-            <Card className="flex h-full min-h-[480px] items-center justify-center p-8 border-dashed">
+            <Card className="flex h-full min-h-[480px] items-center justify-center border-dashed p-8">
               <Empty>
                 <EmptyMedia>
                   <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -208,7 +208,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-sm text-foreground">預覽輸出卡片</h3>
+                  <h3 className="font-semibold text-foreground text-sm">預覽輸出卡片</h3>
                   <Badge variant="secondary" className="font-mono text-xs">
                     共 {printableItems.length} 張卡片
                   </Badge>
