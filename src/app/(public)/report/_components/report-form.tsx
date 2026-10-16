@@ -86,7 +86,7 @@ export function ReportForm({
 
   if (initialEquipment) {
     defaultSpaceId = initialEquipment.space_id;
-    defaultBuildingId = initialEquipment.space?.building_id || "";
+    defaultBuildingId = initialEquipment.space.building_id || "";
   } else if (initialSpaceId) {
     defaultSpaceId = initialSpaceId;
     for (const b of buildings) {
