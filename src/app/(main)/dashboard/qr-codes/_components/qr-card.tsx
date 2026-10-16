@@ -28,8 +28,9 @@ export function QRCard({ item }: QRCardProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    if (qrDataUrlCache.has(item.url)) {
-      setQrDataUrl(qrDataUrlCache.get(item.url)!);
+    const cachedDataUrl = qrDataUrlCache.get(item.url);
+    if (cachedDataUrl) {
+      setQrDataUrl(cachedDataUrl);
       return;
     }
 
