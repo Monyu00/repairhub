@@ -32,7 +32,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
             <span className="font-bold font-heading text-foreground text-lg leading-tight tracking-tight">
               RepairHub
             </span>
-            <span className="hidden text-[10px] text-muted-foreground leading-none sm:inline">校園報修通報系統</span>
+            <span className="hidden text-muted-foreground text-xs leading-none sm:inline">校園報修通報系統</span>
           </div>
         </Link>
 

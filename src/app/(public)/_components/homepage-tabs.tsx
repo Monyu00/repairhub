@@ -37,7 +37,7 @@ export function HomepageTabs({ activeTab, isLoggedIn, myTicketsCount }: Homepage
             <UserCheck className="size-4" />
             <span>我的報修紀錄</span>
             {typeof myTicketsCount === "number" && (
-              <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-semibold text-[10px] text-primary">
+              <span className="rounded-full bg-primary/15 px-1.5 py-0.5 font-semibold text-primary text-xs">
                 {myTicketsCount}
               </span>
             )}

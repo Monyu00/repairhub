@@ -48,7 +48,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-primary text-xs uppercase tracking-wider">系統公告</span>
               {currentAnnouncement.is_pinned && (
-                <Badge variant="default" className="gap-1 px-1.5 py-0 font-normal text-[10px]">
+                <Badge variant="default" className="gap-1 px-1.5 py-0 font-normal text-xs">
                   <Pin className="size-2.5" aria-hidden="true" />
                   置頂
                 </Badge>

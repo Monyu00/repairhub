@@ -62,7 +62,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  className="font-medium text-[11px]"
+                  className="font-medium text-xs"
                 />
                 <XAxis
                   type="number"
@@ -70,7 +70,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
                   axisLine={false}
                   tickMargin={8}
                   allowDecimals={false}
-                  className="text-[11px]"
+                  className="text-xs"
                 />
                 <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
                 <ChartLegend content={<ChartLegendContent />} />
@@ -102,7 +102,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
                     </div>
                     <div>
                       <div className="font-semibold text-foreground">{tech.displayName}</div>
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         已完成: {tech.completedCount} 件 | 進行中: {tech.inProgressCount} 件
                       </div>
                     </div>
@@ -111,7 +111,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
                     <div className="font-semibold text-foreground tabular-nums">
                       {tech.avgDaysToResolve > 0 ? `${tech.avgDaysToResolve} 天` : "—"}
                     </div>
-                    <div className="text-[10px] text-muted-foreground">平均修復</div>
+                    <div className="text-muted-foreground text-xs">平均修復</div>
                   </div>
                 </div>
               ))}

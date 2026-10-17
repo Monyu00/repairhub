@@ -65,9 +65,9 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
                 tickMargin={8}
                 axisLine={false}
                 tickFormatter={(value) => `${value.slice(5)}月`}
-                className="text-[11px]"
+                className="text-xs"
               />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} className="text-[11px]" />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} className="text-xs" />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} maxBarSize={32} />

@@ -8,6 +8,7 @@ import { queryTickets } from "@/server/tickets/query";
 
 import type { FilterOptions, TicketStatus } from "./_components/ticket-types";
 import { TicketsDataTable } from "./_components/tickets-data-table";
+import { TicketsLoadingSkeleton } from "./_components/tickets-loading-skeleton";
 
 export const metadata: Metadata = {
   title: "報修單管理 - RepairHub",
@@ -88,7 +89,7 @@ export default async function Page({ searchParams }: PageProps) {
       </div>
 
       {/* Main Data Table */}
-      <Suspense fallback={<div className="p-8 text-center text-muted-foreground text-sm">載入資料中...</div>}>
+      <Suspense fallback={<TicketsLoadingSkeleton />}>
         <TicketsDataTable
           tickets={tickets}
           totalCount={totalCount}

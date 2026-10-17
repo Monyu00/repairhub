@@ -272,7 +272,7 @@ export function RepairRecordsContent({
                           <div className="space-y-0.5">
                             <span className="block truncate font-medium text-foreground">{record.reporterName}</span>
                             {record.reporterDepartment && (
-                              <span className="block truncate text-[11px] text-muted-foreground">
+                              <span className="block truncate text-muted-foreground text-xs">
                                 {record.reporterDepartment}
                               </span>
                             )}

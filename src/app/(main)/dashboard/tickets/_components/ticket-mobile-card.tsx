@@ -41,7 +41,7 @@ export function TicketMobileCard({ ticket, canViewReporter }: TicketMobileCardPr
           <p className="line-clamp-2 pl-5 text-muted-foreground leading-relaxed">{ticket.description}</p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-border/40 border-t pt-2 text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-border/40 border-t pt-2 text-muted-foreground text-xs">
           <div className="flex items-center gap-1">
             <Calendar className="size-3 shrink-0" />
             <span>{formattedDate}</span>

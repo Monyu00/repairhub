@@ -225,7 +225,7 @@ export function UserProfileSheet({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-[11px] text-primary"
+                className="h-6 px-2 text-primary text-xs"
                 onClick={() => onManageCategories(user)}
               >
                 變更
@@ -284,21 +284,21 @@ export function UserProfileSheet({
                     <div className="font-bold text-amber-600 text-lg dark:text-amber-400">
                       {stats.reporterStats.pending}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">待處理</div>
+                    <div className="text-muted-foreground text-xs">待處理</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
                     <div className="font-bold text-blue-600 text-lg dark:text-blue-400">
                       {stats.reporterStats.inProgress}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">處理中</div>
+                    <div className="text-muted-foreground text-xs">處理中</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
                     <div className="font-bold text-emerald-600 text-lg dark:text-emerald-400">
                       {stats.reporterStats.completed + stats.reporterStats.closed}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">已完成/結案</div>
+                    <div className="text-muted-foreground text-xs">已完成/結案</div>
                   </Card>
                 </div>
               </div>
@@ -321,14 +321,14 @@ export function UserProfileSheet({
                       <div className="font-bold text-blue-600 text-lg dark:text-blue-400">
                         {stats.technicianStats.inProgress}
                       </div>
-                      <div className="text-[11px] text-muted-foreground">目前處置中工單</div>
+                      <div className="text-muted-foreground text-xs">目前處置中工單</div>
                     </Card>
 
                     <Card className="border-emerald-200 bg-emerald-500/5 p-2.5 text-center shadow-2xs dark:border-emerald-900/40">
                       <div className="font-bold text-emerald-600 text-lg dark:text-emerald-400">
                         {stats.technicianStats.completedOrClosed}
                       </div>
-                      <div className="text-[11px] text-muted-foreground">已修復完成工單</div>
+                      <div className="text-muted-foreground text-xs">已修復完成工單</div>
                     </Card>
                   </div>
                 </div>

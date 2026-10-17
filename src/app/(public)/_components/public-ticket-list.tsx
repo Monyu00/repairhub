@@ -122,7 +122,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                       <span className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
                         #{ticket.id.slice(0, 8)}
                       </span>
-                      <Badge variant="secondary" className="px-1.5 py-0 font-normal text-[11px]">
+                      <Badge variant="secondary" className="px-1.5 py-0 font-normal text-xs">
                         {ticket.category.name}
                       </Badge>
                     </div>
@@ -133,7 +133,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   <p className="line-clamp-2 text-foreground text-xs leading-relaxed">{ticket.description}</p>
 
                   {/* Bottom: Location & Date & Tech */}
-                  <div className="flex flex-wrap items-center justify-between gap-y-1 border-border/50 border-t pt-1 text-[11px] text-muted-foreground">
+                  <div className="flex flex-wrap items-center justify-between gap-y-1 border-border/50 border-t pt-1 text-muted-foreground text-xs">
                     <div className="flex max-w-[200px] items-center gap-1 truncate">
                       <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
                       <span className="truncate">

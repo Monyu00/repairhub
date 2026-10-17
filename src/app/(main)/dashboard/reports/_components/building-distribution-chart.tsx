@@ -98,7 +98,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                   </div>
                   <div className="flex items-center gap-1.5 font-medium text-foreground tabular-nums">
                     <span>{item.count} 件</span>
-                    <span className="text-[10px] text-muted-foreground">({item.percentage}%)</span>
+                    <span className="text-muted-foreground text-xs">({item.percentage}%)</span>
                   </div>
                 </div>
               ))}

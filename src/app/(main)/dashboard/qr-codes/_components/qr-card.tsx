@@ -141,10 +141,7 @@ export function QRCard({ item }: QRCardProps) {
           </div>
           <span className="font-heading font-semibold text-xs tracking-tight">RepairHub 報修</span>
         </div>
-        <Badge
-          variant={item.type === "space" ? "secondary" : "outline"}
-          className="px-1.5 py-0 font-normal text-[10px]"
-        >
+        <Badge variant={item.type === "space" ? "secondary" : "outline"} className="px-1.5 py-0 font-normal text-xs">
           {item.type === "space" ? "空間 QR" : "設備 QR"}
         </Badge>
       </div>
@@ -171,11 +168,11 @@ export function QRCard({ item }: QRCardProps) {
       <div className="w-full space-y-1 text-center">
         <h4 className="truncate font-bold font-heading text-base text-foreground tracking-tight">{item.title}</h4>
         <p className="truncate text-muted-foreground text-xs">{item.subtitle}</p>
-        {item.code && <p className="font-mono text-[11px] text-muted-foreground/80">編號: {item.code}</p>}
+        {item.code && <p className="font-mono text-muted-foreground/80 text-xs">編號: {item.code}</p>}
       </div>
 
       {/* Card Footer notice */}
-      <div className="mt-2.5 w-full rounded-md border border-border/70 border-dashed bg-muted/30 py-1 text-center text-[10px] text-muted-foreground">
+      <div className="mt-2.5 w-full rounded-md border border-border/70 border-dashed bg-muted/30 py-1 text-center text-muted-foreground text-xs">
         手機掃描 QR Code 立即通報修繕
       </div>
     </Card>

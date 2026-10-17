@@ -133,7 +133,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
               <SlidersHorizontal className="size-3.5 text-muted-foreground" />
               <span>狀態</span>
               {selectedStatuses.length > 0 && (
-                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 font-medium text-[10px] text-primary-foreground">
+                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 font-medium text-primary-foreground text-xs">
                   {selectedStatuses.length}
                 </span>
               )}

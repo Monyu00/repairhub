@@ -114,7 +114,7 @@ export function PhotoUpload({
               <>
                 <ImagePlus className="size-5 text-muted-foreground/80" />
                 <span className="font-medium text-xs">上傳照片</span>
-                <span className="text-[10px] text-muted-foreground/70">
+                <span className="text-muted-foreground/70 text-xs">
                   ({photos.length}/{maxPhotos})
                 </span>
               </>
