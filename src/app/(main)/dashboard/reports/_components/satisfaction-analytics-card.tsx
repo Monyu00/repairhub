@@ -68,7 +68,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                   )}
                 />
               ))}
-              <span className="ml-1.5 text-[11px] text-muted-foreground">（共 {totalRated} 筆評價）</span>
+              <span className="ml-1.5 text-muted-foreground text-xs">（共 {totalRated} 筆評價）</span>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
             <div className="my-2 flex items-baseline gap-2">
               <span className="font-bold text-3xl text-foreground tabular-nums tracking-tight">{responseRate}%</span>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               已結案 {totalClosed} 件中，{totalRated} 件通報人完成評分
             </p>
           </div>
@@ -108,7 +108,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                 <span className="text-muted-foreground text-sm">尚無評價數據</span>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground">依技師平均評分與件數綜合排序</p>
+            <p className="text-muted-foreground text-xs">依技師平均評分與件數綜合排序</p>
           </div>
         </div>
 
@@ -130,7 +130,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                   <BarChart2 className="size-3.5 text-primary" />
                   星等評價分佈
                 </span>
-                <span className="text-[11px] text-muted-foreground">共 {totalRated} 筆有效評分</span>
+                <span className="text-muted-foreground text-xs">共 {totalRated} 筆有效評分</span>
               </div>
 
               <div className="space-y-2.5 pt-1">
@@ -148,7 +148,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                         />
                       </div>
                     </div>
-                    <div className="w-16 shrink-0 text-right text-[11px] text-muted-foreground tabular-nums">
+                    <div className="w-16 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
                       {d.count} 件 ({d.percentage}%)
                     </div>
                   </div>
@@ -163,7 +163,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                   <TrendingUp className="size-3.5 text-primary" />
                   各月份滿意度趨勢
                 </span>
-                <span className="text-[11px] text-muted-foreground">平均分數走勢</span>
+                <span className="text-muted-foreground text-xs">平均分數走勢</span>
               </div>
 
               {monthlyTrends.length === 0 ? (
@@ -180,7 +180,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                       axisLine={false}
                       tickMargin={8}
                       tickFormatter={(val) => `${val.slice(5)}月`}
-                      className="text-[11px]"
+                      className="text-xs"
                     />
                     <YAxis
                       domain={[1, 5]}
@@ -188,7 +188,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
-                      className="text-[11px]"
+                      className="text-xs"
                     />
                     <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
                     <Line
@@ -214,7 +214,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                 <Users className="size-3.5 text-primary" />
                 維修工程人員滿意度排行榜
               </span>
-              <span className="text-[11px] text-muted-foreground">依滿意度與評分量綜合排行</span>
+              <span className="text-muted-foreground text-xs">依滿意度與評分量綜合排行</span>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 pt-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -233,7 +233,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                     <div className="flex items-center gap-2.5">
                       <div
                         className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-full font-bold text-[11px]",
+                          "flex size-6 shrink-0 items-center justify-center rounded-full font-bold text-xs",
                           index < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                         )}
                       >
@@ -243,7 +243,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                         <span className="block max-w-[120px] truncate font-semibold text-foreground">
                           {tech.displayName}
                         </span>
-                        <span className="block text-[10px] text-muted-foreground">
+                        <span className="block text-muted-foreground text-xs">
                           總完工: {tech.completedCount} 件 | 已評: {tech.ratedCount} 筆
                         </span>
                       </div>
@@ -258,7 +258,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                           </span>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground italic">尚無評分</span>
+                        <span className="text-muted-foreground text-xs italic">尚無評分</span>
                       )}
                     </div>
                   </div>

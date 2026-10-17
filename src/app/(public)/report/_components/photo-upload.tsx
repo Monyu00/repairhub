@@ -106,7 +106,7 @@ export function PhotoUpload({
               <>
                 <UploadIcon className="size-5 text-muted-foreground" />
                 <span className="font-medium text-xs">上傳照片</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   ({photos.length}/{maxPhotos})
                 </span>
               </>

@@ -98,7 +98,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     {item.is_pinned && (
-                      <Badge variant="default" className="gap-0.5 px-1.5 py-0 font-normal text-[10px]">
+                      <Badge variant="default" className="gap-0.5 px-1.5 py-0 font-normal text-xs">
                         <Pin className="size-2.5" aria-hidden="true" />
                         置頂
                       </Badge>
@@ -107,7 +107,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                       {item.title}
                     </span>
                     {isEdited && (
-                      <Badge variant="outline" className="px-1 py-0 text-[10px] text-muted-foreground">
+                      <Badge variant="outline" className="px-1 py-0 text-muted-foreground text-xs">
                         已編輯
                       </Badge>
                     )}

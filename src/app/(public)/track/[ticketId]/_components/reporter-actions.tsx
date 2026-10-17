@@ -137,7 +137,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
               <button
                 type="button"
                 onClick={() => setRating(null)}
-                className="ml-2 text-[11px] text-muted-foreground underline hover:text-foreground"
+                className="ml-2 text-muted-foreground text-xs underline hover:text-foreground"
               >
                 清除
               </button>

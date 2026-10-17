@@ -56,7 +56,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
               <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
                 {kpi.totalTickets} <span className="font-normal text-muted-foreground text-xs">件</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">{kpi.activePeriodLabel}</p>
+              <p className="text-muted-foreground text-xs">{kpi.activePeriodLabel}</p>
             </div>
             <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <FileSpreadsheet className="h-5 w-5" />
@@ -72,7 +72,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
               <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
                 {kpi.completionRate}%
               </div>
-              <p className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-0.5 text-muted-foreground text-xs">
                 <CheckCircle2 className="inline h-3 w-3" />共 {kpi.completedOrClosedCount} 件結案
               </p>
             </div>
@@ -90,7 +90,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
               <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
                 {kpi.overallAvgDaysToResolve} <span className="font-normal text-muted-foreground text-xs">天</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">通報至完工平均耗時</p>
+              <p className="text-muted-foreground text-xs">通報至完工平均耗時</p>
             </div>
             <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <Clock className="h-5 w-5" />
@@ -107,7 +107,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
                 {kpi.pendingCount + kpi.inProgressCount}{" "}
                 <span className="font-normal text-muted-foreground text-xs">件</span>
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 待處理 {kpi.pendingCount} | 進行中 {kpi.inProgressCount}
               </p>
             </div>

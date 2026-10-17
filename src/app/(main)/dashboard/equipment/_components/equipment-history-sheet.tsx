@@ -62,7 +62,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
             <SheetDescription asChild>
               <div className="pt-1 text-muted-foreground text-xs">
                 設備：<span className="font-semibold text-foreground">{equipment.name}</span>
-                <Badge variant="outline" className="ml-2 font-mono text-[10px]">
+                <Badge variant="outline" className="ml-2 font-mono text-xs">
                   {equipment.code}
                 </Badge>
                 <div className="mt-1">
@@ -104,7 +104,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
                 >
                   <div className="flex items-center justify-between gap-2">
                     <TicketStatusBadge status={ticket.status} />
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
                       <Calendar className="h-3 w-3" />
                       <span>{new Date(ticket.created_at).toLocaleDateString("zh-TW")}</span>
                     </div>
@@ -115,7 +115,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
                   </p>
 
                   {ticket.reporter_email && (
-                    <div className="flex items-center gap-1 border-border/40 border-t pt-1 text-[11px] text-muted-foreground">
+                    <div className="flex items-center gap-1 border-border/40 border-t pt-1 text-muted-foreground text-xs">
                       <User className="h-3 w-3" />
                       <span>報修人：{ticket.reporter_email}</span>
                     </div>

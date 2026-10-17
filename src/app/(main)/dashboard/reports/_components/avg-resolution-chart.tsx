@@ -56,14 +56,14 @@ export function AvgResolutionChart({ data }: AvgResolutionChartProps) {
                 tickMargin={8}
                 axisLine={false}
                 tickFormatter={(value) => `${value.slice(5)}月`}
-                className="text-[11px]"
+                className="text-xs"
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
                 unit=" 天"
-                className="text-[11px]"
+                className="text-xs"
                 domain={[0, "auto"]}
               />
               <ChartTooltip

@@ -183,12 +183,12 @@ export function QRSelectionPanel({
                   >
                     <Building2 className="size-3.5 text-muted-foreground" />
                     <span>{building.name}</span>
-                    <span className="text-[11px] text-muted-foreground">({building.code})</span>
+                    <span className="text-muted-foreground text-xs">({building.code})</span>
                   </button>
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                  <Badge variant="outline" className="px-1.5 py-0 text-xs">
                     {building.spaces.length} 間
                   </Badge>
                   <button
@@ -227,7 +227,7 @@ export function QRSelectionPanel({
                             {space.name}
                           </Label>
                         </div>
-                        <span className="font-mono text-[11px] text-muted-foreground">{space.floor}F</span>
+                        <span className="font-mono text-muted-foreground text-xs">{space.floor}F</span>
                       </div>
                     );
                   })}
@@ -279,7 +279,7 @@ export function QRSelectionPanel({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                  <Badge variant="outline" className="px-1.5 py-0 text-xs">
                     {building.items.length} 台
                   </Badge>
                   <button
@@ -319,10 +319,8 @@ export function QRSelectionPanel({
                           </Label>
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5 text-right">
-                          <span className="max-w-[100px] truncate text-[10px] text-muted-foreground">
-                            {eq.spaceName}
-                          </span>
-                          <span className="font-mono text-[10px] text-muted-foreground/80">({eq.code})</span>
+                          <span className="max-w-[100px] truncate text-muted-foreground text-xs">{eq.spaceName}</span>
+                          <span className="font-mono text-muted-foreground/80 text-xs">({eq.code})</span>
                         </div>
                       </div>
                     );

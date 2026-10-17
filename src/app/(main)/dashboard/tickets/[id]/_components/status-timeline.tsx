@@ -151,12 +151,12 @@ export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelin
                         {item.content}
                       </p>
                       {item.authorRole && (
-                        <span className="rounded bg-muted px-1.5 py-0.2 font-medium text-[10px] text-muted-foreground">
+                        <span className="rounded bg-muted px-1.5 py-0.2 font-medium text-muted-foreground text-xs">
                           {item.authorRole}
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">{formatDateTime(item.createdAt)}</p>
+                    <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.createdAt)}</p>
                   </div>
                 </div>
               );

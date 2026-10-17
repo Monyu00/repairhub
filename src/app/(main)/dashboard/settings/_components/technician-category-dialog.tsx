@@ -176,7 +176,7 @@ export function TechnicianCategoryDialog({
                       >
                         <span className="font-medium text-foreground text-sm">{cat.name}</span>
                         {isChecked && (
-                          <Badge variant="secondary" className="h-4 px-1.5 py-0 text-[10px]">
+                          <Badge variant="secondary" className="h-4 px-1.5 py-0 text-xs">
                             已負責
                           </Badge>
                         )}

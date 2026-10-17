@@ -122,7 +122,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
               </div>
             </div>
             {ticket.ratedAt && (
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 評分時間：{format(new Date(ticket.ratedAt), "yyyy/MM/dd HH:mm", { locale: zhTW })}
               </span>
             )}

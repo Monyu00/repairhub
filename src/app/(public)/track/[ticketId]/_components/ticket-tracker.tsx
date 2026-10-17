@@ -141,7 +141,7 @@ export function TicketTracker({
                   </div>
                 </div>
                 {ratedAt && (
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-muted-foreground text-xs">
                     評分於 {new Date(ratedAt).toLocaleDateString("zh-TW")}
                   </span>
                 )}

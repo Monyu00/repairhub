@@ -718,7 +718,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                                 {user.displayName ?? "（未設定姓名）"}
                               </span>
                               {user.department && (
-                                <span className="rounded bg-muted px-1.5 py-0.2 text-[11px] text-muted-foreground">
+                                <span className="rounded bg-muted px-1.5 py-0.2 text-muted-foreground text-xs">
                                   {user.department}
                                 </span>
                               )}
@@ -757,7 +757,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                                 <Badge
                                   key={cat.id}
                                   variant="secondary"
-                                  className="border-blue-200 bg-blue-500/10 px-2 py-0.5 font-normal text-[11px] text-blue-700 dark:border-blue-800/40 dark:text-blue-300"
+                                  className="border-blue-200 bg-blue-500/10 px-2 py-0.5 font-normal text-blue-700 text-xs dark:border-blue-800/40 dark:text-blue-300"
                                 >
                                   {cat.name}
                                 </Badge>

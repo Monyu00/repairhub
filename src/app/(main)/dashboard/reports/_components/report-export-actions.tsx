@@ -67,14 +67,14 @@ export function ReportExportActions({ data }: ReportExportActionsProps) {
             <FileSpreadsheet className="text-muted-foreground" />
             <div className="flex flex-col">
               <span className="font-medium text-xs">Excel 活頁簿 (.xlsx)</span>
-              <span className="text-[10px] text-muted-foreground">多工作表結構化數據</span>
+              <span className="text-muted-foreground text-xs">多工作表結構化數據</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting} className="cursor-pointer gap-2">
             <FileText className="text-muted-foreground" />
             <div className="flex flex-col">
               <span className="font-medium text-xs">PDF 統計報表 (.pdf)</span>
-              <span className="text-[10px] text-muted-foreground">A4 雙頁排版與摘要</span>
+              <span className="text-muted-foreground text-xs">A4 雙頁排版與摘要</span>
             </div>
           </DropdownMenuItem>
         </DropdownMenuGroup>

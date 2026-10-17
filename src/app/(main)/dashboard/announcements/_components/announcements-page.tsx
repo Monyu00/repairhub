@@ -401,12 +401,12 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                               {renderCategoryBadge(item.category)}
                               <span className="font-semibold text-foreground">{item.title}</span>
                               {isExp && (
-                                <Badge variant="secondary" className="px-1.5 py-0 text-[10px] text-muted-foreground">
+                                <Badge variant="secondary" className="px-1.5 py-0 text-muted-foreground text-xs">
                                   已到期
                                 </Badge>
                               )}
                               {isEdited && (
-                                <Badge variant="outline" className="px-1.5 py-0 text-[10px] text-muted-foreground">
+                                <Badge variant="outline" className="px-1.5 py-0 text-muted-foreground text-xs">
                                   已編輯
                                 </Badge>
                               )}

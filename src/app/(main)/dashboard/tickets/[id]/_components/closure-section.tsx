@@ -67,7 +67,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
                 完工照片上傳
                 <span className="text-destructive">*</span>
               </span>
-              <span className="font-normal font-normal text-[11px] text-muted-foreground">(至少 1 張，至多 3 張)</span>
+              <span className="font-normal font-normal text-muted-foreground text-xs">(至少 1 張，至多 3 張)</span>
             </div>
 
             <PhotoUpload

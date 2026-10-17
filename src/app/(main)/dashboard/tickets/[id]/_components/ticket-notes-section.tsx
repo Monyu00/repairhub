@@ -96,9 +96,7 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
                   <div className="flex items-center justify-between text-muted-foreground text-xs">
                     <span className="flex items-center gap-1.5 font-semibold text-foreground">
                       {note.authorName && <span>{note.authorName}</span>}
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                        {roleLabel}
-                      </span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs">{roleLabel}</span>
                     </span>
                     <span>{formattedDate}</span>
                   </div>
