@@ -27,13 +27,13 @@ export function TechnicianNotes({ notes }: TechnicianNotesProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <MessageSquareIcon className="size-4 text-muted-foreground" />
-        <h2 className="text-sm font-semibold text-foreground">技師進度備註</h2>
+        <h2 className="font-semibold text-foreground text-sm">技師進度備註</h2>
       </div>
       <div className="space-y-3">
         {notes.map((note) => (
-          <div key={note.id} className="rounded-lg border border-border bg-muted/40 p-3 space-y-1.5">
-            <p className="text-sm text-foreground whitespace-pre-wrap">{note.content}</p>
-            <p className="text-xs text-muted-foreground">{formatDateTime(note.created_at)}</p>
+          <div key={note.id} className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
+            <p className="whitespace-pre-wrap text-foreground text-sm">{note.content}</p>
+            <p className="text-muted-foreground text-xs">{formatDateTime(note.created_at)}</p>
           </div>
         ))}
       </div>

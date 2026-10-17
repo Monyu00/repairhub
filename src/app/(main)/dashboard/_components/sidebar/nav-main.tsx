@@ -68,7 +68,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
       {filteredGroups.map((group) => (
         <SidebarGroup key={group.id} className="py-1.5">
           {group.label && (
-            <SidebarGroupLabel className="px-3 text-xs font-semibold text-muted-foreground/80 tracking-wider group-data-[collapsible=icon]:pointer-events-none">
+            <SidebarGroupLabel className="px-3 font-semibold text-muted-foreground/80 text-xs tracking-wider group-data-[collapsible=icon]:pointer-events-none">
               {group.label}
             </SidebarGroupLabel>
           )}
@@ -93,7 +93,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
                           <SidebarMenuButton
                             tooltip={item.title}
                             isActive={pathname.startsWith(item.url)}
-                            className="h-10 text-[15px] px-3 gap-3 font-medium [&_svg]:size-5 cursor-pointer"
+                            className="h-10 cursor-pointer gap-3 px-3 font-medium text-[15px] [&_svg]:size-5"
                           >
                             {item.icon && <item.icon className="shrink-0" />}
                             <span className="flex-1 truncate">{item.title}</span>
@@ -101,7 +101,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          <SidebarMenuSub className="mx-3.5 gap-1 border-l border-sidebar-border px-2.5 py-1">
+                          <SidebarMenuSub className="mx-3.5 gap-1 border-sidebar-border border-l px-2.5 py-1">
                             {item.children.map((child: NavChildItem) => {
                               const active = isSubItemActive(pathname, currentTab, child.url);
                               return (
@@ -110,7 +110,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
                                     asChild
                                     size="md"
                                     isActive={active}
-                                    className="h-8.5 text-sm px-2.5 font-normal cursor-pointer"
+                                    className="h-8.5 cursor-pointer px-2.5 font-normal text-sm"
                                   >
                                     <Link href={child.url}>
                                       <span>{child.title}</span>
@@ -145,7 +145,7 @@ function NavLinkItem({ item, isActive }: { readonly item: NavItem; readonly isAc
         asChild
         tooltip={item.title}
         isActive={isActive}
-        className="h-10 text-[15px] px-3 gap-3 font-medium [&_svg]:size-5 cursor-pointer"
+        className="h-10 cursor-pointer gap-3 px-3 font-medium text-[15px] [&_svg]:size-5"
       >
         <Link href={item.url}>
           {Icon && <Icon className="shrink-0" />}

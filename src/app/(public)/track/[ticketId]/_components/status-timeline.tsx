@@ -83,37 +83,36 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-semibold text-foreground">狀態時間軸</h2>
+      <h2 className="font-semibold text-foreground text-sm">狀態時間軸</h2>
       <div className="relative space-y-0">
         {allItems.map((item, index) => {
           const isLast = index === allItems.length - 1;
           const Icon = item.isCreation ? PlusCircleIcon : getStatusIcon(item.content);
           const isNewest = index === 0;
+          const dotClasses = item.isCreation
+            ? "border-muted-foreground/40 bg-muted text-muted-foreground"
+            : "border-border bg-card text-muted-foreground";
 
           return (
             <div key={item.id} className="flex gap-3">
               {/* Vertical line + icon */}
               <div className="flex flex-col items-center">
                 <div
-                  className={`flex size-7 shrink-0 items-center justify-center rounded-full border-2 z-10 ${
-                    isNewest
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : item.isCreation
-                        ? "border-muted-foreground/40 bg-muted text-muted-foreground"
-                        : "border-border bg-card text-muted-foreground"
+                  className={`z-10 flex size-7 shrink-0 items-center justify-center rounded-full border-2 ${
+                    isNewest ? "border-primary bg-primary text-primary-foreground" : dotClasses
                   }`}
                 >
                   <Icon className="size-3.5" />
                 </div>
-                {!isLast && <div className="w-px flex-1 bg-border my-1" />}
+                {!isLast && <div className="my-1 w-px flex-1 bg-border" />}
               </div>
 
               {/* Content */}
-              <div className={`pb-4 min-w-0 ${isLast ? "" : ""}`}>
-                <p className={`text-sm font-medium ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
+              <div className={`min-w-0 pb-4 ${isLast ? "" : ""}`}>
+                <p className={`font-medium text-sm ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
                   {item.content}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">{formatDateTime(item.created_at)}</p>
+                <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.created_at)}</p>
               </div>
             </div>
           );

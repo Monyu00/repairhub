@@ -37,11 +37,11 @@ export function TicketPhotosGallery({ photos, supabaseUrl, phase, title }: Ticke
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <ImageIcon className="size-4 text-muted-foreground" />
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        <span className="text-xs text-muted-foreground">（{phasePhotos.length} 張）</span>
+        <h2 className="font-semibold text-foreground text-sm">{title}</h2>
+        <span className="text-muted-foreground text-xs">（{phasePhotos.length} 張）</span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {phasePhotos.map((photo) => {
           const url = getPublicUrl(supabaseUrl, photo.storage_path);
           return (
@@ -49,7 +49,7 @@ export function TicketPhotosGallery({ photos, supabaseUrl, phase, title }: Ticke
               key={photo.id}
               type="button"
               onClick={() => setLightboxSrc(url)}
-              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="點擊放大照片"
             >
               <Image src={url} alt="報修照片" fill className="object-cover" sizes="(max-width: 640px) 50vw, 33vw" />
@@ -59,18 +59,18 @@ export function TicketPhotosGallery({ photos, supabaseUrl, phase, title }: Ticke
       </div>
 
       <Dialog open={!!lightboxSrc} onOpenChange={(open) => !open && setLightboxSrc(null)}>
-        <DialogContent className="max-w-2xl p-2 bg-black/90 border-0">
+        <DialogContent className="max-w-2xl border-0 bg-black/90 p-2">
           <DialogTitle className="sr-only">照片預覽</DialogTitle>
           <button
             type="button"
             onClick={() => setLightboxSrc(null)}
-            className="absolute right-2 top-2 z-10 rounded-full bg-black/50 p-1.5 text-white hover:bg-black/70 transition-colors"
+            className="absolute top-2 right-2 z-10 rounded-full bg-black/50 p-1.5 text-white transition-colors hover:bg-black/70"
             aria-label="關閉"
           >
             <XIcon className="size-4" />
           </button>
           {lightboxSrc && (
-            <div className="relative w-full aspect-video">
+            <div className="relative aspect-video w-full">
               <Image
                 src={lightboxSrc}
                 alt="放大照片"

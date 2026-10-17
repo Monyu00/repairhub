@@ -34,14 +34,18 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
     if (open && equipment) {
       setErrorMessage(null);
       setIsChecking(true);
-      checkEquipmentTicketsCount(equipment.id).then((res) => {
-        setIsChecking(false);
-        if (res.success) {
-          setTicketCount(res.count);
-        } else {
-          setTicketCount(0);
-        }
-      });
+      checkEquipmentTicketsCount(equipment.id)
+        .then((res) => {
+          setIsChecking(false);
+          if (res.success) {
+            setTicketCount(res.count);
+          } else {
+            setTicketCount(0);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to check equipment ticket associations:", error);
+        });
     }
   }, [open, equipment]);
 
@@ -74,26 +78,27 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
                 這將會從系統中移除設備紀錄（代碼：<span className="font-mono">{equipment?.code}</span>）。
               </p>
 
-              {isChecking ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+              {isChecking && (
+                <div className="flex items-center gap-2 pt-1 text-muted-foreground text-xs">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   檢查報修紀錄中...
                 </div>
-              ) : ticketCount > 0 ? (
-                <div className="flex items-start gap-2 rounded-md bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              )}
+              {!isChecking && ticketCount > 0 && (
+                <div className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 text-xs dark:text-amber-400">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <div>
                     <span className="font-semibold">警告：</span>此設備已有 {ticketCount} 筆歷史報修單引用。
                     刪除設備後，相關報修單的設備關聯將自動設為空值（報修單仍會保留）。
                   </div>
                 </div>
-              ) : null}
+              )}
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {errorMessage && (
-          <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">{errorMessage}</div>
+          <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{errorMessage}</div>
         )}
 
         <AlertDialogFooter>

@@ -95,20 +95,20 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
     <>
       <div className="space-y-4">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">維修驗收</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">技師已完成維修，請確認問題是否已解決。</p>
+          <h2 className="font-semibold text-foreground text-sm">維修驗收</h2>
+          <p className="mt-0.5 text-muted-foreground text-xs">技師已完成維修，請確認問題是否已解決。</p>
         </div>
 
         {/* 5-star Rating selector (Optional) */}
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-foreground">維修服務評分（選填）</span>
-            <span className="text-xs text-muted-foreground transition-colors">
+            <span className="font-medium text-foreground text-xs">維修服務評分（選填）</span>
+            <span className="text-muted-foreground text-xs transition-colors">
               {activeRating ? `${activeRating} 星 - ${RATING_LABELS[activeRating]}` : "點選星星評分"}
             </span>
           </div>
 
-          <fieldset className="flex items-center gap-1.5 border-0 m-0 p-0" aria-label="服務評分星等選擇">
+          <fieldset className="m-0 flex items-center gap-1.5 border-0 p-0" aria-label="服務評分星等選擇">
             {[1, 2, 3, 4, 5].map((star) => {
               const isFilled = (activeRating ?? 0) >= star;
               return (
@@ -137,7 +137,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
               <button
                 type="button"
                 onClick={() => setRating(null)}
-                className="ml-2 text-[11px] text-muted-foreground hover:text-foreground underline"
+                className="ml-2 text-[11px] text-muted-foreground underline hover:text-foreground"
               >
                 清除
               </button>
@@ -192,7 +192,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
               {/* Email verification */}
               <div className="space-y-2">
-                <label htmlFor="reporter-email" className="text-sm font-medium text-foreground">
+                <label htmlFor="reporter-email" className="font-medium text-foreground text-sm">
                   <MailIcon className="mr-1.5 inline-block size-4 text-muted-foreground" />
                   驗證身分
                 </label>
@@ -204,13 +204,13 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isPending}
                 />
-                <p className="text-xs text-muted-foreground">請輸入您提交報修時使用的 Email 以驗證身分。</p>
+                <p className="text-muted-foreground text-xs">請輸入您提交報修時使用的 Email 以驗證身分。</p>
               </div>
 
               {/* Feedback for reopen only */}
               {!isConfirm && (
                 <div className="space-y-2">
-                  <label htmlFor="reopen-feedback" className="text-sm font-medium text-foreground">
+                  <label htmlFor="reopen-feedback" className="font-medium text-foreground text-sm">
                     <MessageSquareWarningIcon className="mr-1.5 inline-block size-4 text-muted-foreground" />
                     反饋說明
                   </label>
@@ -227,7 +227,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
               {/* Error display */}
               {error && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-sm">
                   {error}
                 </div>
               )}
@@ -244,16 +244,14 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                 disabled={isPending || !email.trim() || (!isConfirm && !feedback.trim())}
                 variant={isConfirm ? "default" : "destructive"}
               >
-                {isPending ? (
+                {isPending && (
                   <>
                     <Loader2Icon className="mr-1.5 size-4 animate-spin" />
                     處理中…
                   </>
-                ) : isConfirm ? (
-                  "確認修復"
-                ) : (
-                  "回報問題仍在"
                 )}
+                {!isPending && isConfirm && "確認修復"}
+                {!isPending && !isConfirm && "回報問題仍在"}
               </Button>
             </DialogFooter>
           )}

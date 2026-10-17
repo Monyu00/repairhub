@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import Image from "next/image";
+
 import { ImageIcon, XIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,11 +55,12 @@ export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: Ticke
                 className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="點擊放大照片"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
+                  fill
                   src={url}
                   alt={title}
-                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                  className="object-cover transition-transform duration-200 group-hover:scale-105"
+                  sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, 25vw"
                 />
               </button>
             );
@@ -77,12 +80,7 @@ export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: Ticke
             </button>
             {lightboxSrc && (
               <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={lightboxSrc}
-                  alt="放大照片"
-                  className="max-h-[80vh] w-auto max-w-full rounded object-contain"
-                />
+                <Image fill src={lightboxSrc} alt="放大照片" className="rounded object-contain" />
               </div>
             )}
           </DialogContent>
