@@ -43,9 +43,8 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
             setTicketCount(0);
           }
         })
-        .catch(() => {
-          setIsChecking(false);
-          setTicketCount(0);
+        .catch((error) => {
+          console.error("Failed to check equipment ticket associations:", error);
         });
     }
   }, [open, equipment]);

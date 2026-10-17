@@ -59,8 +59,8 @@ export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: Ticke
                   fill
                   src={url}
                   alt={title}
-                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                  unoptimized
+                  className="object-cover transition-transform duration-200 group-hover:scale-105"
+                  sizes="(max-width: 639px) 50vw, (max-width: 767px) 33vw, 25vw"
                 />
               </button>
             );
@@ -80,13 +80,7 @@ export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: Ticke
             </button>
             {lightboxSrc && (
               <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden">
-                <Image
-                  fill
-                  src={lightboxSrc}
-                  alt="放大照片"
-                  className="max-h-[80vh] w-auto max-w-full rounded object-contain"
-                  unoptimized
-                />
+                <Image fill src={lightboxSrc} alt="放大照片" className="rounded object-contain" />
               </div>
             )}
           </DialogContent>

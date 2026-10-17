@@ -29,7 +29,7 @@ export function QRCard({ item }: QRCardProps) {
 
   useEffect(() => {
     const cachedDataUrl = qrDataUrlCache.get(item.url);
-    if (cachedDataUrl) {
+    if (cachedDataUrl !== undefined) {
       setQrDataUrl(cachedDataUrl);
       return;
     }

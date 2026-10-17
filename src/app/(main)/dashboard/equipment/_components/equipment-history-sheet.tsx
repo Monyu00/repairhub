@@ -48,6 +48,8 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
     }
   }, [open, equipment]);
 
+  const isReady = !isLoading && !error;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
@@ -81,7 +83,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
           {!isLoading && error && (
             <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{error}</div>
           )}
-          {!isLoading && !error && tickets.length === 0 && (
+          {isReady && tickets.length === 0 && (
             <Empty className="border border-dashed bg-card/40 py-10">
               <EmptyMedia variant="icon">
                 <ClipboardList />
@@ -92,7 +94,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
               </EmptyHeader>
             </Empty>
           )}
-          {!isLoading && !error && tickets.length > 0 && (
+          {isReady && tickets.length > 0 && (
             <div className="space-y-3">
               <div className="font-medium text-muted-foreground text-xs">共 {tickets.length} 筆維修通報</div>
               {tickets.map((ticket) => (
