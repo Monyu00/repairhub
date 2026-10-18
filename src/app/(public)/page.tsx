@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Plus, Wrench } from "lucide-react";
+import { Camera, ClipboardList, Plus, ShieldCheck, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 
 import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
@@ -34,6 +34,13 @@ interface HomePageProps {
 }
 
 const DEFAULT_PAGE_SIZE = 15;
+
+const PUBLIC_TICKET_FLOW = [
+  { label: "待處理", icon: ClipboardList },
+  { label: "維修中", icon: Wrench },
+  { label: "已完工", icon: Camera },
+  { label: "已結案", icon: ShieldCheck },
+] as const;
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
@@ -115,69 +122,75 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const totalPages = Math.max(1, Math.ceil(ticketsResult.totalCount / pageSize));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-muted/40 p-6 shadow-xs sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-2xl space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-              <Wrench className="size-3.5" />
-              <span>全校修繕通報入口</span>
+    <div>
+      <section className="border-border border-b bg-muted/20">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="font-bold font-heading text-2xl text-foreground sm:text-3xl">從報修到結案，全程看得見</h1>
+              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+                免登入即可通報校園設施與設備問題；每筆公開工單都會同步呈現待處理、維修中、已完工與已結案的進度。
+              </p>
             </div>
-            <h1 className="font-extrabold font-heading text-2xl text-foreground tracking-tight sm:text-3xl">
-              校園設備修繕與進度查詢
-            </h1>
-            <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
-              即時追蹤校舍設施與設備的通報進度，共同維護安全美好的校園環境。如發現設施損壞或異常，歡迎立即填單通報。
-            </p>
-          </div>
 
-          <div className="flex shrink-0 items-center">
-            <Button asChild size="lg" className="gap-2 shadow-xs">
+            <Button asChild size="lg" className="h-11 w-full sm:h-9 sm:w-auto">
               <Link href="/report">
-                <Plus className="size-4" />
-                <span>我要通報報修</span>
+                <Plus data-icon="inline-start" />
+                <span>我要報修</span>
               </Link>
             </Button>
           </div>
+
+          <ol aria-label="公開報修流程" className="grid grid-cols-4 gap-2 border-border border-t pt-4 sm:gap-4">
+            {PUBLIC_TICKET_FLOW.map((step) => {
+              const Icon = step.icon;
+
+              return (
+                <li
+                  key={step.label}
+                  className="flex min-w-0 flex-col items-center gap-1.5 text-center sm:flex-row sm:justify-center sm:gap-2"
+                >
+                  <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
+                  <span className="font-medium text-foreground text-xs">{step.label}</span>
+                </li>
+              );
+            })}
+          </ol>
         </div>
-      </div>
+      </section>
 
-      {/* Public Announcements Banner */}
-      <PublicAnnouncementsBanner announcements={announcements} />
+      <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <PublicAnnouncementsBanner announcements={announcements} />
 
-      {/* Main Content Area */}
-      <div className="space-y-4">
-        {/* View Navigation */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <HomepageViewLinks activeTab={activeTab} isLoggedIn={isLoggedIn} myTicketsCount={myTicketsCount} />
-        </div>
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <HomepageViewLinks activeTab={activeTab} isLoggedIn={isLoggedIn} myTicketsCount={myTicketsCount} />
+          </div>
 
-        {/* Tab 1: All tickets */}
-        {activeTab === "all" && (
-          <div className="space-y-4">
-            <TicketFilters buildings={buildings} categories={categories} />
-            <PublicTicketList
+          {activeTab === "all" && (
+            <div className="space-y-4">
+              <TicketFilters buildings={buildings} categories={categories} />
+              <PublicTicketList
+                tickets={ticketsResult.tickets}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalCount={ticketsResult.totalCount}
+                pageSize={pageSize}
+              />
+            </div>
+          )}
+
+          {activeTab === "my-tickets" && (
+            <MyTicketList
               tickets={ticketsResult.tickets}
+              userEmail={session?.email ?? null}
               currentPage={currentPage}
               totalPages={totalPages}
               totalCount={ticketsResult.totalCount}
               pageSize={pageSize}
             />
-          </div>
-        )}
-
-        {/* Tab 2: My tickets */}
-        {activeTab === "my-tickets" && (
-          <MyTicketList
-            tickets={ticketsResult.tickets}
-            userEmail={session?.email ?? null}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={ticketsResult.totalCount}
-            pageSize={pageSize}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

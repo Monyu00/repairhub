@@ -59,7 +59,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
               }}
             />
           ) : (
-            <Button asChild variant="outline" size="sm" className="gap-1">
+            <Button asChild variant="outline" size="sm" className="h-11 gap-1 px-3 sm:h-7 sm:px-2.5">
               <Link href="/login">
                 <User className="size-4" />
                 <span>登入</span>
@@ -68,7 +68,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           )}
 
           {/* Theme switcher */}
-          <ThemeSwitcher />
+          <ThemeSwitcher className="size-11 sm:size-8" />
         </div>
       </div>
     </header>

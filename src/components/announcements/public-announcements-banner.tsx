@@ -57,8 +57,15 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
               <span className="text-foreground/70 text-xs">({formatDateTime(currentAnnouncement.published_at)})</span>
             </div>
 
-            <div className="whitespace-pre-wrap text-foreground/90 text-xs leading-relaxed">
-              {expanded ? currentAnnouncement.body : <p className="line-clamp-2">{currentAnnouncement.body}</p>}
+            <div
+              id="public-announcement-body"
+              className="whitespace-pre-wrap text-foreground/90 text-xs leading-relaxed"
+            >
+              {expanded ? (
+                currentAnnouncement.body
+              ) : (
+                <p className="line-clamp-2 hidden sm:block">{currentAnnouncement.body}</p>
+              )}
             </div>
           </div>
         </div>
@@ -76,7 +83,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                     type="button"
                     onClick={() => setActiveItemIndex(idx)}
                     aria-current={idx === activeItemIndex ? "true" : undefined}
-                    className="flex size-6 items-center justify-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex size-11 items-center justify-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary sm:size-6"
                     aria-label={`切換至公告 ${idx + 1}`}
                   >
                     <span
@@ -95,16 +102,17 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
             variant="ghost"
             size="sm"
             aria-expanded={expanded}
+            aria-controls="public-announcement-body"
             onClick={() => setExpanded(!expanded)}
-            className="h-7 px-2 text-foreground/70 text-xs hover:text-foreground"
+            className="h-11 px-3 text-foreground/70 text-xs hover:text-foreground sm:h-7 sm:px-2"
           >
             {expanded ? (
               <>
-                收合 <ChevronUp className="ml-1 size-3.5" aria-hidden="true" />
+                收合 <ChevronUp data-icon="inline-end" aria-hidden="true" />
               </>
             ) : (
               <>
-                查看完整內文 <ChevronDown className="ml-1 size-3.5" aria-hidden="true" />
+                查看完整內文 <ChevronDown data-icon="inline-end" aria-hidden="true" />
               </>
             )}
           </Button>
