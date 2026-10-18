@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TicketPaginationProps {
   currentPage: number;
@@ -86,7 +86,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
           顯示第 <strong className="font-medium text-foreground">{startRecord}</strong> 至{" "}
           <strong className="font-medium text-foreground">{endRecord}</strong> 筆，共{" "}
           <strong className="font-medium text-foreground">{totalCount}</strong> 筆
-          <span className="ml-1 text-muted-foreground/80">
+          <span className="ml-1 text-foreground/70">
             （第 {currentPage} / {safeTotalPages} 頁）
           </span>
         </span>
@@ -94,14 +94,16 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
         <div className="flex items-center gap-1.5">
           <span>每頁</span>
           <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-            <SelectTrigger className="h-8 w-[72px] text-xs">
+            <SelectTrigger aria-label="每頁顯示筆數" className="h-8 w-[72px] text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="15">15</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
+              <SelectGroup>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="15">15</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
           <span>筆</span>
@@ -115,10 +117,11 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
           variant="outline"
           size="sm"
           disabled={currentPage <= 1}
+          aria-label="上一頁"
           className="h-8 px-2.5"
         >
           {currentPage > 1 ? (
-            <Link href={createPageUrl(currentPage - 1)} aria-label="上一頁">
+            <Link href={createPageUrl(currentPage - 1)}>
               <ChevronLeft className="size-4" />
               <span className="ml-1 hidden sm:inline">上一頁</span>
             </Link>
@@ -163,10 +166,11 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
           variant="outline"
           size="sm"
           disabled={currentPage >= safeTotalPages}
+          aria-label="下一頁"
           className="h-8 px-2.5"
         >
           {currentPage < safeTotalPages ? (
-            <Link href={createPageUrl(currentPage + 1)} aria-label="下一頁">
+            <Link href={createPageUrl(currentPage + 1)}>
               <span className="mr-1 hidden sm:inline">下一頁</span>
               <ChevronRight className="size-4" />
             </Link>

@@ -54,9 +54,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                 </Badge>
               )}
               <h2 className="font-semibold text-foreground text-sm">{currentAnnouncement.title}</h2>
-              <span className="text-muted-foreground text-xs">
-                ({formatDateTime(currentAnnouncement.published_at)})
-              </span>
+              <span className="text-foreground/70 text-xs">({formatDateTime(currentAnnouncement.published_at)})</span>
             </div>
 
             <div className="whitespace-pre-wrap text-foreground/90 text-xs leading-relaxed">
@@ -67,7 +65,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
 
         <div className="flex shrink-0 items-center gap-1.5 self-end sm:self-auto">
           {hasMultiple && (
-            <div className="mr-2 flex items-center gap-1 text-muted-foreground text-xs">
+            <div className="mr-2 flex items-center gap-1 text-foreground/70 text-xs">
               <span>
                 {activeItemIndex + 1} / {announcements.length}
               </span>
@@ -98,7 +96,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
             size="sm"
             aria-expanded={expanded}
             onClick={() => setExpanded(!expanded)}
-            className="h-7 px-2 text-muted-foreground text-xs hover:text-foreground"
+            className="h-7 px-2 text-foreground/70 text-xs hover:text-foreground"
           >
             {expanded ? (
               <>
