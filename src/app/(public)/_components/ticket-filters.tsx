@@ -8,7 +8,7 @@ import { RotateCcw, Search, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BuildingOption {
   id: string;
@@ -86,70 +86,83 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search input */}
-        <form onSubmit={handleSearchSubmit} className="relative flex-1">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="搜尋報修單號或描述..."
-            className="h-9 pr-8 pl-9"
-          />
-          {searchValue && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchValue("");
-                updateFilters({ q: null });
-              }}
-              className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="size-3.5" />
-            </button>
-          )}
+        <form onSubmit={handleSearchSubmit} className="flex flex-1 items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="搜尋報修單號或描述..."
+              aria-label="搜尋報修單號或描述"
+              className="h-9 pr-10 pl-9"
+            />
+            {searchValue && (
+              <button
+                type="button"
+                aria-label="清除搜尋"
+                onClick={() => {
+                  setSearchValue("");
+                  updateFilters({ q: null });
+                }}
+                className="absolute top-1/2 right-2.5 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+          <Button type="submit" size="sm" className="h-9 shrink-0 px-3">
+            搜尋
+          </Button>
         </form>
 
         {/* Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
           <Select value={currentStatus} onValueChange={(val) => updateFilters({ status: val })}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[125px]">
+            <SelectTrigger aria-label="報修單狀態" className="h-9 w-full text-xs sm:w-[125px]">
               <SelectValue placeholder="所有狀態" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">所有未結案</SelectItem>
-              <SelectItem value="pending">待處理</SelectItem>
-              <SelectItem value="in_progress">維修中</SelectItem>
-              <SelectItem value="completed">已完工</SelectItem>
+              <SelectGroup>
+                <SelectItem value="all">所有未結案</SelectItem>
+                <SelectItem value="pending">待處理</SelectItem>
+                <SelectItem value="in_progress">維修中</SelectItem>
+                <SelectItem value="completed">已完工</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
 
           {/* Building filter */}
           <Select value={currentBuilding} onValueChange={(val) => updateFilters({ building: val })}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[135px]">
+            <SelectTrigger aria-label="報修大樓" className="h-9 w-full text-xs sm:w-[135px]">
               <SelectValue placeholder="所有大樓" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">所有大樓</SelectItem>
-              {buildings.map((b) => (
-                <SelectItem key={b.id} value={b.id}>
-                  {b.name}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                <SelectItem value="all">所有大樓</SelectItem>
+                {buildings.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
 
           {/* Category filter */}
           <Select value={currentCategory} onValueChange={(val) => updateFilters({ category: val })}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[135px]">
+            <SelectTrigger aria-label="報修類別" className="h-9 w-full text-xs sm:w-[135px]">
               <SelectValue placeholder="所有類別" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">所有類別</SelectItem>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                <SelectItem value="all">所有類別</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
 

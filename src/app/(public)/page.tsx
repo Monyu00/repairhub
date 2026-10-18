@@ -11,7 +11,7 @@ import { getSession } from "@/server/auth/session";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 import { type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
 
-import { HomepageTabs } from "./_components/homepage-tabs";
+import { HomepageViewLinks } from "./_components/homepage-view-links";
 import { MyTicketList } from "./_components/my-ticket-list";
 import { PublicTicketList } from "./_components/public-ticket-list";
 import { TicketFilters } from "./_components/ticket-filters";
@@ -148,9 +148,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* Main Content Area */}
       <div className="space-y-4">
-        {/* Tabs Bar */}
+        {/* View Navigation */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <HomepageTabs activeTab={activeTab} isLoggedIn={isLoggedIn} myTicketsCount={myTicketsCount} />
+          <HomepageViewLinks activeTab={activeTab} isLoggedIn={isLoggedIn} myTicketsCount={myTicketsCount} />
         </div>
 
         {/* Tab 1: All tickets */}

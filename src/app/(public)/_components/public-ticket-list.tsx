@@ -60,7 +60,9 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
               <TableHead className="w-[110px]">狀態</TableHead>
               <TableHead className="w-[130px]">負責技師</TableHead>
               <TableHead className="w-[140px] text-right">通報時間</TableHead>
-              <TableHead className="w-[40px]" />
+              <TableHead className="w-[40px]">
+                <span className="sr-only">操作</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,10 +73,17 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                 <TableRow
                   key={ticket.id}
                   onClick={() => router.push(`/track/${ticket.id}`)}
-                  className="group cursor-pointer transition-colors hover:bg-muted/40"
+                  className="group cursor-pointer transition-colors focus-within:bg-muted/40 hover:bg-muted/40"
                 >
                   <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
-                    #{ticket.id.slice(0, 8)}
+                    <Link
+                      href={`/track/${ticket.id}`}
+                      aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
+                      onClick={(event) => event.stopPropagation()}
+                      className="rounded-sm outline-none hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      #{ticket.id.slice(0, 8)}
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
@@ -98,7 +107,10 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground text-xs">{formattedDate}</TableCell>
                   <TableCell className="p-2 text-right">
-                    <ChevronRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                    <ChevronRight
+                      aria-hidden="true"
+                      className="ml-auto text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                    />
                   </TableCell>
                 </TableRow>
               );
