@@ -5,38 +5,26 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import type { TicketDetail } from "@/server/tickets/detail";
 
 import { TicketStatusBadge } from "../../_components/ticket-status-badge";
-import type { TicketStatus } from "../../_components/ticket-types";
 import { AdminActions } from "./admin-actions";
 import { ClosureSection } from "./closure-section";
-import { StatusTimeline, type TimelineNote } from "./status-timeline";
+import { StatusTimeline } from "./status-timeline";
 import { TechnicianClaimButton } from "./technician-claim-button";
-import { type TicketInfoData, TicketInfoSection } from "./ticket-info-section";
-import { type ProgressNote, TicketNotesSection } from "./ticket-notes-section";
-import { type PhotoItem, TicketPhotosSection } from "./ticket-photos-section";
+import { TicketInfoSection } from "./ticket-info-section";
+import { TicketNotesSection } from "./ticket-notes-section";
+import { TicketPhotosSection } from "./ticket-photos-section";
 
 interface TicketDetailViewProps {
-  ticket: TicketInfoData;
-  photos: PhotoItem[];
-  notes: ProgressNote[];
-  timelineNotes: TimelineNote[];
+  detail: TicketDetail;
   userId: string | null;
   userRole: "admin" | "technician" | null;
-  assignedTo: string | null;
-  supabaseUrl: string;
 }
 
-export function TicketDetailView({
-  ticket,
-  photos,
-  notes,
-  timelineNotes,
-  userId,
-  userRole,
-  assignedTo,
-  supabaseUrl,
-}: TicketDetailViewProps) {
+export function TicketDetailView({ detail, userId, userRole }: TicketDetailViewProps) {
+  const { ticket, photos, notes } = detail;
+  const assignedTo = ticket.assignedTo;
   const isAdmin = userRole === "admin";
   const isAssignedTech = userId !== null && assignedTo === userId;
   const canViewReporter = isAdmin || userRole === "technician";
@@ -63,7 +51,7 @@ export function TicketDetailView({
                 <span>報修單詳情</span>
                 <span className="font-mono font-normal text-base text-muted-foreground">#{ticket.id.slice(0, 8)}</span>
               </h1>
-              <TicketStatusBadge status={ticket.status as TicketStatus} />
+              <TicketStatusBadge status={ticket.status} />
             </div>
             <p className="text-muted-foreground text-xs">
               單據識別碼: <span className="font-mono">{ticket.id}</span>
@@ -92,13 +80,13 @@ export function TicketDetailView({
           <TicketInfoSection ticket={ticket} canViewReporter={canViewReporter} />
 
           {/* Submission Photos */}
-          <TicketPhotosSection photos={photos} supabaseUrl={supabaseUrl} phase="report" title="報修通報照片" />
+          <TicketPhotosSection photos={photos} phase="report" title="報修通報照片" />
 
           {/* Technician Closure Workflow (When in_progress and assigned) */}
           {canSubmitClosure && <ClosureSection ticketId={ticket.id} />}
 
           {/* Closure Photos (When completed/closed) */}
-          <TicketPhotosSection photos={photos} supabaseUrl={supabaseUrl} phase="closure" title="維修完工照片" />
+          <TicketPhotosSection photos={photos} phase="closure" title="維修完工照片" />
 
           {/* Progress Notes */}
           <TicketNotesSection ticketId={ticket.id} notes={notes} canAddNote={canAddNote} />
@@ -106,7 +94,7 @@ export function TicketDetailView({
 
         {/* Right Column (1 col) - Timeline */}
         <div className="space-y-6">
-          <StatusTimeline createdAt={ticket.createdAt} notes={timelineNotes} reporterName={ticket.reporterName} />
+          <StatusTimeline createdAt={ticket.createdAt} notes={notes} reporterName={ticket.reporterName} />
         </div>
       </div>
     </div>

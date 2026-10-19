@@ -8,27 +8,15 @@ import { ImageIcon, XIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-
-export interface PhotoItem {
-  id: string;
-  storagePath: string;
-  phase: "report" | "closure";
-}
+import type { TicketPhoto } from "@/server/tickets/detail";
 
 interface TicketPhotosSectionProps {
-  photos: PhotoItem[];
-  supabaseUrl: string;
+  photos: TicketPhoto[];
   phase: "report" | "closure";
   title: string;
 }
 
-function getPublicUrl(supabaseUrl: string, storagePath: string) {
-  const base = supabaseUrl.replace(/\/+$/, "");
-  const path = storagePath.replace(/^\/+/, "");
-  return `${base}/storage/v1/object/public/ticket-photos/${path}`;
-}
-
-export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: TicketPhotosSectionProps) {
+export function TicketPhotosSection({ photos, phase, title }: TicketPhotosSectionProps) {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const phasePhotos = photos.filter((p) => p.phase === phase);
 
@@ -46,7 +34,7 @@ export function TicketPhotosSection({ photos, supabaseUrl, phase, title }: Ticke
       <CardContent className="pt-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {phasePhotos.map((photo) => {
-            const url = getPublicUrl(supabaseUrl, photo.storagePath);
+            const url = photo.url;
             return (
               <button
                 key={photo.id}

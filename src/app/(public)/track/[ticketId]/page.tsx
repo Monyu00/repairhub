@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTicketDetail } from "@/server/tickets/detail";
 
 import { TicketNotFound } from "./_components/ticket-not-found";
 import { TicketTracker } from "./_components/ticket-tracker";
@@ -12,63 +13,11 @@ interface TrackPageProps {
 export default async function TrackPage({ params }: TrackPageProps) {
   const { ticketId } = await params;
 
-  // Use admin client to bypass RLS – this is a public Server Component.
-  // We intentionally omit reporter_email and reporter_phone from all queries.
+  // Public tracking uses the admin adapter, then redacts Reporter and author data in the module.
   const supabase = createAdminClient();
+  const detail = await getTicketDetail(supabase, ticketId, { role: null });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  if (!detail) return <TicketNotFound ticketId={ticketId} />;
 
-  // Fetch ticket core info (no private contact fields)
-  const { data: ticket } = await supabase
-    .from("tickets")
-    .select(
-      "id, status, description, created_at, rating, rated_at, equipment_id, equipment_name, category:categories(name), space:spaces(name, building:buildings(name)), equipment:equipment(name)",
-    )
-    .eq("id", ticketId)
-    .single();
-
-  if (!ticket) {
-    return <TicketNotFound ticketId={ticketId} />;
-  }
-
-  // Flatten Supabase's nested relation arrays
-  const categoryObj = Array.isArray(ticket.category) ? ticket.category[0] : ticket.category;
-  const spaceObj = Array.isArray(ticket.space) ? ticket.space[0] : ticket.space;
-  const buildingObj = Array.isArray(spaceObj?.building) ? spaceObj?.building[0] : spaceObj?.building;
-  const equipmentObj = Array.isArray(ticket.equipment) ? ticket.equipment[0] : ticket.equipment;
-
-  // Fetch photos and notes concurrently
-  const [photosRes, notesRes] = await Promise.all([
-    supabase
-      .from("ticket_photos")
-      .select("id, storage_path, phase")
-      .eq("ticket_id", ticketId)
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("ticket_notes")
-      .select("id, content, type, created_at")
-      .eq("ticket_id", ticketId)
-      .order("created_at", { ascending: true }),
-  ]);
-
-  const photosData = photosRes.data;
-  const notesData = notesRes.data;
-
-  return (
-    <TicketTracker
-      ticketId={ticket.id}
-      status={ticket.status}
-      createdAt={ticket.created_at}
-      category={categoryObj?.name ?? "未知類別"}
-      building={buildingObj?.name ?? "未知大樓"}
-      space={spaceObj?.name ?? "未知空間"}
-      description={ticket.description}
-      equipment={ticket.equipment_name || equipmentObj?.name || null}
-      rating={ticket.rating}
-      ratedAt={ticket.rated_at}
-      photos={(photosData ?? []) as { id: string; storage_path: string; phase: "report" | "closure" }[]}
-      notes={(notesData ?? []) as { id: string; content: string; type: "note" | "status_change"; created_at: string }[]}
-      supabaseUrl={supabaseUrl}
-    />
-  );
+  return <TicketTracker detail={detail} />;
 }

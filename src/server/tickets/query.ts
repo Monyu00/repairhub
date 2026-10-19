@@ -37,6 +37,8 @@ export interface TicketRecord {
   spaceId: string;
   space: TicketSpace;
   description: string;
+  equipmentId: string | null;
+  equipmentName: string | null;
   reporterName: string | null;
   reporterDepartment: string | null;
   reporterEmail: string | null;
@@ -86,7 +88,7 @@ type RawRecord = Record<string, unknown>;
 /**
  * Normalizes raw PostgREST ticket rows and enforces privacy redaction.
  */
-function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketRecord {
+export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketRecord {
   const t = (raw ?? {}) as RawRecord;
 
   // 1. Unnest space and building relations
@@ -162,6 +164,8 @@ function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketRecord {
     spaceId: String(t.space_id ?? space.id),
     space,
     description: String(t.description ?? ""),
+    equipmentId: (t.equipment_id as string | null) ?? null,
+    equipmentName: (t.equipment_name as string | null) ?? null,
     reporterName: canViewReporter ? rawReporterName : null,
     reporterDepartment: canViewReporter ? rawReporterDepartment : null,
     reporterEmail: canViewReporter ? rawReporterEmail : null,
@@ -207,6 +211,8 @@ export async function queryTickets(
     category_id,
     space_id,
     description,
+    equipment_id,
+    equipment_name,
     reporter_name,
     reporter_department,
     reporter_email,
