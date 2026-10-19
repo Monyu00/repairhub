@@ -10,6 +10,10 @@ A campus facility repair reporting and tracking system. Anyone can submit repair
 A repair request describing a broken or malfunctioning item at a specific location. Created by a reporter, worked on by a technician, and closed after confirmation.
 _Avoid_: Case, order, work order, report
 
+**Ticket Detail**:
+The complete current view of one Ticket, including its status, location, Equipment, repair progress, photos, notes, and Rating where applicable. Reporter contact information is visible only to permitted viewers.
+_Avoid_: Ticket page, ticket view, ticket card
+
 **Reporter**:
 The person who submits a ticket. This is a behavior, not a system role — anyone (including technicians and admins) can be a reporter.
 _Avoid_: Submitter, requester, user
