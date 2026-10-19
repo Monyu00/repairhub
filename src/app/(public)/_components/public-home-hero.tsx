@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Camera, ClipboardList, Plus, ShieldCheck, Wrench } from "lucide-react";
+import { Camera, ClipboardList, Plus, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -8,7 +8,6 @@ const PUBLIC_TICKET_FLOW = [
   { label: "待處理", icon: ClipboardList },
   { label: "維修中", icon: Wrench },
   { label: "已完工", icon: Camera },
-  { label: "已結案", icon: ShieldCheck },
 ] as const;
 
 export function PublicHomeHero() {
@@ -21,7 +20,7 @@ export function PublicHomeHero() {
               從報修到結案，全程看得見
             </h1>
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-              免登入即可通報校園設施與設備問題；每筆公開報修單都會同步呈現待處理、維修中、已完工與已結案的進度。
+              免登入即可通報校園設施與設備問題；每筆公開報修單都會同步呈現待處理、維修中與已完工的進度。
             </p>
           </div>
 
