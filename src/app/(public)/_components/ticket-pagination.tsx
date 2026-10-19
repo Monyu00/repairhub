@@ -94,7 +94,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
         <div className="flex items-center gap-1.5">
           <span>每頁</span>
           <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-            <SelectTrigger aria-label="每頁顯示筆數" className="h-8 w-[72px] text-xs">
+            <SelectTrigger aria-label="每頁顯示筆數" className="h-11! w-[72px] text-xs sm:h-8!">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +118,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
           size="sm"
           disabled={currentPage <= 1}
           aria-label="上一頁"
-          className="h-8 px-2.5"
+          className="h-11 w-11 p-0 sm:h-8 sm:w-auto sm:px-2.5"
         >
           {currentPage > 1 ? (
             <Link href={createPageUrl(currentPage - 1)}>
@@ -134,7 +134,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
         </Button>
 
         {/* Page buttons */}
-        <div className="flex items-center gap-1">
+        <div className="hidden items-center gap-1 sm:flex">
           {pages.map((p, idx) => {
             if (p === "ellipsis") {
               const ellipsisKey = idx < 3 ? "ellipsis-start" : "ellipsis-end";
@@ -167,7 +167,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
           size="sm"
           disabled={currentPage >= safeTotalPages}
           aria-label="下一頁"
-          className="h-8 px-2.5"
+          className="h-11 w-11 p-0 sm:h-8 sm:w-auto sm:px-2.5"
         >
           {currentPage < safeTotalPages ? (
             <Link href={createPageUrl(currentPage + 1)}>

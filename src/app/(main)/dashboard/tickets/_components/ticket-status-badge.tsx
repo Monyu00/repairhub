@@ -21,7 +21,7 @@ export const STATUS_CONFIG: Record<
   in_progress: {
     label: "維修中",
     variant: "outline",
-    dotClass: "bg-blue-500 animate-pulse",
+    dotClass: "bg-blue-500 animate-pulse motion-reduce:animate-none",
     bgClass: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
   },
   completed: {
