@@ -1,14 +1,8 @@
 import Link from "next/link";
 
-import { Camera, ClipboardList, Plus, Wrench } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-const PUBLIC_TICKET_FLOW = [
-  { label: "待處理", icon: ClipboardList },
-  { label: "維修中", icon: Wrench },
-  { label: "已完工", icon: Camera },
-] as const;
 
 export function PublicHomeHero() {
   return (
@@ -20,7 +14,7 @@ export function PublicHomeHero() {
               從報修到結案，全程看得見
             </h1>
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-              免登入即可通報校園設施與設備問題；每筆公開報修單都會同步呈現待處理、維修中與已完工的進度。
+              免登入即可通報校園設施與設備問題；每筆公開報修單都能即時查詢最新處理進度。
             </p>
           </div>
 
@@ -31,22 +25,6 @@ export function PublicHomeHero() {
             </Link>
           </Button>
         </div>
-
-        <ol aria-label="公開報修流程" className="grid grid-cols-4 gap-2 border-border border-t pt-4 sm:gap-4">
-          {PUBLIC_TICKET_FLOW.map((step) => {
-            const Icon = step.icon;
-
-            return (
-              <li
-                key={step.label}
-                className="flex min-w-0 flex-col items-center gap-1.5 text-center sm:flex-row sm:justify-center sm:gap-2"
-              >
-                <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
-                <span className="font-medium text-foreground text-xs">{step.label}</span>
-              </li>
-            );
-          })}
-        </ol>
       </div>
     </section>
   );
