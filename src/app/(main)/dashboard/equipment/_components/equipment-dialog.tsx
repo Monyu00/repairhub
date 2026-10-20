@@ -157,14 +157,14 @@ export function EquipmentDialog({ open, onOpenChange, mode, initialData, buildin
             {/* Cascading Picker: Building & Space */}
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
-                <Label>所在大樓 *</Label>
+                <Label>所在地點 *</Label>
                 <Select
                   value={selectedBuildingId}
                   onValueChange={handleBuildingChange}
                   disabled={isPending || buildings.length === 0}
                 >
                   <SelectTrigger size="default" className="w-full">
-                    <SelectValue placeholder="選擇大樓" />
+                    <SelectValue placeholder="選擇地點" />
                   </SelectTrigger>
                   <SelectContent>
                     {buildings.map((b) => (
@@ -184,7 +184,7 @@ export function EquipmentDialog({ open, onOpenChange, mode, initialData, buildin
                   disabled={isPending || availableSpaces.length === 0}
                 >
                   <SelectTrigger size="default" className="w-full">
-                    <SelectValue placeholder={availableSpaces.length === 0 ? "此大樓無空間" : "選擇空間"} />
+                    <SelectValue placeholder={availableSpaces.length === 0 ? "此地點無空間" : "選擇空間"} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSpaces.map((s) => (

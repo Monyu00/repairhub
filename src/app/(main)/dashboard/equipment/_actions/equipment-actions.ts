@@ -93,7 +93,7 @@ export async function fetchEquipmentList(): Promise<{
       const spaceRaw = Array.isArray(item.space) ? item.space[0] : item.space;
       const spaceData = (spaceRaw ?? {}) as Record<string, unknown>;
 
-      let buildingData = { id: "", name: "未知大樓", code: "" };
+      let buildingData = { id: "", name: "未知地點", code: "" };
       if (spaceData.building) {
         const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
         if (bRaw && typeof bRaw === "object") {

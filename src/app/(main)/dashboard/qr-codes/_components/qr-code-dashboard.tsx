@@ -144,7 +144,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
           </h1>
           <p className="text-muted-foreground text-sm">
             {targetType === "spaces"
-              ? "全校各大樓空間地點報修條碼批量產生、即時預覽與 PDF 下載。"
+              ? "全校各地點空間報修條碼批量產生、即時預覽與 PDF 下載。"
               : "全校設施設備資產報修條碼批量產生、即時預覽與 PDF 下載。"}
           </p>
         </div>

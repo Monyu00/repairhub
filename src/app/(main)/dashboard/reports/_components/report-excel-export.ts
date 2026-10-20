@@ -58,8 +58,8 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
 
     // 3. Sheet 3: 建築物分佈 (Building Distribution)
     const buildingRows = data.buildingDistribution.map((item) => ({
-      大樓名稱: item.buildingName,
-      大樓代碼: item.buildingCode,
+      地點名稱: item.buildingName,
+      地點代碼: item.buildingCode,
       工單數量: item.count,
       佔比: `${item.percentage}%`,
     }));

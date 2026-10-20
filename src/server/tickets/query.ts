@@ -95,14 +95,14 @@ export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketR
   const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
   const spaceData = (spaceRaw ?? {}) as RawRecord;
 
-  let buildingData: TicketBuilding = { id: "", name: "未知大樓", code: "" };
+  let buildingData: TicketBuilding = { id: "", name: "未知地點", code: "" };
   if (spaceData.building) {
     const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
     if (bRaw && typeof bRaw === "object") {
       const bObj = bRaw as RawRecord;
       buildingData = {
         id: String(bObj.id ?? ""),
-        name: String(bObj.name ?? "未知大樓"),
+        name: String(bObj.name ?? "未知地點"),
         code: String(bObj.code ?? ""),
       };
     }

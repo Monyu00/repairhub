@@ -134,7 +134,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     if (buildingDialogMode === "create") {
       const res = await createBuilding(name, code);
       if (res.success) {
-        toast.success("大樓新增成功");
+        toast.success("地點新增成功");
       }
       return res;
     }
@@ -142,7 +142,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     if (buildingDialogMode === "edit" && selectedBuilding) {
       const res = await updateBuilding(selectedBuilding.id, name, code);
       if (res.success) {
-        toast.success("大樓資訊已更新");
+        toast.success("地點資訊已更新");
       }
       return res;
     }
@@ -210,7 +210,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     if (deleteTarget.type === "building") {
       const res = await deleteBuilding(deleteTarget.id);
       if (res.success) {
-        toast.success(`已成功刪除大樓「${deleteTarget.name}」`);
+        toast.success(`已成功刪除地點「${deleteTarget.name}」`);
       }
       return res;
     }
@@ -232,12 +232,12 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         <div>
           <CardTitle className="text-xl">校園地點與空間管理</CardTitle>
           <CardDescription className="mt-1 text-muted-foreground text-sm">
-            維護全校大樓建築與其所屬空間層級結構。刪除前系統會自動檢查相關報修單與設備關聯。
+            維護全校地點與其所屬空間層級結構。刪除前系統會自動檢查相關報修單與設備關聯。
           </CardDescription>
         </div>
         <Button onClick={handleCreateBuildingOpen} className="shrink-0 gap-1.5">
           <Plus className="h-4 w-4" />
-          新增大樓
+          新增地點
         </Button>
       </CardHeader>
 
@@ -249,8 +249,8 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="搜尋大樓名稱、代碼或空間..."
-                aria-label="搜尋大樓名稱、代碼或空間"
+                placeholder="搜尋地點名稱、代碼或空間..."
+                aria-label="搜尋地點名稱、代碼或空間"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="h-8 pl-8 text-xs"
@@ -271,7 +271,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
           </div>
 
           <div className="text-muted-foreground text-xs">
-            共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 棟大樓
+            共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 個地點
             {searchQuery && (
               <span className="ml-1">
                 （含{" "}
@@ -289,8 +289,8 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
             <EmptyHeader>
               <EmptyDescription>
                 {buildings.length === 0
-                  ? "目前尚未建立任何校園大樓。"
-                  : "找不到符合條件的大樓或空間。請嘗試其他關鍵字。"}
+                  ? "目前尚未建立任何校園地點。"
+                  : "找不到符合條件的地點或空間。請嘗試其他關鍵字。"}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -335,7 +335,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                         size="sm"
                         className="h-8 gap-1 text-xs"
                         onClick={() => handleCreateSpaceOpen(building)}
-                        title="在此大樓新增空間"
+                        title="在此地點新增空間"
                       >
                         <Plus className="h-3.5 w-3.5" />
                         新增空間
@@ -345,20 +345,20 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => handleEditBuildingOpen(building)}
-                        title="編輯大樓"
+                        title="編輯地點"
                       >
                         <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        <span className="sr-only">編輯大樓</span>
+                        <span className="sr-only">編輯地點</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => handleDeleteBuildingOpen(building)}
-                        title="刪除大樓"
+                        title="刪除地點"
                       >
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">刪除大樓</span>
+                        <span className="sr-only">刪除地點</span>
                       </Button>
                     </div>
                   </div>
@@ -367,7 +367,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                     {spaceCount === 0 ? (
                       <Empty className="my-2 border border-dashed py-6">
                         <EmptyHeader>
-                          <EmptyDescription>此大樓目前無任何空間設定。</EmptyDescription>
+                          <EmptyDescription>此地點目前無任何空間設定。</EmptyDescription>
                         </EmptyHeader>
                       </Empty>
                     ) : (
@@ -454,12 +454,12 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         onOpenChange={setDeleteDialogOpen}
         title={
           deleteTarget?.type === "building"
-            ? `確定要刪除大樓「${deleteTarget.name}」？`
+            ? `確定要刪除地點「${deleteTarget.name}」？`
             : `確定要刪除空間「${deleteTarget?.name ?? ""}」？`
         }
         description={
           deleteTarget?.type === "building"
-            ? "這將會移除此校園大樓記錄。若底下仍有所屬空間，系統將拒絕刪除。"
+            ? "這將會移除此校園地點記錄。若底下仍有所屬空間，系統將拒絕刪除。"
             : "這將會移除此空間記錄。若此空間曾被報修單或設備引用，系統將拒絕刪除。"
         }
         onConfirm={handleDeleteConfirm}

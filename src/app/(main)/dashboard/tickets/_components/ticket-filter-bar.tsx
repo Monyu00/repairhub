@@ -182,10 +182,10 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
         {/* Building Dropdown */}
         <Select value={selectedBuilding} onValueChange={handleBuildingChange}>
           <SelectTrigger size="sm" className="h-8 min-w-32">
-            <SelectValue placeholder="所有大樓" />
+            <SelectValue placeholder="所有地點" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">所有大樓</SelectItem>
+            <SelectItem value="all">所有地點</SelectItem>
             {filterOptions.buildings.map((bldg) => (
               <SelectItem key={bldg.id} value={bldg.id}>
                 {bldg.name} ({bldg.code})
