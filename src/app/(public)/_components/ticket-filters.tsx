@@ -98,19 +98,19 @@ function FilterSelects({ idPrefix, values, buildings, categories, showLabels, on
 
       <Field className={fieldClassName}>
         <FieldLabel htmlFor={`${idPrefix}-building`} className={labelClassName}>
-          大樓
+          地點
         </FieldLabel>
         <Select value={values.building} onValueChange={(value) => onValueChange("building", value)}>
           <SelectTrigger
             id={`${idPrefix}-building`}
-            aria-label="報修大樓"
+            aria-label="報修地點"
             className={`h-11! text-xs md:h-9! ${buildingWidth}`}
           >
-            <SelectValue placeholder="所有大樓" />
+            <SelectValue placeholder="所有地點" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="all">所有大樓</SelectItem>
+              <SelectItem value="all">所有地點</SelectItem>
               {buildings.map((building) => (
                 <SelectItem key={building.id} value={building.id}>
                   {building.name}
@@ -212,7 +212,7 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
   }
   if (currentBuilding !== "all") {
     const building = buildings.find((item) => item.id === currentBuilding);
-    activeFilterLabels.push({ key: "building", label: building?.name ?? "指定大樓" });
+    activeFilterLabels.push({ key: "building", label: building?.name ?? "指定地點" });
   }
   if (currentCategory !== "all") {
     const category = categories.find((item) => item.id === currentCategory);
@@ -340,7 +340,7 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
         <DrawerContent>
           <DrawerHeader className="text-left">
             <DrawerTitle>篩選報修單</DrawerTitle>
-            <DrawerDescription>依狀態、大樓與類別縮小公開案件範圍。</DrawerDescription>
+            <DrawerDescription>依狀態、地點與類別縮小公開案件範圍。</DrawerDescription>
           </DrawerHeader>
 
           <div className="px-4 pb-2">

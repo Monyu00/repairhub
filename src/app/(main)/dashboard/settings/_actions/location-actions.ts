@@ -40,7 +40,7 @@ export async function fetchBuildingsWithSpaces(): Promise<{
 
     if (buildingsError) {
       console.error("Failed to fetch buildings with spaces:", buildingsError);
-      return { success: false, error: "讀取大樓與空間資料失敗", buildings: [] };
+      return { success: false, error: "讀取地點與空間資料失敗", buildings: [] };
     }
 
     // Sort spaces by floor asc, name asc
@@ -68,7 +68,7 @@ export async function createBuilding(name: string, code: string): Promise<{ succ
     const trimmedCode = code.trim().toUpperCase();
 
     if (!trimmedName || !trimmedCode) {
-      return { success: false, error: "大樓名稱與代碼不可為空白" };
+      return { success: false, error: "地點名稱與代碼不可為空白" };
     }
 
     const { supabase } = await requireAdmin();
@@ -81,9 +81,9 @@ export async function createBuilding(name: string, code: string): Promise<{ succ
     if (insertError) {
       console.error("Failed to create building:", insertError);
       if (insertError.code === "23505") {
-        return { success: false, error: "大樓名稱或代碼已存在，請確認後重試" };
+        return { success: false, error: "地點名稱或代碼已存在，請確認後重試" };
       }
-      return { success: false, error: "新增大樓失敗，請稍後再試" };
+      return { success: false, error: "新增地點失敗，請稍後再試" };
     }
 
     revalidatePath("/dashboard/settings");
@@ -102,7 +102,7 @@ export async function updateBuilding(
     const trimmedCode = code.trim().toUpperCase();
 
     if (!trimmedName || !trimmedCode) {
-      return { success: false, error: "大樓名稱與代碼不可為空白" };
+      return { success: false, error: "地點名稱與代碼不可為空白" };
     }
 
     const { supabase } = await requireAdmin();
@@ -115,9 +115,9 @@ export async function updateBuilding(
     if (updateError) {
       console.error("Failed to update building:", updateError);
       if (updateError.code === "23505") {
-        return { success: false, error: "大樓名稱或代碼已存在，請確認後重試" };
+        return { success: false, error: "地點名稱或代碼已存在，請確認後重試" };
       }
-      return { success: false, error: "更新大樓失敗，請稍後再試" };
+      return { success: false, error: "更新地點失敗，請稍後再試" };
     }
 
     revalidatePath("/dashboard/settings");
@@ -144,7 +144,7 @@ export async function deleteBuilding(id: string): Promise<{ success: boolean; er
     if (spaceCount && spaceCount > 0) {
       return {
         success: false,
-        error: `無法刪除：此大樓底下尚有 ${spaceCount} 個所屬空間。請先刪除或轉移空間後再試。`,
+        error: `無法刪除：此地點底下尚有 ${spaceCount} 個所屬空間。請先刪除或轉移空間後再試。`,
       };
     }
 
@@ -152,7 +152,7 @@ export async function deleteBuilding(id: string): Promise<{ success: boolean; er
 
     if (deleteError) {
       console.error("Failed to delete building:", deleteError);
-      return { success: false, error: "刪除大樓失敗，請稍後再試" };
+      return { success: false, error: "刪除地點失敗，請稍後再試" };
     }
 
     revalidatePath("/dashboard/settings");
@@ -188,7 +188,7 @@ export async function createSpace(
     if (insertError) {
       console.error("Failed to create space:", insertError);
       if (insertError.code === "23505") {
-        return { success: false, error: "該大樓的同樓層已存在相同的空間名稱" };
+        return { success: false, error: "該地點的同樓層已存在相同的空間名稱" };
       }
       return { success: false, error: "新增空間失敗，請稍後再試" };
     }
@@ -225,7 +225,7 @@ export async function updateSpace(
     if (updateError) {
       console.error("Failed to update space:", updateError);
       if (updateError.code === "23505") {
-        return { success: false, error: "該大樓的同樓層已存在相同的空間名稱" };
+        return { success: false, error: "該地點的同樓層已存在相同的空間名稱" };
       }
       return { success: false, error: "更新空間失敗，請稍後再試" };
     }

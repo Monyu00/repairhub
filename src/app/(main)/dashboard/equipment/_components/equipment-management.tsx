@@ -165,7 +165,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
       <Card className="border-border/60 shadow-xs">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">設備資產列表</CardTitle>
-          <CardDescription>按大樓位置與保固狀態快速檢索設備資料</CardDescription>
+          <CardDescription>依地點與保固狀態快速檢索設備資料</CardDescription>
 
           {/* Filter Toolbar */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
@@ -195,10 +195,10 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 }}
               >
                 <SelectTrigger size="sm" className="h-8 min-w-36 text-xs">
-                  <SelectValue placeholder="所有大樓" />
+                  <SelectValue placeholder="所有地點" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有大樓</SelectItem>
+                  <SelectItem value="all">所有地點</SelectItem>
                   {buildings.map((b) => (
                     <SelectItem key={b.id} value={b.id}>
                       {b.name} ({b.code})

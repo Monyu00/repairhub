@@ -195,7 +195,7 @@ export function QRSelectionPanel({
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
                     className="text-muted-foreground hover:text-foreground"
-                    aria-label={isCollapsed ? "展開大樓" : "收合大樓"}
+                    aria-label={isCollapsed ? "展開地點" : "收合地點"}
                   >
                     {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronDown className="size-4" />}
                   </button>
@@ -286,7 +286,7 @@ export function QRSelectionPanel({
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
                     className="text-muted-foreground hover:text-foreground"
-                    aria-label={isCollapsed ? "展開大樓" : "收合大樓"}
+                    aria-label={isCollapsed ? "展開地點" : "收合地點"}
                   >
                     {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronDown className="size-4" />}
                   </button>
@@ -342,7 +342,7 @@ export function QRSelectionPanel({
           <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder={targetType === "spaces" ? "搜尋大樓名稱、空間名稱或樓層..." : "搜尋設備名稱、編號或空間..."}
+            placeholder={targetType === "spaces" ? "搜尋地點名稱、空間名稱或樓層..." : "搜尋設備名稱、編號或空間..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pr-8 pl-8.5 text-sm"

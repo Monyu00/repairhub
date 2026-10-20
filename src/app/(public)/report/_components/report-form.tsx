@@ -179,7 +179,7 @@ export function ReportForm({
         <div className="space-y-4">
           <Field>
             <FieldLabel htmlFor="building_id">
-              大樓棟別 <span className="text-destructive">*</span>
+              地點 <span className="text-destructive">*</span>
             </FieldLabel>
             <NativeSelect
               id="building_id"
@@ -187,7 +187,7 @@ export function ReportForm({
               onChange={handleBuildingChange}
               className="w-full"
             >
-              <NativeSelectOption value="">-- 請選擇大樓 --</NativeSelectOption>
+              <NativeSelectOption value="">-- 請選擇地點 --</NativeSelectOption>
               {buildings.map((b) => (
                 <NativeSelectOption key={b.id} value={b.id}>
                   {b.name} ({b.code})
@@ -209,7 +209,7 @@ export function ReportForm({
               className="w-full"
             >
               <NativeSelectOption value="">
-                {selectedBuildingId ? "-- 請選擇空間 --" : "-- 請先選擇大樓 --"}
+                {selectedBuildingId ? "-- 請選擇空間 --" : "-- 請先選擇地點 --"}
               </NativeSelectOption>
               {availableSpaces.map((s) => (
                 <NativeSelectOption key={s.id} value={s.id}>

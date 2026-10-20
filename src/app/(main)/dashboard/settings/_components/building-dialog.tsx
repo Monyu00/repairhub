@@ -41,11 +41,11 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError("大樓名稱不可為空白");
+      setError("地點名稱不可為空白");
       return;
     }
     if (!code.trim()) {
-      setError("大樓代碼不可為空白");
+      setError("地點代碼不可為空白");
       return;
     }
 
@@ -60,9 +60,9 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
     });
   };
 
-  const title = mode === "create" ? "新增校園大樓" : "編輯大樓資訊";
+  const title = mode === "create" ? "新增地點" : "編輯地點資訊";
   const description =
-    mode === "create" ? "請輸入新大樓名稱與代碼（如：行政大樓 / ADMIN）。" : "修改大樓名稱與代碼。代碼必須於全校唯一。";
+    mode === "create" ? "請輸入新地點名稱與代碼（如：行政中心 / ADMIN）。" : "修改地點名稱與代碼。代碼必須於全校唯一。";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -75,18 +75,18 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="building-name">大樓名稱</Label>
+              <Label htmlFor="building-name">地點名稱</Label>
               <Input
                 id="building-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例如：行政大樓"
+                placeholder="例如：行政中心"
                 disabled={isPending}
                 autoFocus
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="building-code">大樓代碼</Label>
+              <Label htmlFor="building-code">地點代碼</Label>
               <Input
                 id="building-code"
                 value={code}

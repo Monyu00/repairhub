@@ -29,7 +29,7 @@ _Avoid_: Manager, supervisor, operator
 ### Locations
 
 **Building**:
-A named structure on campus that contains one or more spaces. The top level of the two-level location hierarchy.
+A named location on campus that contains one or more spaces. The top level of the two-level location hierarchy. User-facing copy calls this “地點”.
 _Avoid_: Venue, facility, block
 
 **Space**:
