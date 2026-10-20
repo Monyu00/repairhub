@@ -8,10 +8,10 @@ import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, Hand, Loader2, Mail, MapPin, Phone, User } from "lucide-react";
 
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { TicketStatusBadge } from "./ticket-status-badge";
 import type { TicketRecord } from "./ticket-types";
 
 interface PendingTicketCardProps {

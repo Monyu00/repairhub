@@ -2,12 +2,11 @@ import Link from "next/link";
 
 import { ArrowRight, Inbox } from "lucide-react";
 
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
 import type { TicketRecord } from "@/server/tickets/query";
-
-import { TicketStatusBadge } from "../tickets/_components/ticket-status-badge";
 
 interface DashboardOpenQueueProps {
   tickets: TicketRecord[];

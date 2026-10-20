@@ -8,7 +8,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 
-type TicketStatus = "pending" | "in_progress" | "completed" | "closed" | "cancelled";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 interface TimelineEvent {
   id: string;

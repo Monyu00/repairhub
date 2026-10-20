@@ -4,9 +4,9 @@ import Link from "next/link";
 
 import { ArrowLeft } from "lucide-react";
 
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 
-import { TicketStatusBadge } from "../../_components/ticket-status-badge";
 import type { TicketStatus } from "../../_components/ticket-types";
 import { AdminActions } from "./admin-actions";
 import { ClosureSection } from "./closure-section";

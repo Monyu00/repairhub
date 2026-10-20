@@ -7,12 +7,13 @@ import { ArrowLeftIcon, StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 import { ReporterActions } from "./reporter-actions";
 import { StatusTimeline } from "./status-timeline";
 import { TechnicianNotes } from "./technician-notes";
 import { TicketDetails } from "./ticket-details";
-import { TicketHeader, type TicketStatus } from "./ticket-header";
+import { TicketHeader } from "./ticket-header";
 import { TicketPhotosGallery } from "./ticket-photos-gallery";
 import { TicketSearch } from "./ticket-search";
 

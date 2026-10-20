@@ -5,9 +5,9 @@ import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
 import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
 
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 
-import { TicketStatusBadge } from "./ticket-status-badge";
 import type { TicketRecord } from "./ticket-types";
 
 export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRecord>[] {

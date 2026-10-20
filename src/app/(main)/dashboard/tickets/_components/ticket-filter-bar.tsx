@@ -6,13 +6,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CalendarIcon, FilterX, Search, SlidersHorizontal } from "lucide-react";
 
+import { getTicketStatusPresentation } from "@/components/tickets/ticket-status";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { STATUS_CONFIG } from "./ticket-status-badge";
 import type { FilterOptions, TicketStatus } from "./ticket-types";
 
 const ALL_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed", "closed", "cancelled"];
@@ -144,6 +144,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
               <div className="border-b pb-1 font-medium text-muted-foreground text-xs">篩選狀態</div>
               {ALL_STATUSES.map((status) => {
                 const isChecked = selectedStatuses.includes(status);
+                const presentation = getTicketStatusPresentation(status);
                 return (
                   <label
                     key={status}
@@ -155,7 +156,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                       onCheckedChange={() => handleStatusToggle(status)}
                       id={`status-${status}`}
                     />
-                    <span>{STATUS_CONFIG[status].label}</span>
+                    <span>{presentation.label}</span>
                   </label>
                 );
               })}

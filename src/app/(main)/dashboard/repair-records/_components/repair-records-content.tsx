@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ClipboardX, FilterX, Search, Wrench } from "lucide-react";
 
-import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
