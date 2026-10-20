@@ -11,19 +11,11 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-export interface TimelineNote {
-  id: string;
-  content: string;
-  type: "note" | "status_change";
-  createdAt: string;
-  authorRole?: string | null;
-  authorName?: string | null;
-}
+import type { TicketNote } from "@/server/tickets/detail";
 
 interface StatusTimelineProps {
   createdAt: string;
-  notes: TimelineNote[];
+  notes: TicketNote[];
   reporterName?: string | null;
 }
 

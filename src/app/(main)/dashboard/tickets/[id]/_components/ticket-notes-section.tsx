@@ -10,22 +10,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import type { TicketNote } from "@/server/tickets/detail";
 
 import { addProgressNote } from "../_actions/ticket-actions";
 
-export interface ProgressNote {
-  id: string;
-  content: string;
-  type: "note" | "status_change";
-  createdAt: string;
-  authorRole?: string | null;
-  authorId?: string | null;
-  authorName?: string | null;
-}
-
 interface TicketNotesSectionProps {
   ticketId: string;
-  notes: ProgressNote[];
+  notes: TicketNote[];
   canAddNote: boolean;
 }
 
