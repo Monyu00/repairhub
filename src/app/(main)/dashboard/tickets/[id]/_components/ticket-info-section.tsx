@@ -6,30 +6,10 @@ import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, 
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-export interface TicketInfoData {
-  id: string;
-  status: string;
-  categoryName: string;
-  buildingName: string;
-  buildingCode: string;
-  spaceName: string;
-  floor: number;
-  equipmentName?: string | null;
-  description: string;
-  reporterName?: string | null;
-  reporterDepartment?: string | null;
-  reporterEmail: string | null;
-  reporterPhone: string | null;
-  createdAt: string;
-  updatedAt: string;
-  assignedToRole?: string | null;
-  rating?: number | null;
-  ratedAt?: string | null;
-}
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketInfoSectionProps {
-  ticket: TicketInfoData;
+  ticket: TicketRecord;
   canViewReporter: boolean;
 }
 
@@ -59,7 +39,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
               故障地點
             </span>
             <p className="font-medium text-foreground">
-              {ticket.buildingName} ({ticket.buildingCode}) - {ticket.spaceName} ({ticket.floor}F)
+              {ticket.space.building.name} ({ticket.space.building.code}) - {ticket.space.name} ({ticket.space.floor}F)
             </p>
           </div>
 
@@ -68,7 +48,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
               <Tag className="size-3.5" />
               報修類別
             </span>
-            <p className="font-medium text-foreground">{ticket.categoryName}</p>
+            <p className="font-medium text-foreground">{ticket.category.name}</p>
           </div>
 
           {ticket.equipmentName && (

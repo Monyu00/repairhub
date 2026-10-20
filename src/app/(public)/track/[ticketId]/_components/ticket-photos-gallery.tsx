@@ -7,27 +7,15 @@ import Image from "next/image";
 import { ImageIcon, XIcon } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-
-interface Photo {
-  id: string;
-  storage_path: string;
-  phase: "report" | "closure";
-}
+import type { TicketPhoto } from "@/server/tickets/detail";
 
 interface TicketPhotosGalleryProps {
-  photos: Photo[];
-  supabaseUrl: string;
+  photos: TicketPhoto[];
   phase: "report" | "closure";
   title: string;
 }
 
-function getPublicUrl(supabaseUrl: string, storagePath: string) {
-  const base = supabaseUrl.replace(/\/+$/, "");
-  const path = storagePath.replace(/^\/+/, "");
-  return `${base}/storage/v1/object/public/ticket-photos/${path}`;
-}
-
-export function TicketPhotosGallery({ photos, supabaseUrl, phase, title }: TicketPhotosGalleryProps) {
+export function TicketPhotosGallery({ photos, phase, title }: TicketPhotosGalleryProps) {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const phasePhotos = photos.filter((p) => p.phase === phase);
 
@@ -43,7 +31,7 @@ export function TicketPhotosGallery({ photos, supabaseUrl, phase, title }: Ticke
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {phasePhotos.map((photo) => {
-          const url = getPublicUrl(supabaseUrl, photo.storage_path);
+          const url = photo.url;
           return (
             <button
               key={photo.id}

@@ -1,13 +1,10 @@
 import { BuildingIcon, FileTextIcon, TagIcon, WrenchIcon } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketDetailsProps {
-  category: string;
-  building: string;
-  space: string;
-  description: string;
-  equipment?: string | null;
+  ticket: TicketRecord;
 }
 
 interface DetailRowProps {
@@ -30,18 +27,20 @@ function DetailRow({ icon: Icon, label, value }: DetailRowProps) {
   );
 }
 
-export function TicketDetails({ category, building, space, description, equipment }: TicketDetailsProps) {
+export function TicketDetails({ ticket }: TicketDetailsProps) {
+  const { category, space, description, equipmentName } = ticket;
+
   return (
     <div className="space-y-4">
       <h2 className="font-semibold text-foreground text-sm">報修資訊</h2>
       <div className="space-y-3">
-        <DetailRow icon={TagIcon} label="報修類別" value={category} />
+        <DetailRow icon={TagIcon} label="報修類別" value={category.name} />
         <Separator />
-        <DetailRow icon={BuildingIcon} label="地點" value={`${building} - ${space}`} />
-        {equipment && (
+        <DetailRow icon={BuildingIcon} label="地點" value={`${space.building.name} - ${space.name}`} />
+        {equipmentName && (
           <>
             <Separator />
-            <DetailRow icon={WrenchIcon} label="設備" value={equipment} />
+            <DetailRow icon={WrenchIcon} label="設備" value={equipmentName} />
           </>
         )}
         <Separator />

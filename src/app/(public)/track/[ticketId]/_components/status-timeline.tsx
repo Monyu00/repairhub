@@ -8,19 +8,13 @@ import {
   XCircleIcon,
 } from "lucide-react";
 
+import type { TicketNote } from "@/server/tickets/detail";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
-
-interface TimelineEvent {
-  id: string;
-  content: string;
-  type: "note" | "status_change";
-  created_at: string;
-}
 
 interface StatusTimelineProps {
   createdAt: string;
   currentStatus: TicketStatus;
-  events: TimelineEvent[];
+  events: TicketNote[];
 }
 
 function formatDateTime(iso: string) {
@@ -67,16 +61,16 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
     {
       id: "created",
       content: "報修單已建立",
-      created_at: createdAt,
+      createdAt,
       isCreation: true,
     },
     ...statusEvents
       .slice()
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
       .map((e) => ({
         id: e.id,
         content: translateStatusNote(e.content),
-        created_at: e.created_at,
+        createdAt: e.createdAt,
         isCreation: false,
       })),
   ].reverse(); // newest on top
@@ -112,7 +106,7 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
                 <p className={`font-medium text-sm ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
                   {item.content}
                 </p>
-                <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.created_at)}</p>
+                <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.createdAt)}</p>
               </div>
             </div>
           );

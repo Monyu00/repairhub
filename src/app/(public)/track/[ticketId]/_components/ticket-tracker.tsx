@@ -7,7 +7,7 @@ import { ArrowLeftIcon, StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { TicketStatus } from "@/server/tickets/lifecycle";
+import type { TicketDetail } from "@/server/tickets/detail";
 
 import { ReporterActions } from "./reporter-actions";
 import { StatusTimeline } from "./status-timeline";
@@ -17,88 +17,45 @@ import { TicketHeader } from "./ticket-header";
 import { TicketPhotosGallery } from "./ticket-photos-gallery";
 import { TicketSearch } from "./ticket-search";
 
-interface Photo {
-  id: string;
-  storage_path: string;
-  phase: "report" | "closure";
-}
-
-interface Note {
-  id: string;
-  content: string;
-  type: "note" | "status_change";
-  created_at: string;
-}
-
 interface TicketTrackerProps {
-  ticketId: string;
-  status: TicketStatus;
-  createdAt: string;
-  category: string;
-  building: string;
-  space: string;
-  description: string;
-  equipment: string | null;
-  rating?: number | null;
-  ratedAt?: string | null;
-  photos: Photo[];
-  notes: Note[];
-  supabaseUrl: string;
+  detail: TicketDetail;
 }
 
-export function TicketTracker({
-  ticketId,
-  status,
-  createdAt,
-  category,
-  building,
-  space,
-  description,
-  equipment,
-  rating,
-  ratedAt,
-  photos,
-  notes,
-  supabaseUrl,
-}: TicketTrackerProps) {
+export function TicketTracker({ detail }: TicketTrackerProps) {
   const router = useRouter();
-  const isClosedOrCompleted = status === "completed" || status === "closed";
+  const { ticket, photos, notes } = detail;
+  const isClosedOrCompleted = ticket.status === "completed" || ticket.status === "closed";
   const technicianNotes = notes.filter((n) => n.type === "note");
+  const rating = ticket.rating;
 
   return (
     <div className="px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-xl space-y-4">
         {/* Search Bar */}
-        <TicketSearch currentTicketId={ticketId} />
+        <TicketSearch currentTicketId={ticket.id} />
 
         {/* Main Card */}
         <Card className="divide-y divide-border border border-border bg-card shadow-sm">
           {/* Header section */}
           <div className="p-5 sm:p-6">
-            <TicketHeader ticketId={ticketId} status={status} createdAt={createdAt} />
+            <TicketHeader ticketId={ticket.id} status={ticket.status} createdAt={ticket.createdAt} />
           </div>
 
           {/* Details section */}
           <div className="p-5 sm:p-6">
-            <TicketDetails
-              category={category}
-              building={building}
-              space={space}
-              description={description}
-              equipment={equipment}
-            />
+            <TicketDetails ticket={ticket} />
           </div>
 
           {/* Report photos */}
           {photos.some((p) => p.phase === "report") && (
             <div className="p-5 sm:p-6">
-              <TicketPhotosGallery photos={photos} supabaseUrl={supabaseUrl} phase="report" title="報修照片" />
+              <TicketPhotosGallery photos={photos} phase="report" title="報修照片" />
             </div>
           )}
 
           {/* Status Timeline */}
           <div className="p-5 sm:p-6">
-            <StatusTimeline createdAt={createdAt} currentStatus={status} events={notes} />
+            <StatusTimeline createdAt={ticket.createdAt} currentStatus={ticket.status} events={notes} />
           </div>
 
           {/* Technician notes */}
@@ -109,21 +66,21 @@ export function TicketTracker({
           )}
 
           {/* Reporter verification & actions – only when completed */}
-          {status === "completed" && (
+          {ticket.status === "completed" && (
             <div className="p-5 sm:p-6">
-              <ReporterActions ticketId={ticketId} />
+              <ReporterActions ticketId={ticket.id} />
             </div>
           )}
 
           {/* Closure photos */}
           {isClosedOrCompleted && photos.some((p) => p.phase === "closure") && (
             <div className="p-5 sm:p-6">
-              <TicketPhotosGallery photos={photos} supabaseUrl={supabaseUrl} phase="closure" title="完工照片" />
+              <TicketPhotosGallery photos={photos} phase="closure" title="完工照片" />
             </div>
           )}
 
           {/* Rating display on closed ticket */}
-          {status === "closed" && rating != null && (
+          {ticket.status === "closed" && rating != null && (
             <div className="p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5">
                 <div className="space-y-1">
@@ -141,9 +98,9 @@ export function TicketTracker({
                     <span className="ml-1.5 font-bold text-foreground text-xs">{rating} / 5</span>
                   </div>
                 </div>
-                {ratedAt && (
+                {ticket.ratedAt && (
                   <span className="text-muted-foreground text-xs">
-                    評分於 {new Date(ratedAt).toLocaleDateString("zh-TW")}
+                    評分於 {new Date(ticket.ratedAt).toLocaleDateString("zh-TW")}
                   </span>
                 )}
               </div>

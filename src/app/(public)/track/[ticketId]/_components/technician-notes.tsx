@@ -1,13 +1,9 @@
 import { MessageSquareIcon } from "lucide-react";
 
-interface Note {
-  id: string;
-  content: string;
-  created_at: string;
-}
+import type { TicketNote } from "@/server/tickets/detail";
 
 interface TechnicianNotesProps {
-  notes: Note[];
+  notes: TicketNote[];
 }
 
 function formatDateTime(iso: string) {
@@ -33,7 +29,7 @@ export function TechnicianNotes({ notes }: TechnicianNotesProps) {
         {notes.map((note) => (
           <div key={note.id} className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
             <p className="whitespace-pre-wrap text-foreground text-sm">{note.content}</p>
-            <p className="text-muted-foreground text-xs">{formatDateTime(note.created_at)}</p>
+            <p className="text-muted-foreground text-xs">{formatDateTime(note.createdAt)}</p>
           </div>
         ))}
       </div>
