@@ -4,10 +4,10 @@ import Link from "next/link";
 
 import { ArrowLeft } from "lucide-react";
 
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import type { TicketDetail } from "@/server/tickets/detail";
 
-import { TicketStatusBadge } from "../../_components/ticket-status-badge";
 import { AdminActions } from "./admin-actions";
 import { ClosureSection } from "./closure-section";
 import { StatusTimeline } from "./status-timeline";

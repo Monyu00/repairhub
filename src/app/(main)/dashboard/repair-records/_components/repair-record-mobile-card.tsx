@@ -2,7 +2,7 @@
 
 import { Calendar, MapPin, User, Wrench } from "lucide-react";
 
-import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { formatRepairRecordDate, type RepairRecordItem } from "./repair-records-types";

@@ -9,8 +9,7 @@ import {
 } from "lucide-react";
 
 import type { TicketNote } from "@/server/tickets/detail";
-
-type TicketStatus = "pending" | "in_progress" | "completed" | "closed" | "cancelled";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 interface StatusTimelineProps {
   createdAt: string;

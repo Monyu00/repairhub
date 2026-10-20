@@ -1,4 +1,4 @@
-import type { Database } from "@/lib/supabase/database.types";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 import type {
   TicketBuilding,
   TicketCategory,
@@ -7,9 +7,7 @@ import type {
   TicketTechnician,
 } from "@/server/tickets/query";
 
-export type TicketStatus = Database["public"]["Enums"]["ticket_status"];
-
-export type { TicketBuilding, TicketCategory, TicketRecord, TicketSpace, TicketTechnician };
+export type { TicketBuilding, TicketCategory, TicketRecord, TicketSpace, TicketStatus, TicketTechnician };
 
 // Re-export TicketRecord as TicketRow for gradual migration
 export type TicketRow = TicketRecord;

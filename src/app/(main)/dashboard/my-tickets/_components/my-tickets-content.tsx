@@ -6,15 +6,11 @@ import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, ClipboardList, ExternalLink, MapPin, Plus } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { cn } from "@/lib/utils";
 import type { TicketRecord } from "@/server/tickets/query";
-
-import { STATUS_CONFIG } from "../../tickets/_components/ticket-status-badge";
-import type { TicketStatus } from "../../tickets/_components/ticket-types";
 
 interface MyTicketsContentProps {
   tickets: TicketRecord[];
@@ -52,13 +48,6 @@ export function MyTicketsContent({ tickets }: MyTicketsContentProps) {
 }
 
 function TicketCard({ ticket }: { ticket: TicketRecord }) {
-  const config = STATUS_CONFIG[ticket.status as TicketStatus] ?? {
-    label: ticket.status,
-    variant: "outline" as const,
-    dotClass: "bg-muted-foreground",
-    bgClass: "",
-  };
-
   const formattedDate = ticket.createdAt
     ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
     : "-";
@@ -74,10 +63,7 @@ function TicketCard({ ticket }: { ticket: TicketRecord }) {
                 #{ticket.id.slice(0, 8)}
               </span>
               <span className="rounded bg-muted px-1.5 py-0.5 font-medium text-xs">{ticket.category.name}</span>
-              <Badge variant={config.variant} className={cn("gap-1.5 px-2.5 py-0.5 font-normal", config.bgClass)}>
-                <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", config.dotClass)} />
-                <span>{config.label}</span>
-              </Badge>
+              <TicketStatusBadge status={ticket.status} />
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs">

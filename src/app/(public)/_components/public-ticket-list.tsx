@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Calendar, ChevronRight, Inbox, MapPin, Plus, User } from "lucide-react";
 
-import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

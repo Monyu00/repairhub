@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Calendar, ClipboardList, Loader2, User } from "lucide-react";
 
-import { TicketStatusBadge } from "@/app/(main)/dashboard/tickets/_components/ticket-status-badge";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
