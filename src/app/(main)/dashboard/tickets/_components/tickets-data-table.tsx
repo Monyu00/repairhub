@@ -4,13 +4,7 @@ import { useMemo, useState } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import {
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, type SortingState, useTable } from "@tanstack/react-table";
 import { ClipboardX, ListFilter, Zap } from "lucide-react";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -25,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { PendingTicketsView } from "./pending-tickets-view";
-import { getTicketColumns } from "./ticket-columns";
+import { getTicketColumns, ticketTableFeatures } from "./ticket-columns";
 import { TicketFilterBar } from "./ticket-filter-bar";
 import { TicketMobileCard } from "./ticket-mobile-card";
 import type { FilterOptions, TicketRow } from "./ticket-types";
@@ -60,15 +54,14 @@ export function TicketsDataTable({
   const isTechnician = userRole === "technician";
   const columns = useMemo(() => getTicketColumns(canViewReporter), [canViewReporter]);
 
-  const table = useReactTable({
+  const table = useTable({
+    features: ticketTableFeatures,
     data: tickets,
     columns,
     state: {
       sorting,
     },
     onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
