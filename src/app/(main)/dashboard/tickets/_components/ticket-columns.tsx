@@ -1,6 +1,14 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import {
+  type ColumnDef,
+  columnVisibilityFeature,
+  createSortedRowModel,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
+} from "@tanstack/react-table";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
 import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
@@ -10,8 +18,18 @@ import { Button } from "@/components/ui/button";
 
 import type { TicketRecord } from "./ticket-types";
 
-export function getTicketColumns(canViewReporter: boolean): ColumnDef<TicketRecord>[] {
-  const columns: ColumnDef<TicketRecord>[] = [
+export const ticketTableFeatures = tableFeatures({
+  columnVisibilityFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    text: sortFn_text,
+  },
+});
+
+export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof ticketTableFeatures, TicketRecord>[] {
+  const columns: ColumnDef<typeof ticketTableFeatures, TicketRecord>[] = [
     {
       accessorKey: "id",
       header: "Ticket ID",
