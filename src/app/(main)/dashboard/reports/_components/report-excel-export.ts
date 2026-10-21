@@ -1,6 +1,15 @@
+import type { Workbook } from "exceljs";
 import { toast } from "sonner";
 
 import type { ReportData } from "./report-types";
+
+interface ExcelColumn {
+  header: string;
+  key: string;
+  width: number;
+}
+
+type ExcelRow = Record<string, string | number>;
 
 /**
  * Formats a Date object into YYYYMMDD string for filenames
@@ -13,6 +22,19 @@ function getTodayString(): string {
   return `${year}${month}${day}`;
 }
 
+function addReportWorksheet(workbook: Workbook, name: string, rows: ExcelRow[], columns: ExcelColumn[]) {
+  const worksheet = workbook.addWorksheet(name);
+
+  if (rows.length === 0) {
+    worksheet.columns = [{ header: "狀態", key: "狀態", width: 16 }];
+    worksheet.addRow({ 狀態: "無資料" });
+    return;
+  }
+
+  worksheet.columns = columns;
+  worksheet.addRows(rows);
+}
+
 /**
  * Generates and downloads an Excel file (.xlsx) containing all report data sections in structured sheets.
  */
@@ -20,8 +42,8 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
   const toastId = toast.loading("正在產生 Excel 報表試算表...");
 
   try {
-    const XLSX = await import("xlsx");
-    const wb = XLSX.utils.book_new();
+    const ExcelJS = await import("exceljs");
+    const workbook = new ExcelJS.Workbook();
 
     // 1. Sheet 1: 總覽摘要 (KPIs)
     const kpiRows = [
@@ -40,9 +62,11 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       { 項目: "評分回應率", 數值: `${data.satisfaction.responseRate}%`, 備註: "結案案件提供評分之比例" },
       { 項目: "報表匯出時間", 數值: new Date().toLocaleString("zh-TW"), 備註: "系統自動產出" },
     ];
-    const wsKpi = XLSX.utils.json_to_sheet(kpiRows);
-    wsKpi["!cols"] = [{ wch: 18 }, { wch: 24 }, { wch: 26 }];
-    XLSX.utils.book_append_sheet(wb, wsKpi, "總覽摘要");
+    addReportWorksheet(workbook, "總覽摘要", kpiRows, [
+      { header: "項目", key: "項目", width: 18 },
+      { header: "數值", key: "數值", width: 24 },
+      { header: "備註", key: "備註", width: 26 },
+    ]);
 
     // 2. Sheet 2: 每月工單趨勢 (Monthly Volume)
     const monthlyRows = data.monthlyTrends.map((item) => ({
@@ -52,9 +76,13 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       待處理或進行中: item.pendingOrProgress,
       完工率: item.total > 0 ? `${Math.round((item.completed / item.total) * 1000) / 10}%` : "0%",
     }));
-    const wsMonthly = XLSX.utils.json_to_sheet(monthlyRows.length > 0 ? monthlyRows : [{ 狀態: "無資料" }]);
-    wsMonthly["!cols"] = [{ wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 12 }];
-    XLSX.utils.book_append_sheet(wb, wsMonthly, "每月工單趨勢");
+    addReportWorksheet(workbook, "每月工單趨勢", monthlyRows, [
+      { header: "月份", key: "月份", width: 14 },
+      { header: "工單總數", key: "工單總數", width: 12 },
+      { header: "已完成件數", key: "已完成件數", width: 14 },
+      { header: "待處理或進行中", key: "待處理或進行中", width: 16 },
+      { header: "完工率", key: "完工率", width: 12 },
+    ]);
 
     // 3. Sheet 3: 建築物分佈 (Building Distribution)
     const buildingRows = data.buildingDistribution.map((item) => ({
@@ -63,9 +91,12 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       工單數量: item.count,
       佔比: `${item.percentage}%`,
     }));
-    const wsBuilding = XLSX.utils.json_to_sheet(buildingRows.length > 0 ? buildingRows : [{ 狀態: "無資料" }]);
-    wsBuilding["!cols"] = [{ wch: 20 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
-    XLSX.utils.book_append_sheet(wb, wsBuilding, "建築物分佈");
+    addReportWorksheet(workbook, "建築物分佈", buildingRows, [
+      { header: "地點名稱", key: "地點名稱", width: 20 },
+      { header: "地點代碼", key: "地點代碼", width: 14 },
+      { header: "工單數量", key: "工單數量", width: 12 },
+      { header: "佔比", key: "佔比", width: 12 },
+    ]);
 
     // 4. Sheet 4: 維修分類佔比 (Category Distribution)
     const categoryRows = data.categoryDistribution.map((item) => ({
@@ -73,9 +104,11 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       工單數量: item.count,
       佔比: `${item.percentage}%`,
     }));
-    const wsCategory = XLSX.utils.json_to_sheet(categoryRows.length > 0 ? categoryRows : [{ 狀態: "無資料" }]);
-    wsCategory["!cols"] = [{ wch: 20 }, { wch: 12 }, { wch: 12 }];
-    XLSX.utils.book_append_sheet(wb, wsCategory, "維修分類佔比");
+    addReportWorksheet(workbook, "維修分類佔比", categoryRows, [
+      { header: "分類名稱", key: "分類名稱", width: 20 },
+      { header: "工單數量", key: "工單數量", width: 12 },
+      { header: "佔比", key: "佔比", width: 12 },
+    ]);
 
     // 5. Sheet 5: 平均修復時效 (Resolution Times)
     const resolutionRows = data.resolutionTrends.map((item) => ({
@@ -84,9 +117,12 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       平均修復天數: item.avgDays,
       平均修復時數: item.avgHours,
     }));
-    const wsResolution = XLSX.utils.json_to_sheet(resolutionRows.length > 0 ? resolutionRows : [{ 狀態: "無資料" }]);
-    wsResolution["!cols"] = [{ wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
-    XLSX.utils.book_append_sheet(wb, wsResolution, "平均修復時效");
+    addReportWorksheet(workbook, "平均修復時效", resolutionRows, [
+      { header: "月份", key: "月份", width: 14 },
+      { header: "已結案件數", key: "已結案件數", width: 14 },
+      { header: "平均修復天數", key: "平均修復天數", width: 14 },
+      { header: "平均修復時數", key: "平均修復時數", width: 14 },
+    ]);
 
     // 6. Sheet 6: 技師維修績效 (Technician Metrics)
     const technicianRows = data.technicianPerformance.map((item) => ({
@@ -95,9 +131,12 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       處理中件數: item.inProgressCount,
       平均修復天數: `${item.avgDaysToResolve} 天`,
     }));
-    const wsTechnician = XLSX.utils.json_to_sheet(technicianRows.length > 0 ? technicianRows : [{ 狀態: "無資料" }]);
-    wsTechnician["!cols"] = [{ wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 16 }];
-    XLSX.utils.book_append_sheet(wb, wsTechnician, "技師績效");
+    addReportWorksheet(workbook, "技師績效", technicianRows, [
+      { header: "技師姓名", key: "技師姓名", width: 16 },
+      { header: "已完工件數", key: "已完工件數", width: 14 },
+      { header: "處理中件數", key: "處理中件數", width: 14 },
+      { header: "平均修復天數", key: "平均修復天數", width: 16 },
+    ]);
 
     // 7. Sheet 7: 滿意度分析 (Satisfaction Metrics)
     const satisfactionRows = data.satisfaction.technicianRankings.map((item, idx) => ({
@@ -107,17 +146,30 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       已評分件數: item.ratedCount,
       已完工件數: item.completedCount,
     }));
-    const wsSatisfaction = XLSX.utils.json_to_sheet(
-      satisfactionRows.length > 0 ? satisfactionRows : [{ 狀態: "無資料" }],
-    );
-    wsSatisfaction["!cols"] = [{ wch: 8 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
-    XLSX.utils.book_append_sheet(wb, wsSatisfaction, "滿意度分析");
+    addReportWorksheet(workbook, "滿意度分析", satisfactionRows, [
+      { header: "排名", key: "排名", width: 8 },
+      { header: "技師姓名", key: "技師姓名", width: 16 },
+      { header: "平均滿意度", key: "平均滿意度", width: 14 },
+      { header: "已評分件數", key: "已評分件數", width: 14 },
+      { header: "已完工件數", key: "已完工件數", width: 14 },
+    ]);
 
     // Filename: repairhub-report-{preset}-{YYYYMMDD}.xlsx
     const preset = data.filter.preset;
     const filename = `repairhub-report-${preset}-${getTodayString()}.xlsx`;
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
-    XLSX.writeFile(wb, filename);
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 
     toast.success("Excel 報表匯出成功！", { id: toastId });
   } catch (error) {
