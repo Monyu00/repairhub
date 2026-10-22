@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
@@ -235,10 +235,12 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
             維護全校地點與其所屬空間層級結構。刪除前系統會自動檢查相關報修單與設備關聯。
           </CardDescription>
         </div>
-        <Button onClick={handleCreateBuildingOpen} className="shrink-0 gap-1.5">
-          <Plus className="h-4 w-4" />
-          新增地點
-        </Button>
+        <CardAction className="w-full sm:w-auto">
+          <Button onClick={handleCreateBuildingOpen} className="h-11 w-full shrink-0 gap-1.5 sm:h-8 sm:w-auto">
+            <Plus className="h-4 w-4" />
+            新增地點
+          </Button>
+        </CardAction>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -261,7 +263,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+                className="h-11 gap-1 px-3 text-muted-foreground text-xs hover:text-foreground sm:h-8 sm:px-2"
                 onClick={() => handleSearchChange("")}
               >
                 <FilterX className="size-3.5" />
@@ -307,11 +309,11 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                   onOpenChange={() => toggleBuildingOpen(building.id)}
                   className="rounded-lg border border-border bg-card shadow-xs transition-colors"
                 >
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <CollapsibleTrigger asChild>
                       <button
                         type="button"
-                        className="flex flex-1 items-center gap-3 text-left font-medium hover:text-primary focus-visible:outline-hidden"
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left font-medium hover:text-primary focus-visible:outline-hidden"
                       >
                         {isOpen ? (
                           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -329,11 +331,11 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                       </button>
                     </CollapsibleTrigger>
 
-                    <div className="flex items-center gap-1 pl-2">
+                    <div className="flex items-center justify-end gap-1 sm:pl-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 gap-1 text-xs"
+                        className="h-11 gap-1 px-3 text-xs sm:h-8 sm:px-2"
                         onClick={() => handleCreateSpaceOpen(building)}
                         title="在此地點新增空間"
                       >
@@ -343,7 +345,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="size-11 sm:size-8"
                         onClick={() => handleEditBuildingOpen(building)}
                         title="編輯地點"
                       >
@@ -353,7 +355,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
                         onClick={() => handleDeleteBuildingOpen(building)}
                         title="刪除地點"
                       >
@@ -399,7 +401,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-7 w-7"
+                                      className="size-11 sm:size-8"
                                       onClick={() => handleEditSpaceOpen(building, space)}
                                       title="編輯空間"
                                     >
@@ -409,7 +411,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                      className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
                                       onClick={() => handleDeleteSpaceOpen(space)}
                                       title="刪除空間"
                                     >
