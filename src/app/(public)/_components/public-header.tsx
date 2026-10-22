@@ -40,10 +40,10 @@ export function PublicHeader({ user }: PublicHeaderProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Admin / Technician Backstage Entrance */}
           {isStaff && (
-            <Button asChild variant="outline" size="sm" className="hidden gap-1.5 sm:inline-flex">
+            <Button asChild variant="ghost" size="sm" className="h-10 w-10 p-0 sm:h-7 sm:w-auto sm:gap-1.5 sm:px-2.5">
               <Link href="/dashboard">
-                <LayoutDashboard className="size-4 text-primary" />
-                <span>管理後台</span>
+                <span className="sr-only sm:not-sr-only">管理後台</span>
+                <LayoutDashboard data-icon="inline-end" />
               </Link>
             </Button>
           )}
@@ -68,7 +68,7 @@ export function PublicHeader({ user }: PublicHeaderProps) {
           )}
 
           {/* Theme switcher */}
-          <ThemeSwitcher className="size-11 sm:size-8" />
+          <ThemeSwitcher className="size-10 sm:size-8" />
         </div>
       </div>
     </header>
