@@ -11,7 +11,7 @@ export function PublicHomeHero() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <h1 className="font-extrabold font-heading text-2xl text-foreground sm:text-3xl">
-              從報修到結案，全程看得見
+              從報修到完工，全程看得見
             </h1>
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
               免登入即可通報校園設施與設備問題；每筆公開報修單都能即時查詢最新處理進度。
