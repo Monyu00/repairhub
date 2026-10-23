@@ -7,6 +7,43 @@ export interface TicketEmailData {
   trackingUrl: string;
 }
 
+export type TicketNotificationEvent = "in_progress" | "completed" | "closed";
+
+export function ticketStatusLabel(eventType: string): string {
+  switch (eventType) {
+    case "in_progress":
+      return "維修中";
+    case "completed":
+      return "已完工";
+    case "closed":
+      return "已結案";
+    default:
+      return "未知狀態";
+  }
+}
+
+const TICKET_EMAIL_COPY: Record<
+  TicketNotificationEvent,
+  { subject: (shortId: string) => string; heading: string; intro: string; guidance?: string }
+> = {
+  in_progress: {
+    subject: (shortId) => `【RepairHub】案件 #${shortId} 已開始維修`,
+    heading: "案件已開始維修",
+    intro: "您好，您的報修案件已由維修人員開始處理。",
+  },
+  completed: {
+    subject: (shortId) => `【RepairHub】案件 #${shortId} 已完工，請確認`,
+    heading: "案件已完工，請確認修復結果",
+    intro: "您好，您的報修案件已完工，請前往案件頁確認修復結果。",
+    guidance: "若您在 7 天內未確認修復結果，系統將自動結案。",
+  },
+  closed: {
+    subject: (shortId) => `【RepairHub】案件 #${shortId} 已結案`,
+    heading: "案件已結案",
+    intro: "您好，您的報修案件已完成並結案。",
+  },
+};
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -34,14 +71,21 @@ function formatUpdatedAt(value: string): string {
   }).format(date);
 }
 
-export function renderInProgressEmail(data: TicketEmailData): { subject: string; html: string; text: string } {
+export function renderTicketEmail(
+  data: TicketEmailData,
+  eventType: TicketNotificationEvent,
+): { subject: string; html: string; text: string } {
   const shortId = data.ticketId.slice(0, 8);
   const updatedAt = formatUpdatedAt(data.updatedAt);
-  const subject = `【RepairHub】案件 #${shortId} 已開始維修`;
+  const copy = TICKET_EMAIL_COPY[eventType];
+  const subject = copy.subject(shortId);
   const categoryName = escapeHtml(data.categoryName);
   const location = escapeHtml(data.location);
   const escapedUpdatedAt = escapeHtml(updatedAt);
   const trackingUrl = escapeHtml(data.trackingUrl);
+  const guidance = copy.guidance
+    ? `<p style="margin:0 0 24px;font-size:16px;line-height:1.7;"><strong>${escapeHtml(copy.guidance)}</strong></p>`
+    : "";
 
   const html = `<!doctype html>
 <html lang="zh-Hant-TW" dir="ltr">
@@ -52,8 +96,8 @@ export function renderInProgressEmail(data: TicketEmailData): { subject: string;
   </head>
   <body style="margin:0;padding:24px;background:#f8fafc;color:#1f2937;font-family:Arial,sans-serif;">
     <div lang="zh-Hant-TW" dir="ltr" style="max-width:600px;margin:0 auto;padding:32px;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;">
-      <h1 style="margin:0 0 20px;font-size:24px;line-height:1.35;color:#111827;">案件已開始維修</h1>
-      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">您好，您的報修案件已由維修人員開始處理。</p>
+      <h1 style="margin:0 0 20px;font-size:24px;line-height:1.35;color:#111827;">${escapeHtml(copy.heading)}</h1>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">${escapeHtml(copy.intro)}</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>報修單編號：</strong>#${
     escapeHtml(shortId)
   }</p>
@@ -62,7 +106,8 @@ export function renderInProgressEmail(data: TicketEmailData): { subject: string;
   }</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>報修類別：</strong>${categoryName}</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>地點：</strong>${location}</p>
-      <p style="margin:0 0 24px;font-size:16px;line-height:1.7;"><strong>更新時間：</strong>${escapedUpdatedAt}</p>
+      <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>更新時間：</strong>${escapedUpdatedAt}</p>
+      ${guidance}
       <a href="${trackingUrl}" style="display:inline-block;min-height:20px;padding:14px 24px;background:#1d4ed8;color:#ffffff;font-size:16px;font-weight:700;line-height:20px;text-decoration:none;border-radius:6px;">查看報修單進度</a>
       <p style="margin:28px 0 0;color:#475569;font-size:14px;line-height:1.6;">此為系統自動發出的通知信，請勿直接回覆。</p>
     </div>
@@ -71,7 +116,10 @@ export function renderInProgressEmail(data: TicketEmailData): { subject: string;
 
   const text = `RepairHub 報修通知
 
-案件已開始維修。
+${copy.heading}
+
+${copy.intro}
+${copy.guidance ?? ""}
 
 報修單編號：#${shortId}
 目前狀態：${data.statusLabel}
