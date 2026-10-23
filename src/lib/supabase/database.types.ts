@@ -152,25 +152,49 @@ export type Database = {
       };
       notification_log: {
         Row: {
+          attempt_count: number;
+          created_at: string;
+          event_key: string;
           event_type: string;
           id: string;
+          last_error: string | null;
+          next_attempt_at: string | null;
           recipient_email: string;
-          sent_at: string;
+          resend_message_id: string | null;
+          sent_at: string | null;
+          status: string;
           ticket_id: string;
+          updated_at: string;
         };
         Insert: {
+          attempt_count?: number;
+          created_at?: string;
+          event_key: string;
           event_type: string;
           id?: string;
+          last_error?: string | null;
+          next_attempt_at?: string | null;
           recipient_email: string;
-          sent_at?: string;
+          resend_message_id?: string | null;
+          sent_at?: string | null;
+          status?: string;
           ticket_id: string;
+          updated_at?: string;
         };
         Update: {
+          attempt_count?: number;
+          created_at?: string;
+          event_key?: string;
           event_type?: string;
           id?: string;
+          last_error?: string | null;
+          next_attempt_at?: string | null;
           recipient_email?: string;
-          sent_at?: string;
+          resend_message_id?: string | null;
+          sent_at?: string | null;
+          status?: string;
           ticket_id?: string;
+          updated_at?: string;
         };
         Relationships: [
           {
@@ -449,9 +473,26 @@ export type Database = {
     };
     Functions: {
       auto_close_completed_tickets: { Args: never; Returns: undefined };
+      claim_notification_delivery: {
+        Args: { p_delivery_id: string };
+        Returns: {
+          attempt_count: number;
+          event_at: string;
+          event_key: string;
+          event_type: string;
+          id: string;
+          recipient_email: string;
+          status: string;
+          ticket_id: string;
+        }[];
+      };
       claim_ticket: {
         Args: { p_technician_id: string; p_ticket_id: string };
         Returns: boolean;
+      };
+      invoke_notification_delivery: {
+        Args: { p_delivery_id: string };
+        Returns: number;
       };
     };
     Enums: {
