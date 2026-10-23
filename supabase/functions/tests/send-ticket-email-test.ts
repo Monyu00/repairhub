@@ -1,0 +1,237 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import {
+  type ClaimedDelivery,
+  createRequestHandler,
+  type EmailMessage,
+  EmailSendError,
+  type NotificationRepository,
+  type RequestHandlerDependencies,
+  SERVICE_SECRET_HEADER,
+} from "../send-ticket-email/handler.ts";
+import { renderInProgressEmail } from "../send-ticket-email/templates.ts";
+
+const SERVICE_SECRET = "test-service-secret";
+const FIXED_NOW = new Date("2026-10-23T08:30:00.000Z");
+
+function createDelivery(overrides: Partial<ClaimedDelivery> = {}): ClaimedDelivery {
+  return {
+    id: "delivery-1",
+    ticketId: "12345678-1234-1234-1234-123456789abc",
+    eventType: "in_progress",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
+    recipientEmail: "reporter@example.com",
+    eventAt: "2026-10-23T08:30:00.000Z",
+    ...overrides,
+  };
+}
+
+function createRepository() {
+  const state = {
+    claim: createDelivery() as ClaimedDelivery | null,
+    ticketFound: true,
+    sent: [] as Array<{ deliveryId: string; messageId: string }>,
+    failed: [] as Array<{ deliveryId: string; error: string }>,
+  };
+
+  const repository: NotificationRepository = {
+    claimDelivery() {
+      return Promise.resolve(state.claim);
+    },
+    getTicketData(delivery) {
+      if (!state.ticketFound) return Promise.resolve(null);
+
+      return Promise.resolve({
+        ticketId: delivery.ticketId,
+        statusLabel: "維修中",
+        categoryName: "空調",
+        location: "行政大樓 3F 301",
+        updatedAt: delivery.eventAt,
+      });
+    },
+    markSent(deliveryId, messageId) {
+      state.sent.push({ deliveryId, messageId });
+      return Promise.resolve();
+    },
+    markFailed(deliveryId, error) {
+      state.failed.push({ deliveryId, error });
+      return Promise.resolve();
+    },
+  };
+
+  return { repository, state };
+}
+
+function createTestHandler(
+  repository: NotificationRepository,
+  sender: RequestHandlerDependencies["sender"],
+  overrides: Partial<RequestHandlerDependencies> = {},
+) {
+  return createRequestHandler({
+    expectedSecret: SERVICE_SECRET,
+    from: "RepairHub <no-reply@notify.monyu.dev>",
+    replyTo: "support@example.com",
+    appBaseUrl: "https://repairhub.monyu.dev",
+    repository,
+    sender,
+    now: () => FIXED_NOW,
+    sleep: async () => {},
+    random: () => 0,
+    ...overrides,
+  });
+}
+
+function request(deliveryId = "delivery-1", secret = SERVICE_SECRET): Request {
+  return new Request("https://example.test/functions/v1/send-ticket-email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      [SERVICE_SECRET_HEADER]: secret,
+    },
+    body: JSON.stringify({ delivery_id: deliveryId }),
+  });
+}
+
+test("rejects a missing or invalid service secret without claiming or sending", async () => {
+  const { repository } = createRepository();
+  let senderCalls = 0;
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.resolve({ messageId: "unexpected" });
+    },
+  });
+
+  const response = await handler(request("delivery-1", "wrong-secret"));
+
+  assert.equal(response.status, 401);
+  assert.equal(senderCalls, 0);
+});
+
+test("sends the in-progress Email with stable content and idempotency", async () => {
+  const { repository, state } = createRepository();
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-1" });
+    },
+  });
+
+  const response = await handler(request());
+  const body = (await response.json()) as Record<string, unknown>;
+
+  assert.equal(response.status, 200);
+  assert.equal(body.message_id, "resend-message-1");
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.to, "reporter@example.com");
+  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已開始維修");
+  assert.equal(
+    messages[0]?.idempotencyKey,
+    "repairhub:ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
+  );
+  assert.match(messages[0]?.html ?? "", /#12345678/);
+  assert.match(messages[0]?.html ?? "", /維修中/);
+  assert.match(messages[0]?.html ?? "", /空調/);
+  assert.match(messages[0]?.html ?? "", /行政大樓 3F 301/);
+  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
+  assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "resend-message-1" }]);
+});
+
+test("does not send twice when the delivery was already claimed", async () => {
+  const { repository, state } = createRepository();
+  state.claim = null;
+  let senderCalls = 0;
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.resolve({ messageId: "unexpected" });
+    },
+  });
+
+  const response = await handler(request());
+  const body = (await response.json()) as Record<string, unknown>;
+
+  assert.equal(response.status, 200);
+  assert.equal(body.skipped, "already_claimed_or_sent");
+  assert.equal(senderCalls, 0);
+});
+
+test("retries network errors, 429, and 5xx with the same idempotency key", async () => {
+  const { repository } = createRepository();
+  const keys: string[] = [];
+  const outcomes = [
+    new EmailSendError("network unavailable", { retryable: true }),
+    new EmailSendError("rate limited", { retryable: true }),
+    { messageId: "resend-message-after-retry" },
+  ];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      keys.push(message.idempotencyKey);
+      const outcome = outcomes.shift();
+      if (outcome instanceof Error) return Promise.reject(outcome);
+      return Promise.resolve(outcome as { messageId: string });
+    },
+  });
+
+  const response = await handler(request());
+
+  assert.equal(response.status, 200);
+  assert.equal(keys.length, 3);
+  assert.equal(new Set(keys).size, 1);
+});
+
+test("does not retry permanent 4xx responses", async () => {
+  const { repository, state } = createRepository();
+  let senderCalls = 0;
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.reject(new EmailSendError("invalid recipient", { retryable: false }));
+    },
+  });
+
+  const response = await handler(request());
+
+  assert.equal(response.status, 502);
+  assert.equal(senderCalls, 1);
+  assert.deepEqual(state.failed, [{ deliveryId: "delivery-1", error: "invalid recipient" }]);
+});
+
+test("stops after three transient failures and keeps the diagnostic error", async () => {
+  const { repository, state } = createRepository();
+  let senderCalls = 0;
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
+    },
+  });
+
+  const response = await handler(request());
+
+  assert.equal(response.status, 502);
+  assert.equal(senderCalls, 3);
+  assert.deepEqual(state.failed, [{ deliveryId: "delivery-1", error: "upstream unavailable" }]);
+});
+
+test("renders accessible HTML and an equivalent plain-text alternative", () => {
+  const rendered = renderInProgressEmail({
+    ticketId: "12345678-1234-1234-1234-123456789abc",
+    statusLabel: "維修中",
+    categoryName: "空調",
+    location: "行政大樓 3F 301",
+    updatedAt: "2026-10-23T08:30:00.000Z",
+    trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
+  });
+
+  assert.match(rendered.html, /<html lang="zh-Hant-TW" dir="ltr">/);
+  assert.match(rendered.html, /<div lang="zh-Hant-TW" dir="ltr"/);
+  assert.match(rendered.html, /<title>【RepairHub】案件 #12345678 已開始維修<\/title>/);
+  assert.equal((rendered.html.match(/<h1/g) ?? []).length, 1);
+  assert.match(rendered.html, />查看報修單進度<\/a>/);
+  assert.match(rendered.text, /報修單編號：#12345678/);
+  assert.match(rendered.text, /地點：行政大樓 3F 301/);
+});
