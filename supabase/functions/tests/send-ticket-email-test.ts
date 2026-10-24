@@ -10,7 +10,7 @@ import {
   type RequestHandlerDependencies,
   SERVICE_SECRET_HEADER,
 } from "../send-ticket-email/handler.ts";
-import { renderInProgressEmail } from "../send-ticket-email/templates.ts";
+import { renderTicketEmail, ticketStatusLabel } from "../send-ticket-email/templates.ts";
 
 const SERVICE_SECRET = "test-service-secret";
 const FIXED_NOW = new Date("2026-10-23T08:30:00.000Z");
@@ -44,7 +44,7 @@ function createRepository() {
 
       return Promise.resolve({
         ticketId: delivery.ticketId,
-        statusLabel: "維修中",
+        statusLabel: ticketStatusLabel(delivery.eventType),
         categoryName: "空調",
         location: "行政大樓 3F 301",
         updatedAt: delivery.eventAt,
@@ -140,6 +140,122 @@ test("sends the in-progress Email with stable content and idempotency", async ()
   assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "resend-message-1" }]);
 });
 
+test("sends the completed Email with confirmation and seven-day auto-close guidance", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-completed",
+    eventType: "completed",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761208200",
+  });
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-completed" });
+    },
+  });
+
+  const response = await handler(request("delivery-completed"));
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已完工，請確認");
+  assert.match(messages[0]?.html ?? "", /確認修復結果/);
+  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
+  assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
+  assert.match(messages[0]?.html ?? "", /<strong>更新時間：<\/strong>2026\/10\/23\s16:30/);
+  assert.match(messages[0]?.text ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.match(messages[0]?.text ?? "", /7 天內未確認/);
+  assert.match(messages[0]?.text ?? "", /自動結案/);
+  assert.match(messages[0]?.html ?? "", /已完工/);
+  assert.deepEqual(state.sent, [{ deliveryId: "delivery-completed", messageId: "resend-message-completed" }]);
+});
+
+test("sends the closed Email after reporter confirmation or seven-day auto-close", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-closed",
+    eventType: "closed",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:closed:1761208200",
+  });
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-closed" });
+    },
+  });
+
+  const response = await handler(request("delivery-closed"));
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已結案");
+  assert.match(messages[0]?.html ?? "", /案件已結案/);
+  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
+  assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
+  assert.match(messages[0]?.html ?? "", /<strong>更新時間：<\/strong>2026\/10\/23\s16:30/);
+  assert.match(messages[0]?.text ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.match(messages[0]?.text ?? "", /已結案/);
+  assert.match(messages[0]?.html ?? "", /已結案/);
+  assert.deepEqual(state.sent, [{ deliveryId: "delivery-closed", messageId: "resend-message-closed" }]);
+});
+
+test("allows a reopened Ticket to complete again with a new stable event key", async () => {
+  const deliveries = [
+    createDelivery({
+      id: "delivery-first-completion",
+      eventType: "completed",
+      eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761208200",
+      eventAt: "2026-10-23T08:30:00.000Z",
+    }),
+    createDelivery({
+      id: "delivery-second-completion",
+      eventType: "completed",
+      eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761211800",
+      eventAt: "2026-10-23T09:30:00.000Z",
+    }),
+  ];
+  let claimIndex = 0;
+  const messages: EmailMessage[] = [];
+  const repository: NotificationRepository = {
+    claimDelivery() {
+      const delivery = deliveries[claimIndex] ?? null;
+      claimIndex++;
+      return Promise.resolve(delivery);
+    },
+    getTicketData(delivery) {
+      return Promise.resolve({
+        ticketId: delivery.ticketId,
+        statusLabel: "已完工",
+        categoryName: "空調",
+        location: "行政大樓 3F 301",
+        updatedAt: delivery.eventAt,
+      });
+    },
+    markSent() {
+      return Promise.resolve();
+    },
+    markFailed() {
+      return Promise.resolve();
+    },
+  };
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: `resend-message-${messages.length}` });
+    },
+  });
+
+  const firstResponse = await handler(request("delivery-first-completion"));
+  const secondResponse = await handler(request("delivery-second-completion"));
+
+  assert.equal(firstResponse.status, 200);
+  assert.equal(secondResponse.status, 200);
+  assert.equal(messages.length, 2);
+  assert.equal(new Set(messages.map((message) => message.idempotencyKey)).size, 2);
+});
+
 test("does not send twice when the delivery was already claimed", async () => {
   const { repository, state } = createRepository();
   state.claim = null;
@@ -218,14 +334,17 @@ test("stops after three transient failures and keeps the diagnostic error", asyn
 });
 
 test("renders accessible HTML and an equivalent plain-text alternative", () => {
-  const rendered = renderInProgressEmail({
-    ticketId: "12345678-1234-1234-1234-123456789abc",
-    statusLabel: "維修中",
-    categoryName: "空調",
-    location: "行政大樓 3F 301",
-    updatedAt: "2026-10-23T08:30:00.000Z",
-    trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
-  });
+  const rendered = renderTicketEmail(
+    {
+      ticketId: "12345678-1234-1234-1234-123456789abc",
+      statusLabel: "維修中",
+      categoryName: "空調",
+      location: "行政大樓 3F 301",
+      updatedAt: "2026-10-23T08:30:00.000Z",
+      trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
+    },
+    "in_progress",
+  );
 
   assert.match(rendered.html, /<html lang="zh-Hant-TW" dir="ltr">/);
   assert.match(rendered.html, /<div lang="zh-Hant-TW" dir="ltr"/);

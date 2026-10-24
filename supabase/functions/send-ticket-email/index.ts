@@ -10,6 +10,7 @@ import {
   type RequestHandlerDependencies,
   type TicketEmailDisplayData,
 } from "./handler.ts";
+import { ticketStatusLabel } from "./templates.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -87,7 +88,7 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
 
       return {
         ticketId: String(ticket.id),
-        statusLabel: "維修中",
+        statusLabel: ticketStatusLabel(delivery.eventType),
         categoryName,
         location,
         updatedAt: delivery.eventAt,

@@ -1,8 +1,9 @@
-import { renderInProgressEmail, type TicketEmailData } from "./templates.ts";
+import { renderTicketEmail, type TicketEmailData, type TicketNotificationEvent } from "./templates.ts";
 
 export const SERVICE_SECRET_HEADER = "x-repairhub-service-secret";
 
 const MAX_IMMEDIATE_ATTEMPTS = 3;
+const SUPPORTED_EVENT_TYPES = ["in_progress", "completed", "closed"] as const;
 
 export type TicketEmailDisplayData = Omit<TicketEmailData, "trackingUrl">;
 
@@ -90,6 +91,10 @@ function toSendFailure(error: unknown): { message: string; retryable: boolean } 
   return { message: errorMessage(error), retryable: true };
 }
 
+function isTicketNotificationEvent(value: string): value is TicketNotificationEvent {
+  return (SUPPORTED_EVENT_TYPES as readonly string[]).includes(value);
+}
+
 function defaultSleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -166,17 +171,20 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
       return jsonResponse({ error: "Ticket not found" }, 404);
     }
 
-    if (delivery.eventType !== "in_progress") {
+    if (!isTicketNotificationEvent(delivery.eventType)) {
       await dependencies.repository.markFailed(delivery.id, `Unsupported event: ${delivery.eventType}`, now());
       return jsonResponse({ error: "Unsupported event type" }, 422);
     }
 
     let email: EmailMessage;
     try {
-      const rendered = renderInProgressEmail({
-        ...ticketData,
-        trackingUrl: buildTrackingUrl(dependencies.appBaseUrl, ticketData.ticketId),
-      });
+      const rendered = renderTicketEmail(
+        {
+          ...ticketData,
+          trackingUrl: buildTrackingUrl(dependencies.appBaseUrl, ticketData.ticketId),
+        },
+        delivery.eventType,
+      );
 
       email = {
         from: dependencies.from,
