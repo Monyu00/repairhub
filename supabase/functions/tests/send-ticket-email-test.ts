@@ -23,6 +23,7 @@ function createDelivery(overrides: Partial<ClaimedDelivery> = {}): ClaimedDelive
     eventKey: "ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
     recipientEmail: "reporter@example.com",
     eventAt: "2026-10-23T08:30:00.000Z",
+    attemptCount: 1,
     ...overrides,
   };
 }
@@ -32,7 +33,12 @@ function createRepository() {
     claim: createDelivery() as ClaimedDelivery | null,
     ticketFound: true,
     sent: [] as Array<{ deliveryId: string; messageId: string }>,
-    failed: [] as Array<{ deliveryId: string; error: string }>,
+    failed: [] as Array<{
+      deliveryId: string;
+      error: string;
+      retryable: boolean;
+      nextAttemptAt: Date | null;
+    }>,
   };
 
   const repository: NotificationRepository = {
@@ -54,8 +60,13 @@ function createRepository() {
       state.sent.push({ deliveryId, messageId });
       return Promise.resolve();
     },
-    markFailed(deliveryId, error) {
-      state.failed.push({ deliveryId, error });
+    markFailed(deliveryId, error, _failedAt, options) {
+      state.failed.push({
+        deliveryId,
+        error,
+        retryable: options.retryable,
+        nextAttemptAt: options.nextAttemptAt,
+      });
       return Promise.resolve();
     },
   };
@@ -275,6 +286,46 @@ test("does not send twice when the delivery was already claimed", async () => {
   assert.equal(senderCalls, 0);
 });
 
+test("does not send twice when concurrent invocations claim the same delivery", async () => {
+  let claimed = false;
+  let senderCalls = 0;
+  const repository: NotificationRepository = {
+    claimDelivery: async () => {
+      await Promise.resolve();
+      if (claimed) return Promise.resolve(null);
+      claimed = true;
+      return Promise.resolve(createDelivery());
+    },
+    getTicketData(delivery) {
+      return Promise.resolve({
+        ticketId: delivery.ticketId,
+        statusLabel: "維修中",
+        categoryName: "空調",
+        location: "行政大樓 3F 301",
+        updatedAt: delivery.eventAt,
+      });
+    },
+    markSent() {
+      return Promise.resolve();
+    },
+    markFailed() {
+      return Promise.resolve();
+    },
+  };
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.resolve({ messageId: "resend-message-concurrent" });
+    },
+  });
+
+  const [firstResponse, secondResponse] = await Promise.all([handler(request()), handler(request())]);
+
+  assert.equal(firstResponse.status, 200);
+  assert.equal(secondResponse.status, 200);
+  assert.equal(senderCalls, 1);
+});
+
 test("retries network errors, 429, and 5xx with the same idempotency key", async () => {
   const { repository } = createRepository();
   const keys: string[] = [];
@@ -313,7 +364,9 @@ test("does not retry permanent 4xx responses", async () => {
 
   assert.equal(response.status, 502);
   assert.equal(senderCalls, 1);
-  assert.deepEqual(state.failed, [{ deliveryId: "delivery-1", error: "invalid recipient" }]);
+  assert.deepEqual(state.failed, [
+    { deliveryId: "delivery-1", error: "invalid recipient", retryable: false, nextAttemptAt: null },
+  ]);
 });
 
 test("stops after three transient failures and keeps the diagnostic error", async () => {
@@ -330,7 +383,93 @@ test("stops after three transient failures and keeps the diagnostic error", asyn
 
   assert.equal(response.status, 502);
   assert.equal(senderCalls, 3);
-  assert.deepEqual(state.failed, [{ deliveryId: "delivery-1", error: "upstream unavailable" }]);
+  assert.deepEqual(state.failed, [
+    {
+      deliveryId: "delivery-1",
+      error: "upstream unavailable",
+      retryable: true,
+      nextAttemptAt: new Date("2026-10-23T08:35:00.000Z"),
+    },
+  ]);
+});
+
+test("schedules the next persistent retry after a transient delivery failure", async () => {
+  const { repository, state } = createRepository();
+  const handler = createTestHandler(repository, {
+    send() {
+      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
+    },
+  });
+
+  await handler(request());
+
+  assert.deepEqual(state.failed, [
+    {
+      deliveryId: "delivery-1",
+      error: "upstream unavailable",
+      retryable: true,
+      nextAttemptAt: new Date("2026-10-23T08:35:00.000Z"),
+    },
+  ]);
+});
+
+test("does not schedule a persistent retry for permanent failures", async () => {
+  const { repository, state } = createRepository();
+  const handler = createTestHandler(repository, {
+    send() {
+      return Promise.reject(new EmailSendError("invalid recipient", { retryable: false }));
+    },
+  });
+
+  await handler(request());
+
+  assert.deepEqual(state.failed, [
+    {
+      deliveryId: "delivery-1",
+      error: "invalid recipient",
+      retryable: false,
+      nextAttemptAt: null,
+    },
+  ]);
+});
+
+test("uses the persistent retry backoff and stops at the fifth attempt", async () => {
+  const expectedDelays = [5, 15, 60, 360];
+  const failures: Array<Date | null> = [];
+  const repository: NotificationRepository = {
+    claimDelivery() {
+      return Promise.resolve(createDelivery({ id: "delivery-backoff" }));
+    },
+    getTicketData() {
+      return Promise.resolve({
+        ticketId: "12345678-1234-1234-1234-123456789abc",
+        statusLabel: "維修中",
+        categoryName: "空調",
+        location: "行政大樓 3F 301",
+        updatedAt: "2026-10-23T08:30:00.000Z",
+      });
+    },
+    markSent() {
+      return Promise.resolve();
+    },
+    markFailed(_deliveryId, _error, _failedAt, options) {
+      failures.push(options.nextAttemptAt);
+      return Promise.resolve();
+    },
+  };
+  const handler = createTestHandler(repository, {
+    send() {
+      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
+    },
+  });
+
+  for (const [index, attemptCount] of [1, 2, 3, 4, 5].entries()) {
+    repository.claimDelivery = () => Promise.resolve(createDelivery({ id: "delivery-backoff", attemptCount }));
+    await handler(request("delivery-backoff"));
+
+    const expected = index < 4 ? new Date(FIXED_NOW.getTime() + expectedDelays[index] * 60_000) : null;
+    assert.deepEqual(failures[index], expected);
+  }
 });
 
 test("renders accessible HTML and an equivalent plain-text alternative", () => {

@@ -3,6 +3,8 @@ import { renderTicketEmail, type TicketEmailData, type TicketNotificationEvent }
 export const SERVICE_SECRET_HEADER = "x-repairhub-service-secret";
 
 const MAX_IMMEDIATE_ATTEMPTS = 3;
+const MAX_DELIVERY_ATTEMPTS = 5;
+const PERSISTENT_RETRY_DELAYS_MINUTES = [5, 15, 60, 360] as const;
 const SUPPORTED_EVENT_TYPES = ["in_progress", "completed", "closed"] as const;
 
 export type TicketEmailDisplayData = Omit<TicketEmailData, "trackingUrl">;
@@ -14,6 +16,7 @@ export interface ClaimedDelivery {
   eventKey: string;
   recipientEmail: string;
   eventAt: string;
+  attemptCount: number;
 }
 
 export interface EmailMessage {
@@ -30,7 +33,12 @@ export interface NotificationRepository {
   claimDelivery(deliveryId: string, now: Date): Promise<ClaimedDelivery | null>;
   getTicketData(delivery: ClaimedDelivery): Promise<TicketEmailDisplayData | null>;
   markSent(deliveryId: string, messageId: string, now: Date): Promise<void>;
-  markFailed(deliveryId: string, error: string, now: Date): Promise<void>;
+  markFailed(
+    deliveryId: string,
+    error: string,
+    now: Date,
+    failure: { retryable: boolean; nextAttemptAt: Date | null },
+  ): Promise<void>;
 }
 
 export interface EmailSender {
@@ -89,6 +97,19 @@ function toSendFailure(error: unknown): { message: string; retryable: boolean } 
   }
 
   return { message: errorMessage(error), retryable: true };
+}
+
+function nextPersistentAttempt(
+  attemptCount: number,
+  failedAt: Date,
+  retryable: boolean,
+): Date | null {
+  if (!retryable || attemptCount < 1 || attemptCount >= MAX_DELIVERY_ATTEMPTS) {
+    return null;
+  }
+
+  const delayMinutes = PERSISTENT_RETRY_DELAYS_MINUTES[attemptCount - 1];
+  return new Date(failedAt.getTime() + delayMinutes * 60_000);
 }
 
 function isTicketNotificationEvent(value: string): value is TicketNotificationEvent {
@@ -162,17 +183,29 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
     try {
       ticketData = await dependencies.repository.getTicketData(delivery);
     } catch (error) {
-      await dependencies.repository.markFailed(delivery.id, errorMessage(error), now());
+      const failedAt = now();
+      await dependencies.repository.markFailed(delivery.id, errorMessage(error), failedAt, {
+        retryable: true,
+        nextAttemptAt: nextPersistentAttempt(delivery.attemptCount, failedAt, true),
+      });
       return jsonResponse({ error: "Failed to load Ticket data" }, 500);
     }
 
     if (!ticketData) {
-      await dependencies.repository.markFailed(delivery.id, "Ticket not found", now());
+      await dependencies.repository.markFailed(delivery.id, "Ticket not found", now(), {
+        retryable: false,
+        nextAttemptAt: null,
+      });
       return jsonResponse({ error: "Ticket not found" }, 404);
     }
 
     if (!isTicketNotificationEvent(delivery.eventType)) {
-      await dependencies.repository.markFailed(delivery.id, `Unsupported event: ${delivery.eventType}`, now());
+      await dependencies.repository.markFailed(
+        delivery.id,
+        `Unsupported event: ${delivery.eventType}`,
+        now(),
+        { retryable: false, nextAttemptAt: null },
+      );
       return jsonResponse({ error: "Unsupported event type" }, 422);
     }
 
@@ -194,7 +227,10 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
         idempotencyKey: `repairhub:${delivery.eventKey}`,
       };
     } catch (error) {
-      await dependencies.repository.markFailed(delivery.id, errorMessage(error), now());
+      await dependencies.repository.markFailed(delivery.id, errorMessage(error), now(), {
+        retryable: false,
+        nextAttemptAt: null,
+      });
       return jsonResponse({ error: "Failed to render Email" }, 500);
     }
 
@@ -217,7 +253,11 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
       }
     }
 
-    await dependencies.repository.markFailed(delivery.id, lastFailure.message, now());
+    const failedAt = now();
+    await dependencies.repository.markFailed(delivery.id, lastFailure.message, failedAt, {
+      retryable: lastFailure.retryable,
+      nextAttemptAt: nextPersistentAttempt(delivery.attemptCount, failedAt, lastFailure.retryable),
+    });
 
     return jsonResponse(
       {
