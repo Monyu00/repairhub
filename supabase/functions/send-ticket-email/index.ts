@@ -63,6 +63,7 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
         eventKey: String(row.event_key),
         recipientEmail: String(row.recipient_email),
         eventAt: String(row.event_at),
+        attemptCount: Number(row.attempt_count),
       };
     },
 
@@ -111,13 +112,13 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
       if (error) throw error;
     },
 
-    async markFailed(deliveryId, message, failedAt) {
+    async markFailed(deliveryId, message, failedAt, options) {
       const { error } = await supabase
         .from("notification_log")
         .update({
           status: "failed",
           last_error: message,
-          next_attempt_at: null,
+          next_attempt_at: options.nextAttemptAt ? options.nextAttemptAt.toISOString() : null,
           updated_at: failedAt.toISOString(),
         })
         .eq("id", deliveryId)
