@@ -387,6 +387,7 @@ export type Database = {
           equipment_id: string | null;
           equipment_name: string | null;
           id: string;
+          notification_ready_at: string | null;
           rated_at: string | null;
           rating: number | null;
           reporter_department: string | null;
@@ -406,6 +407,7 @@ export type Database = {
           equipment_id?: string | null;
           equipment_name?: string | null;
           id?: string;
+          notification_ready_at?: string | null;
           rated_at?: string | null;
           rating?: number | null;
           reporter_department?: string | null;
@@ -425,6 +427,7 @@ export type Database = {
           equipment_id?: string | null;
           equipment_name?: string | null;
           id?: string;
+          notification_ready_at?: string | null;
           rated_at?: string | null;
           rating?: number | null;
           reporter_department?: string | null;

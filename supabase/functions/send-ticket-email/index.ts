@@ -70,7 +70,7 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
     async getTicketData(delivery) {
       const { data, error } = await supabase
         .from("tickets")
-        .select("id, categories(name), spaces(name, floor, buildings(name))")
+        .select("id, description, categories(name), spaces(name, floor, buildings(name))")
         .eq("id", delivery.ticketId)
         .maybeSingle();
 
@@ -91,6 +91,7 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
         ticketId: String(ticket.id),
         statusLabel: ticketStatusLabel(delivery.eventType),
         categoryName,
+        description: String(ticket.description ?? ""),
         location,
         updatedAt: delivery.eventAt,
       } satisfies TicketEmailDisplayData;

@@ -4,6 +4,8 @@ Issue #86 建立 `pending -> in_progress` 的 Email tracer。Ticket 狀態由 Po
 
 Issue #87 加入持久化回收：暫時性寄送失敗會依約五分鐘、十五分鐘、一小時與六小時排定下次嘗試；`pg_cron` 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending delivery。每筆 delivery 最多五次 claim 嘗試，達上限後保留為 failed。Resend 的永久 4xx 錯誤不會進入持久重試。
 
+Issue #89 加入 `new_ticket` 事件：Ticket 會在必要資料與報修照片提交完成後設定 `notification_ready_at`，trigger 只對符合 Category、active 且已訂閱的 Technician 建立 delivery，並以 Email 呈現最多 160 字的問題描述摘要，不包含 Reporter 電話或 Email。
+
 ## 必要 secrets
 
 在 Supabase Vault 建立下列兩個 secret，兩者都不得寫入 repo：
@@ -42,3 +44,4 @@ npx --yes deno check --frozen-lockfile supabase/functions/send-ticket-email/inde
 
 SQL integration smoke check 位於 `supabase/tests/notification_foundation_smoke.sql`。它會建立暫時 fixture、執行檢查後 `ROLLBACK`；只可在 disposable DB 或已確認可安全交易的環境執行。
 Retry 行為的 SQL integration smoke check 位於 `supabase/tests/notification_retry_smoke.sql`，同樣會在交易內驗證 claim、attempt limit 與 cron scheduling 後 `ROLLBACK`。
+新 Ticket 收件人篩選的 SQL integration smoke check 位於 `supabase/tests/new_ticket_notification_smoke.sql`，會在交易內驗證 readiness gate、active/subscribed Technician 篩選與 delivery 去重後 `ROLLBACK`。

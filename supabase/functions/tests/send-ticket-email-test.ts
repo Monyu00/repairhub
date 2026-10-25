@@ -54,6 +54,7 @@ function createRepository() {
         categoryName: "空調",
         location: "行政大樓 3F 301",
         updatedAt: delivery.eventAt,
+        description: "三樓會議室冷氣無法啟動，需要儘速檢查。",
       });
     },
     markSent(deliveryId, messageId) {
@@ -151,6 +152,68 @@ test("sends the in-progress Email with stable content and idempotency", async ()
   assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "resend-message-1" }]);
 });
 
+test("sends the new-ticket Email with a bounded description and no Reporter contact", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-new-ticket",
+    eventType: "new_ticket",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:new_ticket:1761208200",
+    recipientEmail: "technician@example.com",
+  });
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-new-ticket" });
+    },
+  });
+
+  const response = await handler(request("delivery-new-ticket"));
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.to, "technician@example.com");
+  assert.equal(messages[0]?.subject, "【RepairHub】新報修案件 #12345678：空調");
+  assert.match(messages[0]?.html ?? "", /待處理/);
+  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
+  assert.match(messages[0]?.html ?? "", /<strong>問題描述：<\/strong>三樓會議室冷氣無法啟動/);
+  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.doesNotMatch(messages[0]?.html ?? "", /reporter@example\.com/);
+  assert.doesNotMatch(messages[0]?.html ?? "", /reporter-phone/);
+  assert.match(messages[0]?.text ?? "", /問題描述：三樓會議室冷氣無法啟動/);
+  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
+  assert.deepEqual(state.sent, [{ deliveryId: "delivery-new-ticket", messageId: "resend-message-new-ticket" }]);
+});
+
+test("does not send a new-ticket Email to an invalid recipient", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-invalid-recipient",
+    eventType: "new_ticket",
+    recipientEmail: "not-an-email",
+  });
+  let senderCalls = 0;
+  const handler = createTestHandler(repository, {
+    send() {
+      senderCalls++;
+      return Promise.resolve({ messageId: "unexpected" });
+    },
+  });
+
+  const response = await handler(request("delivery-invalid-recipient"));
+
+  assert.equal(response.status, 422);
+  assert.equal(senderCalls, 0);
+  assert.deepEqual(state.failed, [
+    {
+      deliveryId: "delivery-invalid-recipient",
+      error: "Invalid recipient Email",
+      retryable: false,
+      nextAttemptAt: null,
+    },
+  ]);
+});
+
 test("sends the completed Email with confirmation and seven-day auto-close guidance", async () => {
   const { repository, state } = createRepository();
   state.claim = createDelivery({
@@ -240,6 +303,7 @@ test("allows a reopened Ticket to complete again with a new stable event key", a
         ticketId: delivery.ticketId,
         statusLabel: "已完工",
         categoryName: "空調",
+        description: "冷氣無法啟動",
         location: "行政大樓 3F 301",
         updatedAt: delivery.eventAt,
       });
@@ -286,7 +350,7 @@ test("does not send twice when the delivery was already claimed", async () => {
   assert.equal(senderCalls, 0);
 });
 
-test("does not send twice when concurrent invocations claim the same delivery", async () => {
+test("does not send twice when concurrent invocations claim the same new-ticket delivery", async () => {
   let claimed = false;
   let senderCalls = 0;
   const repository: NotificationRepository = {
@@ -294,13 +358,19 @@ test("does not send twice when concurrent invocations claim the same delivery", 
       await Promise.resolve();
       if (claimed) return Promise.resolve(null);
       claimed = true;
-      return Promise.resolve(createDelivery());
+      return Promise.resolve(
+        createDelivery({
+          eventType: "new_ticket",
+          eventKey: "ticket:12345678-1234-1234-1234-123456789abc:new_ticket",
+        }),
+      );
     },
     getTicketData(delivery) {
       return Promise.resolve({
         ticketId: delivery.ticketId,
         statusLabel: "維修中",
         categoryName: "空調",
+        description: "冷氣無法啟動",
         location: "行政大樓 3F 301",
         updatedAt: delivery.eventAt,
       });
@@ -445,6 +515,7 @@ test("uses the persistent retry backoff and stops at the fifth attempt", async (
         ticketId: "12345678-1234-1234-1234-123456789abc",
         statusLabel: "維修中",
         categoryName: "空調",
+        description: "冷氣無法啟動",
         location: "行政大樓 3F 301",
         updatedAt: "2026-10-23T08:30:00.000Z",
       });
@@ -478,6 +549,7 @@ test("renders accessible HTML and an equivalent plain-text alternative", () => {
       ticketId: "12345678-1234-1234-1234-123456789abc",
       statusLabel: "維修中",
       categoryName: "空調",
+      description: "冷氣無法啟動",
       location: "行政大樓 3F 301",
       updatedAt: "2026-10-23T08:30:00.000Z",
       trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
@@ -492,4 +564,24 @@ test("renders accessible HTML and an equivalent plain-text alternative", () => {
   assert.match(rendered.html, />查看報修單進度<\/a>/);
   assert.match(rendered.text, /報修單編號：#12345678/);
   assert.match(rendered.text, /地點：行政大樓 3F 301/);
+});
+
+test("caps the new-ticket description summary at 160 characters", () => {
+  const rendered = renderTicketEmail(
+    {
+      ticketId: "12345678-1234-1234-1234-123456789abc",
+      statusLabel: "待處理",
+      categoryName: "空調",
+      description: "冷".repeat(200),
+      location: "行政大樓 3F 301",
+      updatedAt: "2026-10-23T08:30:00.000Z",
+      trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
+    },
+    "new_ticket",
+  );
+
+  const expectedSummary = `${"冷".repeat(157)}...`;
+  assert.equal(rendered.html.includes(`<strong>問題描述：</strong>${expectedSummary}`), true);
+  assert.equal(rendered.text.includes(`問題描述：${expectedSummary}`), true);
+  assert.equal(rendered.html.includes(`<strong>問題描述：</strong>${"冷".repeat(158)}`), false);
 });

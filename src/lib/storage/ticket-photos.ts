@@ -42,7 +42,7 @@ export function parseBase64Image(dataString: string): { buffer: Buffer; mimeType
  * Rollback compensation helper: removes uploaded storage files and cleans up database rows.
  * Fails silently with warnings to preserve the primary error.
  */
-async function rollbackPhotos(supabase: SupabaseClient<Database>, paths: string[]): Promise<void> {
+export async function rollbackTicketPhotos(supabase: SupabaseClient<Database>, paths: string[]): Promise<void> {
   if (paths.length === 0) return;
 
   try {
@@ -85,7 +85,7 @@ export async function storeTicketPhotos(
         console.error(
           `Photo #${i + 1} (${phase}) for ticket ${ticketId} exceeds max size: ${buffer.length} > ${MAX_PROCESSED_PHOTO_SIZE_BYTES} bytes`,
         );
-        await rollbackPhotos(supabase, uploadedPaths);
+        await rollbackTicketPhotos(supabase, uploadedPaths);
         return {
           success: false,
           uploadedCount: uploadedPaths.length,
@@ -103,7 +103,7 @@ export async function storeTicketPhotos(
 
       if (uploadError) {
         console.error(`Failed to upload photo #${i + 1} (${phase}) for ticket ${ticketId}:`, uploadError);
-        await rollbackPhotos(supabase, uploadedPaths);
+        await rollbackTicketPhotos(supabase, uploadedPaths);
         return {
           success: false,
           uploadedCount: uploadedPaths.length,
@@ -120,7 +120,7 @@ export async function storeTicketPhotos(
 
       if (dbError) {
         console.error(`Failed to create ticket_photos record for ${storagePath}:`, dbError);
-        await rollbackPhotos(supabase, [...uploadedPaths, storagePath]);
+        await rollbackTicketPhotos(supabase, [...uploadedPaths, storagePath]);
         return {
           success: false,
           uploadedCount: uploadedPaths.length,
@@ -132,7 +132,7 @@ export async function storeTicketPhotos(
       uploadedPaths.push(storagePath);
     } catch (err) {
       console.error(`Unexpected error processing photo #${i + 1} for ticket ${ticketId}:`, err);
-      await rollbackPhotos(supabase, uploadedPaths);
+      await rollbackTicketPhotos(supabase, uploadedPaths);
       return {
         success: false,
         uploadedCount: uploadedPaths.length,
