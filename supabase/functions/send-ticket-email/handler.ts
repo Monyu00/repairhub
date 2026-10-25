@@ -5,7 +5,7 @@ export const SERVICE_SECRET_HEADER = "x-repairhub-service-secret";
 const MAX_IMMEDIATE_ATTEMPTS = 3;
 const MAX_DELIVERY_ATTEMPTS = 5;
 const PERSISTENT_RETRY_DELAYS_MINUTES = [5, 15, 60, 360] as const;
-const SUPPORTED_EVENT_TYPES = ["in_progress", "completed", "closed"] as const;
+const SUPPORTED_EVENT_TYPES = ["new_ticket", "in_progress", "completed", "closed"] as const;
 
 export type TicketEmailDisplayData = Omit<TicketEmailData, "trackingUrl">;
 
@@ -116,6 +116,10 @@ function isTicketNotificationEvent(value: string): value is TicketNotificationEv
   return (SUPPORTED_EVENT_TYPES as readonly string[]).includes(value);
 }
 
+function isValidRecipientEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 function defaultSleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -177,6 +181,14 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
 
     if (!delivery) {
       return jsonResponse({ success: true, skipped: "already_claimed_or_sent" }, 200);
+    }
+
+    if (!isValidRecipientEmail(delivery.recipientEmail)) {
+      await dependencies.repository.markFailed(delivery.id, "Invalid recipient Email", now(), {
+        retryable: false,
+        nextAttemptAt: null,
+      });
+      return jsonResponse({ error: "Invalid recipient Email" }, 422);
     }
 
     let ticketData: TicketEmailDisplayData | null;

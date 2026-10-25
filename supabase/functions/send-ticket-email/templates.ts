@@ -2,15 +2,18 @@ export interface TicketEmailData {
   ticketId: string;
   statusLabel: string;
   categoryName: string;
+  description: string;
   location: string;
   updatedAt: string;
   trackingUrl: string;
 }
 
-export type TicketNotificationEvent = "in_progress" | "completed" | "closed";
+export type TicketNotificationEvent = "new_ticket" | "in_progress" | "completed" | "closed";
 
 export function ticketStatusLabel(eventType: string): string {
   switch (eventType) {
+    case "new_ticket":
+      return "待處理";
     case "in_progress":
       return "維修中";
     case "completed":
@@ -24,8 +27,18 @@ export function ticketStatusLabel(eventType: string): string {
 
 const TICKET_EMAIL_COPY: Record<
   TicketNotificationEvent,
-  { subject: (shortId: string) => string; heading: string; intro: string; guidance?: string }
+  {
+    subject: (shortId: string, categoryName: string) => string;
+    heading: string;
+    intro: string;
+    guidance?: string;
+  }
 > = {
+  new_ticket: {
+    subject: (shortId, categoryName) => `【RepairHub】新報修案件 #${shortId}：${categoryName}`,
+    heading: "新報修案件需要處理",
+    intro: "您好，有新的報修案件符合您訂閱的類別。",
+  },
   in_progress: {
     subject: (shortId) => `【RepairHub】案件 #${shortId} 已開始維修`,
     heading: "案件已開始維修",
@@ -71,6 +84,15 @@ function formatUpdatedAt(value: string): string {
   }).format(date);
 }
 
+function summarizeDescription(value: string): string {
+  const characters = Array.from(value.trim());
+  if (characters.length <= 160) {
+    return characters.join("");
+  }
+
+  return `${characters.slice(0, 157).join("")}...`;
+}
+
 export function renderTicketEmail(
   data: TicketEmailData,
   eventType: TicketNotificationEvent,
@@ -78,8 +100,14 @@ export function renderTicketEmail(
   const shortId = data.ticketId.slice(0, 8);
   const updatedAt = formatUpdatedAt(data.updatedAt);
   const copy = TICKET_EMAIL_COPY[eventType];
-  const subject = copy.subject(shortId);
+  const subject = copy.subject(shortId, data.categoryName);
   const categoryName = escapeHtml(data.categoryName);
+  const descriptionSummary = eventType === "new_ticket" ? summarizeDescription(data.description) : "";
+  const descriptionHtml = descriptionSummary
+    ? `<p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>問題描述：</strong>${
+      escapeHtml(descriptionSummary)
+    }</p>`
+    : "";
   const location = escapeHtml(data.location);
   const escapedUpdatedAt = escapeHtml(updatedAt);
   const trackingUrl = escapeHtml(data.trackingUrl);
@@ -105,6 +133,7 @@ export function renderTicketEmail(
     escapeHtml(data.statusLabel)
   }</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>報修類別：</strong>${categoryName}</p>
+      ${descriptionHtml}
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>地點：</strong>${location}</p>
       <p style="margin:0 0 12px;font-size:16px;line-height:1.7;"><strong>更新時間：</strong>${escapedUpdatedAt}</p>
       ${guidance}
@@ -124,7 +153,7 @@ ${copy.guidance ?? ""}
 報修單編號：#${shortId}
 目前狀態：${data.statusLabel}
 報修類別：${data.categoryName}
-地點：${data.location}
+${descriptionSummary ? `問題描述：${descriptionSummary}\n` : ""}地點：${data.location}
 更新時間：${updatedAt}
 
 查看報修單進度：${data.trackingUrl}

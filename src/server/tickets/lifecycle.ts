@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { DEFAULT_MAX_PHOTOS } from "@/lib/storage/constants";
-import { storeTicketPhotos } from "@/lib/storage/ticket-photos";
+import { rollbackTicketPhotos, storeTicketPhotos } from "@/lib/storage/ticket-photos";
 import type { Database } from "@/lib/supabase/database.types";
 import type { AuthenticatedUser } from "@/server/auth";
 
@@ -210,6 +210,7 @@ export async function createTicket(
 
   // 3. Coordinate photo attachments if provided
   const photos = input.photosBase64?.filter(Boolean) ?? [];
+  let uploadedPhotoPaths: string[] = [];
   if (photos.length > 0) {
     if (photos.length > DEFAULT_MAX_PHOTOS) {
       await supabase.from("tickets").delete().eq("id", ticket.id);
@@ -235,6 +236,27 @@ export async function createTicket(
         code: "PHOTO_UPLOAD_FAILED",
       };
     }
+
+    uploadedPhotoPaths = photoResult.storagePaths;
+  }
+
+  const { error: readinessError } = await supabase
+    .from("tickets")
+    .update({ notification_ready_at: new Date().toISOString() })
+    .eq("id", ticket.id);
+
+  if (readinessError) {
+    console.error("Failed to mark Ticket ready for notifications:", readinessError);
+    await rollbackTicketPhotos(supabase, uploadedPhotoPaths);
+    const { error: deleteError } = await supabase.from("tickets").delete().eq("id", ticket.id);
+    if (deleteError) {
+      console.error("Failed to roll back Ticket after readiness failure:", deleteError);
+    }
+    return {
+      success: false,
+      error: "目前無法處理您的請求，請稍後再試",
+      code: "DATABASE_ERROR",
+    };
   }
 
   // 4. Synchronize profile info if user is authenticated
