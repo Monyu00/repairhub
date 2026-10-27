@@ -19,6 +19,16 @@ Edge Function secrets：
 - `RESEND_REPLY_TO`
 - `APP_BASE_URL`
 
+Vault 的值必須是純文字。若以 bytea 存入（`vault.secrets.secret`），`vault.decrypted_secrets` 會是
+`\x...` 轉義字串：`repairhub_project_url` 會讓 `net.http_post` 丟 `invalid URL ...: Bad scheme`，
+`repairhub_edge_function_secret` 會讓 Edge Function 回 401，兩者都會讓 trigger 中斷 Ticket 寫入。
+可用下列語句檢查是否為純文字：
+
+```sql
+select name, decrypted_secret like 'https://%' as is_plain_url
+from vault.decrypted_secrets where name like 'repairhub%';
+```
+
 部署前請先撤銷或輪替舊版 Edge Function 曾使用的 Resend API key，再設定只用於此版本的 `RESEND_API_KEY`。
 
 本機可建立 `supabase/functions/.env`，內容可參考 `supabase/functions/.env.example`。此檔案已加入 `.gitignore`。
