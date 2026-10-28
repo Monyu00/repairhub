@@ -87,6 +87,8 @@ test("marks a Ticket ready for notification after photos are submitted", async (
 
   assert.deepEqual(result, { success: true, data: { ticketId: "ticket-1" } });
   assert.equal(state.inserted.length, 1);
+  assert.equal(state.inserted[0]?.building_id, null);
+  assert.equal(state.inserted[0]?.space_id, "space-1");
   assert.equal("notification_ready_at" in state.inserted[0], false);
   assert.equal(state.readinessUpdates.length, 1);
   assert.equal(typeof state.readinessUpdates[0].notification_ready_at, "string");
@@ -103,7 +105,7 @@ test("stores a Building when a Ticket has no Space", async () => {
 
   assert.deepEqual(result, { success: true, data: { ticketId: "ticket-1" } });
   assert.equal(state.inserted[0]?.building_id, "building-1");
-  assert.equal(state.inserted[0]?.space_id, "");
+  assert.equal(state.inserted[0]?.space_id, null);
 });
 
 test("requires a Building when a Ticket has no Space", async () => {

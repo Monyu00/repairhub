@@ -395,7 +395,7 @@ export type Database = {
           reporter_email: string;
           reporter_name: string | null;
           reporter_phone: string | null;
-          space_id: string;
+          space_id: string | null;
           status: Database["public"]["Enums"]["ticket_status"];
           ticket_number: string | null;
           updated_at: string;
@@ -416,7 +416,7 @@ export type Database = {
           reporter_email: string;
           reporter_name?: string | null;
           reporter_phone?: string | null;
-          space_id: string;
+          space_id?: string | null;
           status?: Database["public"]["Enums"]["ticket_status"];
           ticket_number?: string | null;
           updated_at?: string;
@@ -437,7 +437,7 @@ export type Database = {
           reporter_email?: string;
           reporter_name?: string | null;
           reporter_phone?: string | null;
-          space_id?: string;
+          space_id?: string | null;
           status?: Database["public"]["Enums"]["ticket_status"];
           ticket_number?: string | null;
           updated_at?: string;

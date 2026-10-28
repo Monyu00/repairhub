@@ -190,7 +190,7 @@ export async function createTicket(
     .insert({
       category_id: categoryId,
       building_id: spaceId ? null : buildingId,
-      space_id: spaceId,
+      space_id: spaceId || null,
       equipment_id: equipmentId,
       equipment_name: equipmentName,
       description,
