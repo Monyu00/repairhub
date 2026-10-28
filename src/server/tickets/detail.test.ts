@@ -11,6 +11,7 @@ function createFakeSupabase() {
     id: "ticket-1",
     status: "completed",
     category_id: "category-1",
+    building_id: null,
     space_id: "space-1",
     description: "Projector does not start",
     equipment_id: "equipment-1",

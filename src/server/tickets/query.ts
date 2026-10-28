@@ -34,8 +34,10 @@ export interface TicketRecord {
   status: TicketStatus;
   categoryId: string;
   category: TicketCategory;
-  spaceId: string;
-  space: TicketSpace;
+  buildingId: string;
+  building: TicketBuilding;
+  spaceId: string | null;
+  space: TicketSpace | null;
   description: string;
   equipmentId: string | null;
   equipmentName: string | null;
@@ -83,7 +85,28 @@ export interface QueryTicketsResult {
   totalCount: number;
 }
 
+export function formatTicketLocation(
+  ticket: Pick<TicketRecord, "building" | "space">,
+  options: { includeCode?: boolean; includeFloor?: boolean } = {},
+): string {
+  const buildingName =
+    options.includeCode && ticket.building.code
+      ? `${ticket.building.name} (${ticket.building.code})`
+      : ticket.building.name;
+
+  if (!ticket.space) {
+    return buildingName;
+  }
+
+  const spaceName =
+    options.includeFloor && typeof ticket.space.floor === "number"
+      ? `${ticket.space.name} (${ticket.space.floor}F)`
+      : ticket.space.name;
+  return `${buildingName} - ${spaceName}`;
+}
+
 type RawRecord = Record<string, unknown>;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Normalizes raw PostgREST ticket rows and enforces privacy redaction.
@@ -95,9 +118,10 @@ export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketR
   const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
   const spaceData = (spaceRaw ?? {}) as RawRecord;
 
-  let buildingData: TicketBuilding = { id: "", name: "未知地點", code: "" };
-  if (spaceData.building) {
-    const bRaw = Array.isArray(spaceData.building) ? spaceData.building[0] : spaceData.building;
+  let buildingData: TicketBuilding | null = null;
+  const ticketBuildingRaw = t.building;
+  if (ticketBuildingRaw && typeof ticketBuildingRaw === "object") {
+    const bRaw = Array.isArray(ticketBuildingRaw) ? ticketBuildingRaw[0] : ticketBuildingRaw;
     if (bRaw && typeof bRaw === "object") {
       const bObj = bRaw as RawRecord;
       buildingData = {
@@ -108,12 +132,28 @@ export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketR
     }
   }
 
-  const space: TicketSpace = {
-    id: String(spaceData.id ?? t.space_id ?? ""),
-    name: String(spaceData.name ?? "未知空間"),
-    floor: Number(spaceData.floor ?? 0),
-    buildingId: String(spaceData.building_id ?? buildingData.id ?? ""),
-    building: buildingData,
+  const space: TicketSpace | null =
+    spaceRaw || t.space_id
+      ? {
+          id: String(spaceData.id ?? t.space_id ?? ""),
+          name: String(spaceData.name ?? "未知空間"),
+          floor: Number(spaceData.floor ?? 0),
+          buildingId: String(spaceData.building_id ?? buildingData?.id ?? ""),
+          building: buildingData ?? {
+            id: "",
+            name: "未知地點",
+            code: "",
+          },
+        }
+      : null;
+
+  if (!buildingData && space?.building.id) {
+    buildingData = space.building;
+  }
+  const building: TicketBuilding = buildingData ?? {
+    id: "",
+    name: "未知地點",
+    code: "",
   };
 
   // 2. Unnest category relation
@@ -161,7 +201,9 @@ export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketR
     status: (t.status ?? "pending") as TicketStatus,
     categoryId: String(t.category_id ?? category.id),
     category,
-    spaceId: String(t.space_id ?? space.id),
+    buildingId: building.id,
+    building,
+    spaceId: space?.id ?? null,
     space,
     description: String(t.description ?? ""),
     equipmentId: (t.equipment_id as string | null) ?? null,
@@ -204,11 +246,11 @@ export async function queryTickets(
     viewerContext,
   } = options;
 
-  const spaceJoin = buildingId ? "spaces!inner" : "spaces";
   const selectQuery = `
     id,
     status,
     category_id,
+    building_id,
     space_id,
     description,
     equipment_id,
@@ -223,7 +265,8 @@ export async function queryTickets(
     created_at,
     updated_at,
     category:categories(id, name),
-    space:${spaceJoin}(
+    building:buildings(id, name, code),
+    space:spaces(
       id,
       name,
       floor,
@@ -280,7 +323,10 @@ export async function queryTickets(
   }
 
   if (buildingId && buildingId !== "all") {
-    query = query.eq("space.building_id", buildingId);
+    if (!UUID_PATTERN.test(buildingId)) {
+      return { tickets: [], totalCount: 0 };
+    }
+    query = query.or(`building_id.eq.${buildingId},space.building_id.eq.${buildingId}`);
   }
 
   if (assignedTo && assignedTo !== "all") {

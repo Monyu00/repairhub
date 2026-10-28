@@ -70,7 +70,9 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
     async getTicketData(delivery) {
       const { data, error } = await supabase
         .from("tickets")
-        .select("id, description, categories(name), spaces(name, floor, buildings(name))")
+        .select(
+          "id, description, space_id, categories(name), building:buildings(name), spaces(name, floor, buildings(name))",
+        )
         .eq("id", delivery.ticketId)
         .maybeSingle();
 
@@ -79,13 +81,16 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
 
       const ticket = data as unknown as JsonRecord;
       const category = firstRelation(ticket.categories);
-      const space = firstRelation(ticket.spaces);
-      const building = firstRelation(space.buildings);
+      const space = ticket.space_id ? firstRelation(ticket.spaces) : null;
+      const building = space ? firstRelation(space.buildings) : firstRelation(ticket.building);
       const categoryName = String(category.name ?? "未知類別");
-      const spaceName = String(space.name ?? "未知地點");
       const buildingName = String(building.name ?? "");
-      const floor = typeof space.floor === "number" ? ` (${space.floor}F)` : "";
-      const location = [buildingName, `${spaceName}${floor}`].filter(Boolean).join(" ");
+      const spaceLabel = space
+        ? `${String(space.name ?? "未知空間")}${
+            typeof space.floor === "number" ? ` (${space.floor}F)` : ""
+          }`
+        : "";
+      const location = [buildingName, spaceLabel].filter(Boolean).join(" ");
 
       return {
         ticketId: String(ticket.id),

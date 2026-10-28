@@ -73,6 +73,7 @@ export async function fetchReportData(filterParams?: {
     id,
     status,
     category_id,
+    building_id,
     space_id,
     assigned_to,
     rating,
@@ -80,6 +81,7 @@ export async function fetchReportData(filterParams?: {
     created_at,
     updated_at,
     category:categories(id, name),
+    building:buildings(id, name, code),
     space:spaces(
       id,
       name,
@@ -135,13 +137,15 @@ export async function fetchReportData(filterParams?: {
     id: string;
     status: "pending" | "in_progress" | "completed" | "closed" | "cancelled";
     category_id: string;
-    space_id: string;
+    building_id: string | null;
+    space_id: string | null;
     assigned_to: string | null;
     rating: number | null;
     rated_at: string | null;
     created_at: string;
     updated_at: string;
     category: { id: string; name: string } | { id: string; name: string }[] | null;
+    building: { id: string; name: string; code: string } | { id: string; name: string; code: string }[] | null;
     space:
       | {
           id: string;
@@ -264,8 +268,11 @@ export async function fetchReportData(filterParams?: {
   tickets.forEach((t) => {
     const spaceObj = Array.isArray(t.space) ? t.space[0] : t.space;
     let buildingObj = null;
+    if (t.building) {
+      buildingObj = Array.isArray(t.building) ? t.building[0] : t.building;
+    }
     if (spaceObj?.building) {
-      buildingObj = Array.isArray(spaceObj.building) ? spaceObj.building[0] : spaceObj.building;
+      buildingObj ||= Array.isArray(spaceObj.building) ? spaceObj.building[0] : spaceObj.building;
     }
     const bId = buildingObj?.id || "unknown";
     const bName = buildingObj?.name || "未指定建築";

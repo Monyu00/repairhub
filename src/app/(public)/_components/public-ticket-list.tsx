@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatTicketDate } from "@/lib/formatters";
-import type { TicketRecord } from "@/server/tickets/query";
+import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
 
 import { TicketPagination } from "./ticket-pagination";
 
@@ -91,7 +91,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                     </Badge>
                   </TableCell>
                   <TableCell className="truncate font-medium text-foreground text-xs">
-                    {ticket.space.building.name} - {ticket.space.name}
+                    {formatTicketLocation(ticket)}
                   </TableCell>
                   <TableCell className="line-clamp-1 max-w-[320px] text-muted-foreground text-xs">
                     {ticket.description}
@@ -148,9 +148,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   <div className="flex flex-wrap items-center justify-between gap-y-1 border-border/50 border-t pt-1 text-muted-foreground text-xs">
                     <div className="flex max-w-[200px] items-center gap-1 truncate">
                       <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
-                      <span className="truncate">
-                        {ticket.space.building.name} - {ticket.space.name}
-                      </span>
+                      <span className="truncate">{formatTicketLocation(ticket)}</span>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-1">

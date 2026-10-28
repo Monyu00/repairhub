@@ -177,12 +177,13 @@ export function ReportForm({
 
         {/* Location (Building & Space) */}
         <div className="space-y-4">
-          <Field>
+          <Field aria-invalid={!!state.fieldErrors?.building_id}>
             <FieldLabel htmlFor="building_id">
               地點 <span className="text-destructive">*</span>
             </FieldLabel>
             <NativeSelect
               id="building_id"
+              name="building_id"
               value={selectedBuildingId}
               onChange={handleBuildingChange}
               className="w-full"
@@ -194,12 +195,11 @@ export function ReportForm({
                 </NativeSelectOption>
               ))}
             </NativeSelect>
+            <FieldError>{state.fieldErrors?.building_id}</FieldError>
           </Field>
 
           <Field aria-invalid={!!state.fieldErrors?.space_id}>
-            <FieldLabel htmlFor="space_id">
-              空間 / 教室名稱 <span className="text-destructive">*</span>
-            </FieldLabel>
+            <FieldLabel htmlFor="space_id">空間 / 教室名稱 (選填)</FieldLabel>
             <NativeSelect
               id="space_id"
               name="space_id"

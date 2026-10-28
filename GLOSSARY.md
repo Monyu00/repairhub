@@ -7,7 +7,7 @@ A campus facility repair reporting and tracking system. Anyone can submit repair
 ### Core Entities
 
 **Ticket**:
-A repair request describing a broken or malfunctioning item at a specific location. Created by a reporter, worked on by a technician, and closed after confirmation.
+A repair request describing a broken or malfunctioning item at a Building, optionally narrowed to a Space. Created by a reporter, worked on by a technician, and closed after confirmation.
 _Avoid_: Case, order, work order, report
 
 **Ticket Detail**:
