@@ -1,7 +1,8 @@
 import { BuildingIcon, FileTextIcon, TagIcon, WrenchIcon } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import { formatTicketLocation } from "@/lib/formatters";
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketDetailsProps {
   ticket: TicketRecord;

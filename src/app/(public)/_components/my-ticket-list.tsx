@@ -20,8 +20,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { formatTicketDate } from "@/lib/formatters";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
+import type { TicketRecord } from "@/server/tickets/query";
 
 import { confirmFix, reopenTicket } from "../track/[ticketId]/_actions/track-actions";
 import { TicketPagination } from "./ticket-pagination";

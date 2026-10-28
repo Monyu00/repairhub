@@ -11,8 +11,8 @@ import { Calendar, Hand, Loader2, Mail, MapPin, Phone, User } from "lucide-react
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
-import { formatTicketLocation } from "@/server/tickets/query";
 
 interface PendingTicketCardProps {
   ticket: TicketRecord;

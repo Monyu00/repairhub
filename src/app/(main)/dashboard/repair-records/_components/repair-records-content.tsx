@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatTicketLocation } from "@/server/tickets/query";
+import { formatTicketLocation } from "@/lib/formatters";
 
 import { RepairRecordMobileCard } from "./repair-record-mobile-card";
 import { formatRepairRecordDate, type RepairRecordItem, type TechnicianOption } from "./repair-records-types";

@@ -5,8 +5,9 @@ import { zhTW } from "date-fns/locale/zh-TW";
 import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTicketLocation } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketInfoSectionProps {
   ticket: TicketRecord;

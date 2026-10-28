@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatTicketDate } from "@/lib/formatters";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
+import type { TicketRecord } from "@/server/tickets/query";
 
 import { TicketPagination } from "./ticket-pagination";
 

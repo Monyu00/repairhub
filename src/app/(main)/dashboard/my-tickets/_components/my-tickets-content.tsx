@@ -10,7 +10,8 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import { formatTicketLocation } from "@/lib/formatters";
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface MyTicketsContentProps {
   tickets: TicketRecord[];

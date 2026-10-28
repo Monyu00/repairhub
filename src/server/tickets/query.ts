@@ -85,26 +85,6 @@ export interface QueryTicketsResult {
   totalCount: number;
 }
 
-export function formatTicketLocation(
-  ticket: Pick<TicketRecord, "building" | "space">,
-  options: { includeCode?: boolean; includeFloor?: boolean } = {},
-): string {
-  const buildingName =
-    options.includeCode && ticket.building.code
-      ? `${ticket.building.name} (${ticket.building.code})`
-      : ticket.building.name;
-
-  if (!ticket.space) {
-    return buildingName;
-  }
-
-  const spaceName =
-    options.includeFloor && typeof ticket.space.floor === "number"
-      ? `${ticket.space.name} (${ticket.space.floor}F)`
-      : ticket.space.name;
-  return `${buildingName} - ${spaceName}`;
-}
-
 type RawRecord = Record<string, unknown>;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

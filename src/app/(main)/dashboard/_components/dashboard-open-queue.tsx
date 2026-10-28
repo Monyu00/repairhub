@@ -6,7 +6,8 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
-import { formatTicketLocation, type TicketRecord } from "@/server/tickets/query";
+import { formatTicketLocation } from "@/lib/formatters";
+import type { TicketRecord } from "@/server/tickets/query";
 
 interface DashboardOpenQueueProps {
   tickets: TicketRecord[];
