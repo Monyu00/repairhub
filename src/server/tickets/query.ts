@@ -88,29 +88,29 @@ export interface QueryTicketsResult {
 type RawRecord = Record<string, unknown>;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+function toTicketBuilding(value: unknown): TicketBuilding | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  const obj = raw as RawRecord;
+  return {
+    id: String(obj.id ?? ""),
+    name: String(obj.name ?? "未知地點"),
+    code: String(obj.code ?? ""),
+  };
+}
+
 /**
  * Normalizes raw PostgREST ticket rows and enforces privacy redaction.
  */
 export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketRecord {
   const t = (raw ?? {}) as RawRecord;
 
-  // 1. Unnest space and building relations
+  // 1. Unnest space and building relations; Tickets with a Space store no building_id, so the Building is on the Space
   const spaceRaw = Array.isArray(t.space) ? t.space[0] : t.space;
   const spaceData = (spaceRaw ?? {}) as RawRecord;
-
-  let buildingData: TicketBuilding | null = null;
-  const ticketBuildingRaw = t.building;
-  if (ticketBuildingRaw && typeof ticketBuildingRaw === "object") {
-    const bRaw = Array.isArray(ticketBuildingRaw) ? ticketBuildingRaw[0] : ticketBuildingRaw;
-    if (bRaw && typeof bRaw === "object") {
-      const bObj = bRaw as RawRecord;
-      buildingData = {
-        id: String(bObj.id ?? ""),
-        name: String(bObj.name ?? "未知地點"),
-        code: String(bObj.code ?? ""),
-      };
-    }
-  }
+  const buildingData = toTicketBuilding(t.building) ?? toTicketBuilding(spaceData.building);
 
   const space: TicketSpace | null =
     spaceRaw || t.space_id
@@ -127,9 +127,6 @@ export function normalizeTicketRow(raw: unknown, viewer: ViewerContext): TicketR
         }
       : null;
 
-  if (!buildingData && space?.building.id) {
-    buildingData = space.building;
-  }
   const building: TicketBuilding = buildingData ?? {
     id: "",
     name: "未知地點",

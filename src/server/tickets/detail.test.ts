@@ -99,6 +99,8 @@ test("getTicketDetail redacts reporter and author data for public viewers", asyn
 
   assert.ok(detail);
   assert.equal(detail.ticket.equipmentName, "Classroom projector");
+  assert.equal(detail.ticket.buildingId, "building-1");
+  assert.equal(detail.ticket.building.name, "Science Building");
   assert.equal(detail.ticket.reporterEmail, null);
   assert.equal(detail.notes[0]?.authorName, null);
   assert.equal(
