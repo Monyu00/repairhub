@@ -64,6 +64,7 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          sort_order: number;
           updated_at: string;
         };
         Insert: {
@@ -71,6 +72,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           name: string;
+          sort_order?: number;
           updated_at?: string;
         };
         Update: {
@@ -78,6 +80,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           name?: string;
+          sort_order?: number;
           updated_at?: string;
         };
         Relationships: [];
@@ -243,6 +246,7 @@ export type Database = {
           floor: number;
           id: string;
           name: string;
+          sort_order: number;
           updated_at: string;
         };
         Insert: {
@@ -251,6 +255,7 @@ export type Database = {
           floor: number;
           id?: string;
           name: string;
+          sort_order?: number;
           updated_at?: string;
         };
         Update: {
@@ -259,6 +264,7 @@ export type Database = {
           floor?: number;
           id?: string;
           name?: string;
+          sort_order?: number;
           updated_at?: string;
         };
         Relationships: [

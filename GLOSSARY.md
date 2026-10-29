@@ -46,6 +46,14 @@ _Avoid_: Device, asset (acceptable in technical context), item
 A classification for repair requests (e.g., plumbing, electrical, HVAC). Stored in the database and manageable by admins. Technicians subscribe to categories they handle.
 _Avoid_: Type, kind, tag
 
+**Category Deactivation**:
+An admin disabling a Category from new repair reports while preserving its Ticket history. Reversible.
+_Avoid_: Delete
+
+**Category Deletion**:
+Permanent removal of a Category. Allowed only when no Ticket references it; otherwise the Category must be deactivated.
+_Avoid_: Deactivate
+
 ### Announcements
 
 **Announcement**:

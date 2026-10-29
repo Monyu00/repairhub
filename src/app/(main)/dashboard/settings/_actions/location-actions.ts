@@ -8,6 +8,7 @@ export interface BuildingItem {
   id: string;
   name: string;
   code: string;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -17,6 +18,7 @@ export interface SpaceItem {
   name: string;
   floor: number;
   building_id: string;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +38,7 @@ export async function fetchBuildingsWithSpaces(): Promise<{
     const { data: buildings, error: buildingsError } = await supabase
       .from("buildings")
       .select("*, spaces(*)")
+      .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
 
     if (buildingsError) {
@@ -47,6 +50,7 @@ export async function fetchBuildingsWithSpaces(): Promise<{
     const formatted = (buildings as (BuildingItem & { spaces: SpaceItem[] })[]).map((b) => ({
       ...b,
       spaces: (b.spaces ?? []).sort((a, b) => {
+        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
         if (a.floor !== b.floor) return a.floor - b.floor;
         return a.name.localeCompare(b.name, "zh-Hant");
       }),
@@ -73,9 +77,17 @@ export async function createBuilding(name: string, code: string): Promise<{ succ
 
     const { supabase } = await requireAdmin();
 
+    const { data: maxSortData } = await supabase
+      .from("buildings")
+      .select("sort_order")
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     const { error: insertError } = await supabase.from("buildings").insert({
       name: trimmedName,
       code: trimmedCode,
+      sort_order: (maxSortData?.sort_order ?? 0) + 1,
     });
 
     if (insertError) {
@@ -179,10 +191,19 @@ export async function createSpace(
 
     const { supabase } = await requireAdmin();
 
+    const { data: maxSortData } = await supabase
+      .from("spaces")
+      .select("sort_order")
+      .eq("building_id", buildingId)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     const { error: insertError } = await supabase.from("spaces").insert({
       building_id: buildingId,
       name: trimmedName,
       floor: floor,
+      sort_order: (maxSortData?.sort_order ?? 0) + 1,
     });
 
     if (insertError) {
@@ -280,6 +301,58 @@ export async function deleteSpace(id: string): Promise<{ success: boolean; error
     if (deleteError) {
       console.error("Failed to delete space:", deleteError);
       return { success: false, error: "刪除空間失敗，請稍後再試" };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/report");
+    return { success: true };
+  });
+}
+
+export async function reorderBuildings(orderedIds: string[]): Promise<{ success: boolean; error?: string }> {
+  return safeAction(async () => {
+    const { supabase } = await requireAdmin();
+
+    const results = await Promise.all(
+      orderedIds.map((id, index) =>
+        supabase
+          .from("buildings")
+          .update({ sort_order: index + 1 })
+          .eq("id", id),
+      ),
+    );
+
+    if (results.some((result) => result.error)) {
+      console.error("Failed to reorder buildings");
+      return { success: false, error: "調整地點排序失敗，請稍後再試" };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/report");
+    return { success: true };
+  });
+}
+
+export async function reorderSpaces(
+  buildingId: string,
+  orderedIds: string[],
+): Promise<{ success: boolean; error?: string }> {
+  return safeAction(async () => {
+    const { supabase } = await requireAdmin();
+
+    const results = await Promise.all(
+      orderedIds.map((id, index) =>
+        supabase
+          .from("spaces")
+          .update({ sort_order: index + 1 })
+          .eq("id", id)
+          .eq("building_id", buildingId),
+      ),
+    );
+
+    if (results.some((result) => result.error)) {
+      console.error("Failed to reorder spaces");
+      return { success: false, error: "調整空間排序失敗，請稍後再試" };
     }
 
     revalidatePath("/dashboard/settings");

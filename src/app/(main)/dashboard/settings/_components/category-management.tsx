@@ -19,12 +19,19 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Edit2, GripVertical, Plus } from "lucide-react";
+import { Edit2, GripVertical, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,11 +39,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   type CategoryItem,
   createCategory,
+  deleteCategory,
   renameCategory,
   reorderCategories,
   toggleCategoryActive,
 } from "../_actions/category-actions";
 import { CategoryDialog } from "./category-dialog";
+import { DeleteConfirmDialog } from "./delete-confirm-dialog";
 
 interface CategoryManagementProps {
   initialCategories: CategoryItem[];
@@ -48,9 +57,17 @@ interface SortableCategoryRowProps {
   isPending: boolean;
   onToggleActive: (category: CategoryItem, checked: boolean) => void;
   onRenameOpen: (category: CategoryItem) => void;
+  onDeleteOpen: (category: CategoryItem) => void;
 }
 
-function SortableCategoryRow({ category, index, isPending, onToggleActive, onRenameOpen }: SortableCategoryRowProps) {
+function SortableCategoryRow({
+  category,
+  index,
+  isPending,
+  onToggleActive,
+  onRenameOpen,
+  onDeleteOpen,
+}: SortableCategoryRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
   });
@@ -84,7 +101,7 @@ function SortableCategoryRow({ category, index, isPending, onToggleActive, onRen
         </div>
       </TableCell>
       <TableCell className="font-medium text-foreground">{category.name}</TableCell>
-      <TableCell className="w-[120px]">
+      <TableCell className="hidden w-[120px] sm:table-cell">
         {category.is_active ? (
           <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-700">
             啟用中
@@ -103,18 +120,52 @@ function SortableCategoryRow({ category, index, isPending, onToggleActive, onRen
           aria-label={`切換 ${category.name} 狀態`}
         />
       </TableCell>
-      <TableCell className="w-[100px] text-right">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => onRenameOpen(category)}
-          disabled={isPending}
-          title="重命名類別"
-        >
-          <Edit2 className="h-4 w-4" />
-          <span className="sr-only">重命名</span>
-        </Button>
+      <TableCell className="w-[60px] text-right sm:w-[140px]">
+        <div className="hidden items-center justify-end gap-1 sm:flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 sm:size-8"
+            onClick={() => onRenameOpen(category)}
+            disabled={isPending}
+            title="重命名類別"
+          >
+            <Edit2 />
+            <span className="sr-only">重命名</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+            onClick={() => onDeleteOpen(category)}
+            disabled={isPending}
+            title="刪除類別"
+          >
+            <Trash2 />
+            <span className="sr-only">刪除類別</span>
+          </Button>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-11 sm:hidden" disabled={isPending}>
+              <MoreHorizontal />
+              <span className="sr-only">類別操作</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-36">
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onRenameOpen(category)} disabled={isPending}>
+                <Edit2 />
+                重新命名
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onSelect={() => onDeleteOpen(category)} disabled={isPending}>
+                <Trash2 />
+                刪除類別
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
@@ -128,6 +179,8 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "rename">("create");
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CategoryItem | null>(null);
 
   // Configure Sensors for Dragging
   const sensors = useSensors(
@@ -156,6 +209,22 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
     setDialogMode("rename");
     setSelectedCategory(category);
     setDialogOpen(true);
+  };
+
+  const handleDeleteOpen = (category: CategoryItem) => {
+    setDeleteTarget(category);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return { success: false, error: "未指定的刪除標的" };
+
+    const res = await deleteCategory(deleteTarget.id);
+    if (res.success) {
+      setCategories((prev) => prev.filter((category) => category.id !== deleteTarget.id));
+      toast.success(`已刪除類別「${deleteTarget.name}」`);
+    }
+    return res;
   };
 
   const handleDialogSubmit = async (name: string) => {
@@ -255,9 +324,9 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
                   <TableRow>
                     <TableHead className="w-[100px] text-center">排序</TableHead>
                     <TableHead>類別名稱</TableHead>
-                    <TableHead className="w-[120px]">狀態</TableHead>
+                    <TableHead className="hidden w-[120px] sm:table-cell">狀態</TableHead>
                     <TableHead className="w-[120px] text-center">啟用 / 停用</TableHead>
-                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                    <TableHead className="w-[60px] text-right sm:w-[140px]">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -270,6 +339,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
                         isPending={isPending}
                         onToggleActive={handleToggleActive}
                         onRenameOpen={handleRenameOpen}
+                        onDeleteOpen={handleDeleteOpen}
                       />
                     ))}
                   </SortableContext>
@@ -286,6 +356,14 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
         mode={dialogMode}
         initialName={selectedCategory?.name ?? ""}
         onSubmit={handleDialogSubmit}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={`確定要刪除類別「${deleteTarget?.name ?? ""}」？`}
+        description="此操作無法復原。若有任何報修單使用此類別，系統將拒絕刪除，請改用停用。"
+        onConfirm={handleDeleteConfirm}
       />
     </Card>
   );

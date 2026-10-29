@@ -35,7 +35,11 @@ export default async function Page(props: PageProps) {
   // 2. Fetch categories, buildings, users, and technician categories in parallel
   const [categoriesRes, buildingsRes, usersRes, techCategoriesRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-    supabase.from("buildings").select("*, spaces(*)").order("name", { ascending: true }),
+    supabase
+      .from("buildings")
+      .select("*, spaces(*)")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
     fetchUsers(),
     fetchAllTechnicianCategories(),
   ]);
@@ -52,6 +56,7 @@ export default async function Page(props: PageProps) {
   const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
     ...b,
     spaces: (b.spaces ?? []).sort((a, b) => {
+      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
       if (a.floor !== b.floor) return a.floor - b.floor;
       return a.name.localeCompare(b.name, "zh-Hant");
     }),
