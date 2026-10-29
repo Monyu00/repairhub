@@ -6,6 +6,7 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import { formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface DashboardOpenQueueProps {
@@ -64,7 +65,7 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
                       </span>
                     </div>
                     <p className="mt-1 line-clamp-1 text-muted-foreground text-xs">
-                      {ticket.space.building.name} / {ticket.space.name} · {ticket.description}
+                      {formatTicketLocation(ticket)} · {ticket.description}
                     </p>
                   </div>
                   <time dateTime={ticket.createdAt} className="shrink-0 text-muted-foreground text-xs">

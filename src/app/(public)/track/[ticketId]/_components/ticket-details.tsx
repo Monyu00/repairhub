@@ -1,6 +1,7 @@
 import { BuildingIcon, FileTextIcon, TagIcon, WrenchIcon } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
+import { formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketDetailsProps {
@@ -28,7 +29,7 @@ function DetailRow({ icon: Icon, label, value }: DetailRowProps) {
 }
 
 export function TicketDetails({ ticket }: TicketDetailsProps) {
-  const { category, space, description, equipmentName } = ticket;
+  const { category, description, equipmentName } = ticket;
 
   return (
     <div className="space-y-4">
@@ -36,7 +37,7 @@ export function TicketDetails({ ticket }: TicketDetailsProps) {
       <div className="space-y-3">
         <DetailRow icon={TagIcon} label="報修類別" value={category.name} />
         <Separator />
-        <DetailRow icon={BuildingIcon} label="地點" value={`${space.building.name} - ${space.name}`} />
+        <DetailRow icon={BuildingIcon} label="地點" value={formatTicketLocation(ticket)} />
         {equipmentName && (
           <>
             <Separator />

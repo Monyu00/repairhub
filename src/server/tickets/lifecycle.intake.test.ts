@@ -9,6 +9,7 @@ import test from "node:test";
 
 const baseInput = {
   categoryId: "category-1",
+  buildingId: "building-1",
   spaceId: "space-1",
   description: "Projector cannot start",
   reporterName: "Alice",
@@ -86,10 +87,39 @@ test("marks a Ticket ready for notification after photos are submitted", async (
 
   assert.deepEqual(result, { success: true, data: { ticketId: "ticket-1" } });
   assert.equal(state.inserted.length, 1);
+  assert.equal(state.inserted[0]?.building_id, null);
+  assert.equal(state.inserted[0]?.space_id, "space-1");
   assert.equal("notification_ready_at" in state.inserted[0], false);
   assert.equal(state.readinessUpdates.length, 1);
   assert.equal(typeof state.readinessUpdates[0].notification_ready_at, "string");
   assert.equal(state.deleted, 0);
+});
+
+test("stores a Building when a Ticket has no Space", async () => {
+  const { supabase, state } = createFakeSupabase();
+
+  const result = await createTicket(supabase, {
+    ...baseInput,
+    spaceId: "",
+  });
+
+  assert.deepEqual(result, { success: true, data: { ticketId: "ticket-1" } });
+  assert.equal(state.inserted[0]?.building_id, "building-1");
+  assert.equal(state.inserted[0]?.space_id, null);
+});
+
+test("requires a Building when a Ticket has no Space", async () => {
+  const { supabase, state } = createFakeSupabase();
+
+  const result = await createTicket(supabase, {
+    ...baseInput,
+    buildingId: "",
+    spaceId: "",
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.success ? null : result.fieldErrors?.building_id, "請選擇地點");
+  assert.equal(state.inserted.length, 0);
 });
 
 test("does not mark an over-limit Ticket ready for notification", async () => {

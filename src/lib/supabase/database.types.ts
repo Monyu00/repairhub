@@ -381,6 +381,7 @@ export type Database = {
       tickets: {
         Row: {
           assigned_to: string | null;
+          building_id: string | null;
           category_id: string;
           created_at: string;
           description: string;
@@ -394,13 +395,14 @@ export type Database = {
           reporter_email: string;
           reporter_name: string | null;
           reporter_phone: string | null;
-          space_id: string;
+          space_id: string | null;
           status: Database["public"]["Enums"]["ticket_status"];
           ticket_number: string | null;
           updated_at: string;
         };
         Insert: {
           assigned_to?: string | null;
+          building_id?: string | null;
           category_id: string;
           created_at?: string;
           description: string;
@@ -414,13 +416,14 @@ export type Database = {
           reporter_email: string;
           reporter_name?: string | null;
           reporter_phone?: string | null;
-          space_id: string;
+          space_id?: string | null;
           status?: Database["public"]["Enums"]["ticket_status"];
           ticket_number?: string | null;
           updated_at?: string;
         };
         Update: {
           assigned_to?: string | null;
+          building_id?: string | null;
           category_id?: string;
           created_at?: string;
           description?: string;
@@ -434,7 +437,7 @@ export type Database = {
           reporter_email?: string;
           reporter_name?: string | null;
           reporter_phone?: string | null;
-          space_id?: string;
+          space_id?: string | null;
           status?: Database["public"]["Enums"]["ticket_status"];
           ticket_number?: string | null;
           updated_at?: string;
@@ -445,6 +448,13 @@ export type Database = {
             columns: ["assigned_to"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tickets_building_id_fkey";
+            columns: ["building_id"];
+            isOneToOne: false;
+            referencedRelation: "buildings";
             referencedColumns: ["id"];
           },
           {

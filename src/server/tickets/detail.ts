@@ -57,6 +57,7 @@ export async function getTicketDetail(
         id,
         status,
         category_id,
+        building_id,
         space_id,
         description,
         equipment_id,
@@ -71,6 +72,7 @@ export async function getTicketDetail(
         created_at,
         updated_at,
         category:categories(id, name),
+        building:buildings(id, name, code),
         space:spaces(
           id,
           name,

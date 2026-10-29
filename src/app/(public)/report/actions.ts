@@ -27,6 +27,7 @@ export async function submitReport(_prevState: FormState, formData: FormData): P
 
     const result = await createTicket(supabase, {
       categoryId: formData.get("category_id")?.toString() ?? "",
+      buildingId: formData.get("building_id")?.toString() ?? "",
       spaceId: formData.get("space_id")?.toString() ?? "",
       equipmentId: formData.get("equipment_id")?.toString() || null,
       equipmentName: formData.get("equipment_name")?.toString() || null,

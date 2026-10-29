@@ -5,6 +5,7 @@ import { zhTW } from "date-fns/locale/zh-TW";
 import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTicketLocation } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { TicketRecord } from "@/server/tickets/query";
 
@@ -39,7 +40,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
               故障地點
             </span>
             <p className="font-medium text-foreground">
-              {ticket.space.building.name} ({ticket.space.building.code}) - {ticket.space.name} ({ticket.space.floor}F)
+              {formatTicketLocation(ticket, { includeCode: true, includeFloor: true })}
             </p>
           </div>
 

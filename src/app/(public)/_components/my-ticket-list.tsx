@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { formatTicketDate } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 import { confirmFix, reopenTicket } from "../track/[ticketId]/_actions/track-actions";
@@ -151,7 +151,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="size-3.5 shrink-0" />
-                      {ticket.space.building.name} - {ticket.space.name} ({ticket.space.floor}F)
+                      {formatTicketLocation(ticket, { includeFloor: true })}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Calendar className="size-3.5 shrink-0" />

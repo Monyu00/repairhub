@@ -49,15 +49,18 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
       accessorKey: "location",
       header: "地點",
       cell: ({ row }) => {
+        const building = row.original.building;
         const space = row.original.space;
         return (
           <div className="flex flex-col text-xs">
             <span className="font-medium text-foreground">
-              {space.building.name} ({space.building.code})
+              {building.name} ({building.code})
             </span>
-            <span className="text-muted-foreground">
-              {space.name} ({space.floor}F)
-            </span>
+            {space && (
+              <span className="text-muted-foreground">
+                {space.name} ({space.floor}F)
+              </span>
+            )}
           </div>
         );
       },

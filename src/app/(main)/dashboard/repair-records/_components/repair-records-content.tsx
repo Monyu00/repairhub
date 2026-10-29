@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatTicketLocation } from "@/lib/formatters";
 
 import { RepairRecordMobileCard } from "./repair-record-mobile-card";
 import { formatRepairRecordDate, type RepairRecordItem, type TechnicianOption } from "./repair-records-types";
@@ -246,11 +247,7 @@ export function RepairRecordsContent({
                       </TableCell>
                       <TableCell className="py-3 font-medium text-xs">{record.category.name}</TableCell>
                       <TableCell className="py-3 text-xs">
-                        <span className="font-medium text-foreground">{record.space.building.name}</span>
-                        <span className="text-muted-foreground">
-                          {" "}
-                          - {record.space.name} ({record.space.floor}F)
-                        </span>
+                        <span>{formatTicketLocation(record, { includeFloor: true })}</span>
                       </TableCell>
                       <TableCell className="py-3 text-xs">
                         <p className="line-clamp-2 text-muted-foreground">{record.description}</p>

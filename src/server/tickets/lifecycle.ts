@@ -80,6 +80,7 @@ export type TransitionResult =
     };
 
 export type CreateTicketFieldKey =
+  | "building_id"
   | "category_id"
   | "space_id"
   | "description"
@@ -88,7 +89,8 @@ export type CreateTicketFieldKey =
   | "reporter_phone";
 export type CreateTicketInput = {
   categoryId: string;
-  spaceId: string;
+  buildingId: string;
+  spaceId?: string | null;
   description: string;
   reporterName: string;
   reporterEmail: string;
@@ -142,7 +144,8 @@ export async function createTicket(
   input: CreateTicketInput,
 ): Promise<CreateTicketResult> {
   const categoryId = input.categoryId.trim();
-  const spaceId = input.spaceId.trim();
+  const buildingId = input.buildingId.trim();
+  const spaceId = input.spaceId?.trim() ?? "";
   const description = input.description.trim();
   const reporterName = input.reporterName.trim();
   const reporterEmail = input.reporterEmail.trim();
@@ -157,8 +160,8 @@ export async function createTicket(
   if (!categoryId) {
     fieldErrors.category_id = "請選擇報修類別";
   }
-  if (!spaceId) {
-    fieldErrors.space_id = "請選擇故障地點（空間）";
+  if (!spaceId && !buildingId) {
+    fieldErrors.building_id = "請選擇地點";
   }
   if (!description) {
     fieldErrors.description = "請輸入故障狀況描述";
@@ -186,7 +189,8 @@ export async function createTicket(
     .from("tickets")
     .insert({
       category_id: categoryId,
-      space_id: spaceId,
+      building_id: spaceId ? null : buildingId,
+      space_id: spaceId || null,
       equipment_id: equipmentId,
       equipment_name: equipmentName,
       description,

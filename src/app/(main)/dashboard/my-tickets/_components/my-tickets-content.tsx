@@ -10,6 +10,7 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface MyTicketsContentProps {
@@ -69,7 +70,7 @@ function TicketCard({ ticket }: { ticket: TicketRecord }) {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs">
               <span className="inline-flex items-center gap-1">
                 <MapPin className="size-3.5 shrink-0" />
-                {ticket.space.building.name} - {ticket.space.name} ({ticket.space.floor}F)
+                {formatTicketLocation(ticket, { includeFloor: true })}
               </span>
               <span className="inline-flex items-center gap-1">
                 <Calendar className="size-3.5 shrink-0" />

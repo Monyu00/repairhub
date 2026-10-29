@@ -4,6 +4,7 @@ import { Calendar, MapPin, User, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatTicketLocation } from "@/lib/formatters";
 
 import { formatRepairRecordDate, type RepairRecordItem } from "./repair-records-types";
 
@@ -31,9 +32,7 @@ export function RepairRecordMobileCard({ record, isAdmin }: RepairRecordMobileCa
         <div className="space-y-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-foreground">
             <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
-            <span>
-              {record.space.building.name} - {record.space.name} ({record.space.floor}F)
-            </span>
+            <span>{formatTicketLocation(record, { includeFloor: true })}</span>
           </div>
 
           <p className="line-clamp-2 pl-5 text-muted-foreground leading-relaxed">{record.description}</p>
