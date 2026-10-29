@@ -24,6 +24,7 @@ export type BuildingWithSpaces = {
     id: string;
     name: string;
     floor: number;
+    sort_order: number;
   }[];
 };
 

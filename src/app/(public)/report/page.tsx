@@ -16,7 +16,11 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   const { location_id, equipment_id } = await searchParams;
   const supabase = await createClient();
 
-  const buildingsPromise = supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name");
+  const buildingsPromise = supabase
+    .from("buildings")
+    .select("id, name, code, spaces(id, name, floor, sort_order)")
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
 
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
 
@@ -65,7 +69,11 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const buildings = (buildingsData || []).map((b) => ({
     ...b,
-    spaces: b.spaces || [],
+    spaces: [...(b.spaces || [])].sort((a, b) => {
+      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+      if (a.floor !== b.floor) return a.floor - b.floor;
+      return a.name.localeCompare(b.name, "zh-Hant");
+    }),
   }));
 
   const categories = categoriesData || [];

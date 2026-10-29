@@ -333,7 +333,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
   } | null>(null);
 
   // Sync state if server props change
-  if (initialBuildings !== buildings) {
+  if (initialBuildings !== buildings && !isPending) {
     setBuildings(initialBuildings);
   }
 
