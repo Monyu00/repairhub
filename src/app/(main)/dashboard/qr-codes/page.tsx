@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { sortSpacesByOrder } from "@/lib/locations";
+import { getLocationBySpaceId, getLocationCatalog } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import { QRCodeDashboard } from "./_components/qr-code-dashboard";
-import type { BuildingOption, EquipmentOption } from "./_components/types";
+import type { EquipmentOption } from "./_components/types";
 
 export const metadata: Metadata = {
   title: "批量 QR Code 產生 - RepairHub",
@@ -30,62 +30,18 @@ export default async function QRCodesPage(props: PageProps) {
 
   const supabase = session.supabase;
 
-  // 2. Fetch buildings with spaces & equipment in parallel
-  const [buildingsRes, equipmentRes] = await Promise.all([
-    supabase
-      .from("buildings")
-      .select("id, name, code, spaces(id, name, floor, sort_order)")
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true }),
-    supabase
-      .from("equipment")
-      .select("id, name, code, space_id, spaces(id, name, building_id, buildings(id, name))")
-      .order("name"),
+  const [buildings, equipmentRes] = await Promise.all([
+    getLocationCatalog(supabase),
+    supabase.from("equipment").select("id, name, code, space_id").order("name"),
   ]);
 
-  type RawBuilding = {
-    id: string;
-    name: string;
-    code: string;
-    spaces: { id: string; name: string; floor: number; sort_order: number }[] | null;
-  };
-
-  const rawBuildings = (buildingsRes.data ?? []) as unknown as RawBuilding[];
-  const buildings: BuildingOption[] = rawBuildings.map((b) => ({
-    id: b.id,
-    name: b.name,
-    code: b.code,
-    spaces: sortSpacesByOrder(b.spaces ?? []),
-  }));
-
-  type RawEquipment = {
-    id: string;
-    name: string;
-    code: string;
-    space_id: string;
-    spaces: {
-      id: string;
-      name: string;
-      building_id: string;
-      buildings: {
-        id: string;
-        name: string;
-      } | null;
-    } | null;
-  };
-
-  const rawEquipment = (equipmentRes.data ?? []) as unknown as RawEquipment[];
-  const equipment: EquipmentOption[] = rawEquipment.map((eq) => {
-    const space = eq.spaces;
-    const building = space?.buildings;
+  const equipment: EquipmentOption[] = (equipmentRes.data ?? []).map((eq) => {
+    const location = getLocationBySpaceId(buildings, eq.space_id);
     return {
       id: eq.id,
       name: eq.name,
       code: eq.code,
-      spaceId: eq.space_id,
-      spaceName: space?.name ?? "未指定空間",
-      buildingId: space?.building_id ?? "",
-      buildingName: building?.name ?? "未指定建築",
+      ...location,
     };
   });
 

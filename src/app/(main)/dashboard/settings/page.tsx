@@ -2,11 +2,10 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { sortSpacesByOrder } from "@/lib/locations";
+import { getLocationCatalog } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import type { CategoryItem } from "./_actions/category-actions";
-import type { BuildingItem, BuildingWithSpaces, SpaceItem } from "./_actions/location-actions";
 import { fetchAllTechnicianCategories } from "./_actions/technician-category-actions";
 import { fetchUsers } from "./_actions/user-actions";
 import { SettingsPage } from "./_components/settings-page";
@@ -33,14 +32,10 @@ export default async function Page(props: PageProps) {
 
   const supabase = session.supabase;
 
-  // 2. Fetch categories, buildings, users, and technician categories in parallel
-  const [categoriesRes, buildingsRes, usersRes, techCategoriesRes] = await Promise.all([
+  // Fetch categories, locations, users, and technician categories in parallel
+  const [categoriesRes, buildings, usersRes, techCategoriesRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-    supabase
-      .from("buildings")
-      .select("*, spaces(*)")
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true }),
+    getLocationCatalog(supabase),
     fetchUsers(),
     fetchAllTechnicianCategories(),
   ]);
@@ -48,16 +43,6 @@ export default async function Page(props: PageProps) {
   if (categoriesRes.error) {
     console.error("Error fetching categories for settings page:", categoriesRes.error);
   }
-
-  if (buildingsRes.error) {
-    console.error("Error fetching buildings for settings page:", buildingsRes.error);
-  }
-
-  const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[] | null) ?? [];
-  const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
-    ...b,
-    spaces: sortSpacesByOrder(b.spaces ?? []),
-  }));
 
   const users = usersRes.users ?? [];
   const technicianCategoryMap = techCategoriesRes.technicianCategoryMap ?? {};

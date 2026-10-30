@@ -12,21 +12,10 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import { type FormState, submitReport } from "../actions";
 import { PhotoUpload } from "./photo-upload";
-
-export type BuildingWithSpaces = {
-  id: string;
-  name: string;
-  code: string;
-  spaces: {
-    id: string;
-    name: string;
-    floor: number;
-    sort_order: number;
-  }[];
-};
 
 export type CategoryItem = {
   id: string;
@@ -60,7 +49,7 @@ export type UserInfo = {
 };
 
 interface ReportFormProps {
-  buildings: BuildingWithSpaces[];
+  buildings: LocationCatalogBuilding[];
   categories: CategoryItem[];
   equipmentList?: EquipmentOption[];
   initialSpaceId?: string;

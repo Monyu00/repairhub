@@ -2,66 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { sortSpacesByOrder } from "@/lib/locations";
 import { requireAdmin, safeAction } from "@/server/auth";
-
-export interface BuildingItem {
-  id: string;
-  name: string;
-  code: string;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SpaceItem {
-  id: string;
-  name: string;
-  floor: number;
-  building_id: string;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface BuildingWithSpaces extends BuildingItem {
-  spaces: SpaceItem[];
-}
-
-export async function fetchBuildingsWithSpaces(): Promise<{
-  success: boolean;
-  error?: string;
-  buildings: BuildingWithSpaces[];
-}> {
-  const result = await safeAction(async () => {
-    const { supabase } = await requireAdmin();
-
-    const { data: buildings, error: buildingsError } = await supabase
-      .from("buildings")
-      .select("*, spaces(*)")
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true });
-
-    if (buildingsError) {
-      console.error("Failed to fetch buildings with spaces:", buildingsError);
-      return { success: false, error: "讀取地點與空間資料失敗", buildings: [] };
-    }
-
-    // Sort spaces by floor asc, name asc
-    const formatted = (buildings as (BuildingItem & { spaces: SpaceItem[] })[]).map((b) => ({
-      ...b,
-      spaces: sortSpacesByOrder(b.spaces ?? []),
-    }));
-
-    return { success: true, buildings: formatted };
-  });
-
-  if (!result.success) {
-    return { success: false, error: result.error, buildings: [] };
-  }
-
-  return result;
-}
 
 export async function createBuilding(name: string, code: string): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {

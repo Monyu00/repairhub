@@ -16,26 +16,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import type { EquipmentFormData, EquipmentRow } from "../_actions/equipment-actions";
-
-export interface BuildingOption {
-  id: string;
-  name: string;
-  code: string;
-  spaces: {
-    id: string;
-    name: string;
-    floor: number;
-  }[];
-}
 
 interface EquipmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: "create" | "edit";
   initialData?: EquipmentRow | null;
-  buildings: BuildingOption[];
+  buildings: LocationCatalogBuilding[];
   onSubmit: (data: EquipmentFormData) => Promise<{ success: boolean; error?: string | null }>;
 }
 
