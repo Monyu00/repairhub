@@ -513,6 +513,10 @@ export type Database = {
         Args: { p_delivery_id: string };
         Returns: number;
       };
+      reorder_categories: {
+        Args: { ordered_ids: string[] };
+        Returns: undefined;
+      };
       reorder_buildings: {
         Args: { ordered_ids: string[] };
         Returns: undefined;

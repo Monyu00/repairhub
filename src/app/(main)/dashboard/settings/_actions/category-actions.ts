@@ -158,57 +158,14 @@ export async function toggleCategoryActive(
   });
 }
 
-export async function swapCategoryOrder(
-  item1: { id: string; sort_order: number },
-  item2: { id: string; sort_order: number },
-): Promise<{ success: boolean; error?: string }> {
-  return safeAction(async () => {
-    const { supabase } = await requireAdmin();
-
-    // Swap sort_orders
-    const { error: error1 } = await supabase
-      .from("categories")
-      .update({ sort_order: item2.sort_order })
-      .eq("id", item1.id);
-
-    if (error1) {
-      console.error("Failed to update item1 order:", error1);
-      return { success: false, error: "調整排序失敗，請稍後再試" };
-    }
-
-    const { error: error2 } = await supabase
-      .from("categories")
-      .update({ sort_order: item1.sort_order })
-      .eq("id", item2.id);
-
-    if (error2) {
-      console.error("Failed to update item2 order:", error2);
-      return { success: false, error: "調整排序失敗，請稍後再試" };
-    }
-
-    revalidatePath("/dashboard/settings");
-    revalidatePath("/report");
-    return { success: true };
-  });
-}
-
 export async function reorderCategories(orderedIds: string[]): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
     const { supabase } = await requireAdmin();
 
-    // Update sort_order for each category according to its new index (1-based)
-    const updates = orderedIds.map((id, index) =>
-      supabase
-        .from("categories")
-        .update({ sort_order: index + 1 })
-        .eq("id", id),
-    );
+    const { error } = await supabase.rpc("reorder_categories", { ordered_ids: orderedIds });
 
-    const results = await Promise.all(updates);
-    const hasError = results.some((res) => res.error);
-
-    if (hasError) {
-      console.error("Failed to reorder categories");
+    if (error) {
+      console.error("Failed to reorder categories:", error);
       return { success: false, error: "調整排序失敗，請稍後再試" };
     }
 
