@@ -11,12 +11,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
-import type { BuildingOption, EquipmentOption, QRTargetType } from "./types";
+import type { EquipmentOption, QRTargetType } from "./types";
 
 interface QRSelectionPanelProps {
   targetType: QRTargetType;
-  buildings: BuildingOption[];
+  buildings: LocationCatalogBuilding[];
   equipment: EquipmentOption[];
   selectedIds: string[];
   onToggleItem: (id: string) => void;

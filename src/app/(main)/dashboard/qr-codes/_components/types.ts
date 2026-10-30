@@ -1,16 +1,3 @@
-export interface SpaceOption {
-  id: string;
-  name: string;
-  floor: number;
-}
-
-export interface BuildingOption {
-  id: string;
-  name: string;
-  code: string;
-  spaces: SpaceOption[];
-}
-
 export interface EquipmentOption {
   id: string;
   name: string;

@@ -8,14 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import { QRCard } from "./qr-card";
 import { exportQRCodesToPDF } from "./qr-pdf-export";
 import { QRSelectionPanel } from "./qr-selection-panel";
-import type { BuildingOption, EquipmentOption, PrintableQRItem, QRTargetType } from "./types";
+import type { EquipmentOption, PrintableQRItem, QRTargetType } from "./types";
 
 interface QRCodeDashboardProps {
-  buildings: BuildingOption[];
+  buildings: LocationCatalogBuilding[];
   equipment: EquipmentOption[];
   defaultTab?: string;
 }
