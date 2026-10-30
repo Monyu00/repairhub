@@ -101,6 +101,43 @@ export async function renameCategory(id: string, newName: string): Promise<{ suc
   });
 }
 
+export async function deleteCategory(id: string): Promise<{ success: boolean; error?: string }> {
+  return safeAction(async () => {
+    const { supabase } = await requireAdmin();
+
+    const { count: ticketCount, error: countError } = await supabase
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("category_id", id);
+
+    if (countError) {
+      console.error("Failed to check category association:", countError);
+      return { success: false, error: "檢查類別關聯失敗" };
+    }
+
+    if (ticketCount && ticketCount > 0) {
+      return {
+        success: false,
+        error: `無法刪除：已有 ${ticketCount} 筆報修單使用此類別，請改為停用。`,
+      };
+    }
+
+    const { error: deleteError } = await supabase.from("categories").delete().eq("id", id);
+
+    if (deleteError) {
+      console.error("Failed to delete category:", deleteError);
+      if (deleteError.code === "23503") {
+        return { success: false, error: "此類別已有報修紀錄，請改為停用。" };
+      }
+      return { success: false, error: "刪除類別失敗，請稍後再試" };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/report");
+    return { success: true };
+  });
+}
+
 export async function toggleCategoryActive(
   id: string,
   isActive: boolean,

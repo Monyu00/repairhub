@@ -1,8 +1,38 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 
-import { Building2, ChevronDown, ChevronRight, Edit2, FilterX, MapPin, Plus, Search, Trash2 } from "lucide-react";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  Building2,
+  ChevronDown,
+  ChevronRight,
+  ChevronsDown,
+  ChevronsUp,
+  Edit2,
+  FilterX,
+  GripVertical,
+  MapPin,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +42,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 import {
   type BuildingWithSpaces,
@@ -19,6 +50,8 @@ import {
   createSpace,
   deleteBuilding,
   deleteSpace,
+  reorderBuildings,
+  reorderSpaces,
   type SpaceItem,
   updateBuilding,
   updateSpace,
@@ -31,8 +64,245 @@ interface LocationManagementProps {
   initialBuildings: BuildingWithSpaces[];
 }
 
+interface SortableBuildingCardProps {
+  building: BuildingWithSpaces;
+  isOpen: boolean;
+  isSearching: boolean;
+  isPending: boolean;
+  onToggleOpen: () => void;
+  onAddSpace: () => void;
+  onEditBuilding: () => void;
+  onDeleteBuilding: () => void;
+  onEditSpace: (space: SpaceItem) => void;
+  onDeleteSpace: (space: SpaceItem) => void;
+  onReorderSpaces: (event: DragEndEvent) => void;
+}
+
+interface SortableSpaceRowProps {
+  space: SpaceItem;
+  isDisabled: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function SortableSpaceRow({ space, isDisabled, onEdit, onDelete }: SortableSpaceRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: space.id,
+    disabled: isDisabled,
+  });
+
+  const style: React.CSSProperties = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style} className={cn(isDragging && "relative z-10 bg-muted opacity-60")}>
+      <TableCell className="w-[120px] font-mono text-sm">
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing sm:size-8"
+            {...attributes}
+            {...listeners}
+            disabled={isDisabled}
+            title={isDisabled ? "清除搜尋後可調整順序" : "拖拉調整空間順序"}
+          >
+            <GripVertical />
+            <span className="sr-only">拖拉調整空間順序</span>
+          </Button>
+          <Badge variant="outline" className="font-normal">
+            {space.floor > 0 ? `${space.floor}F` : `B${Math.abs(space.floor)}`}
+          </Badge>
+        </div>
+      </TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+          <span>{space.name}</span>
+        </div>
+      </TableCell>
+      <TableCell className="w-[120px] text-right">
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="icon" className="size-11 sm:size-8" onClick={onEdit} title="編輯空間">
+            <Edit2 />
+            <span className="sr-only">編輯空間</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+            onClick={onDelete}
+            title="刪除空間"
+          >
+            <Trash2 />
+            <span className="sr-only">刪除空間</span>
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function SortableBuildingCard({
+  building,
+  isOpen,
+  isSearching,
+  isPending,
+  onToggleOpen,
+  onAddSpace,
+  onEditBuilding,
+  onDeleteBuilding,
+  onEditSpace,
+  onDeleteSpace,
+  onReorderSpaces,
+}: SortableBuildingCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: building.id,
+    disabled: isSearching || isPending,
+  });
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const style: React.CSSProperties = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+  };
+  const spaceCount = building.spaces.length;
+
+  return (
+    <div ref={setNodeRef} style={style} className={cn(isDragging && "relative z-10 opacity-60")}>
+      <Collapsible
+        open={isOpen}
+        onOpenChange={onToggleOpen}
+        className="rounded-lg border border-border bg-card shadow-xs transition-colors"
+      >
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing sm:size-8"
+              {...attributes}
+              {...listeners}
+              disabled={isSearching || isPending}
+              title={isSearching ? "清除搜尋後可調整順序" : "拖拉調整地點順序"}
+            >
+              <GripVertical />
+              <span className="sr-only">拖拉調整地點順序</span>
+            </Button>
+
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex min-w-0 flex-1 items-center gap-3 text-left font-medium hover:text-primary focus-visible:outline-hidden"
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+                <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <span className="font-semibold text-base text-foreground">{building.name}</span>
+                <Badge variant="outline" className="font-mono text-xs uppercase">
+                  {building.code}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {spaceCount} 個空間
+                </Badge>
+              </button>
+            </CollapsibleTrigger>
+          </div>
+
+          <div className="flex items-center justify-end gap-1 sm:pl-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-11 gap-1 px-3 text-xs sm:h-8 sm:px-2"
+              onClick={onAddSpace}
+              title="在此地點新增空間"
+            >
+              <Plus />
+              新增空間
+            </Button>
+            <Button variant="ghost" size="icon" className="size-11 sm:size-8" onClick={onEditBuilding} title="編輯地點">
+              <Edit2 />
+              <span className="sr-only">編輯地點</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+              onClick={onDeleteBuilding}
+              title="刪除地點"
+            >
+              <Trash2 />
+              <span className="sr-only">刪除地點</span>
+            </Button>
+          </div>
+        </div>
+
+        <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
+          {spaceCount === 0 ? (
+            <Empty className="my-2 border border-dashed py-6">
+              <EmptyHeader>
+                <EmptyDescription>此地點目前無任何空間設定。</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className="mt-2 rounded-md border bg-background">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis]}
+                onDragEnd={onReorderSpaces}
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-[120px]">排序 / 樓層</TableHead>
+                      <TableHead>空間名稱</TableHead>
+                      <TableHead className="w-[120px] text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <SortableContext
+                      items={building.spaces.map((space) => space.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {building.spaces.map((space) => (
+                        <SortableSpaceRow
+                          key={space.id}
+                          space={space}
+                          isDisabled={isSearching || isPending}
+                          onEdit={() => onEditSpace(space)}
+                          onDelete={() => onDeleteSpace(space)}
+                        />
+                      ))}
+                    </SortableContext>
+                  </TableBody>
+                </Table>
+              </DndContext>
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
+}
+
 export function LocationManagement({ initialBuildings }: LocationManagementProps) {
   const [buildings, setBuildings] = useState<BuildingWithSpaces[]>(initialBuildings);
+  const [isPending, startTransition] = useTransition();
 
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,15 +333,43 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
   } | null>(null);
 
   // Sync state if server props change
-  if (initialBuildings !== buildings) {
+  if (initialBuildings !== buildings && !isPending) {
     setBuildings(initialBuildings);
   }
 
   const isSearching = Boolean(searchQuery.trim());
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
     setClosedInSearch([]);
+  };
+
+  const handleExpandAll = () => {
+    if (isSearching) {
+      setClosedInSearch([]);
+      return;
+    }
+
+    setOpenBuildingIds(buildings.map((building) => building.id));
+  };
+
+  const handleCollapseAll = () => {
+    if (isSearching) {
+      setClosedInSearch(filteredBuildings.map((building) => building.id));
+      return;
+    }
+
+    setOpenBuildingIds([]);
   };
 
   const toggleBuildingOpen = (id: string) => {
@@ -226,13 +524,67 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     return { success: false, error: "未知操作類別" };
   };
 
+  const handleBuildingDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (isSearching || !over || active.id === over.id) return;
+
+    const oldIndex = buildings.findIndex((building) => building.id === active.id);
+    const newIndex = buildings.findIndex((building) => building.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const nextBuildings = arrayMove(buildings, oldIndex, newIndex);
+    setBuildings(nextBuildings);
+
+    startTransition(async () => {
+      const res = await reorderBuildings(nextBuildings.map((building) => building.id));
+      if (!res.success) {
+        toast.error(res.error ?? "調整地點排序失敗");
+        setBuildings(initialBuildings);
+      } else {
+        toast.success("地點排序已更新");
+      }
+    });
+  };
+
+  const handleSpaceDragEnd = (buildingId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (isSearching || !over || active.id === over.id) return;
+
+    const building = buildings.find((item) => item.id === buildingId);
+    if (!building) return;
+
+    const oldIndex = building.spaces.findIndex((space) => space.id === active.id);
+    const newIndex = building.spaces.findIndex((space) => space.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const nextSpaces = arrayMove(building.spaces, oldIndex, newIndex);
+    setBuildings((prev) => prev.map((item) => (item.id === buildingId ? { ...item, spaces: nextSpaces } : item)));
+
+    startTransition(async () => {
+      const res = await reorderSpaces(
+        buildingId,
+        nextSpaces.map((space) => space.id),
+      );
+      if (!res.success) {
+        toast.error(res.error ?? "調整空間排序失敗");
+        setBuildings(initialBuildings);
+      } else {
+        toast.success("空間排序已更新");
+      }
+    });
+  };
+
   return (
     <Card className="border-border/60 shadow-xs">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-xl">校園地點與空間管理</CardTitle>
           <CardDescription className="mt-1 text-muted-foreground text-sm">
-            維護全校地點與其所屬空間層級結構。刪除前系統會自動檢查相關報修單與設備關聯。
+            維護全校地點與其所屬空間層級結構。可拖曳調整顯示順序，刪除前系統會自動檢查相關報修單與設備關聯。
           </CardDescription>
         </div>
         <CardAction className="w-full sm:w-auto">
@@ -243,7 +595,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         </CardAction>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {/* Search Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -272,17 +624,39 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
             )}
           </div>
 
-          <div className="text-muted-foreground text-xs">
-            共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 個地點
-            {searchQuery && (
-              <span className="ml-1">
-                （含{" "}
-                <span className="font-semibold text-foreground">
-                  {filteredBuildings.reduce((acc, b) => acc + (b.spaces?.length ?? 0), 0)}
-                </span>{" "}
-                個空間）
-              </span>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="text-muted-foreground text-xs">
+              共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 個地點
+              {searchQuery && (
+                <span className="ml-1">
+                  （含{" "}
+                  <span className="font-semibold text-foreground">
+                    {filteredBuildings.reduce((acc, b) => acc + (b.spaces?.length ?? 0), 0)}
+                  </span>{" "}
+                  個空間）
+                </span>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 sm:h-8"
+              onClick={handleExpandAll}
+              disabled={filteredBuildings.length === 0}
+            >
+              <ChevronsDown data-icon="inline-start" />
+              全部展開
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 sm:h-8"
+              onClick={handleCollapseAll}
+              disabled={filteredBuildings.length === 0}
+            >
+              <ChevronsUp data-icon="inline-start" />
+              全部摺疊
+            </Button>
           </div>
         </div>
 
@@ -297,140 +671,36 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="space-y-3">
-            {filteredBuildings.map((building) => {
-              const isOpen = isBuildingOpen(building.id);
-              const spaceCount = building.spaces?.length ?? 0;
-
-              return (
-                <Collapsible
-                  key={building.id}
-                  open={isOpen}
-                  onOpenChange={() => toggleBuildingOpen(building.id)}
-                  className="rounded-lg border border-border bg-card shadow-xs transition-colors"
-                >
-                  <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type="button"
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left font-medium hover:text-primary focus-visible:outline-hidden"
-                      >
-                        {isOpen ? (
-                          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        )}
-                        <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" />
-                        <span className="font-semibold text-base text-foreground">{building.name}</span>
-                        <Badge variant="outline" className="font-mono text-xs uppercase">
-                          {building.code}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {spaceCount} 個空間
-                        </Badge>
-                      </button>
-                    </CollapsibleTrigger>
-
-                    <div className="flex items-center justify-end gap-1 sm:pl-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-11 gap-1 px-3 text-xs sm:h-8 sm:px-2"
-                        onClick={() => handleCreateSpaceOpen(building)}
-                        title="在此地點新增空間"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        新增空間
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-11 sm:size-8"
-                        onClick={() => handleEditBuildingOpen(building)}
-                        title="編輯地點"
-                      >
-                        <Edit2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        <span className="sr-only">編輯地點</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
-                        onClick={() => handleDeleteBuildingOpen(building)}
-                        title="刪除地點"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">刪除地點</span>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
-                    {spaceCount === 0 ? (
-                      <Empty className="my-2 border border-dashed py-6">
-                        <EmptyHeader>
-                          <EmptyDescription>此地點目前無任何空間設定。</EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    ) : (
-                      <div className="mt-2 rounded-md border bg-background">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                              <TableHead className="w-[100px]">樓層</TableHead>
-                              <TableHead>空間名稱</TableHead>
-                              <TableHead className="w-[120px] text-right">操作</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {building.spaces.map((space) => (
-                              <TableRow key={space.id}>
-                                <TableCell className="w-[100px] font-mono text-sm">
-                                  <Badge variant="outline" className="font-normal">
-                                    {space.floor > 0 ? `${space.floor}F` : `B${Math.abs(space.floor)}`}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                  <div className="flex items-center gap-2">
-                                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                                    <span>{space.name}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="w-[120px] text-right">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-11 sm:size-8"
-                                      onClick={() => handleEditSpaceOpen(building, space)}
-                                      title="編輯空間"
-                                    >
-                                      <Edit2 className="h-3.5 w-3.5" />
-                                      <span className="sr-only">編輯空間</span>
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
-                                      onClick={() => handleDeleteSpaceOpen(space)}
-                                      title="刪除空間"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                      <span className="sr-only">刪除空間</span>
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            })}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={handleBuildingDragEnd}
+          >
+            <SortableContext
+              items={filteredBuildings.map((building) => building.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="flex flex-col gap-3">
+                {filteredBuildings.map((building) => (
+                  <SortableBuildingCard
+                    key={building.id}
+                    building={building}
+                    isOpen={isBuildingOpen(building.id)}
+                    isSearching={isSearching}
+                    isPending={isPending}
+                    onToggleOpen={() => toggleBuildingOpen(building.id)}
+                    onAddSpace={() => handleCreateSpaceOpen(building)}
+                    onEditBuilding={() => handleEditBuildingOpen(building)}
+                    onDeleteBuilding={() => handleDeleteBuildingOpen(building)}
+                    onEditSpace={(space) => handleEditSpaceOpen(building, space)}
+                    onDeleteSpace={handleDeleteSpaceOpen}
+                    onReorderSpaces={(event) => handleSpaceDragEnd(building.id, event)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </CardContent>
 

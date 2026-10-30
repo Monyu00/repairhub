@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
+import { sortSpacesByOrder } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import type { CategoryItem } from "./_actions/category-actions";
@@ -35,7 +36,11 @@ export default async function Page(props: PageProps) {
   // 2. Fetch categories, buildings, users, and technician categories in parallel
   const [categoriesRes, buildingsRes, usersRes, techCategoriesRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-    supabase.from("buildings").select("*, spaces(*)").order("name", { ascending: true }),
+    supabase
+      .from("buildings")
+      .select("*, spaces(*)")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
     fetchUsers(),
     fetchAllTechnicianCategories(),
   ]);
@@ -51,10 +56,7 @@ export default async function Page(props: PageProps) {
   const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[] | null) ?? [];
   const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
     ...b,
-    spaces: (b.spaces ?? []).sort((a, b) => {
-      if (a.floor !== b.floor) return a.floor - b.floor;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    }),
+    spaces: sortSpacesByOrder(b.spaces ?? []),
   }));
 
   const users = usersRes.users ?? [];

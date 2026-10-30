@@ -1,4 +1,5 @@
 import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
+import { sortSpacesByOrder } from "@/lib/locations";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
@@ -16,7 +17,11 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   const { location_id, equipment_id } = await searchParams;
   const supabase = await createClient();
 
-  const buildingsPromise = supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name");
+  const buildingsPromise = supabase
+    .from("buildings")
+    .select("id, name, code, spaces(id, name, floor, sort_order)")
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
 
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
 
@@ -65,7 +70,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const buildings = (buildingsData || []).map((b) => ({
     ...b,
-    spaces: b.spaces || [],
+    spaces: sortSpacesByOrder(b.spaces || []),
   }));
 
   const categories = categoriesData || [];

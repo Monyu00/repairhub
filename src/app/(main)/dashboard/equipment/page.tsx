@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
+import { sortSpacesByOrder } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import { fetchEquipmentList } from "./_actions/equipment-actions";
@@ -29,7 +30,11 @@ export default async function EquipmentPage() {
   // 2. Fetch equipment list and buildings in parallel
   const [equipmentRes, buildingsRes] = await Promise.all([
     fetchEquipmentList(),
-    supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name"),
+    supabase
+      .from("buildings")
+      .select("id, name, code, spaces(id, name, floor, sort_order)")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
   ]);
 
   const equipmentList = equipmentRes.equipment ?? [];
@@ -38,7 +43,7 @@ export default async function EquipmentPage() {
     id: string;
     name: string;
     code: string;
-    spaces: { id: string; name: string; floor: number }[] | null;
+    spaces: { id: string; name: string; floor: number; sort_order: number }[] | null;
   };
 
   const rawBuildings = (buildingsRes.data ?? []) as unknown as RawBuilding[];
@@ -46,10 +51,7 @@ export default async function EquipmentPage() {
     id: b.id,
     name: b.name,
     code: b.code,
-    spaces: (b.spaces ?? []).sort((a, b) => {
-      if (a.floor !== b.floor) return a.floor - b.floor;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    }),
+    spaces: sortSpacesByOrder(b.spaces ?? []),
   }));
 
   return <EquipmentManagement initialEquipment={equipmentList} buildings={buildings} />;
