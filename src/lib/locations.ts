@@ -2,12 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 
-interface SortableSpace {
-  floor: number;
-  name: string;
-  sort_order: number;
-}
-
 export type LocationCatalogSpace = {
   floor: number;
   id: string;
@@ -21,6 +15,13 @@ export type LocationCatalogBuilding = {
   spaces: LocationCatalogSpace[];
 };
 
+export type LocationCatalogLocation = {
+  buildingId: string;
+  buildingName: string;
+  spaceId: string;
+  spaceName: string;
+};
+
 export async function getLocationCatalog(supabase: SupabaseClient<Database>): Promise<LocationCatalogBuilding[]> {
   const { data, error } = await supabase
     .from("buildings")
@@ -28,24 +29,38 @@ export async function getLocationCatalog(supabase: SupabaseClient<Database>): Pr
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
 
-  if (error) throw new Error("Failed to load Location Catalog.", { cause: error });
+  if (error) return [];
 
   return (data ?? []).map((building) => ({
     id: building.id,
     name: building.name,
     code: building.code,
-    spaces: sortSpacesByOrder(building.spaces ?? []).map((space) => ({
-      floor: space.floor,
-      id: space.id,
-      name: space.name,
-    })),
+    spaces: [...(building.spaces ?? [])]
+      .sort((a, b) => {
+        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+        if (a.floor !== b.floor) return a.floor - b.floor;
+        return a.name.localeCompare(b.name, "zh-Hant");
+      })
+      .map((space) => ({
+        floor: space.floor,
+        id: space.id,
+        name: space.name,
+      })),
   }));
 }
 
-function sortSpacesByOrder<T extends SortableSpace>(spaces: T[]): T[] {
-  return [...spaces].sort((a, b) => {
-    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-    if (a.floor !== b.floor) return a.floor - b.floor;
-    return a.name.localeCompare(b.name, "zh-Hant");
-  });
+export function getLocationBySpaceId(buildings: LocationCatalogBuilding[], spaceId: string): LocationCatalogLocation {
+  for (const building of buildings) {
+    const space = building.spaces.find((item) => item.id === spaceId);
+    if (space) {
+      return {
+        buildingId: building.id,
+        buildingName: building.name,
+        spaceId: space.id,
+        spaceName: space.name,
+      };
+    }
+  }
+
+  return { buildingId: "", buildingName: "未指定建築", spaceId, spaceName: "未指定空間" };
 }

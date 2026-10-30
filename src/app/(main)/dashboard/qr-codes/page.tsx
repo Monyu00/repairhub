@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
-import { getLocationCatalog } from "@/lib/locations";
+import { getLocationBySpaceId, getLocationCatalog } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import { QRCodeDashboard } from "./_components/qr-code-dashboard";
@@ -32,40 +32,16 @@ export default async function QRCodesPage(props: PageProps) {
 
   const [buildings, equipmentRes] = await Promise.all([
     getLocationCatalog(supabase),
-    supabase
-      .from("equipment")
-      .select("id, name, code, space_id, spaces(id, name, building_id, buildings(id, name))")
-      .order("name"),
+    supabase.from("equipment").select("id, name, code, space_id").order("name"),
   ]);
 
-  type RawEquipment = {
-    id: string;
-    name: string;
-    code: string;
-    space_id: string;
-    spaces: {
-      id: string;
-      name: string;
-      building_id: string;
-      buildings: {
-        id: string;
-        name: string;
-      } | null;
-    } | null;
-  };
-
-  const rawEquipment = (equipmentRes.data ?? []) as unknown as RawEquipment[];
-  const equipment: EquipmentOption[] = rawEquipment.map((eq) => {
-    const space = eq.spaces;
-    const building = space?.buildings;
+  const equipment: EquipmentOption[] = (equipmentRes.data ?? []).map((eq) => {
+    const location = getLocationBySpaceId(buildings, eq.space_id);
     return {
       id: eq.id,
       name: eq.name,
       code: eq.code,
-      spaceId: eq.space_id,
-      spaceName: space?.name ?? "未指定空間",
-      buildingId: space?.building_id ?? "",
-      buildingName: building?.name ?? "未指定建築",
+      ...location,
     };
   });
 

@@ -1,5 +1,5 @@
 import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
-import { getLocationCatalog } from "@/lib/locations";
+import { getLocationBySpaceId, getLocationCatalog } from "@/lib/locations";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
@@ -28,11 +28,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   const announcementsPromise = fetchPublicAnnouncements(3);
 
   const equipmentPromise = equipment_id
-    ? supabase
-        .from("equipment")
-        .select("id, name, code, space_id, space:spaces(id, name, building_id)")
-        .eq("id", equipment_id)
-        .single()
+    ? supabase.from("equipment").select("id, name, code, space_id").eq("id", equipment_id).single()
     : Promise.resolve({ data: null });
 
   const [buildings, categoriesRes, allEquipmentRes, eqRes, session, announcements] = await Promise.all([
@@ -50,17 +46,18 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   let initialEquipment: EquipmentInfo | null = null;
   if (eqData) {
-    // Cast nested space relation
-    const spaceObj = Array.isArray(eqData.space) ? eqData.space[0] : eqData.space;
-    if (spaceObj) {
-      initialEquipment = {
-        id: eqData.id,
-        name: eqData.name,
-        code: eqData.code,
-        space_id: eqData.space_id,
-        space: spaceObj,
-      };
-    }
+    const location = getLocationBySpaceId(buildings, eqData.space_id);
+    initialEquipment = {
+      id: eqData.id,
+      name: eqData.name,
+      code: eqData.code,
+      space_id: eqData.space_id,
+      space: {
+        id: location.spaceId,
+        name: location.spaceName,
+        building_id: location.buildingId,
+      },
+    };
   }
 
   const categories = categoriesData || [];
