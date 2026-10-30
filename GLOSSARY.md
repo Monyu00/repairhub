@@ -64,6 +64,16 @@ _Avoid_: Notice, Bulletin, News
 Target audience classification for an announcement, restricted to internal staff (`internal`), public visitors (`public`), or all (`all`).
 _Avoid_: Target, Scope, Visibility
 
+### Notifications
+
+**Notification Queue**:
+The durable set of Deliveries created by Ticket lifecycle events.
+_Avoid_: Notification log, mail queue, trigger chain
+
+**Delivery**:
+A single queued Email send for one Ticket event and one recipient.
+_Avoid_: Notification, message, attempt
+
 ### Workflow
 
 **Claim**:
