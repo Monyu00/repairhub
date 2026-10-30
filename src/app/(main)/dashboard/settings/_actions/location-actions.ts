@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { sortSpacesByOrder } from "@/lib/locations";
 import { requireAdmin, safeAction } from "@/server/auth";
 
 export interface BuildingItem {
@@ -49,11 +50,7 @@ export async function fetchBuildingsWithSpaces(): Promise<{
     // Sort spaces by floor asc, name asc
     const formatted = (buildings as (BuildingItem & { spaces: SpaceItem[] })[]).map((b) => ({
       ...b,
-      spaces: (b.spaces ?? []).sort((a, b) => {
-        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-        if (a.floor !== b.floor) return a.floor - b.floor;
-        return a.name.localeCompare(b.name, "zh-Hant");
-      }),
+      spaces: sortSpacesByOrder(b.spaces ?? []),
     }));
 
     return { success: true, buildings: formatted };
@@ -313,17 +310,10 @@ export async function reorderBuildings(orderedIds: string[]): Promise<{ success:
   return safeAction(async () => {
     const { supabase } = await requireAdmin();
 
-    const results = await Promise.all(
-      orderedIds.map((id, index) =>
-        supabase
-          .from("buildings")
-          .update({ sort_order: index + 1 })
-          .eq("id", id),
-      ),
-    );
+    const { error } = await supabase.rpc("reorder_buildings", { ordered_ids: orderedIds });
 
-    if (results.some((result) => result.error)) {
-      console.error("Failed to reorder buildings");
+    if (error) {
+      console.error("Failed to reorder buildings:", error);
       return { success: false, error: "調整地點排序失敗，請稍後再試" };
     }
 
@@ -340,18 +330,13 @@ export async function reorderSpaces(
   return safeAction(async () => {
     const { supabase } = await requireAdmin();
 
-    const results = await Promise.all(
-      orderedIds.map((id, index) =>
-        supabase
-          .from("spaces")
-          .update({ sort_order: index + 1 })
-          .eq("id", id)
-          .eq("building_id", buildingId),
-      ),
-    );
+    const { error } = await supabase.rpc("reorder_spaces", {
+      target_building_id: buildingId,
+      ordered_ids: orderedIds,
+    });
 
-    if (results.some((result) => result.error)) {
-      console.error("Failed to reorder spaces");
+    if (error) {
+      console.error("Failed to reorder spaces:", error);
       return { success: false, error: "調整空間排序失敗，請稍後再試" };
     }
 

@@ -19,19 +19,12 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Edit2, GripVertical, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { Edit2, GripVertical, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -101,7 +94,7 @@ function SortableCategoryRow({
         </div>
       </TableCell>
       <TableCell className="font-medium text-foreground">{category.name}</TableCell>
-      <TableCell className="hidden w-[120px] sm:table-cell">
+      <TableCell className="w-[120px]">
         {category.is_active ? (
           <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-700">
             啟用中
@@ -120,52 +113,29 @@ function SortableCategoryRow({
           aria-label={`切換 ${category.name} 狀態`}
         />
       </TableCell>
-      <TableCell className="w-[60px] text-right sm:w-[140px]">
-        <div className="hidden items-center justify-end gap-1 sm:flex">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11 sm:size-8"
-            onClick={() => onRenameOpen(category)}
-            disabled={isPending}
-            title="重命名類別"
-          >
-            <Edit2 />
-            <span className="sr-only">重命名</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
-            onClick={() => onDeleteOpen(category)}
-            disabled={isPending}
-            title="刪除類別"
-          >
-            <Trash2 />
-            <span className="sr-only">刪除類別</span>
-          </Button>
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-11 sm:hidden" disabled={isPending}>
-              <MoreHorizontal />
-              <span className="sr-only">類別操作</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-36">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => onRenameOpen(category)} disabled={isPending}>
-                <Edit2 />
-                重新命名
-              </DropdownMenuItem>
-              <DropdownMenuItem variant="destructive" onSelect={() => onDeleteOpen(category)} disabled={isPending}>
-                <Trash2 />
-                刪除類別
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <TableCell className="w-[140px] text-right">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-11 sm:size-8"
+          onClick={() => onRenameOpen(category)}
+          disabled={isPending}
+          title="重命名類別"
+        >
+          <Edit2 />
+          <span className="sr-only">重命名</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+          onClick={() => onDeleteOpen(category)}
+          disabled={isPending}
+          title="刪除類別"
+        >
+          <Trash2 />
+          <span className="sr-only">刪除類別</span>
+        </Button>
       </TableCell>
     </TableRow>
   );
@@ -324,9 +294,9 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
                   <TableRow>
                     <TableHead className="w-[100px] text-center">排序</TableHead>
                     <TableHead>類別名稱</TableHead>
-                    <TableHead className="hidden w-[120px] sm:table-cell">狀態</TableHead>
+                    <TableHead className="w-[120px]">狀態</TableHead>
                     <TableHead className="w-[120px] text-center">啟用 / 停用</TableHead>
-                    <TableHead className="w-[60px] text-right sm:w-[140px]">操作</TableHead>
+                    <TableHead className="w-[140px] text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

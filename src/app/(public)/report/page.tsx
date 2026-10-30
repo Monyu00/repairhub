@@ -1,4 +1,5 @@
 import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
+import { sortSpacesByOrder } from "@/lib/locations";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
@@ -69,11 +70,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   const buildings = (buildingsData || []).map((b) => ({
     ...b,
-    spaces: [...(b.spaces || [])].sort((a, b) => {
-      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-      if (a.floor !== b.floor) return a.floor - b.floor;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    }),
+    spaces: sortSpacesByOrder(b.spaces || []),
   }));
 
   const categories = categoriesData || [];

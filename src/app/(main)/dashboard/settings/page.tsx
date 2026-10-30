@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
+import { sortSpacesByOrder } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import type { CategoryItem } from "./_actions/category-actions";
@@ -55,11 +56,7 @@ export default async function Page(props: PageProps) {
   const rawBuildings = (buildingsRes.data as (BuildingItem & { spaces: SpaceItem[] })[] | null) ?? [];
   const buildings: BuildingWithSpaces[] = rawBuildings.map((b) => ({
     ...b,
-    spaces: (b.spaces ?? []).sort((a, b) => {
-      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-      if (a.floor !== b.floor) return a.floor - b.floor;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    }),
+    spaces: sortSpacesByOrder(b.spaces ?? []),
   }));
 
   const users = usersRes.users ?? [];

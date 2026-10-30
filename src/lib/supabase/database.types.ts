@@ -513,6 +513,14 @@ export type Database = {
         Args: { p_delivery_id: string };
         Returns: number;
       };
+      reorder_buildings: {
+        Args: { ordered_ids: string[] };
+        Returns: undefined;
+      };
+      reorder_spaces: {
+        Args: { target_building_id: string; ordered_ids: string[] };
+        Returns: undefined;
+      };
     };
     Enums: {
       announcement_audience: "internal" | "public" | "all";

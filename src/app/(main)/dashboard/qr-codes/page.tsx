@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { Metadata } from "next";
 
+import { sortSpacesByOrder } from "@/lib/locations";
 import { getSession } from "@/server/auth/session";
 
 import { QRCodeDashboard } from "./_components/qr-code-dashboard";
@@ -31,7 +32,11 @@ export default async function QRCodesPage(props: PageProps) {
 
   // 2. Fetch buildings with spaces & equipment in parallel
   const [buildingsRes, equipmentRes] = await Promise.all([
-    supabase.from("buildings").select("id, name, code, spaces(id, name, floor)").order("name"),
+    supabase
+      .from("buildings")
+      .select("id, name, code, spaces(id, name, floor, sort_order)")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true }),
     supabase
       .from("equipment")
       .select("id, name, code, space_id, spaces(id, name, building_id, buildings(id, name))")
@@ -42,7 +47,7 @@ export default async function QRCodesPage(props: PageProps) {
     id: string;
     name: string;
     code: string;
-    spaces: { id: string; name: string; floor: number }[] | null;
+    spaces: { id: string; name: string; floor: number; sort_order: number }[] | null;
   };
 
   const rawBuildings = (buildingsRes.data ?? []) as unknown as RawBuilding[];
@@ -50,10 +55,7 @@ export default async function QRCodesPage(props: PageProps) {
     id: b.id,
     name: b.name,
     code: b.code,
-    spaces: (b.spaces ?? []).sort((a, b) => {
-      if (a.floor !== b.floor) return a.floor - b.floor;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    }),
+    spaces: sortSpacesByOrder(b.spaces ?? []),
   }));
 
   type RawEquipment = {
