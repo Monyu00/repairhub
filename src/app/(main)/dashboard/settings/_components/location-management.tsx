@@ -42,17 +42,16 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { LocationCatalogBuilding, LocationCatalogSpace } from "@/lib/locations";
 import { cn } from "@/lib/utils";
 
 import {
-  type BuildingWithSpaces,
   createBuilding,
   createSpace,
   deleteBuilding,
   deleteSpace,
   reorderBuildings,
   reorderSpaces,
-  type SpaceItem,
   updateBuilding,
   updateSpace,
 } from "../_actions/location-actions";
@@ -61,11 +60,11 @@ import { DeleteConfirmDialog } from "./delete-confirm-dialog";
 import { SpaceDialog } from "./space-dialog";
 
 interface LocationManagementProps {
-  initialBuildings: BuildingWithSpaces[];
+  initialBuildings: LocationCatalogBuilding[];
 }
 
 interface SortableBuildingCardProps {
-  building: BuildingWithSpaces;
+  building: LocationCatalogBuilding;
   isOpen: boolean;
   isSearching: boolean;
   isPending: boolean;
@@ -73,13 +72,13 @@ interface SortableBuildingCardProps {
   onAddSpace: () => void;
   onEditBuilding: () => void;
   onDeleteBuilding: () => void;
-  onEditSpace: (space: SpaceItem) => void;
-  onDeleteSpace: (space: SpaceItem) => void;
+  onEditSpace: (space: LocationCatalogSpace) => void;
+  onDeleteSpace: (space: LocationCatalogSpace) => void;
   onReorderSpaces: (event: DragEndEvent) => void;
 }
 
 interface SortableSpaceRowProps {
-  space: SpaceItem;
+  space: LocationCatalogSpace;
   isDisabled: boolean;
   onEdit: () => void;
   onDelete: () => void;
@@ -301,7 +300,7 @@ function SortableBuildingCard({
 }
 
 export function LocationManagement({ initialBuildings }: LocationManagementProps) {
-  const [buildings, setBuildings] = useState<BuildingWithSpaces[]>(initialBuildings);
+  const [buildings, setBuildings] = useState<LocationCatalogBuilding[]>(initialBuildings);
   const [isPending, startTransition] = useTransition();
 
   // Search State
@@ -316,13 +315,13 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
   // Building Dialog State
   const [buildingDialogOpen, setBuildingDialogOpen] = useState(false);
   const [buildingDialogMode, setBuildingDialogMode] = useState<"create" | "edit">("create");
-  const [selectedBuilding, setSelectedBuilding] = useState<BuildingWithSpaces | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<LocationCatalogBuilding | null>(null);
 
   // Space Dialog State
   const [spaceDialogOpen, setSpaceDialogOpen] = useState(false);
   const [spaceDialogMode, setSpaceDialogMode] = useState<"create" | "edit">("create");
-  const [targetBuildingForSpace, setTargetBuildingForSpace] = useState<BuildingWithSpaces | null>(null);
-  const [selectedSpace, setSelectedSpace] = useState<SpaceItem | null>(null);
+  const [targetBuildingForSpace, setTargetBuildingForSpace] = useState<LocationCatalogBuilding | null>(null);
+  const [selectedSpace, setSelectedSpace] = useState<LocationCatalogSpace | null>(null);
 
   // Delete Confirm Dialog State
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -412,7 +411,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
         return null;
       })
-      .filter((b): b is BuildingWithSpaces => b !== null);
+      .filter((b): b is LocationCatalogBuilding => b !== null);
   }, [buildings, searchQuery]);
 
   // Building Handlers
@@ -422,7 +421,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     setBuildingDialogOpen(true);
   };
 
-  const handleEditBuildingOpen = (building: BuildingWithSpaces) => {
+  const handleEditBuildingOpen = (building: LocationCatalogBuilding) => {
     setBuildingDialogMode("edit");
     setSelectedBuilding(building);
     setBuildingDialogOpen(true);
@@ -449,14 +448,14 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
   };
 
   // Space Handlers
-  const handleCreateSpaceOpen = (building: BuildingWithSpaces) => {
+  const handleCreateSpaceOpen = (building: LocationCatalogBuilding) => {
     setSpaceDialogMode("create");
     setTargetBuildingForSpace(building);
     setSelectedSpace(null);
     setSpaceDialogOpen(true);
   };
 
-  const handleEditSpaceOpen = (building: BuildingWithSpaces, space: SpaceItem) => {
+  const handleEditSpaceOpen = (building: LocationCatalogBuilding, space: LocationCatalogSpace) => {
     setSpaceDialogMode("edit");
     setTargetBuildingForSpace(building);
     setSelectedSpace(space);
@@ -484,7 +483,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
   };
 
   // Delete Handlers
-  const handleDeleteBuildingOpen = (building: BuildingWithSpaces) => {
+  const handleDeleteBuildingOpen = (building: LocationCatalogBuilding) => {
     setDeleteTarget({
       type: "building",
       id: building.id,
@@ -493,7 +492,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteSpaceOpen = (space: SpaceItem) => {
+  const handleDeleteSpaceOpen = (space: LocationCatalogSpace) => {
     setDeleteTarget({
       type: "space",
       id: space.id,
