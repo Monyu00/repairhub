@@ -1,7 +1,8 @@
 "use client";
 
+import type { LocationCatalogBuilding } from "@/lib/locations";
+
 import type { CategoryItem } from "../_actions/category-actions";
-import type { BuildingWithSpaces } from "../_actions/location-actions";
 import type { UserItem } from "../_actions/user-actions";
 import { CategoryManagement } from "./category-management";
 import { LocationManagement } from "./location-management";
@@ -9,7 +10,7 @@ import { UserManagement } from "./user-management";
 
 interface SettingsPageProps {
   categories: CategoryItem[];
-  buildings: BuildingWithSpaces[];
+  buildings: LocationCatalogBuilding[];
   users: UserItem[];
   technicianCategoryMap?: Record<string, string[]>;
   defaultTab?: string;
