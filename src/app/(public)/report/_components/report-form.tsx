@@ -9,10 +9,10 @@ import { AlertCircleIcon, ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { LocationCatalogBuilding } from "@/lib/locations";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import { type FormState, submitReport } from "../actions";
 import { PhotoUpload } from "./photo-upload";
