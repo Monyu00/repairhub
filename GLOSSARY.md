@@ -36,6 +36,10 @@ _Avoid_: Venue, facility, block
 A specific room, hallway, or area within a building. The bottom level of the location hierarchy. Each space can have its own QR code.
 _Avoid_: Room (acceptable in casual use), location (too generic), area
 
+**Location Catalog**:
+The read model that presents Buildings together with their ordered Spaces.
+_Avoid_: Location list, Building tree, location hierarchy
+
 ### Assets
 
 **Equipment**:
