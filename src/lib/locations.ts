@@ -42,7 +42,7 @@ export async function getLocationCatalog(supabase: SupabaseClient<Database>): Pr
   }));
 }
 
-export function sortSpacesByOrder<T extends SortableSpace>(spaces: T[]): T[] {
+function sortSpacesByOrder<T extends SortableSpace>(spaces: T[]): T[] {
   return [...spaces].sort((a, b) => {
     if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
     if (a.floor !== b.floor) return a.floor - b.floor;
