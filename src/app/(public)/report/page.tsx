@@ -1,5 +1,5 @@
 import { PublicAnnouncementsBanner } from "@/components/announcements/public-announcements-banner";
-import { sortSpacesByOrder } from "@/lib/locations";
+import { getLocationCatalog } from "@/lib/locations";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
@@ -17,11 +17,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   const { location_id, equipment_id } = await searchParams;
   const supabase = await createClient();
 
-  const buildingsPromise = supabase
-    .from("buildings")
-    .select("id, name, code, spaces(id, name, floor, sort_order)")
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
+  const buildingsPromise = getLocationCatalog(supabase);
 
   const categoriesPromise = supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order");
 
@@ -39,7 +35,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         .single()
     : Promise.resolve({ data: null });
 
-  const [buildingsRes, categoriesRes, allEquipmentRes, eqRes, session, announcements] = await Promise.all([
+  const [buildings, categoriesRes, allEquipmentRes, eqRes, session, announcements] = await Promise.all([
     buildingsPromise,
     categoriesPromise,
     allEquipmentPromise,
@@ -48,7 +44,6 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
     announcementsPromise,
   ]);
 
-  const buildingsData = buildingsRes.data;
   const categoriesData = categoriesRes.data;
   const allEquipmentData = (allEquipmentRes.data || []) as EquipmentOption[];
   const eqData = eqRes.data;
@@ -67,11 +62,6 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
       };
     }
   }
-
-  const buildings = (buildingsData || []).map((b) => ({
-    ...b,
-    spaces: sortSpacesByOrder(b.spaces || []),
-  }));
 
   const categories = categoriesData || [];
 
