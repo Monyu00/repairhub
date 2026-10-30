@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import {
   createEquipment,
@@ -27,7 +28,7 @@ import {
   updateEquipment,
 } from "../_actions/equipment-actions";
 import { EquipmentDeleteDialog } from "./equipment-delete-dialog";
-import { type BuildingOption, EquipmentDialog } from "./equipment-dialog";
+import { EquipmentDialog } from "./equipment-dialog";
 import { EquipmentHistorySheet } from "./equipment-history-sheet";
 import { getWarrantyStatus, WarrantyStatusBadge } from "./warranty-status-badge";
 
@@ -35,7 +36,7 @@ const PAGE_SIZE = 10;
 
 interface EquipmentManagementProps {
   initialEquipment: EquipmentRow[];
-  buildings: BuildingOption[];
+  buildings: LocationCatalogBuilding[];
 }
 
 export function EquipmentManagement({ initialEquipment, buildings }: EquipmentManagementProps) {
