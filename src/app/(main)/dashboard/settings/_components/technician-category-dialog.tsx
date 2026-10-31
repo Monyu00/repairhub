@@ -188,7 +188,9 @@ export function TechnicianCategoryDialog({
             )}
 
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">{error}</div>
+              <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+                {error}
+              </div>
             )}
           </div>
 

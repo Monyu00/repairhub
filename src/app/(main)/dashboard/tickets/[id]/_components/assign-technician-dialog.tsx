@@ -105,7 +105,7 @@ export function AssignTechnicianDialog({ ticketId }: AssignTechnicianDialogProps
 
     return (
       <Select value={selectedTechId} onValueChange={setSelectedTechId} disabled={isSubmitting}>
-        <SelectTrigger className="w-full text-xs sm:text-sm">
+        <SelectTrigger className="w-full text-xs sm:text-sm" aria-label="選擇維修技師">
           <SelectValue placeholder="請選擇技師..." />
         </SelectTrigger>
         <SelectContent>

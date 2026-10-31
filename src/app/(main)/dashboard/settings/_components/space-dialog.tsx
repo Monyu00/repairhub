@@ -83,7 +83,6 @@ export function SpaceDialog({ open, onOpenChange, mode, buildingName, initialDat
                 onChange={(e) => setName(e.target.value)}
                 placeholder="例如：校長室、電腦教室 301"
                 disabled={isPending}
-                autoFocus
               />
             </div>
             <div className="grid gap-2">
@@ -97,7 +96,11 @@ export function SpaceDialog({ open, onOpenChange, mode, buildingName, initialDat
                 disabled={isPending}
               />
             </div>
-            {error && <p className="text-destructive text-xs">{error}</p>}
+            {error && (
+              <p role="alert" className="text-destructive text-xs">
+                {error}
+              </p>
+            )}
           </div>
 
           <DialogFooter>

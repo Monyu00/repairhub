@@ -162,7 +162,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
                   size="icon-xs"
                   className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
                   onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
+                  aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
@@ -238,7 +238,9 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
             </div>
 
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">{error}</div>
+              <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+                {error}
+              </div>
             )}
           </div>
 

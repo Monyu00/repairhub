@@ -82,7 +82,6 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
                 onChange={(e) => setName(e.target.value)}
                 placeholder="例如：行政中心"
                 disabled={isPending}
-                autoFocus
               />
             </div>
             <div className="grid gap-2">
@@ -95,7 +94,11 @@ export function BuildingDialog({ open, onOpenChange, mode, initialData, onSubmit
                 disabled={isPending}
               />
             </div>
-            {error && <p className="text-destructive text-xs">{error}</p>}
+            {error && (
+              <p role="alert" className="text-destructive text-xs">
+                {error}
+              </p>
+            )}
           </div>
 
           <DialogFooter>

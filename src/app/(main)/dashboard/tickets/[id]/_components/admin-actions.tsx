@@ -141,13 +141,13 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
 
             <div className="py-4">
               <Textarea
+                aria-label="取消原因"
                 placeholder="輸入取消原因（例如：重複報修、資訊不齊全、已現場自行修復...）"
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 rows={3}
                 className="resize-none text-xs sm:text-sm"
                 disabled={isCancelling}
-                autoFocus
               />
             </div>
 

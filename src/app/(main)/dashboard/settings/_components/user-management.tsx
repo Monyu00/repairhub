@@ -498,6 +498,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
               <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="搜尋姓名、Email、部門或電話..."
+                aria-label="搜尋姓名、Email、部門或電話"
                 className="h-9 pl-9"
                 value={searchQuery}
                 onChange={(e) => {
@@ -516,7 +517,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9" aria-label="帳號狀態篩選">
                     <SelectValue placeholder="帳號狀態" />
                   </SelectTrigger>
                   <SelectContent>
@@ -535,7 +536,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9" aria-label="角色篩選">
                     <SelectValue placeholder="篩選角色" />
                   </SelectTrigger>
                   <SelectContent>
@@ -851,7 +852,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-8 w-[72px] text-xs">
+                  <SelectTrigger className="h-8 w-[72px] text-xs" aria-label="每頁顯示筆數">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
