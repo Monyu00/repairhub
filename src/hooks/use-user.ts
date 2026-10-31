@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/database.types";
+import { resolveUserProjection } from "@/lib/users/projection";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -67,5 +68,7 @@ export function useUser() {
     };
   }, []);
 
-  return { user, profile, isLoading };
+  const projection = user ? resolveUserProjection(user, profile) : null;
+
+  return { projection, isLoading };
 }

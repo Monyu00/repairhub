@@ -10,9 +10,7 @@ import {
   Settings,
 } from "lucide-react";
 
-import type { Database } from "@/lib/supabase/database.types";
-
-export type UserRole = Database["public"]["Enums"]["user_role"];
+import type { UserRole } from "@/lib/users/projection";
 
 export interface NavChildItem {
   id: string;

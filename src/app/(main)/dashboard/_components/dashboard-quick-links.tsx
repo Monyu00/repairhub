@@ -11,7 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 
-import type { UserRole } from "@/server/auth/session";
+import type { UserRole } from "@/lib/users/projection";
 
 interface QuickLink {
   title: string;

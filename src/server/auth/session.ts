@@ -4,16 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { resolveUserProjection, type UserProjection } from "@/lib/users/projection";
 
-export type UserRole = Database["public"]["Enums"]["user_role"];
-
-export interface AuthenticatedUser {
+export interface AuthenticatedUser extends Omit<UserProjection, "avatarUrl" | "id"> {
   userId: string;
-  email: string;
-  role: UserRole | null;
-  displayName: string | null;
-  department: string | null;
-  phone: string | null;
   avatarUrl?: string;
   supabase: SupabaseClient<Database>;
 }
@@ -56,24 +50,19 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile && profile.is_active === false) {
+  const projection = resolveUserProjection(user, profile);
+
+  if (!projection.isActive) {
     return null;
   }
 
-  const metaName =
-    (user.user_metadata?.full_name as string) ||
-    (user.user_metadata?.name as string) ||
-    (user.user_metadata?.display_name as string) ||
-    null;
+  const { id: userId, avatarUrl, ...identity } = projection;
 
   return {
-    userId: user.id,
-    email: user.email ?? "",
+    ...identity,
     role: profile?.user_role ?? null,
-    displayName: profile?.display_name ?? metaName,
-    department: profile?.department ?? (user.user_metadata?.department as string | undefined) ?? null,
-    phone: profile?.phone ?? (user.user_metadata?.phone as string | undefined) ?? null,
-    avatarUrl: user.user_metadata?.avatar_url as string | undefined,
+    userId,
+    avatarUrl: avatarUrl ?? undefined,
     supabase,
   };
 });

@@ -53,6 +53,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { compareUserRole } from "@/lib/users/projection";
 
 import type { CategoryItem } from "../_actions/category-actions";
 import {
@@ -182,12 +183,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           break;
         }
         case "role": {
-          const getRoleScore = (r: UserItem["role"]) => {
-            if (r === "admin") return 0;
-            if (r === "technician") return 1;
-            return 2;
-          };
-          comparison = getRoleScore(a.role) - getRoleScore(b.role);
+          comparison = compareUserRole(a.role, b.role);
           break;
         }
         case "createdAt": {
