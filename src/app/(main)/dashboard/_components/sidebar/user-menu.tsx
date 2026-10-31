@@ -13,8 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getInitials } from "@/lib/utils";
 import type { UserRole } from "@/lib/users/projection";
+import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
 
 interface UserMenuProps {

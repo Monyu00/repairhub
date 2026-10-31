@@ -34,14 +34,17 @@ function getRoleLabel(role?: UserRole | null) {
   return "一般使用者";
 }
 
+function firstText(...values: Array<string | null | undefined>) {
+  return values.find((value) => value) ?? "";
+}
+
 export function NavUser({ user: propUser, userRole: propRole }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { projection } = useUser();
   const [isPending, startTransition] = useTransition();
 
-  const email = projection?.email || propUser?.email || "";
-  const name =
-    projection?.displayName || propUser?.name || (email ? email.split("@")[0] : undefined) || "使用者";
+  const email = firstText(projection?.email, propUser?.email);
+  const name = firstText(projection?.displayName, propUser?.name, email ? email.split("@")[0] : undefined, "使用者");
 
   const avatar = projection?.avatarUrl ?? propUser?.avatar ?? "";
 

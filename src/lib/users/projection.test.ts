@@ -1,7 +1,6 @@
+import { compareUserProjection, resolveUserProjection, type UserProjection } from "./projection";
 import assert from "node:assert/strict";
 import test from "node:test";
-
-import { compareUserProjection, resolveUserProjection, type UserProjection } from "./projection";
 
 function projection(overrides: Partial<UserProjection> = {}): UserProjection {
   return {

@@ -13,6 +13,13 @@ export interface UserProjection {
   isActive: boolean;
 }
 
+function firstNonEmpty(...values: Array<string | null | undefined>): string | null {
+  for (const value of values) {
+    if (value) return value;
+  }
+  return null;
+}
+
 interface UserMetadata {
   full_name?: string | null;
   name?: string | null;
@@ -39,12 +46,13 @@ interface Profile {
 
 export function resolveUserProjection(authUser: AuthUser, profile?: Profile | null): UserProjection {
   const metadata = authUser.user_metadata;
+  const metadataDisplayName = firstNonEmpty(metadata?.full_name, metadata?.name, metadata?.display_name);
 
   return {
     id: authUser.id,
     email: authUser.email ?? "",
-    displayName: profile?.display_name ?? (metadata?.full_name || metadata?.name || metadata?.display_name) ?? null,
-    role: profile?.user_role ?? (metadata?.user_role || null),
+    displayName: profile?.display_name ?? metadataDisplayName,
+    role: profile?.user_role ?? metadata?.user_role ?? null,
     department: profile?.department ?? metadata?.department ?? null,
     phone: profile?.phone ?? metadata?.phone ?? null,
     avatarUrl: metadata?.avatar_url ?? null,
