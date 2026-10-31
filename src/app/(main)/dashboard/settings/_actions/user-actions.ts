@@ -2,11 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
-import { compareUserProjection, resolveUserProjection, type UserProjection } from "@/lib/users/projection";
+import {
+  compareUserProjection,
+  resolveUserProjection,
+  type UserProjection,
+  type UserRole,
+} from "@/lib/users/projection";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus, type UserRole } from "@/server/auth";
+import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus } from "@/server/auth";
 
-export interface UserItem extends Omit<UserProjection, "avatarUrl" | "id"> {
+export interface UserItem extends Omit<UserProjection, "id"> {
   id: string;
   createdAt: string;
   lastSignInAt: string | null;

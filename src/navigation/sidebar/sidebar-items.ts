@@ -12,8 +12,6 @@ import {
 
 import type { UserRole } from "@/lib/users/projection";
 
-export type { UserRole };
-
 export interface NavChildItem {
   id: string;
   title: string;
