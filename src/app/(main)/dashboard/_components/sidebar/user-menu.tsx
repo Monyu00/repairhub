@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import type { UserRole } from "@/lib/users/projection";
 import { signOutAction } from "@/server/auth/actions";
 
 interface UserMenuProps {
@@ -21,11 +22,11 @@ interface UserMenuProps {
     email: string;
     name?: string;
     avatarUrl?: string;
-    role?: "admin" | "technician" | "user" | null;
+    role?: UserRole | null;
   };
 }
 
-function getRoleLabel(role?: "admin" | "technician" | "user" | null) {
+function getRoleLabel(role?: UserRole | null) {
   if (role === "admin") return "系統管理員 (Admin)";
   if (role === "technician") return "維修技師 (Technician)";
   return "一般使用者";
