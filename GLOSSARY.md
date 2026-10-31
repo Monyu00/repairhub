@@ -26,6 +26,10 @@ _Avoid_: Repairman, worker, staff, maintenance personnel
 A user with the `admin` role who has full system access: assigning tickets, managing equipment, viewing reports, and managing system settings.
 _Avoid_: Manager, supervisor, operator
 
+**User Projection**:
+The resolved read model for one account.
+_Avoid_: User record, profile, auth user
+
 ### Locations
 
 **Building**:
