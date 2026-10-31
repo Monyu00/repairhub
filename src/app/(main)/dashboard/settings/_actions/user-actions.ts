@@ -2,17 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
+import { compareUserProjection, resolveUserProjection, type UserProjection } from "@/lib/users/projection";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus, type UserRole } from "@/server/auth";
 
-export interface UserItem {
+export interface UserItem extends Omit<UserProjection, "avatarUrl" | "id"> {
   id: string;
-  email: string;
-  displayName: string | null;
-  role: UserRole | null;
-  department: string | null;
-  phone: string | null;
-  isActive: boolean;
   createdAt: string;
   lastSignInAt: string | null;
 }
@@ -59,41 +54,17 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
 
     const users: UserItem[] = (authData.users || []).map((authUser) => {
       const profile = profileMap.get(authUser.id);
-      const metaName =
-        (authUser.user_metadata?.full_name as string) ||
-        (authUser.user_metadata?.name as string) ||
-        (authUser.user_metadata?.display_name as string) ||
-        null;
-      const metaRole = (authUser.user_metadata?.user_role as UserRole | undefined) || null;
+      const { id, ...projection } = resolveUserProjection(authUser, profile);
 
       return {
-        id: authUser.id,
-        email: authUser.email ?? "",
-        displayName: profile?.display_name ?? metaName,
-        role: profile?.user_role ?? metaRole ?? null,
-        department: profile?.department ?? (authUser.user_metadata?.department as string | undefined) ?? null,
-        phone: profile?.phone ?? (authUser.user_metadata?.phone as string | undefined) ?? null,
-        isActive: profile?.is_active ?? true,
+        ...projection,
+        id,
         createdAt: authUser.created_at,
         lastSignInAt: authUser.last_sign_in_at ?? null,
       };
     });
 
-    // Sort by status (active first) -> role (admin -> technician -> user) -> email
-    users.sort((a, b) => {
-      if (a.isActive !== b.isActive) {
-        return a.isActive ? -1 : 1;
-      }
-      const roleScore = (r: UserItem["role"]) => {
-        if (r === "admin") return 0;
-        if (r === "technician") return 1;
-        return 2;
-      };
-      const scoreA = roleScore(a.role);
-      const scoreB = roleScore(b.role);
-      if (scoreA !== scoreB) return scoreA - scoreB;
-      return a.email.localeCompare(b.email);
-    });
+    users.sort(compareUserProjection);
 
     return { success: true, users };
   });
