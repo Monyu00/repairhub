@@ -115,9 +115,21 @@ export function PhotoUpload({
         )}
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        aria-label="選擇照片檔案"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      {error && (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      )}
       <p className="text-muted-foreground text-xs">支援 JPG、PNG、WebP 格式，每張最大 5MB，最多 {maxPhotos} 張照片。</p>
     </div>
   );

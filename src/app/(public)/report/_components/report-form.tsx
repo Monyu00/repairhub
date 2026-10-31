@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -16,6 +16,7 @@ import type { LocationCatalogBuilding } from "@/lib/locations";
 
 import { type FormState, submitReport } from "../actions";
 import { PhotoUpload } from "./photo-upload";
+import { applyFieldErrors, errorIdForField } from "./report-form-errors";
 
 export type CategoryItem = {
   id: string;
@@ -92,6 +93,8 @@ export function ReportForm({
   const [equipmentSelection, setEquipmentSelection] = useState<string>(defaultEquipmentId);
   const [customEquipmentName, setCustomEquipmentName] = useState<string>("");
   const [state, formAction, isPending] = useActionState(submitReport, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  const skipUnloadWarningRef = useRef(false);
 
   // Available spaces for currently selected building
   const selectedBuilding = buildings.find((b) => b.id === selectedBuildingId);
@@ -103,9 +106,38 @@ export function ReportForm({
   // Redirect on success
   useEffect(() => {
     if (state.success && state.ticketId) {
+      skipUnloadWarningRef.current = true;
       router.push(`/track/${state.ticketId}`);
     }
   }, [state.success, state.ticketId, router]);
+
+  // Server-returned field errors are rendered after the state update, so link and focus them here.
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || !state.fieldErrors) return;
+
+    applyFieldErrors(form, state.fieldErrors)?.focus();
+  }, [state.fieldErrors]);
+
+  // Warn before leaving while the form holds unsent content.
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (skipUnloadWarningRef.current) return;
+
+      const hasContent = Array.from(new FormData(form).entries()).some(([name, value]) => {
+        if (typeof value === "string") return name !== "photos" && value.trim().length > 0;
+        return value.size > 0;
+      });
+
+      if (hasContent) event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   const handleBuildingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newBuildingId = e.target.value;
@@ -153,7 +185,7 @@ export function ReportForm({
         </div>
       </div>
 
-      <form action={formAction} className="space-y-6">
+      <form ref={formRef} action={formAction} className="space-y-6">
         {state.error && (
           <div className="flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-destructive text-sm">
             <AlertCircleIcon className="size-4 shrink-0" />
@@ -167,13 +199,15 @@ export function ReportForm({
 
         {/* Location (Building & Space) */}
         <div className="space-y-4">
-          <Field aria-invalid={!!state.fieldErrors?.building_id}>
+          <Field data-invalid={!!state.fieldErrors?.building_id}>
             <FieldLabel htmlFor="building_id">
               地點 <span className="text-destructive">*</span>
             </FieldLabel>
             <NativeSelect
               id="building_id"
               name="building_id"
+              aria-invalid={!!state.fieldErrors?.building_id}
+              aria-describedby={state.fieldErrors?.building_id ? errorIdForField("building_id") : undefined}
               value={selectedBuildingId}
               onChange={handleBuildingChange}
               className="w-full"
@@ -185,14 +219,16 @@ export function ReportForm({
                 </NativeSelectOption>
               ))}
             </NativeSelect>
-            <FieldError>{state.fieldErrors?.building_id}</FieldError>
+            <FieldError id={errorIdForField("building_id")}>{state.fieldErrors?.building_id}</FieldError>
           </Field>
 
-          <Field aria-invalid={!!state.fieldErrors?.space_id}>
+          <Field data-invalid={!!state.fieldErrors?.space_id}>
             <FieldLabel htmlFor="space_id">空間 / 教室名稱 (選填)</FieldLabel>
             <NativeSelect
               id="space_id"
               name="space_id"
+              aria-invalid={!!state.fieldErrors?.space_id}
+              aria-describedby={state.fieldErrors?.space_id ? errorIdForField("space_id") : undefined}
               value={selectedSpaceId}
               onChange={handleSpaceChange}
               disabled={!selectedBuildingId}
@@ -207,7 +243,7 @@ export function ReportForm({
                 </NativeSelectOption>
               ))}
             </NativeSelect>
-            <FieldError>{state.fieldErrors?.space_id}</FieldError>
+            <FieldError id={errorIdForField("space_id")}>{state.fieldErrors?.space_id}</FieldError>
           </Field>
         </div>
 
@@ -245,6 +281,7 @@ export function ReportForm({
 
                 {equipmentSelection === "__custom__" && (
                   <Input
+                    aria-label="設備名稱"
                     placeholder="請輸入設備名稱（如：第 2 排投影機、窗邊冷氣）"
                     value={customEquipmentName}
                     onChange={(e) => setCustomEquipmentName(e.target.value)}
@@ -256,6 +293,7 @@ export function ReportForm({
 
             {Boolean(selectedSpaceId && availableEquipments.length === 0) && (
               <Input
+                aria-label="設備名稱"
                 placeholder="請輸入設備名稱（選填，如：第 2 排投影機、窗邊冷氣）"
                 value={customEquipmentName}
                 onChange={(e) => setCustomEquipmentName(e.target.value)}
@@ -266,11 +304,17 @@ export function ReportForm({
         </div>
 
         {/* Category */}
-        <Field aria-invalid={!!state.fieldErrors?.category_id}>
+        <Field data-invalid={!!state.fieldErrors?.category_id}>
           <FieldLabel htmlFor="category_id">
             報修類別 <span className="text-destructive">*</span>
           </FieldLabel>
-          <NativeSelect id="category_id" name="category_id" className="w-full">
+          <NativeSelect
+            id="category_id"
+            name="category_id"
+            aria-invalid={!!state.fieldErrors?.category_id}
+            aria-describedby={state.fieldErrors?.category_id ? errorIdForField("category_id") : undefined}
+            className="w-full"
+          >
             <NativeSelectOption value="">-- 請選擇報修類別 --</NativeSelectOption>
             {categories.map((c) => (
               <NativeSelectOption key={c.id} value={c.id}>
@@ -278,21 +322,23 @@ export function ReportForm({
               </NativeSelectOption>
             ))}
           </NativeSelect>
-          <FieldError>{state.fieldErrors?.category_id}</FieldError>
+          <FieldError id={errorIdForField("category_id")}>{state.fieldErrors?.category_id}</FieldError>
         </Field>
 
         {/* Description */}
-        <Field aria-invalid={!!state.fieldErrors?.description}>
+        <Field data-invalid={!!state.fieldErrors?.description}>
           <FieldLabel htmlFor="description">
             故障狀況描述 <span className="text-destructive">*</span>
           </FieldLabel>
           <Textarea
             id="description"
             name="description"
+            aria-invalid={!!state.fieldErrors?.description}
+            aria-describedby={state.fieldErrors?.description ? errorIdForField("description") : undefined}
             placeholder="請詳細描述設備故障或設施損壞狀況..."
             className="min-h-24"
           />
-          <FieldError>{state.fieldErrors?.description}</FieldError>
+          <FieldError id={errorIdForField("description")}>{state.fieldErrors?.description}</FieldError>
         </Field>
 
         {/* Photo Upload */}
@@ -306,17 +352,20 @@ export function ReportForm({
           <div className="font-medium text-muted-foreground text-xs uppercase tracking-wider">通報人聯絡資訊</div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field aria-invalid={!!state.fieldErrors?.reporter_name}>
+            <Field data-invalid={!!state.fieldErrors?.reporter_name}>
               <FieldLabel htmlFor="reporter_name">
                 聯絡人姓名 <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 id="reporter_name"
                 name="reporter_name"
+                autoComplete="name"
+                aria-invalid={!!state.fieldErrors?.reporter_name}
+                aria-describedby={state.fieldErrors?.reporter_name ? errorIdForField("reporter_name") : undefined}
                 defaultValue={userInfo?.name ?? ""}
                 placeholder="例如：王大明"
               />
-              <FieldError>{state.fieldErrors?.reporter_name}</FieldError>
+              <FieldError id={errorIdForField("reporter_name")}>{state.fieldErrors?.reporter_name}</FieldError>
             </Field>
 
             <Field>
@@ -324,6 +373,7 @@ export function ReportForm({
               <Input
                 id="reporter_department"
                 name="reporter_department"
+                autoComplete="organization"
                 defaultValue={userInfo?.department ?? ""}
                 placeholder="例如：資工系、總務處"
               />
@@ -331,7 +381,7 @@ export function ReportForm({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field aria-invalid={!!state.fieldErrors?.reporter_email}>
+            <Field data-invalid={!!state.fieldErrors?.reporter_email}>
               <FieldLabel htmlFor="reporter_email">
                 電子郵件 <span className="text-destructive">*</span>
               </FieldLabel>
@@ -339,22 +389,28 @@ export function ReportForm({
                 id="reporter_email"
                 name="reporter_email"
                 type="email"
+                autoComplete="email"
+                aria-invalid={!!state.fieldErrors?.reporter_email}
+                aria-describedby={state.fieldErrors?.reporter_email ? errorIdForField("reporter_email") : undefined}
                 defaultValue={userInfo?.email ?? ""}
                 placeholder="example@domain.com"
               />
-              <FieldError>{state.fieldErrors?.reporter_email}</FieldError>
+              <FieldError id={errorIdForField("reporter_email")}>{state.fieldErrors?.reporter_email}</FieldError>
             </Field>
 
-            <Field aria-invalid={!!state.fieldErrors?.reporter_phone}>
+            <Field data-invalid={!!state.fieldErrors?.reporter_phone}>
               <FieldLabel htmlFor="reporter_phone">聯絡電話 (選填)</FieldLabel>
               <Input
                 id="reporter_phone"
                 name="reporter_phone"
                 type="tel"
+                autoComplete="tel"
+                aria-invalid={!!state.fieldErrors?.reporter_phone}
+                aria-describedby={state.fieldErrors?.reporter_phone ? errorIdForField("reporter_phone") : undefined}
                 defaultValue={userInfo?.phone ?? ""}
                 placeholder="0912345678"
               />
-              <FieldError>{state.fieldErrors?.reporter_phone}</FieldError>
+              <FieldError id={errorIdForField("reporter_phone")}>{state.fieldErrors?.reporter_phone}</FieldError>
             </Field>
           </div>
         </div>
