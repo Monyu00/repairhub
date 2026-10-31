@@ -1,7 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { compareUserProjection, resolveUserProjection, type UserProjection } from "./projection.ts";
+import { compareUserProjection, resolveUserProjection, type UserProjection } from "./projection";
+
+function projection(overrides: Partial<UserProjection> = {}): UserProjection {
+  return {
+    id: "user",
+    email: "user@example.com",
+    displayName: null,
+    role: null,
+    department: null,
+    phone: null,
+    avatarUrl: null,
+    isActive: true,
+    ...overrides,
+  };
+}
 
 test("uses profile values over auth metadata", () => {
   const result = resolveUserProjection(
@@ -80,6 +94,18 @@ test("uses the first non-empty auth metadata display name", () => {
   assert.equal(result.displayName, "Metadata Name");
 });
 
+test("uses auth metadata display_name as the third name fallback", () => {
+  const result = resolveUserProjection(
+    {
+      id: "user-6",
+      email: "third-fallback@example.com",
+      user_metadata: { full_name: "", name: "", display_name: "Display Name" },
+    },
+    null,
+  );
+
+  assert.equal(result.displayName, "Display Name");
+});
 test("falls back to the auth metadata role when the profile role is missing", () => {
   const result = resolveUserProjection(
     {
@@ -100,66 +126,12 @@ test("uses the profile active state when present", () => {
 });
 
 test("sorts active users first, then by role precedence and email", () => {
-  const active: UserProjection = {
-    id: "active",
-    email: "active@example.com",
-    role: "technician",
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: true,
-  };
-  const inactiveAdmin: UserProjection = {
-    id: "inactive",
-    email: "inactive@example.com",
-    role: "admin",
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: false,
-  };
-  const admin: UserProjection = {
-    id: "admin",
-    email: "admin@example.com",
-    role: "admin",
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: true,
-  };
-  const technician: UserProjection = {
-    id: "technician",
-    email: "technician@example.com",
-    role: "technician",
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: true,
-  };
-  const unassigned: UserProjection = {
-    id: "unassigned",
-    email: "unassigned@example.com",
-    role: null,
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: true,
-  };
-  const earlierEmail: UserProjection = {
-    id: "earlier",
-    email: "a@example.com",
-    role: "admin",
-    displayName: null,
-    department: null,
-    phone: null,
-    avatarUrl: null,
-    isActive: true,
-  };
+  const active = projection({ email: "active@example.com", role: "technician" });
+  const inactiveAdmin = projection({ id: "inactive", email: "inactive@example.com", role: "admin", isActive: false });
+  const admin = projection({ id: "admin", email: "admin@example.com", role: "admin" });
+  const technician = projection({ id: "technician", email: "technician@example.com", role: "technician" });
+  const unassigned = projection({ id: "unassigned", email: "unassigned@example.com" });
+  const earlierEmail = projection({ id: "earlier", email: "a@example.com", role: "admin" });
 
   assert.ok(compareUserProjection(active, inactiveAdmin) < 0);
   assert.ok(compareUserProjection(admin, technician) < 0);

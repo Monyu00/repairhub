@@ -60,6 +60,7 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
 
   return {
     ...identity,
+    role: profile?.user_role ?? null,
     userId,
     avatarUrl: avatarUrl ?? undefined,
     supabase,

@@ -5,12 +5,13 @@ import { LayoutDashboard, User, Wrench } from "lucide-react";
 import { ThemeSwitcher } from "@/app/(main)/dashboard/_components/sidebar/theme-switcher";
 import { UserMenu } from "@/app/(main)/dashboard/_components/sidebar/user-menu";
 import { Button } from "@/components/ui/button";
+import type { UserRole } from "@/lib/users/projection";
 
 interface PublicHeaderProps {
   user: {
     userId: string;
     email: string;
-    role: "admin" | "technician" | "user" | null;
+    role: UserRole | null;
     displayName: string | null;
     avatarUrl?: string;
   } | null;
