@@ -1,9 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
+import type { UserRole } from "@/lib/users/projection";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
-
-export type UserRole = Database["public"]["Enums"]["user_role"];
 
 export interface TicketCategory {
   id: string;

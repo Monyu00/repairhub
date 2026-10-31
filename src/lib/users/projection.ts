@@ -56,12 +56,16 @@ function roleRanking(role: UserRole | null): number {
   return 2;
 }
 
+export function compareUserRole(a: UserRole | null, b: UserRole | null): number {
+  return roleRanking(a) - roleRanking(b);
+}
+
 export function compareUserProjection(a: UserProjection, b: UserProjection): number {
   if (a.isActive !== b.isActive) {
     return a.isActive ? -1 : 1;
   }
 
-  const roleDifference = roleRanking(a.role) - roleRanking(b.role);
+  const roleDifference = compareUserRole(a.role, b.role);
   if (roleDifference !== 0) {
     return roleDifference;
   }

@@ -6,8 +6,6 @@ import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 import { resolveUserProjection, type UserProjection } from "@/lib/users/projection";
 
-export type { UserRole } from "@/lib/users/projection";
-
 export interface AuthenticatedUser extends Omit<UserProjection, "avatarUrl" | "id"> {
   userId: string;
   avatarUrl?: string;
@@ -58,12 +56,11 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
     return null;
   }
 
-  const { id: userId, avatarUrl, ...user } = projection;
+  const { id: userId, avatarUrl, ...identity } = projection;
 
   return {
-    ...user,
+    ...identity,
     userId,
-    role: profile?.user_role ?? null,
     avatarUrl: avatarUrl ?? undefined,
     supabase,
   };

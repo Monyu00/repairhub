@@ -19,7 +19,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import type { NavChildItem, NavGroup, NavItem, UserRole } from "@/navigation/sidebar/sidebar-items";
+import type { UserRole } from "@/lib/users/projection";
+import type { NavChildItem, NavGroup, NavItem } from "@/navigation/sidebar/sidebar-items";
 
 interface NavMainProps {
   readonly items: readonly NavGroup[];
