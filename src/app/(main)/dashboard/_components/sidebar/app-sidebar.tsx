@@ -27,8 +27,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarProps) {
-  const { profile } = useUser();
-  const activeRole = profile?.user_role ?? initialUserRole;
+  const { projection } = useUser();
+  const activeRole = projection?.role ?? initialUserRole;
 
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
     useShallow((s) => ({

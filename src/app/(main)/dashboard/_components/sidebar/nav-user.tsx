@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUser } from "@/hooks/use-user";
+import type { UserRole } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
-import type { UserRole } from "@/navigation/sidebar/sidebar-items";
 import { signOutAction } from "@/server/auth/actions";
 
 interface NavUserProps {
@@ -36,23 +36,19 @@ function getRoleLabel(role?: UserRole | null) {
 
 export function NavUser({ user: propUser, userRole: propRole }: NavUserProps) {
   const { isMobile } = useSidebar();
-  const { user: authUser, profile } = useUser();
+  const { projection } = useUser();
   const [isPending, startTransition] = useTransition();
 
-  const email = authUser?.email ?? propUser?.email ?? "";
+  const email = projection?.email || propUser?.email || "";
   const name =
-    (authUser?.user_metadata?.full_name as string | undefined) ??
-    (authUser?.user_metadata?.name as string | undefined) ??
-    propUser?.name ??
-    (email ? email.split("@")[0] : undefined) ??
-    "使用者";
+    projection?.displayName || propUser?.name || (email ? email.split("@")[0] : undefined) || "使用者";
 
-  const avatar = (authUser?.user_metadata?.avatar_url as string | undefined) ?? propUser?.avatar ?? "";
+  const avatar = projection?.avatarUrl ?? propUser?.avatar ?? "";
 
-  const effectiveRole = profile?.user_role ?? propRole;
+  const effectiveRole = projection?.role ?? propRole;
   const roleLabel = getRoleLabel(effectiveRole);
 
-  if (!email && !authUser) {
+  if (!email && !projection) {
     return null;
   }
 

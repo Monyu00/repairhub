@@ -1,12 +1,11 @@
 import { ShieldCheck, User, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import type { UserRole } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
 
-export type UserRole = "admin" | "technician" | null;
-
 interface UserRoleBadgeProps {
-  role: UserRole;
+  role: UserRole | null;
   className?: string;
 }
 
