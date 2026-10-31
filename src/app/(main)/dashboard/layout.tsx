@@ -51,8 +51,16 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         } as React.CSSProperties
       }
     >
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:text-sm focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-hidden"
+      >
+        跳到主要內容
+      </a>
       <AppSidebar variant={variant} collapsible={collapsible} userRole={session?.role ?? null} />
       <SidebarInset
+        id="main-content"
+        tabIndex={-1}
         className={cn(
           "[html[data-content-layout=centered]_&>*]:mx-auto",
           "[html[data-content-layout=centered]_&>*]:w-full",
