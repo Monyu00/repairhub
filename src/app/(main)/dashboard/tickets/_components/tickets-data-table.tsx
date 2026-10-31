@@ -2,19 +2,15 @@
 
 import { useMemo, useState } from "react";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { flexRender, type SortingState, useTable } from "@tanstack/react-table";
-import { ClipboardX, ListFilter, Zap } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, ClipboardX, ListFilter, Zap } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -66,11 +62,10 @@ export function TicketsDataTable({
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
+  const createPageUrl = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    return `${pathname}?${params.toString()}`;
   };
 
   const handleRowClick = (ticketId: string) => {
@@ -113,11 +108,7 @@ export function TicketsDataTable({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => handleRowClick(row.original.id)}
-                    className="cursor-pointer transition-colors hover:bg-muted/60"
-                  >
+                  <TableRow key={row.id} className="relative cursor-pointer transition-colors hover:bg-muted/60">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-3 text-xs">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -155,21 +146,51 @@ export function TicketsDataTable({
               <Pagination className="mx-0 w-auto">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious
-                      text="上一頁"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                    <Button
+                      asChild={currentPage > 1}
+                      variant="ghost"
+                      size="default"
+                      disabled={currentPage <= 1}
+                      aria-label="上一頁"
+                      className="pl-1.5!"
+                    >
+                      {currentPage > 1 ? (
+                        <Link href={createPageUrl(currentPage - 1)}>
+                          <ChevronLeftIcon data-icon="inline-start" />
+                          <span className="hidden sm:block">上一頁</span>
+                        </Link>
+                      ) : (
+                        <span className="flex items-center">
+                          <ChevronLeftIcon data-icon="inline-start" />
+                          <span className="hidden sm:block">上一頁</span>
+                        </span>
+                      )}
+                    </Button>
                   </PaginationItem>
                   <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>
-                    <PaginationNext
-                      text="下一頁"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                    <Button
+                      asChild={currentPage < totalPages}
+                      variant="ghost"
+                      size="default"
+                      disabled={currentPage >= totalPages}
+                      aria-label="下一頁"
+                      className="pr-1.5!"
+                    >
+                      {currentPage < totalPages ? (
+                        <Link href={createPageUrl(currentPage + 1)}>
+                          <span className="hidden sm:block">下一頁</span>
+                          <ChevronRightIcon data-icon="inline-end" />
+                        </Link>
+                      ) : (
+                        <span className="flex items-center">
+                          <span className="hidden sm:block">下一頁</span>
+                          <ChevronRightIcon data-icon="inline-end" />
+                        </span>
+                      )}
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>

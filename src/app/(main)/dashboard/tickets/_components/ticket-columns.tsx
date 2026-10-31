@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import {
   type ColumnDef,
   columnVisibilityFeature,
@@ -35,7 +37,15 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
       header: "Ticket ID",
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
-        return <span className="font-mono font-semibold text-primary text-xs">#{id.slice(0, 8)}</span>;
+        return (
+          <Link
+            href={`/dashboard/tickets/${row.original.id}`}
+            aria-label={`查看報修單 ${id.slice(0, 8)}`}
+            className="font-mono font-semibold text-primary text-xs after:absolute after:inset-0"
+          >
+            #{id.slice(0, 8)}
+          </Link>
+        );
       },
     },
     {
