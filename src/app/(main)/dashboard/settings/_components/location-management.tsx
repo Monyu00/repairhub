@@ -300,8 +300,9 @@ function SortableBuildingCard({
 }
 
 export function LocationManagement({ initialBuildings }: LocationManagementProps) {
-  const [buildings, setBuildings] = useState<LocationCatalogBuilding[]>(initialBuildings);
+  const [draggedBuildings, setDraggedBuildings] = useState<LocationCatalogBuilding[] | null>(null);
   const [isPending, startTransition] = useTransition();
+  const buildings = draggedBuildings ?? initialBuildings;
 
   // Search State
   const [searchQuery, setSearchQuery] = useState("");
@@ -330,11 +331,6 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     id: string;
     name: string;
   } | null>(null);
-
-  // Sync state if server props change
-  if (initialBuildings !== buildings && !isPending) {
-    setBuildings(initialBuildings);
-  }
 
   const isSearching = Boolean(searchQuery.trim());
   const sensors = useSensors(
@@ -534,15 +530,16 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     if (oldIndex === -1 || newIndex === -1) return;
 
     const nextBuildings = arrayMove(buildings, oldIndex, newIndex);
-    setBuildings(nextBuildings);
+    setDraggedBuildings(nextBuildings);
 
     startTransition(async () => {
       const res = await reorderBuildings(nextBuildings.map((building) => building.id));
       if (!res.success) {
         toast.error(res.error ?? "調整地點排序失敗");
-        setBuildings(initialBuildings);
+        setDraggedBuildings(null);
       } else {
         toast.success("地點排序已更新");
+        setDraggedBuildings(null);
       }
     });
   };
@@ -561,7 +558,9 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     if (oldIndex === -1 || newIndex === -1) return;
 
     const nextSpaces = arrayMove(building.spaces, oldIndex, newIndex);
-    setBuildings((prev) => prev.map((item) => (item.id === buildingId ? { ...item, spaces: nextSpaces } : item)));
+    setDraggedBuildings((prev) =>
+      (prev ?? initialBuildings).map((item) => (item.id === buildingId ? { ...item, spaces: nextSpaces } : item)),
+    );
 
     startTransition(async () => {
       const res = await reorderSpaces(
@@ -570,9 +569,10 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
       );
       if (!res.success) {
         toast.error(res.error ?? "調整空間排序失敗");
-        setBuildings(initialBuildings);
+        setDraggedBuildings(null);
       } else {
         toast.success("空間排序已更新");
+        setDraggedBuildings(null);
       }
     });
   };
