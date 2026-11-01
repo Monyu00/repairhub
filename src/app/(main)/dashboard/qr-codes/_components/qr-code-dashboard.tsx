@@ -15,6 +15,8 @@ import { exportQRCodesToPDF } from "./qr-pdf-export";
 import { QRSelectionPanel } from "./qr-selection-panel";
 import type { EquipmentOption, PrintableQRItem, QRTargetType } from "./types";
 
+const QR_PREVIEW_LIMIT = 24;
+
 interface QRCodeDashboardProps {
   buildings: LocationCatalogBuilding[];
   equipment: EquipmentOption[];
@@ -126,6 +128,9 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
     return items;
   }, [targetType, selectedSpaceIds, selectedEquipmentIds, spacesMap, equipment, origin]);
 
+  const previewItems = useMemo(() => printableItems.slice(0, QR_PREVIEW_LIMIT), [printableItems]);
+  const hiddenPreviewCount = printableItems.length - previewItems.length;
+
   // Export PDF
   const handleExportPDF = async () => {
     if (printableItems.length === 0) return;
@@ -211,14 +216,14 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-foreground text-sm">預覽輸出卡片</h3>
                   <Badge variant="secondary" className="font-mono text-xs">
-                    共 {printableItems.length} 張卡片
+                    已選 {printableItems.length} 張{hiddenPreviewCount > 0 ? `、僅預覽前 ${QR_PREVIEW_LIMIT} 張` : ""}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-xs">A4 列印每頁排版 6 張（2×3 網格）</p>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {printableItems.map((item) => (
+                {previewItems.map((item) => (
                   <QRCard key={`${item.type}-${item.id}`} item={item} />
                 ))}
               </div>
