@@ -7,6 +7,7 @@ import { getSession } from "@/server/auth/session";
 import { queryTickets } from "@/server/tickets/query";
 
 import type { FilterOptions, TicketStatus } from "./_components/ticket-types";
+import { parseTicketSortParam } from "./_components/ticket-url-state";
 import { TicketsDataTable } from "./_components/tickets-data-table";
 import { TicketsLoadingSkeleton } from "./_components/tickets-loading-skeleton";
 
@@ -24,6 +25,7 @@ interface PageProps {
     from?: string;
     to?: string;
     page?: string;
+    sort?: string;
   }>;
 }
 
@@ -39,6 +41,7 @@ export default async function Page({ searchParams }: PageProps) {
   const buildingId = params.building && params.building !== "all" ? params.building : undefined;
   const fromDate = params.from ?? undefined;
   const toDate = params.to ?? undefined;
+  const sort = parseTicketSortParam(params.sort);
 
   // 1. Get cached session (deduplicated from layout)
   const session = await getSession();
@@ -60,6 +63,7 @@ export default async function Page({ searchParams }: PageProps) {
     toDate,
     page,
     pageSize: PAGE_SIZE,
+    sort: { field: sort.field, ascending: sort.ascending },
     viewerContext: {
       role: userRole,
       userId: session?.userId,

@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { flexRender, type SortingState, useTable } from "@tanstack/react-table";
-import { ChevronLeftIcon, ChevronRightIcon, ClipboardX, ListFilter, Zap } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, ClipboardX, ListFilter, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -19,6 +19,7 @@ import { getTicketColumns, ticketTableFeatures } from "./ticket-columns";
 import { TicketFilterBar } from "./ticket-filter-bar";
 import { TicketMobileCard } from "./ticket-mobile-card";
 import type { FilterOptions, TicketRow } from "./ticket-types";
+import { parseTicketSortParam, toggleTicketSortParam } from "./ticket-url-state";
 
 interface TicketsDataTableProps {
   tickets: TicketRow[];
@@ -44,9 +45,6 @@ export function TicketsDataTable({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [activeTab, setActiveTab] = useState("all");
-
   const isTechnician = userRole === "technician";
   const columns = useMemo(() => getTicketColumns(canViewReporter), [canViewReporter]);
 
@@ -54,10 +52,6 @@ export function TicketsDataTable({
     features: ticketTableFeatures,
     data: tickets,
     columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
   });
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -71,6 +65,29 @@ export function TicketsDataTable({
   const handleRowClick = (ticketId: string) => {
     router.push(`/dashboard/tickets/${ticketId}`);
   };
+
+  const activeTab: "all" | "pending" = searchParams.get("tab") === "pending" ? "pending" : "all";
+  const currentSort = searchParams.get("sort") ?? undefined;
+
+  const createSortUrl = useCallback(
+    (sortValue: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("sort", sortValue);
+      params.delete("page");
+      return `${pathname}?${params.toString()}`;
+    },
+    [pathname, searchParams],
+  );
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", value);
+      params.delete("page");
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   const renderAllTicketsView = () => (
     <div className="space-y-4">
@@ -100,7 +117,18 @@ export function TicketsDataTable({
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <TableHead key={header.id} className="h-10 font-semibold text-xs">
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder ? null : header.column.id === "createdAt" ? (
+                          <Link
+                            href={createSortUrl(toggleTicketSortParam(currentSort))}
+                            aria-label="切換通報時間排序"
+                            className="text-foreground hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            通報時間
+                            <ArrowUpDown className="size-3 inline ml-0.5" />
+                          </Link>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -206,7 +234,7 @@ export function TicketsDataTable({
   }
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
       <TabsList className="h-9 p-1">
         <TabsTrigger value="all" className="gap-1.5 px-3 text-xs">
           <ListFilter className="size-3.5" />

@@ -2,32 +2,17 @@
 
 import Link from "next/link";
 
-import {
-  type ColumnDef,
-  columnVisibilityFeature,
-  createSortedRowModel,
-  rowSortingFeature,
-  sortFn_alphanumeric,
-  sortFn_text,
-  tableFeatures,
-} from "@tanstack/react-table";
+import { type ColumnDef, columnVisibilityFeature, tableFeatures } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale/zh-TW";
-import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
+import { Mail, Phone, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
-import { Button } from "@/components/ui/button";
 
 import type { TicketRecord } from "./ticket-types";
 
 export const ticketTableFeatures = tableFeatures({
   columnVisibilityFeature,
-  rowSortingFeature,
-  sortedRowModel: createSortedRowModel(),
-  sortFns: {
-    alphanumeric: sortFn_alphanumeric,
-    text: sortFn_text,
-  },
 });
 
 export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof ticketTableFeatures, TicketRecord>[] {
@@ -133,17 +118,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
   columns.push({
     accessorKey: "createdAt",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="-ml-3 h-8 gap-1 font-medium text-xs"
-        >
-          通報時間
-          <ArrowUpDown className="size-3" />
-        </Button>
-      );
+      return "通報時間";
     },
     cell: ({ row }) => {
       const dateStr = row.getValue("createdAt") as string;
