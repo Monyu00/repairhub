@@ -187,8 +187,8 @@ export function ReportForm({
 
       <form ref={formRef} action={formAction} className="space-y-6">
         {state.error && (
-          <div className="flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-destructive text-sm">
-            <AlertCircleIcon className="size-4 shrink-0" />
+          <div className="flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-foreground text-sm">
+            <AlertCircleIcon className="size-4 shrink-0 text-destructive" />
             <span>{state.error}</span>
           </div>
         )}

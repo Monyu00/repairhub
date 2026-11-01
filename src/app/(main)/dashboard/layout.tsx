@@ -51,12 +51,6 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         } as React.CSSProperties
       }
     >
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:text-sm focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-hidden"
-      >
-        跳到主要內容
-      </a>
       <AppSidebar variant={variant} collapsible={collapsible} userRole={session?.role ?? null} />
       <SidebarInset
         id="main-content"
@@ -70,6 +64,12 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           "min-w-0 overflow-x-clip",
         )}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:text-sm focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-hidden"
+        >
+          跳到主要內容
+        </a>
         <header
           className={cn(
             "flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
@@ -89,8 +89,11 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="gap-1.5">
                 <Link href="/">
+                  <span className="sr-only">前台首頁</span>
                   <Home className="size-4" />
-                  <span className="hidden sm:inline">前台首頁</span>
+                  <span aria-hidden="true" className="hidden sm:inline">
+                    前台首頁
+                  </span>
                 </Link>
               </Button>
               {currentUserData && <UserMenu user={currentUserData} />}

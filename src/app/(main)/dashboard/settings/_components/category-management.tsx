@@ -96,7 +96,7 @@ function SortableCategoryRow({
       <TableCell className="font-medium text-foreground">{category.name}</TableCell>
       <TableCell className="w-[120px]">
         {category.is_active ? (
-          <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-700">
+          <Badge variant="default" className="bg-emerald-700 dark:bg-emerald-800">
             啟用中
           </Badge>
         ) : (
@@ -284,6 +284,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
         ) : (
           <div className="rounded-md border">
             <DndContext
+              id="category-order"
               sensors={sensors}
               collisionDetection={closestCenter}
               modifiers={[restrictToVerticalAxis]}

@@ -243,7 +243,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                         <span className="block max-w-[120px] truncate font-semibold text-foreground">
                           {tech.displayName}
                         </span>
-                        <span className="block text-muted-foreground text-xs">
+                        <span className="block text-foreground/80 text-xs">
                           總完工: {tech.completedCount} 件 | 已評: {tech.ratedCount} 筆
                         </span>
                       </div>
@@ -258,7 +258,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                           </span>
                         </div>
                       ) : (
-                        <span className="text-muted-foreground text-xs italic">尚無評分</span>
+                        <span className="text-foreground/80 text-xs italic">尚無評分</span>
                       )}
                     </div>
                   </div>

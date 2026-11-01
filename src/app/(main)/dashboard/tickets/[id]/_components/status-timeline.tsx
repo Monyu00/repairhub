@@ -143,7 +143,7 @@ export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelin
                         {item.content}
                       </p>
                       {item.authorRole && (
-                        <span className="rounded bg-muted px-1.5 py-0.2 font-medium text-muted-foreground text-xs">
+                        <span className="rounded bg-muted px-1.5 py-0.2 font-medium text-foreground text-xs">
                           {item.authorRole}
                         </span>
                       )}

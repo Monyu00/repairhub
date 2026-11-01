@@ -260,6 +260,7 @@ function SortableBuildingCard({
           ) : (
             <div className="mt-2 rounded-md border bg-background">
               <DndContext
+                id={`space-order-${building.id}`}
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 modifiers={[restrictToVerticalAxis]}
@@ -671,6 +672,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
           </Empty>
         ) : (
           <DndContext
+            id="building-order"
             sensors={sensors}
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}

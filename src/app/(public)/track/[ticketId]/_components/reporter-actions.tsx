@@ -227,7 +227,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
               {/* Error display */}
               {error && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-sm">
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-foreground text-sm">
                   {error}
                 </div>
               )}

@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 
-import { getTicketDetail } from "./detail";
+import { getTicketDetail, resolvePublicTicketId } from "./detail";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -118,4 +118,46 @@ test("getTicketDetail exposes reporter and author data for technicians", async (
   assert.equal(detail.ticket.reporterEmail, "alice@example.com");
   assert.equal(detail.notes[0]?.authorRole, "technician");
   assert.equal(detail.notes[0]?.authorName, "Bob");
+});
+
+function createShortTicketSupabase() {
+  return {
+    from: (table: string) => {
+      if (table !== "tickets") {
+        throw new Error(`Unexpected table: ${table}`);
+      }
+
+      return {
+        select: () => ({
+          ilike: (_column: string, value: string) => {
+            if (value !== "c339d399%") {
+              throw new Error(`Unexpected ticket lookup: ${value}`);
+            }
+
+            return {
+              limit: () => ({
+                maybeSingle: async () => ({ data: { id: "c339d399-a3c2-4de2-b7a3-fb5bdc8f3249" }, error: null }),
+              }),
+            };
+          },
+        }),
+      };
+    },
+  } as unknown as SupabaseClient<Database>;
+}
+
+test("resolvePublicTicketId resolves the short ID shown in public listings", async () => {
+  const resolvedTicketId = await resolvePublicTicketId(createShortTicketSupabase(), "#c339d399");
+
+  assert.equal(resolvedTicketId, "c339d399-a3c2-4de2-b7a3-fb5bdc8f3249");
+});
+
+test("resolvePublicTicketId rejects invalid ticket input without querying", async () => {
+  const supabase = {
+    from: () => {
+      throw new Error("Unexpected database lookup");
+    },
+  } as unknown as SupabaseClient<Database>;
+
+  assert.equal(await resolvePublicTicketId(supabase, "not-a-ticket"), null);
 });

@@ -6,12 +6,14 @@ test("errorIdForField builds the id used by the server error message", () => {
   assert.equal(errorIdForField("reporter_email"), "report-error-reporter_email");
 });
 
-test("applyFieldErrors links errors to their fields and returns the first invalid field", () => {
+test("applyFieldErrors focuses the first invalid field in DOM order", () => {
   const documentDescriptor = Object.getOwnPropertyDescriptor(globalThis, "document");
   const buildingControl = {
     id: "building_id",
     describedBy: "",
-    removeAttribute: () => undefined,
+    removeAttribute: () => {
+      buildingControl.describedBy = "";
+    },
     setAttribute: (_name: string, value: string) => {
       buildingControl.describedBy = value;
     },
@@ -19,15 +21,29 @@ test("applyFieldErrors links errors to their fields and returns the first invali
   const emailControl = {
     id: "reporter_email",
     describedBy: "",
-    removeAttribute: () => undefined,
+    removeAttribute: () => {
+      emailControl.describedBy = "";
+    },
     setAttribute: (_name: string, value: string) => {
       emailControl.describedBy = value;
     },
   };
 
+  function selectControl(selector: string) {
+    if (selector === "[aria-describedby]") {
+      return [buildingControl, emailControl].find((control) => control.describedBy) ?? null;
+    }
+
+    if (selector === "#reporter_email") {
+      return emailControl;
+    }
+
+    return buildingControl;
+  }
+
   const form = {
-    querySelectorAll: () => [],
-    querySelector: (selector: string) => (selector === "#reporter_email" ? emailControl : buildingControl),
+    querySelectorAll: (selector: string) => (selector === "[aria-describedby]" ? [buildingControl, emailControl] : []),
+    querySelector: selectControl,
   } as unknown as HTMLFormElement;
 
   Reflect.set(globalThis, "document", {
@@ -36,8 +52,8 @@ test("applyFieldErrors links errors to their fields and returns the first invali
 
   try {
     const firstInvalidControl = applyFieldErrors(form, {
-      building_id: "請選擇地點",
       reporter_email: "電子郵件格式不正確",
+      building_id: "請選擇地點",
     });
 
     assert.equal(firstInvalidControl, buildingControl);

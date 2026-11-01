@@ -117,7 +117,7 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
         <Button
           variant="destructive"
           size="sm"
-          className="gap-1.5 text-xs shadow-xs"
+          className="gap-1.5 bg-destructive! text-destructive-foreground! text-xs shadow-xs hover:bg-destructive/90!"
           onClick={() => setCancelOpen(true)}
         >
           <Ban className="size-3.5" />

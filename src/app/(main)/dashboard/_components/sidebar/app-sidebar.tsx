@@ -44,28 +44,30 @@ export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarPr
 
   return (
     <Sidebar {...props} variant={variant} collapsible={collapsible}>
-      <SidebarHeader className="gap-3 pb-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="h-11 px-3">
-              <Link prefetch={false} href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-base leading-tight">
-                  <span className="font-bold">{APP_CONFIG.name}</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={sidebarItems} userRole={activeRole} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser userRole={activeRole} />
-      </SidebarFooter>
+      <nav aria-label="主要導覽" className="flex h-full min-h-0 flex-1 flex-col">
+        <SidebarHeader className="gap-3 pb-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild className="h-11 px-3">
+                <Link prefetch={false} href="/dashboard">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <Command className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-base leading-tight">
+                    <span className="font-bold">{APP_CONFIG.name}</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={sidebarItems} userRole={activeRole} />
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser userRole={activeRole} />
+        </SidebarFooter>
+      </nav>
     </Sidebar>
   );
 }

@@ -15,16 +15,13 @@ export function applyFieldErrors(form: HTMLFormElement, errors: ReportFieldError
 
   if (!errors) return null;
 
-  let firstInvalidControl: HTMLElement | null = null;
-
   for (const field of Object.keys(errors)) {
     const control = form.querySelector<HTMLElement>(`#${field}`);
     const error = document.getElementById(errorIdForField(field));
     if (!control || !error) continue;
 
     control.setAttribute("aria-describedby", error.id);
-    firstInvalidControl ??= control;
   }
 
-  return firstInvalidControl;
+  return form.querySelector<HTMLElement>("[aria-describedby]");
 }
