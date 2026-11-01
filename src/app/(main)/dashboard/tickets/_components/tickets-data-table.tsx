@@ -137,6 +137,12 @@ export function TicketsDataTable({
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} className="relative cursor-pointer transition-colors hover:bg-muted/60">
+                    <Link
+                      href={`/dashboard/tickets/${row.original.id}`}
+                      className="absolute inset-0 z-0"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    />
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-3 text-xs">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

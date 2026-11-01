@@ -71,11 +71,17 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   key={ticket.id}
                   className="group relative cursor-pointer transition-colors focus-within:bg-muted/40 hover:bg-muted/40"
                 >
+                  <Link
+                    href={`/track/${ticket.id}`}
+                    className="absolute inset-0 z-0"
+                    aria-hidden="true"
+                    tabIndex={-1}
+                  />
                   <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
                     <Link
                       href={`/track/${ticket.id}`}
                       aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
-                      className="rounded-sm outline-none after:absolute after:inset-0 hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                      className="rounded-sm outline-none relative z-10 hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       #{ticket.id.slice(0, 8)}
                     </Link>
