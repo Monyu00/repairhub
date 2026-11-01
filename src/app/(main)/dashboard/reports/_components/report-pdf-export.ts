@@ -553,7 +553,7 @@ function renderPage2ToCanvas(data: ReportData): string {
  * Generates an A4 PDF containing all report charts, KPIs, and summaries in 2 structured pages.
  */
 export async function exportReportToPDF(data: ReportData): Promise<void> {
-  const toastId = toast.loading("正在產生 PDF 統計報表...");
+  const toastId = toast.loading("正在產生 PDF 統計報表…");
 
   try {
     const { jsPDF } = await import("jspdf");

@@ -27,6 +27,7 @@ export function SettingsPage({
 
   return (
     <div className="space-y-6">
+      <h1 className="font-bold font-heading text-2xl text-foreground tracking-tight">系統設定</h1>
       {currentTab === "categories" && <CategoryManagement initialCategories={categories} />}
       {currentTab === "locations" && <LocationManagement initialBuildings={buildings} />}
       {currentTab === "users" && (

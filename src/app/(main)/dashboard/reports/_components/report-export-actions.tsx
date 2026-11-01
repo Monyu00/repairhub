@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ChevronDown, Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { exportReportToExcel } from "./report-excel-export";
-import { exportReportToPDF } from "./report-pdf-export";
 import type { ReportData } from "./report-types";
 
 interface ReportExportActionsProps {
@@ -30,7 +29,10 @@ export function ReportExportActions({ data }: ReportExportActionsProps) {
     if (isExporting) return;
     setIsExporting(true);
     try {
+      const { exportReportToExcel } = await import("./report-excel-export");
       await exportReportToExcel(data);
+    } catch {
+      toast.error("匯出 Excel 報表失敗，請稍後再試");
     } finally {
       setIsExporting(false);
     }
@@ -40,7 +42,10 @@ export function ReportExportActions({ data }: ReportExportActionsProps) {
     if (isExporting) return;
     setIsExporting(true);
     try {
+      const { exportReportToPDF } = await import("./report-pdf-export");
       await exportReportToPDF(data);
+    } catch {
+      toast.error("產生 PDF 報表失敗，請稍後再試");
     } finally {
       setIsExporting(false);
     }

@@ -79,7 +79,7 @@ export function QRCard({ item }: QRCardProps) {
   };
 
   return (
-    <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-all hover:shadow-md">
+    <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-shadow hover:shadow-md">
       {/* Screen action bar */}
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <TooltipProvider>
@@ -166,9 +166,9 @@ export function QRCard({ item }: QRCardProps) {
 
       {/* Card Info & Labels */}
       <div className="w-full space-y-1 text-center">
-        <h4 className="truncate font-bold font-heading text-base text-foreground tracking-tight">{item.title}</h4>
+        <h3 className="truncate font-bold font-heading text-base text-foreground tracking-tight">{item.title}</h3>
         <p className="truncate text-muted-foreground text-xs">{item.subtitle}</p>
-        {item.code && <p className="font-mono text-muted-foreground/80 text-xs">編號: {item.code}</p>}
+        {item.code && <p className="font-mono text-foreground/80 text-xs">編號: {item.code}</p>}
       </div>
 
       {/* Card Footer notice */}

@@ -1,20 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { flexRender, type SortingState, useTable } from "@tanstack/react-table";
-import { ClipboardX, ListFilter, Zap } from "lucide-react";
+import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, ClipboardX, ListFilter, Zap } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -23,6 +19,7 @@ import { getTicketColumns, ticketTableFeatures } from "./ticket-columns";
 import { TicketFilterBar } from "./ticket-filter-bar";
 import { TicketMobileCard } from "./ticket-mobile-card";
 import type { FilterOptions, TicketRow } from "./ticket-types";
+import { parseTicketSortParam, toggleTicketSortParam } from "./ticket-url-state";
 
 interface TicketsDataTableProps {
   tickets: TicketRow[];
@@ -48,9 +45,6 @@ export function TicketsDataTable({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [activeTab, setActiveTab] = useState("all");
-
   const isTechnician = userRole === "technician";
   const columns = useMemo(() => getTicketColumns(canViewReporter), [canViewReporter]);
 
@@ -58,24 +52,42 @@ export function TicketsDataTable({
     features: ticketTableFeatures,
     data: tickets,
     columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
   });
 
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
+  const createPageUrl = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    return `${pathname}?${params.toString()}`;
   };
 
   const handleRowClick = (ticketId: string) => {
     router.push(`/dashboard/tickets/${ticketId}`);
   };
+
+  const activeTab: "all" | "pending" = searchParams.get("tab") === "pending" ? "pending" : "all";
+  const currentSort = searchParams.get("sort") ?? undefined;
+
+  const createSortUrl = useCallback(
+    (sortValue: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("sort", sortValue);
+      params.delete("page");
+      return `${pathname}?${params.toString()}`;
+    },
+    [pathname, searchParams],
+  );
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", value);
+      params.delete("page");
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
 
   const renderAllTicketsView = () => (
     <div className="space-y-4">
@@ -105,7 +117,18 @@ export function TicketsDataTable({
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <TableHead key={header.id} className="h-10 font-semibold text-xs">
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder ? null : header.column.id === "createdAt" ? (
+                          <Link
+                            href={createSortUrl(toggleTicketSortParam(currentSort))}
+                            aria-label="切換通報時間排序"
+                            className="text-foreground hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            通報時間
+                            <ArrowUpDown className="size-3 inline ml-0.5" />
+                          </Link>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -113,13 +136,17 @@ export function TicketsDataTable({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => handleRowClick(row.original.id)}
-                    className="cursor-pointer transition-colors hover:bg-muted/60"
-                  >
-                    {row.getVisibleCells().map((cell) => (
+                  <TableRow key={row.id} className="relative cursor-pointer transition-colors hover:bg-muted/60">
+                    {row.getVisibleCells().map((cell, cellIndex) => (
                       <TableCell key={cell.id} className="py-3 text-xs">
+                        {cellIndex === 0 && (
+                          <Link
+                            href={`/dashboard/tickets/${row.original.id}`}
+                            className="absolute inset-0 z-0"
+                            aria-hidden="true"
+                            tabIndex={-1}
+                          />
+                        )}
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -155,21 +182,51 @@ export function TicketsDataTable({
               <Pagination className="mx-0 w-auto">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious
-                      text="上一頁"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                    <Button
+                      asChild={currentPage > 1}
+                      variant="ghost"
+                      size="default"
+                      disabled={currentPage <= 1}
+                      aria-label="上一頁"
+                      className="pl-1.5!"
+                    >
+                      {currentPage > 1 ? (
+                        <Link href={createPageUrl(currentPage - 1)}>
+                          <ChevronLeftIcon data-icon="inline-start" />
+                          <span className="hidden sm:block">上一頁</span>
+                        </Link>
+                      ) : (
+                        <span className="flex items-center">
+                          <ChevronLeftIcon data-icon="inline-start" />
+                          <span className="hidden sm:block">上一頁</span>
+                        </span>
+                      )}
+                    </Button>
                   </PaginationItem>
                   <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>
-                    <PaginationNext
-                      text="下一頁"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                    <Button
+                      asChild={currentPage < totalPages}
+                      variant="ghost"
+                      size="default"
+                      disabled={currentPage >= totalPages}
+                      aria-label="下一頁"
+                      className="pr-1.5!"
+                    >
+                      {currentPage < totalPages ? (
+                        <Link href={createPageUrl(currentPage + 1)}>
+                          <span className="hidden sm:block">下一頁</span>
+                          <ChevronRightIcon data-icon="inline-end" />
+                        </Link>
+                      ) : (
+                        <span className="flex items-center">
+                          <span className="hidden sm:block">下一頁</span>
+                          <ChevronRightIcon data-icon="inline-end" />
+                        </span>
+                      )}
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
@@ -185,7 +242,7 @@ export function TicketsDataTable({
   }
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
       <TabsList className="h-9 p-1">
         <TabsTrigger value="all" className="gap-1.5 px-3 text-xs">
           <ListFilter className="size-3.5" />

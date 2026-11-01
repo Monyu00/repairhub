@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getTicketDetail } from "@/server/tickets/detail";
+import { getTicketDetail, resolvePublicTicketId } from "@/server/tickets/detail";
 
 import { TicketNotFound } from "./_components/ticket-not-found";
 import { TicketTracker } from "./_components/ticket-tracker";
@@ -15,7 +15,11 @@ export default async function TrackPage({ params }: TrackPageProps) {
 
   // Public tracking uses the admin adapter, then redacts Reporter and author data in the module.
   const supabase = createAdminClient();
-  const detail = await getTicketDetail(supabase, ticketId, { role: null });
+  const resolvedTicketId = await resolvePublicTicketId(supabase, ticketId);
+
+  if (!resolvedTicketId) return <TicketNotFound ticketId={ticketId} />;
+
+  const detail = await getTicketDetail(supabase, resolvedTicketId, { role: null });
 
   if (!detail) return <TicketNotFound ticketId={ticketId} />;
 

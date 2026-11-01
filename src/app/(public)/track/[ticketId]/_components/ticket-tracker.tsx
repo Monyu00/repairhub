@@ -31,6 +31,8 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
   return (
     <div className="px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-xl space-y-4">
+        <h1 className="text-xl font-semibold text-foreground tracking-tight">報修單追蹤</h1>
+
         {/* Search Bar */}
         <TicketSearch currentTicketId={ticket.id} />
 

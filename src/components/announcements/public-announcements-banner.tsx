@@ -37,7 +37,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 shadow-2xs transition-all">
+    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 shadow-2xs transition-colors">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -87,7 +87,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                     aria-label={`切換至公告 ${idx + 1}`}
                   >
                     <span
-                      className={`block h-1.5 rounded-full transition-all ${
+                      className={`block h-1.5 rounded-full transition-colors ${
                         idx === activeItemIndex ? "w-3.5 bg-primary" : "w-1.5 bg-primary/25 hover:bg-primary/40"
                       }`}
                     />

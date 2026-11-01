@@ -131,7 +131,7 @@ export async function exportQRCodesToPDF(
     return;
   }
 
-  const toastId = toast.loading(`正在產生 ${items.length} 張 QR Code PDF...`);
+  const toastId = toast.loading(`正在產生 ${items.length} 張 QR Code PDF…`);
 
   try {
     const { jsPDF } = await import("jspdf");

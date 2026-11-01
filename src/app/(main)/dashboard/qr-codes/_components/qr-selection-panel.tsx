@@ -174,6 +174,7 @@ export function QRSelectionPanel({
                 <div className="flex items-center gap-2.5">
                   <Checkbox
                     id={`building-${building.id}`}
+                    aria-label={`全選 ${building.name} 的所有空間`}
                     checked={getCheckboxState(isAllSelected, isSomeSelected)}
                     onCheckedChange={() => handleToggleBuilding(buildingSpaceIds)}
                   />
@@ -228,7 +229,7 @@ export function QRSelectionPanel({
                             {space.name}
                           </Label>
                         </div>
-                        <span className="font-mono text-muted-foreground text-xs">{space.floor}F</span>
+                        <span className="font-mono text-foreground/80 text-xs">{space.floor}F</span>
                       </div>
                     );
                   })}
@@ -266,6 +267,7 @@ export function QRSelectionPanel({
                 <div className="flex items-center gap-2.5">
                   <Checkbox
                     id={`eq-building-${building.id}`}
+                    aria-label={`全選 ${building.name} 的所有設備`}
                     checked={getCheckboxState(isAllSelected, isSomeSelected)}
                     onCheckedChange={() => handleToggleBuilding(buildingEqIds)}
                   />
@@ -321,7 +323,7 @@ export function QRSelectionPanel({
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5 text-right">
                           <span className="max-w-[100px] truncate text-muted-foreground text-xs">{eq.spaceName}</span>
-                          <span className="font-mono text-muted-foreground/80 text-xs">({eq.code})</span>
+                          <span className="font-mono text-foreground/80 text-xs">({eq.code})</span>
                         </div>
                       </div>
                     );

@@ -1,11 +1,9 @@
 "use client";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, User } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { TicketRecord } from "@/server/tickets/query";
 
@@ -15,13 +13,9 @@ interface TicketInfoSectionProps {
 }
 
 export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSectionProps) {
-  const formattedCreatedAt = ticket.createdAt
-    ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedCreatedAt = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
-  const formattedUpdatedAt = ticket.updatedAt
-    ? format(new Date(ticket.updatedAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedUpdatedAt = ticket.updatedAt ? formatTicketDate(ticket.updatedAt) : "-";
 
   return (
     <Card className="shadow-2xs">
@@ -103,9 +97,7 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
               </div>
             </div>
             {ticket.ratedAt && (
-              <span className="text-muted-foreground text-xs">
-                評分時間：{format(new Date(ticket.ratedAt), "yyyy/MM/dd HH:mm", { locale: zhTW })}
-              </span>
+              <span className="text-muted-foreground text-xs">評分時間：{formatTicketDate(ticket.ratedAt)}</span>
             )}
           </div>
         )}

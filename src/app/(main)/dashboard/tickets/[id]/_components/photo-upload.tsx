@@ -92,7 +92,7 @@ export function PhotoUpload({
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
-                className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
                 aria-label="移除照片"
               >
                 <X className="size-3.5" />
@@ -106,6 +106,7 @@ export function PhotoUpload({
             type="button"
             disabled={isUploadDisabled}
             onClick={() => fileInputRef.current?.click()}
+            aria-label={loading ? "照片上傳中" : "上傳照片"}
             className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-border border-dashed bg-muted/30 p-2 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
@@ -128,12 +129,17 @@ export function PhotoUpload({
         type="file"
         accept="image/*"
         multiple
+        aria-label="選擇照片檔案"
         className="hidden"
         onChange={handleFileSelect}
         disabled={isUploadDisabled}
       />
 
-      {error && <p className="font-medium text-destructive text-xs">{error}</p>}
+      {error && (
+        <p role="alert" className="font-medium text-destructive text-xs">
+          {error}
+        </p>
+      )}
       <p className="text-muted-foreground text-xs">支援 JPG、PNG、WebP 格式，每張最大 5MB，最多 {maxPhotos} 張照片。</p>
     </div>
   );

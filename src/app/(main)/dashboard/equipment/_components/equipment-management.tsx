@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Edit2, FilterX, HardDrive, History, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -40,8 +40,6 @@ interface EquipmentManagementProps {
 }
 
 export function EquipmentManagement({ initialEquipment, buildings }: EquipmentManagementProps) {
-  const [equipmentList, setEquipmentList] = useState<EquipmentRow[]>(initialEquipment);
-
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [buildingFilter, setBuildingFilter] = useState("all");
@@ -59,14 +57,9 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
   const [historyTarget, setHistoryTarget] = useState<EquipmentRow | null>(null);
 
-  // Sync state if server props change
-  if (initialEquipment !== equipmentList) {
-    setEquipmentList(initialEquipment);
-  }
-
   // Filtered Equipment List
   const filteredEquipment = useMemo(() => {
-    return equipmentList.filter((item) => {
+    return initialEquipment.filter((item) => {
       // 1. Search Query (Name or Code)
       if (searchQuery.trim()) {
         const query = searchQuery.trim().toLowerCase();
@@ -89,16 +82,10 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
 
       return true;
     });
-  }, [equipmentList, searchQuery, buildingFilter, warrantyFilter]);
+  }, [initialEquipment, searchQuery, buildingFilter, warrantyFilter]);
 
   const totalPages = Math.ceil(filteredEquipment.length / PAGE_SIZE) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
 
   const paginatedEquipment = useMemo(() => {
     const start = (safeCurrentPage - 1) * PAGE_SIZE;
@@ -231,7 +218,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+                  className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
                   onClick={() => {
                     setSearchQuery("");
                     setBuildingFilter("all");
@@ -258,9 +245,9 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 <HardDrive />
               </EmptyMedia>
               <EmptyHeader>
-                <EmptyTitle>{equipmentList.length === 0 ? "尚未建立設備資產" : "找不到符合條件的設備"}</EmptyTitle>
+                <EmptyTitle>{initialEquipment.length === 0 ? "尚未建立設備資產" : "找不到符合條件的設備"}</EmptyTitle>
                 <EmptyDescription>
-                  {equipmentList.length === 0
+                  {initialEquipment.length === 0
                     ? "目前尚無任何設備資料，請點擊右上角新增。"
                     : "找不到符合條件的設備資產。"}
                 </EmptyDescription>
@@ -371,7 +358,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                       <PaginationItem>
                         <PaginationPrevious
                           text="上一頁"
-                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          onClick={() => setCurrentPage((p) => Math.max(1, Math.min(totalPages, p) - 1))}
                           aria-disabled={safeCurrentPage <= 1}
                           tabIndex={safeCurrentPage <= 1 ? -1 : undefined}
                           className={safeCurrentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}

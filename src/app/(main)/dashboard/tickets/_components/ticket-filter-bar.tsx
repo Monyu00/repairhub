@@ -166,7 +166,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
 
         {/* Category Dropdown */}
         <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-          <SelectTrigger size="sm" className="h-8 min-w-32">
+          <SelectTrigger size="sm" className="h-8 min-w-32" aria-label="類別篩選">
             <SelectValue placeholder="所有類別" />
           </SelectTrigger>
           <SelectContent>
@@ -181,7 +181,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
 
         {/* Building Dropdown */}
         <Select value={selectedBuilding} onValueChange={handleBuildingChange}>
-          <SelectTrigger size="sm" className="h-8 min-w-32">
+          <SelectTrigger size="sm" className="h-8 min-w-32" aria-label="地點篩選">
             <SelectValue placeholder="所有地點" />
           </SelectTrigger>
           <SelectContent>
@@ -210,6 +210,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                   <span className="w-12 text-muted-foreground">起始日:</span>
                   <input
                     type="date"
+                    aria-label="起始日期"
                     value={fromDateStr}
                     onChange={(e) => updateQueryParams({ from: e.target.value || null })}
                     className="rounded border border-input bg-background px-2 py-1 text-xs"
@@ -219,6 +220,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
                   <span className="w-12 text-muted-foreground">結束日:</span>
                   <input
                     type="date"
+                    aria-label="結束日期"
                     value={toDateStr}
                     onChange={(e) => updateQueryParams({ to: e.target.value || null })}
                     className="rounded border border-input bg-background px-2 py-1 text-xs"
@@ -245,7 +247,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
             variant="ghost"
             size="sm"
             onClick={handleResetFilters}
-            className="h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+            className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
           >
             <FilterX className="size-3.5" />
             <span>清除篩選 ({activeFilterCount})</span>
@@ -253,7 +255,11 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
         )}
       </div>
 
-      {isPending && <span className="animate-pulse text-muted-foreground text-xs">更新中...</span>}
+      {isPending && (
+        <span role="status" className="animate-pulse text-muted-foreground text-xs">
+          更新中...
+        </span>
+      )}
     </div>
   );
 }

@@ -44,6 +44,40 @@ interface RawTicketNote {
     | null;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TICKET_PREFIX_PATTERN = /^[0-9a-f-]{1,36}$/i;
+
+/**
+ * Resolves public ticket lookups from a full Ticket ID or the short ID shown on public listings.
+ */
+export async function resolvePublicTicketId(
+  supabase: SupabaseClient<Database>,
+  ticketId: string,
+): Promise<string | null> {
+  const normalizedTicketId = ticketId.trim().replace(/^#/, "");
+
+  if (UUID_PATTERN.test(normalizedTicketId)) {
+    return normalizedTicketId;
+  }
+
+  if (!TICKET_PREFIX_PATTERN.test(normalizedTicketId)) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("tickets")
+    .select("id")
+    .ilike("ticket_number", `${normalizedTicketId}%`)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data?.id ?? null;
+}
+
 export async function getTicketDetail(
   supabase: SupabaseClient<Database>,
   ticketId: string,

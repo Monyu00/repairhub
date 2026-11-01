@@ -85,7 +85,7 @@ export function PhotoUpload({
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
               aria-label="移除圖片"
             >
               <XIcon className="size-3.5" />
@@ -115,9 +115,21 @@ export function PhotoUpload({
         )}
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        aria-label="選擇照片檔案"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
-      {error && <p className="text-destructive text-xs">{error}</p>}
+      {error && (
+        <p role="alert" className="text-destructive text-xs">
+          {error}
+        </p>
+      )}
       <p className="text-muted-foreground text-xs">支援 JPG、PNG、WebP 格式，每張最大 5MB，最多 {maxPhotos} 張照片。</p>
     </div>
   );

@@ -69,7 +69,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
       {filteredGroups.map((group) => (
         <SidebarGroup key={group.id} className="py-1.5">
           {group.label && (
-            <SidebarGroupLabel className="px-3 font-semibold text-muted-foreground/80 text-xs tracking-wider group-data-[collapsible=icon]:pointer-events-none">
+            <SidebarGroupLabel className="px-3 font-semibold text-sidebar-foreground/70 text-xs tracking-wider group-data-[collapsible=icon]:pointer-events-none">
               {group.label}
             </SidebarGroupLabel>
           )}

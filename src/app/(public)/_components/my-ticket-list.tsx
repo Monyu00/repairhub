@@ -119,7 +119,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
           return (
             <Card
               key={ticket.id}
-              className="border border-border shadow-2xs transition-all hover:border-primary/40 hover:shadow-xs"
+              className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs"
             >
               <CardContent className="flex flex-col gap-3 p-4 sm:p-5">
                 {/* Header row */}

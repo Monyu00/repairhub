@@ -26,15 +26,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         {error === "invalid-domain" && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
-            <AlertCircle className="size-4 shrink-0" />
+          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-foreground text-sm">
+            <AlertCircle className="size-4 shrink-0 text-destructive" />
             <span>僅限使用 @stust.edu.tw 學校信箱登入，請切換帳號。</span>
           </div>
         )}
 
         {error === "auth-callback-failed" && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm">
-            <AlertCircle className="size-4 shrink-0" />
+          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-foreground text-sm">
+            <AlertCircle className="size-4 shrink-0 text-destructive" />
             <span>登入驗證失敗或已過期，請重新嘗試。</span>
           </div>
         )}

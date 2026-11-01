@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Loader2, MessageSquarePlus, MessageSquareText, Send } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketNote } from "@/server/tickets/detail";
 
 import { addProgressNote } from "../_actions/ticket-actions";
@@ -74,11 +73,7 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
         ) : (
           <div className="space-y-3">
             {progressNotes.map((note) => {
-              const formattedDate = note.createdAt
-                ? format(new Date(note.createdAt), "yyyy/MM/dd HH:mm", {
-                    locale: zhTW,
-                  })
-                : "-";
+              const formattedDate = note.createdAt ? formatTicketDate(note.createdAt) : "-";
 
               const roleLabel = getRoleLabel(note.authorRole);
 

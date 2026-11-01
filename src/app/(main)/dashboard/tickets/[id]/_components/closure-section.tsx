@@ -97,7 +97,11 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
             />
           </div>
 
-          {errorMsg && <p className="font-semibold text-destructive text-xs">{errorMsg}</p>}
+          {errorMsg && (
+            <p role="alert" className="font-semibold text-destructive text-xs">
+              {errorMsg}
+            </p>
+          )}
 
           <div className="flex justify-end pt-1">
             <Button

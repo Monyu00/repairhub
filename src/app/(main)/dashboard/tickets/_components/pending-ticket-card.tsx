@@ -4,14 +4,12 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, Hand, Loader2, Mail, MapPin, Phone, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface PendingTicketCardProps {
@@ -24,9 +22,7 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
   const router = useRouter();
   const [isClaiming, setIsClaiming] = useState(false);
 
-  const formattedDate = ticket.createdAt
-    ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedDate = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
   const handleCardClick = () => {
     router.push(`/dashboard/tickets/${ticket.id}`);

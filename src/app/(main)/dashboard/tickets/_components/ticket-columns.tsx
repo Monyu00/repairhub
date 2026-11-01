@@ -1,31 +1,17 @@
 "use client";
 
-import {
-  type ColumnDef,
-  columnVisibilityFeature,
-  createSortedRowModel,
-  rowSortingFeature,
-  sortFn_alphanumeric,
-  sortFn_text,
-  tableFeatures,
-} from "@tanstack/react-table";
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
-import { ArrowUpDown, Mail, Phone, User } from "lucide-react";
+import Link from "next/link";
+
+import { type ColumnDef, columnVisibilityFeature, tableFeatures } from "@tanstack/react-table";
+import { Mail, Phone, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
-import { Button } from "@/components/ui/button";
+import { formatTicketDate } from "@/lib/formatters";
 
 import type { TicketRecord } from "./ticket-types";
 
 export const ticketTableFeatures = tableFeatures({
   columnVisibilityFeature,
-  rowSortingFeature,
-  sortedRowModel: createSortedRowModel(),
-  sortFns: {
-    alphanumeric: sortFn_alphanumeric,
-    text: sortFn_text,
-  },
 });
 
 export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof ticketTableFeatures, TicketRecord>[] {
@@ -35,7 +21,15 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
       header: "Ticket ID",
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
-        return <span className="font-mono font-semibold text-primary text-xs">#{id.slice(0, 8)}</span>;
+        return (
+          <Link
+            href={`/dashboard/tickets/${row.original.id}`}
+            aria-label={`查看報修單 ${id.slice(0, 8)}`}
+            className="font-mono font-semibold text-primary text-xs relative z-10"
+          >
+            #{id.slice(0, 8)}
+          </Link>
+        );
       },
     },
     {
@@ -52,7 +46,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
         const building = row.original.building;
         const space = row.original.space;
         return (
-          <div className="flex flex-col text-xs">
+          <div className="flex flex-col text-xs min-w-0">
             <span className="font-medium text-foreground">
               {building.name} ({building.code})
             </span>
@@ -93,7 +87,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
         const email = row.original.reporterEmail;
         const phone = row.original.reporterPhone;
         return (
-          <div className="flex flex-col gap-0.5 text-xs">
+          <div className="flex flex-col gap-0.5 text-xs min-w-0">
             {(name || dept) && (
               <span className="flex items-center gap-1 font-medium text-foreground">
                 <User className="size-3 text-muted-foreground" />
@@ -123,21 +117,11 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
   columns.push({
     accessorKey: "createdAt",
     header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="-ml-3 h-8 gap-1 font-medium text-xs"
-        >
-          通報時間
-          <ArrowUpDown className="size-3" />
-        </Button>
-      );
+      return "通報時間";
     },
     cell: ({ row }) => {
       const dateStr = row.getValue("createdAt") as string;
-      const formattedDate = dateStr ? format(new Date(dateStr), "yyyy/MM/dd HH:mm", { locale: zhTW }) : "-";
+      const formattedDate = formatTicketDate(dateStr);
       return <span className="whitespace-nowrap text-muted-foreground text-xs">{formattedDate}</span>;
     },
   });

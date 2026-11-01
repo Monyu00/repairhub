@@ -75,9 +75,12 @@ export function CategoryDialog({ open, onOpenChange, mode, initialName = "", onS
                 onChange={(e) => setName(e.target.value)}
                 placeholder="例如：電梯設備"
                 disabled={isPending}
-                autoFocus
               />
-              {error && <p className="text-destructive text-xs">{error}</p>}
+              {error && (
+                <p role="alert" className="text-destructive text-xs">
+                  {error}
+                </p>
+              )}
             </div>
           </div>
 

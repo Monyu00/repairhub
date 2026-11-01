@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, ClipboardList, ExternalLink, MapPin, Plus } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface MyTicketsContentProps {
@@ -49,13 +47,11 @@ export function MyTicketsContent({ tickets }: MyTicketsContentProps) {
 }
 
 function TicketCard({ ticket }: { ticket: TicketRecord }) {
-  const formattedDate = ticket.createdAt
-    ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedDate = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
   return (
     <Link href={`/track/${ticket.id}`} className="group block">
-      <Card className="shadow-2xs transition-all hover:border-primary/40 hover:shadow-sm">
+      <Card className="shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-sm">
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: info */}
           <div className="flex min-w-0 flex-1 flex-col gap-2">

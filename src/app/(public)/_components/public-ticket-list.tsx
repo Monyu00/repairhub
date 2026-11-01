@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Calendar, ChevronRight, Inbox, MapPin, Plus, User } from "lucide-react";
 
@@ -24,8 +23,6 @@ interface PublicTicketListProps {
 }
 
 export function PublicTicketList({ tickets, currentPage, totalPages, totalCount, pageSize }: PublicTicketListProps) {
-  const router = useRouter();
-
   if (tickets.length === 0) {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-border border-dashed bg-card/40 p-8 text-center">
@@ -72,15 +69,13 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
               return (
                 <TableRow
                   key={ticket.id}
-                  onClick={() => router.push(`/track/${ticket.id}`)}
-                  className="group cursor-pointer transition-colors focus-within:bg-muted/40 hover:bg-muted/40"
+                  className="group relative cursor-pointer transition-colors focus-within:bg-muted/40 hover:bg-muted/40"
                 >
                   <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
                     <Link
                       href={`/track/${ticket.id}`}
                       aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
-                      onClick={(event) => event.stopPropagation()}
-                      className="rounded-sm outline-none hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                      className="rounded-sm outline-none relative z-10 hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       #{ticket.id.slice(0, 8)}
                     </Link>
@@ -107,9 +102,15 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground text-xs">{formattedDate}</TableCell>
                   <TableCell className="p-2 text-right">
+                    <Link
+                      href={`/track/${ticket.id}`}
+                      className="absolute inset-0 z-0"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    />
                     <ChevronRight
                       aria-hidden="true"
-                      className="ml-auto text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="relative z-10 ml-auto text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
                     />
                   </TableCell>
                 </TableRow>
@@ -126,7 +127,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
 
           return (
             <Link key={ticket.id} href={`/track/${ticket.id}`} className="group block">
-              <Card className="border border-border shadow-2xs transition-all hover:border-primary/40 hover:shadow-xs">
+              <Card className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs">
                 <CardContent className="space-y-2.5 p-4">
                   {/* Top: ID, Category & Status */}
                   <div className="flex items-center justify-between gap-2">
