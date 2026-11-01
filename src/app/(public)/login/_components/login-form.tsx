@@ -14,28 +14,17 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { isAllowedEmailDomain } from "@/lib/auth/validate-email-domain";
 
 import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .email({ message: "請輸入有效的 Email 地址。" })
-    .refine((email) => isAllowedEmailDomain(email), {
-      message: "僅限使用 @stust.edu.tw 學校信箱登入。",
-    }),
+  email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
   password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
 });
 
 const registerSchema = z
   .object({
-    email: z
-      .string()
-      .email({ message: "請輸入有效的 Email 地址。" })
-      .refine((email) => isAllowedEmailDomain(email), {
-        message: "僅限使用 @stust.edu.tw 學校信箱註冊。",
-      }),
+    email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
     password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
     confirmPassword: z.string().min(8, { message: "確認密碼至少需要 8 個字元。" }),
   })
@@ -115,13 +104,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="email"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="login-email">學校信箱</FieldLabel>
+                  <FieldLabel htmlFor="login-email">電子郵件</FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ""}
                     id="login-email"
                     type="email"
-                    placeholder="you@stust.edu.tw"
                     autoComplete="email"
                     aria-invalid={fieldState.invalid}
                   />
@@ -175,13 +163,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               name="email"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="register-email">學校信箱</FieldLabel>
+                  <FieldLabel htmlFor="register-email">電子郵件</FieldLabel>
                   <Input
                     {...field}
                     value={field.value ?? ""}
                     id="register-email"
                     type="email"
-                    placeholder="you@stust.edu.tw"
                     autoComplete="email"
                     aria-invalid={fieldState.invalid}
                   />
