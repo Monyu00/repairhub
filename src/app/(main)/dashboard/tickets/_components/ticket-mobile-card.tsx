@@ -1,10 +1,8 @@
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
 import { Calendar, Mail, MapPin, Phone, User } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface TicketMobileCardProps {
@@ -13,9 +11,7 @@ interface TicketMobileCardProps {
 }
 
 export function TicketMobileCard({ ticket, canViewReporter }: TicketMobileCardProps) {
-  const formattedDate = ticket.createdAt
-    ? format(new Date(ticket.createdAt), "yyyy/MM/dd HH:mm", { locale: zhTW })
-    : "-";
+  const formattedDate = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
   return (
     <Card className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40">
@@ -33,7 +29,7 @@ export function TicketMobileCard({ ticket, canViewReporter }: TicketMobileCardPr
         <div className="space-y-1.5 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-foreground">
             <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
-            <span>{formatTicketLocation(ticket, { includeFloor: true })}</span>
+            <span className="truncate max-w-[200px]">{formatTicketLocation(ticket, { includeFloor: true })}</span>
           </div>
 
           <p className="line-clamp-2 pl-5 text-muted-foreground leading-relaxed">{ticket.description}</p>

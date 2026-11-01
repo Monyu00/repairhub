@@ -143,7 +143,7 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                     <div className="flex-1">
                       <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-primary transition-all duration-300"
+                          className="h-full rounded-full bg-primary transition-width duration-300"
                           style={{ width: `${d.percentage}%` }}
                         />
                       </div>

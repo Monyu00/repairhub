@@ -247,7 +247,7 @@ export function TicketFilterBar({ filterOptions }: TicketFilterBarProps) {
             variant="ghost"
             size="sm"
             onClick={handleResetFilters}
-            className="h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
+            className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
           >
             <FilterX className="size-3.5" />
             <span>清除篩選 ({activeFilterCount})</span>

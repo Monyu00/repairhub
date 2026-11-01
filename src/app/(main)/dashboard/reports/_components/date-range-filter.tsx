@@ -97,7 +97,7 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
               type="button"
               variant={isActive ? "default" : "outline"}
               size="sm"
-              className="h-8 font-normal text-xs transition-all"
+              className="h-8 font-normal text-xs transition-colors"
               disabled={isPending}
               onClick={() => handlePresetChange(opt.id)}
             >

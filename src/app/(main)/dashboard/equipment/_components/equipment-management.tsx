@@ -218,7 +218,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+                  className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
                   onClick={() => {
                     setSearchQuery("");
                     setBuildingFilter("all");

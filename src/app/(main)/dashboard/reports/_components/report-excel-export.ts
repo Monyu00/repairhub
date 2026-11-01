@@ -39,7 +39,7 @@ function addReportWorksheet(workbook: Workbook, name: string, rows: ExcelRow[], 
  * Generates and downloads an Excel file (.xlsx) containing all report data sections in structured sheets.
  */
 export async function exportReportToExcel(data: ReportData): Promise<void> {
-  const toastId = toast.loading("正在產生 Excel 報表試算表...");
+  const toastId = toast.loading("正在產生 Excel 報表試算表…");
 
   try {
     const ExcelJS = await import("exceljs");

@@ -85,7 +85,7 @@ export function PhotoUpload({
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
               aria-label="移除圖片"
             >
               <XIcon className="size-3.5" />

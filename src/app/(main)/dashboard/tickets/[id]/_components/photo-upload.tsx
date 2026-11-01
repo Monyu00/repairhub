@@ -92,7 +92,7 @@ export function PhotoUpload({
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
-                className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
                 aria-label="移除照片"
               >
                 <X className="size-3.5" />

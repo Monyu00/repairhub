@@ -183,7 +183,7 @@ export function RepairRecordsContent({
               size="sm"
               onClick={handleResetFilters}
               disabled={isPending}
-              className="h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+              className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
             >
               <FilterX className="size-3.5" />
               <span>清除篩選</span>

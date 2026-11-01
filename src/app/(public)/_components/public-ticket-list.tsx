@@ -121,7 +121,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
 
           return (
             <Link key={ticket.id} href={`/track/${ticket.id}`} className="group block">
-              <Card className="border border-border shadow-2xs transition-all hover:border-primary/40 hover:shadow-xs">
+              <Card className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs">
                 <CardContent className="space-y-2.5 p-4">
                   {/* Top: ID, Category & Status */}
                   <div className="flex items-center justify-between gap-2">

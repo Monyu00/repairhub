@@ -140,7 +140,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
               const ellipsisKey = idx < 3 ? "ellipsis-start" : "ellipsis-end";
               return (
                 <span key={ellipsisKey} className="px-1.5 text-muted-foreground text-xs">
-                  ...
+                  …
                 </span>
               );
             }

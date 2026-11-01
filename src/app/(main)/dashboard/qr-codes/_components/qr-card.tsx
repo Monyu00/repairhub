@@ -79,7 +79,7 @@ export function QRCard({ item }: QRCardProps) {
   };
 
   return (
-    <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-all hover:shadow-md">
+    <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-shadow hover:shadow-md">
       {/* Screen action bar */}
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <TooltipProvider>
