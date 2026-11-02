@@ -1,0 +1,19 @@
+```mermaid
+stateDiagram-v2
+  [*] --> pending : 開單
+  pending --> in_progress : 接單 / 指派
+  pending --> cancelled : 取消
+  in_progress --> completed : 完工回報
+  in_progress --> pending : 退回待處理
+  in_progress --> cancelled : 取消
+  completed --> closed : 確認驗收
+  completed --> closed : 7 天自動關單（pg_cron）
+  completed --> in_progress : 重開單
+  closed --> [*]
+  cancelled --> [*]
+
+  note right of completed : 完工後逾期 7 天未回覆，<br/>由 pg_cron 每日 03:00 UTC 自動結單
+```
+
+對照實作：`src/server/tickets/lifecycle.ts` 的七種 transition
+（claim / assign / submit_closure / confirm_fix / reopen / return_to_pending / cancel）。

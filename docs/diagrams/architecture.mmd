@@ -1,0 +1,28 @@
+```mermaid
+flowchart LR
+  user(["校園使用者<br/>reporter · technician · admin"])
+
+  subgraph NEXT["Next.js App Router"]
+    web["前台（公開）<br/>report · track · login"]
+    app["管理儀表板<br/>tickets · equipment · reports"]
+  end
+
+  subgraph SUPA["Supabase"]
+    auth["Auth<br/>email + password"]
+    db[("Postgres<br/>tickets · RLS · triggers")]
+  end
+
+  fn["Edge Function<br/>send-ticket-email"]
+  resend["Resend<br/>email api"]
+
+  user -->|"免登入報修"| web
+  user -->|"登入使用"| app
+  web -->|AUTH| auth
+  web -->|SQL| db
+  app -->|RPC| db
+  db -. pg_net .-> fn
+  fn -->|HTTPS| resend
+```
+
+說明：新工單或狀態變更由 Postgres trigger 寫入 `notification_log`，`pg_net` 以帶密鑰的 POST
+喚醒 Edge Function；派送失敗只記錄 `last_error` 與重試時間，不中斷工單寫入。

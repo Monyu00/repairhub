@@ -1,0 +1,26 @@
+```mermaid
+sequenceDiagram
+  participant T as DB 觸發器
+  participant L as 通知佇列
+  participant N as pg_net
+  participant F as Edge Function
+  participant R as Resend
+
+  T->>L: ENQUEUE
+  L-->>T: delivery_id
+  T->>N: invoke
+  N->>F: http_post
+
+  alt send ok
+    F->>L: claim
+    L-->>F: claimed
+    F->>R: POST /emails
+    R-->>F: 200 ok
+  else retry ≤ 5
+    F->>L: last_error + next_attempt_at
+  end
+```
+
+說明：`enqueue_notification_delivery` 以 `ON CONFLICT DO NOTHING` 去重，
+`claim_notification_delivery` 每次遞增 `attempt_count`；`process_due_notification_deliveries`
+由 pg_cron 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending delivery。
