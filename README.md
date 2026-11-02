@@ -99,6 +99,14 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 前台與儀表板共用 Next.js App Router：公開頁面以匿名或登入身分讀寫 Supabase，`@supabase/ssr` 管理 session；儀表板依角色（technician／admin）限制可見範圍。寫入路徑集中在 Server Action 與 `src/server/tickets/lifecycle.ts`，工單照片走 Storage 的 `ticket-photos` bucket。資料庫觸發器負責通知派送，因此寄信失敗不會回滾工單。
 
+## 資料模型
+
+![RepairHub 資料模型](docs/diagrams/data-model.svg)
+
+Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)。
+
+工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工，實體定義見 `supabase/migrations/`。
+
 ## 工單狀態
 
 ![Ticket 工單狀態機](docs/diagrams/ticket-status.svg)

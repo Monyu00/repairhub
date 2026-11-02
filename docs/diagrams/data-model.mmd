@@ -1,0 +1,67 @@
+```mermaid
+erDiagram
+  profiles ||--o{ technician_categories : "訂閱"
+  categories ||--o{ technician_categories : "被訂閱"
+  categories ||--o{ tickets : "分類"
+  buildings ||--o{ spaces : "包含"
+  spaces ||--o{ equipment : "安裝於"
+  spaces |o--o{ tickets : "所在空間"
+  buildings |o--o{ tickets : "所在地點"
+  equipment |o--o{ tickets : "相關設備"
+  profiles |o--o{ tickets : "受指派"
+  tickets ||--o{ ticket_photos : "佐證照片"
+
+  profiles {
+    uuid id PK
+    text user_role
+    text display_name
+    bool is_active
+  }
+  categories {
+    uuid id PK
+    text name
+    bool is_active
+  }
+  technician_categories {
+    uuid technician_id PK_FK
+    uuid category_id PK_FK
+  }
+  tickets {
+    uuid id PK
+    enum status
+    uuid category_id FK
+    uuid space_id FK_NULL
+    uuid building_id FK_NULL
+    uuid equipment_id FK_NULL
+    uuid assigned_to FK_NULL
+    int rating
+  }
+  buildings {
+    uuid id PK
+    text name
+    text code
+  }
+  spaces {
+    uuid id PK
+    text name
+    int floor
+    uuid building_id FK
+  }
+  equipment {
+    uuid id PK
+    text code
+    date purchase_date
+    date warranty_expiry
+    uuid space_id FK
+  }
+  ticket_photos {
+    uuid id PK
+    uuid ticket_id FK
+    enum phase
+    text storage_path
+  }
+```
+
+說明：工單為聚合根；`space_id`／`building_id`／`equipment_id`／`assigned_to` 可為空，
+因此圖中選配關係以虛線表示。`ticket_notes`（含 status_change 記事）與
+`notification_log`（通知派送帳）未畫入本圖。

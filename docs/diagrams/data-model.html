@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RepairHub 資料模型</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #bf4520;
+      --font-sans:     'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', 'Noto Serif TC', serif;
+      --font-mono:     'Geist Mono', ui-monospace, 'Courier New', monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 960px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">ER · Diagram Design</p>
+    <h1>RepairHub 資料模型</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="data-model-title data-model-desc">
+        <title id="data-model-title">RepairHub 資料模型</title>
+        <desc id="data-model-desc">以工單為聚合根的資料模型：人員訂閱分類，地點包含空間與設備，工單連結分類、空間與設備並派生照片記錄；標記問號的外來鍵可為空。</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- relationships -->
+        <line x1="110" y1="184" x2="110" y2="264" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="118" y="196" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="126" y="205" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <rect x="118" y="248" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="126" y="257" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <path d="M180,312 H208 Q216,312 216,304 V128 Q216,120 224,120 H256" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="228" y="292" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="236" y="301" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+        <rect x="228" y="124" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="236" y="133" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+
+        <line x1="424" y1="118" x2="468" y2="118" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="432" y="98" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="440" y="107" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <rect x="452" y="98" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="460" y="107" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <path d="M180,100 H196 Q204,100 204,108 V172 Q204,180 212,180 H468" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <rect x="216" y="140" width="32" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="232" y="149" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0..1</text>
+        <rect x="436" y="160" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="444" y="169" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <line x1="828" y1="172" x2="828" y2="212" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="836" y="176" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="844" y="185" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <rect x="836" y="196" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="844" y="205" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <line x1="828" y1="332" x2="828" y2="372" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="836" y="336" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="844" y="345" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <rect x="836" y="356" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="844" y="365" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <path d="M744,272 H732 Q724,272 724,264 V188 Q724,180 716,180 H648" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="660" y="160" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="668" y="169" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+        <rect x="736" y="196" width="32" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="752" y="205" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0..1</text>
+
+        <path d="M744,438 H688 Q680,438 680,430 V188 a 8,8 0 0,1 0,-16 V112 Q680,104 688,104 H648" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <rect x="656" y="84" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="664" y="93" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+        <rect x="690" y="418" width="28" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="704" y="427" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0..1</text>
+
+        <path d="M558,232 V248 H340 V264" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <rect x="366" y="228" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="374" y="237" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">1</text>
+        <rect x="316" y="228" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="324" y="237" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <path d="M744,160 H712 Q704,160 704,168 V248 H688 a 8,8 0 0,0 -16,0 H620 V232" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <rect x="690" y="140" width="28" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="704" y="149" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">0..1</text>
+        <rect x="656" y="228" width="16" height="12" rx="2" fill="#f5f5f5"/>
+        <text x="664" y="237" fill="#5a6580" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">N</text>
+
+        <!-- entities -->
+        <rect x="40" y="64" width="140" height="120" rx="6" fill="#f5f5f5"/>
+        <rect x="40" y="64" width="140" height="120" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="48" y="70" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="65" y="79" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="110" y="98" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">人員</text>
+        <text x="48" y="116" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">profiles</text>
+        <text x="48" y="128" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="48" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">user_role</text>
+        <text x="48" y="152" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">display_name</text>
+        <text x="48" y="164" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">is_active bool</text>
+
+        <rect x="256" y="64" width="168" height="108" rx="6" fill="#f5f5f5"/>
+        <rect x="256" y="64" width="168" height="108" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="264" y="70" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="281" y="79" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="340" y="98" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">分類</text>
+        <text x="264" y="116" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">categories</text>
+        <text x="264" y="128" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="264" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">name</text>
+        <text x="264" y="152" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">is_active bool</text>
+
+        <rect x="468" y="64" width="180" height="168" rx="6" fill="#f5f5f5"/>
+        <rect x="468" y="64" width="180" height="168" rx="6" fill="rgba(191,69,32,0.08)" stroke="#bf4520" stroke-width="1"/>
+        <rect x="476" y="70" width="34" height="12" rx="2" fill="transparent" stroke="rgba(191,69,32,0.40)" stroke-width="0.8"/>
+        <text x="493" y="79" fill="rgba(191,69,32,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="558" y="98" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">工單</text>
+        <text x="476" y="116" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">tickets</text>
+        <text x="476" y="128" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="476" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">status</text>
+        <text x="476" y="152" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ category_id</text>
+        <text x="476" y="164" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ space_id?</text>
+        <text x="476" y="176" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ building_id?</text>
+        <text x="476" y="188" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ equipment_id?</text>
+        <text x="476" y="200" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ assigned_to?</text>
+        <text x="476" y="212" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">rating smallint</text>
+
+        <rect x="256" y="264" width="168" height="120" rx="6" fill="#f5f5f5"/>
+        <rect x="256" y="264" width="168" height="120" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="264" y="270" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="281" y="279" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="340" y="298" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">工單照片</text>
+        <text x="264" y="316" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">ticket_photos</text>
+        <text x="264" y="328" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="264" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ ticket_id</text>
+        <text x="264" y="352" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">phase</text>
+        <text x="264" y="364" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">storage_path</text>
+
+        <rect x="40" y="264" width="140" height="96" rx="6" fill="#f5f5f5"/>
+        <rect x="40" y="264" width="140" height="96" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="48" y="270" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="65" y="279" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="110" y="298" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">分類訂閱</text>
+        <text x="48" y="316" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">technician_categories</text>
+        <text x="48" y="328" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># → technician_id</text>
+        <text x="48" y="340" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># → category_id</text>
+
+        <rect x="744" y="64" width="168" height="108" rx="6" fill="#f5f5f5"/>
+        <rect x="744" y="64" width="168" height="108" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="752" y="70" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="769" y="79" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="828" y="98" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">地點</text>
+        <text x="752" y="116" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">buildings</text>
+        <text x="752" y="128" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="752" y="140" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">name</text>
+        <text x="752" y="152" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">code</text>
+
+        <rect x="744" y="212" width="168" height="120" rx="6" fill="#f5f5f5"/>
+        <rect x="744" y="212" width="168" height="120" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="752" y="218" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="769" y="227" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="828" y="246" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">空間</text>
+        <text x="752" y="264" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">spaces</text>
+        <text x="752" y="276" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="752" y="288" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">name</text>
+        <text x="752" y="300" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">floor int</text>
+        <text x="752" y="312" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ building_id</text>
+
+        <rect x="744" y="372" width="168" height="132" rx="6" fill="#f5f5f5"/>
+        <rect x="744" y="372" width="168" height="132" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+        <rect x="752" y="378" width="34" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.40)" stroke-width="0.8"/>
+        <text x="769" y="387" fill="rgba(79,93,117,0.85)" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ENTITY</text>
+        <text x="828" y="406" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" text-anchor="middle">設備</text>
+        <text x="752" y="424" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">equipment</text>
+        <text x="752" y="436" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id uuid</text>
+        <text x="752" y="448" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">code</text>
+        <text x="752" y="460" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">purchase_date</text>
+        <text x="752" y="472" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">warranty_expiry</text>
+        <text x="752" y="484" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ space_id</text>
+
+        <!-- legend -->
+        <line x1="30" y1="540" x2="930" y2="540" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+        <text x="30" y="560" fill="#4f5d75" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+        <line x1="112" y1="553" x2="136" y2="553" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+        <text x="144" y="557" fill="#2d3142" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">必要 FK</text>
+        <line x1="232" y1="553" x2="256" y2="553" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+        <text x="264" y="557" fill="#2d3142" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">選配 FK（可為空）</text>
+        <text x="408" y="557" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace"># id</text>
+        <text x="452" y="557" fill="#2d3142" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">主鍵</text>
+        <text x="512" y="557" fill="#4f5d75" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">→ id</text>
+        <text x="556" y="557" fill="#2d3142" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">外來鍵</text>
+        <rect x="652" y="548" width="12" height="10" rx="2" fill="rgba(191,69,32,0.08)" stroke="#bf4520" stroke-width="1"/>
+        <text x="670" y="557" fill="#2d3142" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif">聚合根</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
