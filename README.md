@@ -71,7 +71,7 @@ Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example
 | `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定 |
 | `APP_BASE_URL` | 郵件中的連結網域 |
 
-Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉Escaped 字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，插入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
+Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
 
 ## 畫面結構
 
@@ -142,9 +142,3 @@ Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/noti
 - [0004-optional-ticket-space.md](docs/adr/0004-optional-ticket-space.md)：空間欄位可為空
 - [0005-notification-dispatch-failures-do-not-block-tickets.md](docs/adr/0005-notification-dispatch-failures-do-not-block-tickets.md)：派送失敗不阻斷工單
 - [0006-open-registration-and-login-to-any-email-domain.md](docs/adr/0006-open-registration-and-login-to-any-email-domain.md)：開放任意網域註冊登入
-
-## 授權
-
-本專案採用 [MIT](LICENSE)。`LICENSE` 的著作權宣告仍為專案範本原作者 Mohammed Arham Khan，尚未變更。
-Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉Escaped 字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，插入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
-Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
