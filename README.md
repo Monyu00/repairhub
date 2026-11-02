@@ -103,9 +103,13 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 ![RepairHub 資料模型](docs/diagrams/data-model.svg)
 
-Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)。
+工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工。
 
-工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工，實體定義見 `supabase/migrations/`。
+![工單記事、通知帳務與公告](docs/diagrams/data-model-detail.svg)
+
+工單的附屬表：`ticket_notes` 同時承載維修記事與 `status_change` 流轉紀錄（對照上面的狀態機）、`notification_log` 是每封通知信的派送帳務（含重試次數與下次嘗試時間，對照通知派送流程）、`announcements` 由人員發布。圖分兩張是因為 Diagram Design 的 ER 上限為 8 個實體。
+
+Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)（列出全部 11 張表，含各表未畫進圖的欄位與 unique 條件）。實體定義以 `supabase/migrations/` 為準；各表共通的 `created_at` / `updated_at` 等稽核欄位未畫出。
 
 ## 工單狀態
 

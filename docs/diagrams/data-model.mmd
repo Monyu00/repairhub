@@ -10,58 +10,106 @@ erDiagram
   equipment |o--o{ tickets : "相關設備"
   profiles |o--o{ tickets : "受指派"
   tickets ||--o{ ticket_photos : "佐證照片"
+  tickets ||--o{ ticket_notes : "記事與狀態流轉"
+  tickets ||--o{ notification_log : "派送帳務"
+  profiles |o--o{ ticket_notes : "作者"
+  profiles ||--o{ announcements : "發布"
 
   profiles {
     uuid id PK
-    text user_role
+    user_role user_role
     text display_name
+    text department
+    text phone
     bool is_active
   }
   categories {
     uuid id PK
     text name
+    int sort_order
     bool is_active
   }
   technician_categories {
     uuid technician_id PK_FK
     uuid category_id PK_FK
   }
-  tickets {
-    uuid id PK
-    enum status
-    uuid category_id FK
-    uuid space_id FK_NULL
-    uuid building_id FK_NULL
-    uuid equipment_id FK_NULL
-    uuid assigned_to FK_NULL
-    int rating
-  }
   buildings {
     uuid id PK
     text name
     text code
+    int sort_order
   }
   spaces {
     uuid id PK
     text name
     int floor
+    int sort_order
     uuid building_id FK
   }
   equipment {
     uuid id PK
+    text name
     text code
     date purchase_date
     date warranty_expiry
     uuid space_id FK
   }
+  tickets {
+    uuid id PK
+    ticket_status status
+    uuid category_id FK
+    uuid space_id FK_NULL
+    uuid building_id FK_NULL
+    uuid equipment_id FK_NULL
+    uuid assigned_to FK_NULL
+    text description
+    text reporter_email
+    text ticket_number GENERATED
+    smallint rating
+    timestamptz notification_ready_at
+  }
   ticket_photos {
     uuid id PK
     uuid ticket_id FK
-    enum phase
+    ticket_photo_phase phase
     text storage_path
+  }
+  ticket_notes {
+    uuid id PK
+    uuid ticket_id FK
+    uuid author_id FK_NULL
+    ticket_note_type type
+    text content
+  }
+  notification_log {
+    uuid id PK
+    uuid ticket_id FK
+    text event_type
+    text recipient_email
+    text status
+    int attempt_count
+    timestamptz next_attempt_at
+    timestamptz sent_at
+    text resend_message_id
+    text last_error
+  }
+  announcements {
+    uuid id PK
+    text title
+    announcement_audience audience
+    announcement_category category
+    bool is_pinned
+    uuid author_id FK
   }
 ```
 
-說明：工單為聚合根；`space_id`／`building_id`／`equipment_id`／`assigned_to` 可為空，
-因此圖中選配關係以虛線表示。`ticket_notes`（含 status_change 記事）與
-`notification_log`（通知派送帳）未畫入本圖。
+權威來源：本檔列出全部 11 張表；`data-model.svg` 是領域總覽（8 實體，Diagram Design 的 ER 上限），
+`data-model-detail.svg` 是工單記事、通知帳務與公告的明細。
+
+未畫出的共用欄位：`created_at` / `updated_at`（各表皆有）、`tickets.reporter_name`、
+`reporter_department`、`reporter_phone`、`equipment_name`、`rated_at`，以及 `notification_log.event_key`
+（去重鍵）與 `tickets.ticket_number`（由 `id` 產生的 stored 欄位）。
+`spaces` 另有 `UNIQUE(building_id, name, floor)`，`equipment.code`、`buildings.code`、
+`buildings.name`、`categories.name` 皆為 unique。
+
+`profiles.id` 另外參照 `auth.users.id`（跨 schema，`ON DELETE CASCADE`），本圖省略該外部邊界。
