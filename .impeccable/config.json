@@ -16,6 +16,51 @@
         "value": "arial",
         "createdAt": "2026-10-23T12:43:05.125Z",
         "reason": "impeccable hook: Arial is intentional for transactional email client compatibility"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-11-02T01:02:36.114Z",
+        "reason": "user confirmed: kept the Diagram Design default skin, whose typography mandates Geist Mono for technical labels"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "createdAt": "2026-11-02T01:02:36.236Z",
+        "reason": "user confirmed: kept the Diagram Design default skin, whose typography mandates Geist sans for node names"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "createdAt": "2026-11-02T01:02:36.367Z",
+        "reason": "user confirmed: kept the Diagram Design default skin, whose typography mandates Instrument Serif for figure titles"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "docs/diagrams/architecture.html"
+        ],
+        "createdAt": "2026-11-02T01:02:43.444Z",
+        "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "docs/diagrams/ticket-status.html"
+        ],
+        "createdAt": "2026-11-02T01:02:43.555Z",
+        "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          "docs/diagrams/notification-pipeline.html"
+        ],
+        "createdAt": "2026-11-02T01:02:43.659Z",
+        "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
       }
     ]
   }
