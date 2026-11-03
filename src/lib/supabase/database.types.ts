@@ -215,6 +215,7 @@ export type Database = {
           display_name: string | null;
           id: string;
           is_active: boolean;
+          must_change_password: boolean;
           phone: string | null;
           updated_at: string;
           user_role: Database["public"]["Enums"]["user_role"] | null;
@@ -224,6 +225,7 @@ export type Database = {
           display_name?: string | null;
           id: string;
           is_active?: boolean;
+          must_change_password?: boolean;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
@@ -233,6 +235,7 @@ export type Database = {
           display_name?: string | null;
           id?: string;
           is_active?: boolean;
+          must_change_password?: boolean;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;

@@ -11,6 +11,7 @@ export interface UserProjection {
   phone: string | null;
   avatarUrl: string | null;
   isActive: boolean;
+  mustChangePassword: boolean;
 }
 
 function firstNonEmpty(...values: Array<string | null | undefined>): string | null {
@@ -42,6 +43,7 @@ interface Profile {
   phone?: string | null;
   user_role?: UserRole | null;
   is_active?: boolean | null;
+  must_change_password?: boolean | null;
 }
 
 export function resolveUserProjection(authUser: AuthUser, profile?: Profile | null): UserProjection {
@@ -57,6 +59,7 @@ export function resolveUserProjection(authUser: AuthUser, profile?: Profile | nu
     phone: profile?.phone ?? metadata?.phone ?? null,
     avatarUrl: metadata?.avatar_url ?? null,
     isActive: profile?.is_active ?? true,
+    mustChangePassword: profile?.must_change_password ?? false,
   };
 }
 

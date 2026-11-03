@@ -26,6 +26,7 @@ import {
   ChevronsDown,
   ChevronsUp,
   Edit2,
+  FileUp,
   FilterX,
   GripVertical,
   MapPin,
@@ -45,6 +46,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { LocationCatalogBuilding, LocationCatalogSpace } from "@/lib/locations";
 import { cn } from "@/lib/utils";
 
+import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import {
   createBuilding,
   createSpace,
@@ -332,6 +334,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
     id: string;
     name: string;
   } | null>(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   const isSearching = Boolean(searchQuery.trim());
   const sensors = useSensors(
@@ -588,10 +591,20 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
           </CardDescription>
         </div>
         <CardAction className="w-full sm:w-auto">
-          <Button onClick={handleCreateBuildingOpen} className="h-11 w-full shrink-0 gap-1.5 sm:h-8 sm:w-auto">
-            <Plus className="h-4 w-4" />
-            新增地點
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setBulkImportOpen(true)}
+              className="h-11 w-full shrink-0 gap-1.5 sm:h-8 sm:w-auto"
+            >
+              <FileUp data-icon="inline-start" />
+              批次匯入
+            </Button>
+            <Button onClick={handleCreateBuildingOpen} className="h-11 w-full shrink-0 gap-1.5 sm:h-8 sm:w-auto">
+              <Plus className="h-4 w-4" />
+              新增地點
+            </Button>
+          </div>
         </CardAction>
       </CardHeader>
 
@@ -712,6 +725,8 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         initialData={selectedBuilding ? { name: selectedBuilding.name, code: selectedBuilding.code } : null}
         onSubmit={handleBuildingSubmit}
       />
+
+      <BulkImportDialog entity="location" open={bulkImportOpen} onOpenChange={setBulkImportOpen} />
 
       <SpaceDialog
         open={spaceDialogOpen}

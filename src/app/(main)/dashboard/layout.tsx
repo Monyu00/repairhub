@@ -33,6 +33,10 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     redirect("/");
   }
 
+  if (session.mustChangePassword) {
+    redirect("/change-password");
+  }
+
   const currentUserData = session
     ? {
         email: session.email,

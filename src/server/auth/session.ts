@@ -46,7 +46,7 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("user_role, display_name, department, phone, is_active")
+    .select("user_role, display_name, department, phone, is_active, must_change_password")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -75,6 +75,9 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
   const session = await getSession();
   if (!session) {
     throw new AuthError("UNAUTHENTICATED", "尚未登入，請先登入");
+  }
+  if (session.mustChangePassword) {
+    throw new AuthError("FORBIDDEN", "請先變更密碼後再繼續使用系統");
   }
   return session;
 }

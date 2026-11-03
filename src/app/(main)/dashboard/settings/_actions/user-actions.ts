@@ -272,6 +272,16 @@ export async function resetUserPassword(
       return { success: false, error: error.message ?? "重設密碼失敗" };
     }
 
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ must_change_password: true, updated_at: new Date().toISOString() })
+      .eq("id", targetUserId);
+
+    if (profileError) {
+      console.error("Failed to mark password for change after admin reset:", profileError);
+      return { success: false, error: "密碼已重設，但無法要求使用者變更密碼" };
+    }
+
     return { success: true };
   });
 }

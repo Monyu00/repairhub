@@ -30,6 +30,22 @@ _Avoid_: Manager, supervisor, operator
 The resolved read model for one account.
 _Avoid_: User record, profile, auth user
 
+**Bulk Import**:
+An admin file upload that creates many records at once, validates rows before writing, skips existing records, and reports valid, skipped, and failed rows.
+_Avoid_: Batch update, migration, sync
+
+**Email Username**:
+The portion of an Email before the `@` character.
+_Avoid_: account, login name
+
+**Default Password**:
+The initial password assigned during Bulk Import, derived from the Email Username.
+_Avoid_: temp password, generated password
+
+**Password Change Required**:
+An account state that blocks dashboard access until the account replaces an admin-assisted initial password.
+_Avoid_: force reset, expired password
+
 ### Locations
 
 **Building**:

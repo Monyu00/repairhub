@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/server/auth/session";
 
 export async function loginWithEmail(formData: { email: string; password: string }) {
   const supabase = await createClient();
@@ -14,7 +15,8 @@ export async function loginWithEmail(formData: { email: string; password: string
     return { success: false, error: error.message };
   }
 
-  return { success: true };
+  const session = await getSession();
+  return { success: true, mustChangePassword: session?.mustChangePassword ?? false };
 }
 
 export async function registerWithEmail(formData: { email: string; password: string }) {
@@ -33,5 +35,6 @@ export async function registerWithEmail(formData: { email: string; password: str
     return { success: false, error: error.message };
   }
 
-  return { success: true };
+  const session = await getSession();
+  return { success: true, mustChangePassword: session?.mustChangePassword ?? false };
 }

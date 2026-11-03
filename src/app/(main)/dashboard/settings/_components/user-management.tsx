@@ -13,6 +13,7 @@ import {
   ChevronsRight,
   Edit2,
   Eye,
+  FileUp,
   KeyRound,
   Loader2,
   MoreHorizontal,
@@ -55,6 +56,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { compareUserRole } from "@/lib/users/projection";
 
+import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import type { CategoryItem } from "../_actions/category-actions";
 import {
   batchToggleUserActive,
@@ -104,6 +106,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
   // Dialog & Sheet states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createSuccessData, setCreateSuccessData] = useState<{ email: string; password: string } | null>(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
@@ -485,10 +488,16 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
             </CardDescription>
           </div>
 
-          <Button onClick={() => setCreateDialogOpen(true)} className="shrink-0">
-            <UserPlus className="mr-2 h-4 w-4" />
-            新增使用者
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setBulkImportOpen(true)} className="shrink-0">
+              <FileUp data-icon="inline-start" />
+              批次匯入
+            </Button>
+            <Button onClick={() => setCreateDialogOpen(true)} className="shrink-0">
+              <UserPlus className="mr-2 h-4 w-4" />
+              新增使用者
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -938,6 +947,8 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           password={createSuccessData.password}
         />
       )}
+
+      <BulkImportDialog entity="users" open={bulkImportOpen} onOpenChange={setBulkImportOpen} />
 
       {/* User Profile Sheet */}
       <UserProfileSheet

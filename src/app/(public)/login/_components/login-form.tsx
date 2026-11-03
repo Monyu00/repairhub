@@ -19,7 +19,7 @@ import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
-  password: z.string().min(8, { message: "密碼至少需要 8 個字元。" }),
+  password: z.string().min(6, { message: "密碼至少需要 6 個字元。" }),
 });
 
 const registerSchema = z
@@ -71,7 +71,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     }
 
     toast.success("登入成功！");
-    router.push(redirectTo ?? "/dashboard");
+    const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+    router.push(destination);
     router.refresh();
   }
 
@@ -85,7 +86,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     }
 
     toast.success("註冊成功！已自動登入。");
-    router.push(redirectTo ?? "/dashboard");
+    const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+    router.push(destination);
     router.refresh();
   }
 
