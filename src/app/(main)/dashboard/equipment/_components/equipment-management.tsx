@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Edit2, FilterX, HardDrive, History, MapPin, Plus, Search, Trash2 } from "lucide-react";
+import { Edit2, FileUp, FilterX, HardDrive, History, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { LocationCatalogBuilding } from "@/lib/locations";
 
+import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import {
   createEquipment,
   type EquipmentFormData,
@@ -56,6 +57,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
 
   const [historySheetOpen, setHistorySheetOpen] = useState(false);
   const [historyTarget, setHistoryTarget] = useState<EquipmentRow | null>(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   // Filtered Equipment List
   const filteredEquipment = useMemo(() => {
@@ -143,10 +145,16 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
           <h1 className="font-bold text-2xl text-foreground tracking-tight">設備資產管理</h1>
           <p className="text-muted-foreground text-sm">管理全校設備資產、追蹤保固期限與查看歷史維修紀錄</p>
         </div>
-        <Button onClick={handleCreateOpen} className="shrink-0 gap-1.5">
-          <Plus className="h-4 w-4" />
-          新增設備
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" onClick={() => setBulkImportOpen(true)} className="shrink-0 gap-1.5">
+            <FileUp data-icon="inline-start" />
+            批次匯入
+          </Button>
+          <Button onClick={handleCreateOpen} className="shrink-0 gap-1.5">
+            <Plus className="h-4 w-4" />
+            新增設備
+          </Button>
+        </div>
       </div>
 
       {/* Main Card */}
@@ -407,6 +415,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
       />
 
       <EquipmentHistorySheet open={historySheetOpen} onOpenChange={setHistorySheetOpen} equipment={historyTarget} />
+      <BulkImportDialog entity="equipment" open={bulkImportOpen} onOpenChange={setBulkImportOpen} />
     </div>
   );
 }

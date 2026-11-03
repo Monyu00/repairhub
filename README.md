@@ -8,12 +8,13 @@
 
 - **Reporter（報修者）**：校園內的學生、教職員工與訪客。現場掃碼或開網頁即可通報，並追蹤修復進度、提供滿意度評分。
 - **Technician（維修技師）**：內部維修團隊成員。瀏覽所屬分類的待修工單、自主接單（Claim）、記錄維修進度並附照片完工。
-- **Admin（管理員）**：總務與設施管理主管。負責工單指派（Assignment）、退回待處理（Return to Pending）、設備與空間生命週期、統計報表與系統公告。
+- **Admin（管理員）**：總務與設施管理主管。負責工單指派（Assignment）、退回待處理（Return to Pending）、設備與空間生命週期、批次匯入地點、設備與使用者、統計報表與系統公告。
 
 ## 核心能力
 
 - **零阻力報修**：公開報修表與 QR Code 綁定地點／空間／設備，免登入也能在數十秒內完成通報。
 - **地點與設備兩級管理**：地點（Building）與空間（Space）組成場域樹，設備（Equipment）可各自綁定 QR Code 並累積維修履歷。
+- **批次匯入**：管理員可用 XLSX／CSV 批次建立地點、設備與使用者；已存在記錄會略過，並逐列回報建立、略過與失敗結果。匯入或重設的使用者帳號以完整 Email 作為預設密碼，必須先改密碼才能使用管理後台。
 - **工單生命週期閉環**：接單、完工（須附照片與維修說明）、報修者確認或七日自動關單、未完成重開單（Reopen）。
 - **Email 通知**：新工單與狀態變更由資料庫觸發器派送，收件人為報修者與已訂閱分類的技師；失敗只記錄錯誤與重試時間，不中斷工單寫入。
 - **管理後台**：待修佇列、工單詳情與時間軸、維修紀錄、QR Code 批次產生與匯出、Excel／PDF 報表、滿意度分析、公告與系統設定。
@@ -84,12 +85,12 @@ Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repai
 | `/dashboard` | 總覽：待修數量、公告、快速入口 | 登入 |
 | `/dashboard/tickets`、`/dashboard/tickets/[id]` | 待修佇列與工單詳情（接單、完工、退回、取消） | 登入 |
 | `/dashboard/my-tickets` | 我通報的工單 | 登入 |
-| `/dashboard/equipment` | 設備與履歷管理 | 管理員 |
+| `/dashboard/equipment` | 設備與履歷管理（支援 XLSX／CSV 匯入） | 管理員 |
 | `/dashboard/repair-records` | 維修紀錄查詢 | 登入 |
 | `/dashboard/qr-codes` | QR Code 批次產生、列印與匯出 | 管理員 |
 | `/dashboard/reports` | 統計報表（Excel／PDF 匯出、滿意度） | 管理員 |
 | `/dashboard/announcements` | 系統公告管理 | 管理員 |
-| `/dashboard/settings` | 地點、空間、分類、人員與權限設定 | 管理員 |
+| `/dashboard/settings` | 地點、空間、分類、人員與權限設定（支援 XLSX／CSV 匯入） | 管理員 |
 
 ## 系統架構
 
@@ -154,3 +155,4 @@ Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/noti
 - [0004-optional-ticket-space.md](docs/adr/0004-optional-ticket-space.md)：空間欄位可為空
 - [0005-notification-dispatch-failures-do-not-block-tickets.md](docs/adr/0005-notification-dispatch-failures-do-not-block-tickets.md)：派送失敗不阻斷工單
 - [0006-open-registration-and-login-to-any-email-domain.md](docs/adr/0006-open-registration-and-login-to-any-email-domain.md)：開放任意網域註冊登入
+- [0007-bulk-import-forces-password-reset.md](docs/adr/0007-bulk-import-forces-password-reset.md)：批次匯入使用者的預設密碼需強制重設

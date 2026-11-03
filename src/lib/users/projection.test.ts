@@ -12,6 +12,7 @@ function projection(overrides: Partial<UserProjection> = {}): UserProjection {
     phone: null,
     avatarUrl: null,
     isActive: true,
+    mustChangePassword: false,
     ...overrides,
   };
 }
@@ -48,6 +49,7 @@ test("uses profile values over auth metadata", () => {
     phone: "0912345678",
     avatarUrl: "https://example.com/avatar.png",
     isActive: true,
+    mustChangePassword: false,
   });
 });
 
@@ -77,6 +79,7 @@ test("falls back to auth metadata when profile values are missing", () => {
     phone: "0987654321",
     avatarUrl: "https://example.com/avatar.png",
     isActive: true,
+    mustChangePassword: false,
   });
 });
 
