@@ -39,7 +39,7 @@ The portion of an Email before the `@` character.
 _Avoid_: account, login name
 
 **Default Password**:
-The initial password assigned during Bulk Import, derived from the Email Username.
+The initial password assigned during Bulk Import, using the Email Username; when Supabase rejects it as too short, the full Email is used.
 _Avoid_: temp password, generated password
 
 **Password Change Required**:

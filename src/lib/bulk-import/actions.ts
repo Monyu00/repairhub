@@ -16,7 +16,7 @@ import {
   SPACE_HEADERS,
   USER_HEADERS,
 } from "./types";
-import { parseIsoDate, parseRole } from "./validation";
+import { defaultPasswordFor, parseIsoDate, parseRole } from "./validation";
 
 interface PreparedRecord<TData> {
   source: string;
@@ -367,10 +367,10 @@ async function importUsers(formData: FormData): Promise<BulkImportResponse> {
     const result: BulkImportResultRow = { source: "使用者", row: row.row, status: "failed" };
     results.push(result);
     const email = row.values.email?.trim().toLowerCase() ?? "";
-    const password = email.split("@")[0] ?? "";
+    const password = defaultPasswordFor(email);
 
-    if (!email.includes("@") || password.length < 6) {
-      result.reason = "Email 無效，或 Email Username 少於 6 碼";
+    if (!email.includes("@") || !password) {
+      result.reason = "Email 無效";
       continue;
     }
     if (existingEmails.has(email) || seenEmails.has(email)) {

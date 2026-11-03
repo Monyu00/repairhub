@@ -1,5 +1,10 @@
 export type ParsedRole = "admin" | "technician" | null | false;
 
+export function defaultPasswordFor(email: string): string {
+  const username = email.split("@")[0] ?? "";
+  return username.length >= 8 ? username : email;
+}
+
 export function parseRole(value: string | undefined): ParsedRole {
   const role = value?.trim().toLowerCase();
   if (!role || role === "user") return null;

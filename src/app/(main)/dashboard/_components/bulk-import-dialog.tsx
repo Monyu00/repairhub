@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Download, FileUp, Loader2 } from "lucide-react";
 
@@ -75,15 +75,17 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
   const locationCanSubmit = format === "xlsx" ? Boolean(locationExcel) : Boolean(buildingCsv && spaceCsv);
   const canSubmit = isLocation ? locationCanSubmit : Boolean(importFile);
 
-  const resetForm = () => {
-    setFormat("xlsx");
-    setLocationExcel(null);
-    setBuildingCsv(null);
-    setSpaceCsv(null);
-    setImportFile(null);
-    setError(null);
-    setResult(null);
-  };
+  useEffect(() => {
+    if (!open) {
+      setFormat("xlsx");
+      setLocationExcel(null);
+      setBuildingCsv(null);
+      setSpaceCsv(null);
+      setImportFile(null);
+      setError(null);
+      setResult(null);
+    }
+  }, [open]);
 
   const handleSubmit = () => {
     if (!canSubmit || isPending) return;
@@ -172,7 +174,6 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) resetForm();
         onOpenChange(next);
       }}
     >
