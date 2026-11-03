@@ -34,12 +34,8 @@ _Avoid_: User record, profile, auth user
 An admin file upload that creates many records at once, validates rows before writing, skips existing records, and reports valid, skipped, and failed rows.
 _Avoid_: Batch update, migration, sync
 
-**Email Username**:
-The portion of an Email before the `@` character.
-_Avoid_: account, login name
-
 **Default Password**:
-The initial password assigned during Bulk Import, using the Email Username; when Supabase rejects it as too short, the full Email is used.
+The initial password assigned during Bulk Import, set to the full Email.
 _Avoid_: temp password, generated password
 
 **Password Change Required**:

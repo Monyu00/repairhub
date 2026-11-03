@@ -16,7 +16,7 @@ import {
   SPACE_HEADERS,
   USER_HEADERS,
 } from "./types";
-import { defaultPasswordFor, parseIsoDate, parseRole } from "./validation";
+import { parseIsoDate, parseRole } from "./validation";
 
 interface PreparedRecord<TData> {
   source: string;
@@ -367,7 +367,7 @@ async function importUsers(formData: FormData): Promise<BulkImportResponse> {
     const result: BulkImportResultRow = { source: "使用者", row: row.row, status: "failed" };
     results.push(result);
     const email = row.values.email?.trim().toLowerCase() ?? "";
-    const password = defaultPasswordFor(email);
+    const password = email;
 
     if (!email.includes("@") || !password) {
       result.reason = "Email 無效";

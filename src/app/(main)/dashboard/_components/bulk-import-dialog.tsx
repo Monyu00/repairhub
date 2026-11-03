@@ -48,7 +48,7 @@ const copy: Record<BulkImportEntity, { title: string; description: string }> = {
   },
   users: {
     title: "批次匯入使用者",
-    description: "系統會以 Email Username 作為預設密碼，並要求首次登入變更密碼。",
+    description: "系統會以 Email 作為預設密碼，並要求首次登入變更密碼。",
   },
 };
 
