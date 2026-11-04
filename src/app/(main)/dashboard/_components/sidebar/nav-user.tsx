@@ -19,15 +19,6 @@ import type { UserRole } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
 
-interface NavUserProps {
-  user?: {
-    readonly name?: string;
-    readonly email?: string;
-    readonly avatar?: string;
-  };
-  userRole?: UserRole | null;
-}
-
 function getRoleLabel(role?: UserRole | null) {
   if (role === "admin") return "系統管理員 (Admin)";
   if (role === "technician") return "維修技師 (Technician)";
@@ -38,22 +29,19 @@ function firstText(...values: Array<string | null | undefined>) {
   return values.find((value) => value) ?? "";
 }
 
-export function NavUser({ user: propUser, userRole: propRole }: NavUserProps) {
+export function NavUser() {
   const { isMobile } = useSidebar();
-  const { projection } = useUser();
+  const projection = useUser();
   const [isPending, startTransition] = useTransition();
 
-  const email = firstText(projection?.email, propUser?.email);
-  const name = firstText(projection?.displayName, propUser?.name, email ? email.split("@")[0] : undefined, "使用者");
-
-  const avatar = projection?.avatarUrl ?? propUser?.avatar ?? "";
-
-  const effectiveRole = projection?.role ?? propRole;
-  const roleLabel = getRoleLabel(effectiveRole);
-
-  if (!email && !projection) {
+  if (!projection) {
     return null;
   }
+
+  const email = firstText(projection.email);
+  const name = firstText(projection.displayName, email ? email.split("@")[0] : undefined, "使用者");
+  const avatar = projection.avatarUrl ?? "";
+  const roleLabel = getRoleLabel(projection.role);
 
   return (
     <SidebarMenu>

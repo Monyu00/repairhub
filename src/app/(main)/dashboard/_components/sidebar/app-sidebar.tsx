@@ -16,20 +16,15 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_CONFIG } from "@/config/app-config";
 import { useUser } from "@/hooks/use-user";
-import type { UserRole } from "@/lib/users/projection";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  userRole?: UserRole | null;
-}
-
-export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarProps) {
-  const { projection } = useUser();
-  const activeRole = projection?.role ?? initialUserRole;
+export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const projection = useUser();
+  const activeRole = projection?.role ?? null;
 
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
     useShallow((s) => ({
@@ -65,7 +60,7 @@ export function AppSidebar({ userRole: initialUserRole, ...props }: AppSidebarPr
           <NavMain items={sidebarItems} userRole={activeRole} />
         </SidebarContent>
         <SidebarFooter>
-          <NavUser userRole={activeRole} />
+          <NavUser />
         </SidebarFooter>
       </nav>
     </Sidebar>

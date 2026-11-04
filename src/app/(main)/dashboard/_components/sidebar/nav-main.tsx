@@ -35,6 +35,23 @@ export function NavMain(props: NavMainProps) {
   );
 }
 
+export function filterNavGroups(items: readonly NavGroup[], userRole?: UserRole | null): NavGroup[] {
+  const isAllowed = (roles?: UserRole[]) => !roles?.length || Boolean(userRole && roles.includes(userRole));
+
+  return items
+    .filter((group) => isAllowed(group.roles))
+    .map((group) => ({
+      ...group,
+      items: group.items
+        .filter((item) => isAllowed(item.roles))
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) => isAllowed(child.roles)),
+        })),
+    }))
+    .filter((group) => group.items.length > 0);
+}
+
 function isSubItemActive(pathname: string, currentTab: string | null, subUrl: string): boolean {
   const [subPath, query] = subUrl.split("?");
   if (pathname !== subPath) return false;
@@ -49,20 +66,7 @@ function NavMainContent({ items, userRole }: NavMainProps) {
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab");
 
-  const isAllowed = (roles?: UserRole[]) => !roles?.length || Boolean(userRole && roles.includes(userRole));
-
-  const filteredGroups = items
-    .filter((group) => isAllowed(group.roles))
-    .map((group) => ({
-      ...group,
-      items: group.items
-        .filter((item) => isAllowed(item.roles))
-        .map((item) => ({
-          ...item,
-          children: item.children?.filter((child) => isAllowed(child.roles)),
-        })),
-    }))
-    .filter((group) => group.items.length > 0);
+  const filteredGroups = filterNavGroups(items, userRole);
 
   return (
     <>
