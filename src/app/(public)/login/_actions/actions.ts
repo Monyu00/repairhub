@@ -26,7 +26,7 @@ export async function registerWithEmail(formData: { email: string; password: str
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: formData.email,
     password: formData.password,
   });
@@ -35,6 +35,10 @@ export async function registerWithEmail(formData: { email: string; password: str
     return { success: false, error: error.message };
   }
 
+  if (!data.session) {
+    return { success: true, needsEmailVerification: true, mustChangePassword: false };
+  }
+
   const session = await getSession();
-  return { success: true, mustChangePassword: session?.mustChangePassword ?? false };
+  return { success: true, needsEmailVerification: false, mustChangePassword: session?.mustChangePassword ?? false };
 }

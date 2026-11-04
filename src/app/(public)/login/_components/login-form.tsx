@@ -85,7 +85,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       return;
     }
 
-    toast.success("註冊成功！已自動登入。");
+    if (res.needsEmailVerification) {
+      toast.success("註冊成功！請前往 Email 收取驗證信。");
+      router.push("/check-email");
+      return;
+    }
+
+    toast.success("註冊成功！");
     const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
     router.push(destination);
     router.refresh();
