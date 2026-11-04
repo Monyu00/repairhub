@@ -36,7 +36,7 @@ export default async function DashboardPage() {
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h1 className="font-bold font-heading text-2xl text-foreground tracking-tight">管理後台</h1>
-            <Badge variant="secondary" className="gap-1 px-2.5 py-0.5">
+            <Badge variant="secondary" className="gap-1">
               <ShieldCheck className="size-3.5 text-primary" />
               {roleName}
             </Badge>

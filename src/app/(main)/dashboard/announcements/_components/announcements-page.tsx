@@ -163,24 +163,21 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     switch (audience) {
       case "all":
         return (
-          <Badge variant="outline" className="gap-1 border-primary/30 bg-primary/5 text-primary text-xs">
+          <Badge variant="outline" className="gap-1">
             <Radio className="size-3" aria-hidden="true" />
             全體對象
           </Badge>
         );
       case "internal":
         return (
-          <Badge variant="secondary" className="gap-1 bg-muted text-foreground text-xs">
+          <Badge variant="secondary" className="gap-1">
             <Lock className="size-3" aria-hidden="true" />
             僅內部
           </Badge>
         );
       case "public":
         return (
-          <Badge
-            variant="outline"
-            className="gap-1 border-amber-500/30 bg-amber-500/10 text-amber-600 text-xs dark:text-amber-400"
-          >
+          <Badge variant="outline" className="gap-1">
             <Globe className="size-3" aria-hidden="true" />
             前台公開
           </Badge>
@@ -192,34 +189,25 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     switch (category) {
       case "system_maintenance":
         return (
-          <Badge
-            variant="outline"
-            className="shrink-0 border-sky-500/30 bg-sky-500/10 text-sky-600 text-xs dark:text-sky-400"
-          >
+          <Badge variant="outline" className="shrink-0">
             系統維護
           </Badge>
         );
       case "outage":
         return (
-          <Badge
-            variant="outline"
-            className="shrink-0 border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs dark:text-rose-400"
-          >
+          <Badge variant="destructive" className="shrink-0">
             停機通知
           </Badge>
         );
       case "policy":
         return (
-          <Badge
-            variant="outline"
-            className="shrink-0 border-violet-500/30 bg-violet-500/10 text-violet-600 text-xs dark:text-violet-400"
-          >
+          <Badge variant="outline" className="shrink-0">
             政策公告
           </Badge>
         );
       default:
         return (
-          <Badge variant="secondary" className="shrink-0 bg-muted text-muted-foreground text-xs">
+          <Badge variant="secondary" className="shrink-0 text-muted-foreground">
             一般公告
           </Badge>
         );
@@ -401,12 +389,12 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                               {renderCategoryBadge(item.category)}
                               <span className="font-semibold text-foreground">{item.title}</span>
                               {isExp && (
-                                <Badge variant="secondary" className="px-1.5 py-0 text-muted-foreground text-xs">
+                                <Badge variant="secondary" className="text-muted-foreground">
                                   已到期
                                 </Badge>
                               )}
                               {isEdited && (
-                                <Badge variant="outline" className="px-1.5 py-0 text-muted-foreground text-xs">
+                                <Badge variant="outline" className="text-muted-foreground">
                                   已編輯
                                 </Badge>
                               )}

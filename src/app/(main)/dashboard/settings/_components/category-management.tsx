@@ -96,9 +96,7 @@ function SortableCategoryRow({
       <TableCell className="font-medium text-foreground">{category.name}</TableCell>
       <TableCell className="w-[120px]">
         {category.is_active ? (
-          <Badge variant="default" className="bg-emerald-700 dark:bg-emerald-800">
-            啟用中
-          </Badge>
+          <Badge variant="default">啟用中</Badge>
         ) : (
           <Badge variant="outline" className="text-muted-foreground">
             已停用

@@ -576,9 +576,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           {selectedIds.size > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-2 text-sm">
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="px-2 py-0.5 font-semibold">
-                  已選取 {selectedIds.size} 位使用者
-                </Badge>
+                <Badge variant="secondary">已選取 {selectedIds.size} 位使用者</Badge>
                 <span className="text-muted-foreground text-xs">（跨頁選取）</span>
               </div>
 
@@ -734,19 +732,9 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                         </TableCell>
                         <TableCell>
                           {user.isActive ? (
-                            <Badge
-                              variant="outline"
-                              className="border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-normal text-emerald-700 text-xs dark:text-emerald-400"
-                            >
-                              啟用中
-                            </Badge>
+                            <Badge variant="secondary">啟用中</Badge>
                           ) : (
-                            <Badge
-                              variant="outline"
-                              className="border-destructive/20 bg-destructive/10 px-2 py-0.5 font-normal text-destructive text-xs"
-                            >
-                              已停用
-                            </Badge>
+                            <Badge variant="destructive">已停用</Badge>
                           )}
                         </TableCell>
                         <TableCell>
@@ -760,11 +748,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           {isTech && subscribedCategories.length > 0 && (
                             <div className="flex max-w-[240px] flex-wrap gap-1">
                               {subscribedCategories.map((cat) => (
-                                <Badge
-                                  key={cat.id}
-                                  variant="secondary"
-                                  className="border-blue-200 bg-blue-500/10 px-2 py-0.5 font-normal text-blue-700 text-xs dark:border-blue-800/40 dark:text-blue-300"
-                                >
+                                <Badge key={cat.id} variant="secondary">
                                   {cat.name}
                                 </Badge>
                               ))}

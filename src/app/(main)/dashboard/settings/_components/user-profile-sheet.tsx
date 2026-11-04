@@ -118,18 +118,12 @@ export function UserProfileSheet({
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <UserRoleBadge role={user.role} />
                 {user.isActive ? (
-                  <Badge
-                    variant="outline"
-                    className="gap-1 border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-normal text-emerald-700 text-xs dark:text-emerald-400"
-                  >
+                  <Badge variant="secondary" className="gap-1">
                     <CheckCircle2 className="size-3" />
                     <span>正常啟用</span>
                   </Badge>
                 ) : (
-                  <Badge
-                    variant="outline"
-                    className="gap-1 border-destructive/20 bg-destructive/10 px-2 py-0.5 font-normal text-destructive text-xs"
-                  >
+                  <Badge variant="destructive" className="gap-1">
                     <Ban className="size-3" />
                     <span>已停用</span>
                   </Badge>
@@ -235,11 +229,7 @@ export function UserProfileSheet({
             {subscribedCategories.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {subscribedCategories.map((cat) => (
-                  <Badge
-                    key={cat.id}
-                    variant="secondary"
-                    className="border-blue-200 bg-blue-500/10 px-2.5 py-1 font-normal text-blue-700 text-xs dark:border-blue-800/40 dark:text-blue-300"
-                  >
+                  <Badge key={cat.id} variant="secondary">
                     {cat.name}
                   </Badge>
                 ))}

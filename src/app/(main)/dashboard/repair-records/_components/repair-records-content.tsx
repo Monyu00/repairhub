@@ -98,7 +98,8 @@ export function RepairRecordsContent({
   };
 
   const handleRowClick = (id: string) => {
-    router.push(`/dashboard/tickets/${id}`);
+    const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
+    router.push(`/dashboard/tickets/${id}?returnTo=${encodeURIComponent(returnTo)}`);
   };
 
   const handleResetFilters = () => {

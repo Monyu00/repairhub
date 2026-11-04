@@ -81,7 +81,7 @@ export function QRCard({ item }: QRCardProps) {
   return (
     <Card className="group relative flex flex-col items-center justify-between overflow-hidden border border-border bg-card p-4 text-card-foreground shadow-xs transition-shadow hover:shadow-md">
       {/* Screen action bar */}
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-100 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:group-focus-within:opacity-100">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -134,14 +134,14 @@ export function QRCard({ item }: QRCardProps) {
       </div>
 
       {/* Top Header / Branding */}
-      <div className="flex w-full items-center justify-between border-border/60 border-b pb-2.5">
+      <div className="flex w-full items-center justify-between border-border/60 border-b pb-2.5 pr-24">
         <div className="flex items-center gap-1.5">
           <div className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Wrench className="size-3" />
           </div>
           <span className="font-heading font-semibold text-xs tracking-tight">RepairHub 報修</span>
         </div>
-        <Badge variant={item.type === "space" ? "secondary" : "outline"} className="px-1.5 py-0 font-normal text-xs">
+        <Badge variant={item.type === "space" ? "secondary" : "outline"}>
           {item.type === "space" ? "空間 QR" : "設備 QR"}
         </Badge>
       </div>
