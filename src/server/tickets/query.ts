@@ -335,7 +335,11 @@ export async function queryTickets(
   }
 
   if (buildingId && buildingId !== "all") {
-    query = query.or(`building_id.eq.${buildingId},space.building_id.eq.${buildingId}`);
+    // PostgREST cannot mix root and foreign columns in one .or() string.
+    query = query
+      .filter("building.id", "eq", buildingId)
+      .filter("space.building_id", "eq", buildingId)
+      .or("building.not.is.null,space.not.is.null");
   }
 
   if (assignedTo && assignedTo !== "all") {
