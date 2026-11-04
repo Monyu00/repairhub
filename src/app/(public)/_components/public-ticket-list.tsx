@@ -74,6 +74,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
                     <Link
                       href={`/track/${ticket.id}`}
+                      prefetch={false}
                       aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
                       className="rounded-sm outline-none relative z-10 hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
                     >
@@ -104,6 +105,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   <TableCell className="p-2 text-right">
                     <Link
                       href={`/track/${ticket.id}`}
+                      prefetch={false}
                       className="absolute inset-0 z-0"
                       aria-hidden="true"
                       tabIndex={-1}
@@ -126,7 +128,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
           const formattedDate = formatTicketDate(ticket.createdAt);
 
           return (
-            <Link key={ticket.id} href={`/track/${ticket.id}`} className="group block">
+            <Link key={ticket.id} href={`/track/${ticket.id}`} prefetch={false} className="group block">
               <Card className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs">
                 <CardContent className="space-y-2.5 p-4">
                   {/* Top: ID, Category & Status */}
