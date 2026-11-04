@@ -163,7 +163,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     switch (audience) {
       case "all":
         return (
-          <Badge variant="outline" className="gap-1">
+          <Badge variant="info" className="gap-1">
             <Radio className="size-3" aria-hidden="true" />
             全體對象
           </Badge>
@@ -177,7 +177,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         );
       case "public":
         return (
-          <Badge variant="outline" className="gap-1">
+          <Badge variant="warning" className="gap-1">
             <Globe className="size-3" aria-hidden="true" />
             前台公開
           </Badge>
@@ -189,7 +189,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
     switch (category) {
       case "system_maintenance":
         return (
-          <Badge variant="outline" className="shrink-0">
+          <Badge variant="info" className="shrink-0">
             系統維護
           </Badge>
         );

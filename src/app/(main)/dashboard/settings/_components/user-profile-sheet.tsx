@@ -118,7 +118,7 @@ export function UserProfileSheet({
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <UserRoleBadge role={user.role} />
                 {user.isActive ? (
-                  <Badge variant="secondary" className="gap-1">
+                  <Badge variant="success" className="gap-1">
                     <CheckCircle2 className="size-3" />
                     <span>正常啟用</span>
                   </Badge>
@@ -229,7 +229,7 @@ export function UserProfileSheet({
             {subscribedCategories.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {subscribedCategories.map((cat) => (
-                  <Badge key={cat.id} variant="secondary">
+                  <Badge key={cat.id} variant="info">
                     {cat.name}
                   </Badge>
                 ))}

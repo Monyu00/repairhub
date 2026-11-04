@@ -21,7 +21,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
 
   if (role === "technician") {
     return (
-      <Badge variant="secondary" className={cn("gap-1.5", className)}>
+      <Badge variant="info" className={cn("gap-1.5", className)}>
         <Wrench className="shrink-0" />
         <span>維修技師</span>
       </Badge>

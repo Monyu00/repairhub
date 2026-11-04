@@ -732,7 +732,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                         </TableCell>
                         <TableCell>
                           {user.isActive ? (
-                            <Badge variant="secondary">啟用中</Badge>
+                            <Badge variant="success">啟用中</Badge>
                           ) : (
                             <Badge variant="destructive">已停用</Badge>
                           )}
@@ -748,7 +748,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           {isTech && subscribedCategories.length > 0 && (
                             <div className="flex max-w-[240px] flex-wrap gap-1">
                               {subscribedCategories.map((cat) => (
-                                <Badge key={cat.id} variant="secondary">
+                                <Badge key={cat.id} variant="info">
                                   {cat.name}
                                 </Badge>
                               ))}

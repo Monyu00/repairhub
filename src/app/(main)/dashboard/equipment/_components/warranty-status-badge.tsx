@@ -28,7 +28,7 @@ export function WarrantyStatusBadge({ warrantyExpiry, className }: WarrantyStatu
 
   if (status === "active") {
     return (
-      <Badge variant="secondary" className={cn("gap-1", className)}>
+      <Badge variant="success" className={cn("gap-1", className)}>
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
         <span>保固中</span>
       </Badge>
@@ -36,7 +36,7 @@ export function WarrantyStatusBadge({ warrantyExpiry, className }: WarrantyStatu
   }
 
   return (
-    <Badge variant="destructive" className={cn("gap-1", className)}>
+    <Badge variant="warning" className={cn("gap-1", className)}>
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
       <span>已過期</span>
     </Badge>
