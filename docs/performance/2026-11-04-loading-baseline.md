@@ -8,6 +8,8 @@ Measured against production at `https://repairhub.monyu.dev/` before the Functio
 - Function Region: `hkg1`
 - Target Function Region: `hnd1` (Tokyo)
 
+After deployment, `vercel inspect https://repairhub.monyu.dev` reported all sampled Functions in `hnd1`.
+
 ## Public Homepage
 
 | Viewport | TTFB | FCP | LCP | Font Requests | RSC Prefetches |
@@ -16,6 +18,15 @@ Measured against production at `https://repairhub.monyu.dev/` before the Functio
 | Desktop 1440x900 | 21.9 ms | 3,736 ms | 3,736 ms | 22 | 8 |
 
 RSC prefetches include repeated `/login`, `/report`, and `/track/:id` requests.
+
+## Public Homepage After Region Change
+
+| Viewport | TTFB | FCP | LCP | Font Requests | RSC Prefetches |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Mobile 390x844 | 20.0 ms | 1,480 ms | 1,480 ms | 22 | 8 |
+| Desktop 1440x900 | 20.3 ms | 2,216 ms | 2,216 ms | 22 | 8 |
+
+The region change reduces Supabase round-trip latency for dynamic requests; font and prefetch reductions are handled in later tickets.
 
 ## Dashboard
 
