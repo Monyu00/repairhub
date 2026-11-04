@@ -258,8 +258,8 @@ export async function resetUserPassword(
     await requireAdmin();
 
     const password = newPassword.trim();
-    if (!password || password.length < 6) {
-      return { success: false, error: "新密碼長度至少需為 6 個字元" };
+    if (!password || password.length < 8) {
+      return { success: false, error: "新密碼長度至少需為 8 個字元" };
     }
 
     const adminClient = createAdminClient();
