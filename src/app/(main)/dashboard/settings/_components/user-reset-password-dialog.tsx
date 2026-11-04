@@ -72,8 +72,8 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
     e.preventDefault();
     setError(null);
 
-    if (!password.trim() || password.trim().length < 6) {
-      setError("新密碼長度至少需為 6 個字元");
+    if (!password.trim() || password.trim().length < 8) {
+      setError("新密碼長度至少需為 8 個字元");
       return;
     }
 
@@ -170,7 +170,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="至少 6 個字元"
+                    placeholder="至少 8 個字元"
                     className="pr-10 font-mono"
                     required
                     disabled={isPending}

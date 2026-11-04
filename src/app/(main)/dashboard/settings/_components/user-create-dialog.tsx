@@ -65,8 +65,8 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
       setError("請輸入有效的 Email 地址");
       return;
     }
-    if (!password.trim() || password.trim().length < 6) {
-      setError("密碼長度至少需為 6 個字元");
+    if (!password.trim() || password.trim().length < 8) {
+      setError("密碼長度至少需為 8 個字元");
       return;
     }
 
@@ -151,7 +151,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="至少 6 個字元"
+                  placeholder="至少 8 個字元"
                   className="pr-10 font-mono"
                   required
                   disabled={isPending}
