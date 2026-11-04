@@ -86,6 +86,16 @@ export interface QueryTicketsResult {
 
 type RawRecord = Record<string, unknown>;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TICKET_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed", "closed", "cancelled"];
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function isUuid(value: string): boolean {
+  return UUID_PATTERN.test(value);
+}
+
+function isIsoDate(value: string): boolean {
+  return DATE_PATTERN.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
+}
 
 function toTicketBuilding(value: unknown): TicketBuilding | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -222,6 +232,32 @@ export async function queryTickets(
     viewerContext,
   } = options;
 
+  const hasInvalidIdentifier =
+    (id ? !isUuid(id) : false) ||
+    (spaceId ? !isUuid(spaceId) : false) ||
+    (assignedTo && assignedTo !== "all" ? !isUuid(assignedTo) : false) ||
+    (buildingId && buildingId !== "all" ? !isUuid(buildingId) : false);
+
+  if (
+    hasInvalidIdentifier ||
+    (Array.isArray(status)
+      ? status.length === 0 || status.some((value) => !TICKET_STATUSES.includes(value))
+      : status
+        ? !TICKET_STATUSES.includes(status)
+        : false) ||
+    (Array.isArray(categoryId)
+      ? categoryId.length === 0 || categoryId.some((value) => !isUuid(value))
+      : categoryId && categoryId !== "all"
+        ? !isUuid(categoryId)
+        : false) ||
+    (fromDate ? !isIsoDate(fromDate) : false) ||
+    (toDate ? !isIsoDate(toDate) : false) ||
+    (page !== undefined && (!Number.isInteger(page) || page < 1)) ||
+    (pageSize !== undefined && (!Number.isInteger(pageSize) || pageSize < 1))
+  ) {
+    return { tickets: [], totalCount: 0 };
+  }
+
   const selectQuery = `
     id,
     status,
@@ -299,10 +335,11 @@ export async function queryTickets(
   }
 
   if (buildingId && buildingId !== "all") {
-    if (!UUID_PATTERN.test(buildingId)) {
-      return { tickets: [], totalCount: 0 };
-    }
-    query = query.or(`building_id.eq.${buildingId},space.building_id.eq.${buildingId}`);
+    // PostgREST cannot mix root and foreign columns in one .or() string.
+    query = query
+      .filter("building.id", "eq", buildingId)
+      .filter("space.building_id", "eq", buildingId)
+      .or("building.not.is.null,space.not.is.null");
   }
 
   if (assignedTo && assignedTo !== "all") {
@@ -334,7 +371,7 @@ export async function queryTickets(
   const { data, count, error } = await query;
 
   if (error) {
-    console.error("queryTickets error:", error);
+    console.error("queryTickets error:", JSON.stringify(error));
     return { tickets: [], totalCount: 0 };
   }
 

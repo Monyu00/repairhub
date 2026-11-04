@@ -113,9 +113,7 @@ function SortableSpaceRow({ space, isDisabled, onEdit, onDelete }: SortableSpace
             <GripVertical />
             <span className="sr-only">拖拉調整空間順序</span>
           </Button>
-          <Badge variant="outline" className="font-normal">
-            {space.floor > 0 ? `${space.floor}F` : `B${Math.abs(space.floor)}`}
-          </Badge>
+          <Badge variant="outline">{space.floor > 0 ? `${space.floor}F` : `B${Math.abs(space.floor)}`}</Badge>
         </div>
       </TableCell>
       <TableCell className="font-medium">
@@ -214,12 +212,10 @@ function SortableBuildingCard({
                 )}
                 <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <span className="font-semibold text-base text-foreground">{building.name}</span>
-                <Badge variant="outline" className="font-mono text-xs uppercase">
+                <Badge variant="outline" className="font-mono uppercase">
                   {building.code}
                 </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {spaceCount} 個空間
-                </Badge>
+                <Badge variant="secondary">{spaceCount} 個空間</Badge>
               </button>
             </CollapsibleTrigger>
           </div>

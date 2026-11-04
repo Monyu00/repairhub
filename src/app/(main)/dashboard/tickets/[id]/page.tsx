@@ -12,6 +12,9 @@ interface PageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    returnTo?: string;
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -23,8 +26,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params, searchParams }: PageProps) {
   const { id: ticketId } = await params;
+  const { returnTo } = await searchParams;
 
   if (!ticketId || typeof ticketId !== "string") {
     notFound();
@@ -42,5 +46,16 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  return <TicketDetailView detail={detail} userId={session?.userId ?? null} userRole={session?.role ?? null} />;
+  const isRepairRecordsReturn =
+    returnTo === "/dashboard/repair-records" || returnTo?.startsWith("/dashboard/repair-records?");
+  const safeReturnTo = isRepairRecordsReturn ? returnTo : "/dashboard/tickets";
+
+  return (
+    <TicketDetailView
+      detail={detail}
+      userId={session?.userId ?? null}
+      userRole={session?.role ?? null}
+      returnTo={safeReturnTo}
+    />
+  );
 }

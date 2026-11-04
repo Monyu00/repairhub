@@ -104,6 +104,10 @@ _Avoid_: Notification, message, attempt
 The act of a technician voluntarily taking ownership of a pending ticket. Atomic operation — only one technician can successfully claim a given ticket.
 _Avoid_: Accept, take, pick up
 
+**Completion Summary**:
+Technician-provided notes describing the repair, parts replaced, or follow-up recommendations recorded at Completion.
+_Avoid_: Closure note, progress note, repair description
+
 **Assignment**:
 An admin manually designating a specific technician to handle a ticket. Unlike a claim, the technician does not choose — they are assigned.
 _Avoid_: Dispatch, delegate, allocate

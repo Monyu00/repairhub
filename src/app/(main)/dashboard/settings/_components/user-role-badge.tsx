@@ -12,14 +12,8 @@ interface UserRoleBadgeProps {
 export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
   if (role === "admin") {
     return (
-      <Badge
-        variant="outline"
-        className={cn(
-          "gap-1.5 border-rose-500/20 bg-rose-500/10 px-2.5 py-0.5 font-normal text-rose-700 dark:text-rose-400",
-          className,
-        )}
-      >
-        <ShieldCheck className="size-3.5 shrink-0" />
+      <Badge variant="destructive" className={cn("gap-1.5", className)}>
+        <ShieldCheck className="shrink-0" />
         <span>系統管理者</span>
       </Badge>
     );
@@ -27,28 +21,16 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
 
   if (role === "technician") {
     return (
-      <Badge
-        variant="outline"
-        className={cn(
-          "gap-1.5 border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 font-normal text-blue-700 dark:text-blue-400",
-          className,
-        )}
-      >
-        <Wrench className="size-3.5 shrink-0" />
+      <Badge variant="info" className={cn("gap-1.5", className)}>
+        <Wrench className="shrink-0" />
         <span>維修技師</span>
       </Badge>
     );
   }
 
   return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "gap-1.5 border-slate-500/20 bg-slate-500/10 px-2.5 py-0.5 font-normal text-slate-700 dark:text-slate-400",
-        className,
-      )}
-    >
-      <User className="size-3.5 shrink-0" />
+    <Badge variant="outline" className={cn("gap-1.5", className)}>
+      <User className="shrink-0" />
       <span>一般使用者</span>
     </Badge>
   );

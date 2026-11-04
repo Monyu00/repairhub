@@ -62,7 +62,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
             <SheetDescription asChild>
               <div className="pt-1 text-muted-foreground text-xs">
                 設備：<span className="font-semibold text-foreground">{equipment.name}</span>
-                <Badge variant="outline" className="ml-2 font-mono text-xs">
+                <Badge variant="outline" className="ml-2 font-mono">
                   {equipment.code}
                 </Badge>
                 <div className="mt-1">

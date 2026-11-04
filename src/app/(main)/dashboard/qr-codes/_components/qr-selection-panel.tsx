@@ -190,9 +190,7 @@ export function QRSelectionPanel({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="px-1.5 py-0 text-xs">
-                    {building.spaces.length} 間
-                  </Badge>
+                  <Badge variant="outline">{building.spaces.length} 間</Badge>
                   <button
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
@@ -282,9 +280,7 @@ export function QRSelectionPanel({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="px-1.5 py-0 text-xs">
-                    {building.items.length} 台
-                  </Badge>
+                  <Badge variant="outline">{building.items.length} 台</Badge>
                   <button
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
@@ -398,7 +394,7 @@ export function QRSelectionPanel({
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
+            <Badge variant="secondary">
               已選 <span className="mr-0.5 ml-1 font-semibold text-primary">{selectedIds.length}</span> 項
             </Badge>
           </div>

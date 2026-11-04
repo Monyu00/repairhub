@@ -175,11 +175,7 @@ export function TechnicianCategoryDialog({
                         className="flex flex-1 cursor-pointer items-center justify-between font-normal"
                       >
                         <span className="font-medium text-foreground text-sm">{cat.name}</span>
-                        {isChecked && (
-                          <Badge variant="secondary" className="h-4 px-1.5 py-0 text-xs">
-                            已負責
-                          </Badge>
-                        )}
+                        {isChecked && <Badge variant="secondary">已負責</Badge>}
                       </Label>
                     </div>
                   );

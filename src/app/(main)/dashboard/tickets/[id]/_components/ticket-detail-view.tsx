@@ -10,19 +10,20 @@ import type { TicketDetail } from "@/server/tickets/detail";
 
 import { AdminActions } from "./admin-actions";
 import { ClosureSection } from "./closure-section";
+import { CompletionSummarySection } from "./completion-summary-section";
 import { StatusTimeline } from "./status-timeline";
 import { TechnicianClaimButton } from "./technician-claim-button";
 import { TicketInfoSection } from "./ticket-info-section";
 import { TicketNotesSection } from "./ticket-notes-section";
-import { TicketPhotosSection } from "./ticket-photos-section";
 
 interface TicketDetailViewProps {
   detail: TicketDetail;
   userId: string | null;
   userRole: "admin" | "technician" | null;
+  returnTo?: string;
 }
 
-export function TicketDetailView({ detail, userId, userRole }: TicketDetailViewProps) {
+export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashboard/tickets" }: TicketDetailViewProps) {
   const { ticket, photos, notes } = detail;
   const assignedTo = ticket.assignedTo;
   const isAdmin = userRole === "admin";
@@ -37,7 +38,7 @@ export function TicketDetailView({ detail, userId, userRole }: TicketDetailViewP
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm" className="-ml-2 h-8 gap-1 text-muted-foreground text-xs">
-            <Link href="/dashboard/tickets">
+            <Link href={returnTo}>
               <ArrowLeft className="size-3.5" />
               返回單據列表
             </Link>
@@ -77,16 +78,12 @@ export function TicketDetailView({ detail, userId, userRole }: TicketDetailViewP
         {/* Left Column (2 cols) */}
         <div className="space-y-6 lg:col-span-2">
           {/* Main Info */}
-          <TicketInfoSection ticket={ticket} canViewReporter={canViewReporter} />
-
-          {/* Submission Photos */}
-          <TicketPhotosSection photos={photos} phase="report" title="報修通報照片" />
+          <TicketInfoSection ticket={ticket} canViewReporter={canViewReporter} photos={photos} />
 
           {/* Technician Closure Workflow (When in_progress and assigned) */}
           {canSubmitClosure && <ClosureSection ticketId={ticket.id} />}
 
-          {/* Closure Photos (When completed/closed) */}
-          <TicketPhotosSection photos={photos} phase="closure" title="維修完工照片" />
+          <CompletionSummarySection notes={notes} photos={photos} />
 
           {/* Progress Notes */}
           <TicketNotesSection ticketId={ticket.id} notes={notes} canAddNote={canAddNote} />

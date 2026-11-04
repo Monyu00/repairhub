@@ -6,7 +6,7 @@ export interface TicketStatusPresentation {
   label: string;
   icon: LucideIcon;
   dotClass: string;
-  badgeVariant: "default" | "secondary" | "destructive" | "outline";
+  badgeVariant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info";
 }
 
 const PRESENTATION_BY_STATUS: Record<TicketStatus, TicketStatusPresentation> = {
@@ -14,19 +14,19 @@ const PRESENTATION_BY_STATUS: Record<TicketStatus, TicketStatusPresentation> = {
     label: "待處理",
     icon: ClockIcon,
     dotClass: "bg-amber-500",
-    badgeVariant: "outline",
+    badgeVariant: "warning",
   },
   in_progress: {
     label: "維修中",
     icon: WrenchIcon,
     dotClass: "bg-blue-500 animate-pulse motion-reduce:animate-none",
-    badgeVariant: "outline",
+    badgeVariant: "info",
   },
   completed: {
     label: "已完工",
     icon: CheckCircle2Icon,
     dotClass: "bg-emerald-500",
-    badgeVariant: "outline",
+    badgeVariant: "success",
   },
   closed: {
     label: "已結案",

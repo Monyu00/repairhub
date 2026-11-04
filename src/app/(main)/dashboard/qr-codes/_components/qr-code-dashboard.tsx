@@ -215,7 +215,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h2 className="font-semibold text-foreground text-sm">預覽輸出卡片</h2>
-                  <Badge variant="secondary" className="font-mono text-xs">
+                  <Badge variant="secondary" className="font-mono">
                     已選 {printableItems.length} 張{hiddenPreviewCount > 0 ? `、僅預覽前 ${QR_PREVIEW_LIMIT} 張` : ""}
                   </Badge>
                 </div>

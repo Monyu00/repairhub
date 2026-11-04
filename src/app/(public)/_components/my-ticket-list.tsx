@@ -119,7 +119,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
           return (
             <Card
               key={ticket.id}
-              className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs"
+              className="relative border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs"
             >
               <CardContent className="flex flex-col gap-3 p-4 sm:p-5">
                 {/* Header row */}
@@ -136,7 +136,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
                   <Link
                     href={`/track/${ticket.id}`}
-                    className="inline-flex items-center gap-1 text-muted-foreground text-xs transition-colors hover:text-primary"
+                    className="inline-flex items-center gap-1 text-muted-foreground text-xs transition-colors after:absolute after:inset-0 after:z-0 after:content-[''] hover:text-primary"
                   >
                     <span>案件詳情</span>
                     <ExternalLink className="size-3" />
@@ -161,7 +161,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
                   {/* Inline actions for completed tickets */}
                   {isCompleted && (
-                    <div className="flex items-center gap-2">
+                    <div className="relative z-10 flex items-center gap-2">
                       <Button
                         size="sm"
                         variant="outline"
