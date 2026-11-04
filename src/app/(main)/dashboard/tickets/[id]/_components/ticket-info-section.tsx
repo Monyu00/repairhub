@@ -5,14 +5,18 @@ import { Building2, Calendar, Clock, HardDrive, Mail, MapPin, Phone, Star, Tag, 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
+import type { TicketPhoto } from "@/server/tickets/detail";
 import type { TicketRecord } from "@/server/tickets/query";
+
+import { TicketPhotosSection } from "./ticket-photos-section";
 
 interface TicketInfoSectionProps {
   ticket: TicketRecord;
   canViewReporter: boolean;
+  photos: TicketPhoto[];
 }
 
-export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSectionProps) {
+export function TicketInfoSection({ ticket, canViewReporter, photos }: TicketInfoSectionProps) {
   const formattedCreatedAt = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
   const formattedUpdatedAt = ticket.updatedAt ? formatTicketDate(ticket.updatedAt) : "-";
@@ -157,6 +161,8 @@ export function TicketInfoSection({ ticket, canViewReporter }: TicketInfoSection
             </p>
           )}
         </div>
+
+        <TicketPhotosSection photos={photos} phase="report" title="報修通報照片" />
       </CardContent>
     </Card>
   );

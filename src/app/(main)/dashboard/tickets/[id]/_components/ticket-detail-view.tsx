@@ -15,7 +15,6 @@ import { StatusTimeline } from "./status-timeline";
 import { TechnicianClaimButton } from "./technician-claim-button";
 import { TicketInfoSection } from "./ticket-info-section";
 import { TicketNotesSection } from "./ticket-notes-section";
-import { TicketPhotosSection } from "./ticket-photos-section";
 
 interface TicketDetailViewProps {
   detail: TicketDetail;
@@ -79,18 +78,12 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
         {/* Left Column (2 cols) */}
         <div className="space-y-6 lg:col-span-2">
           {/* Main Info */}
-          <TicketInfoSection ticket={ticket} canViewReporter={canViewReporter} />
-
-          {/* Submission Photos */}
-          <TicketPhotosSection photos={photos} phase="report" title="報修通報照片" />
+          <TicketInfoSection ticket={ticket} canViewReporter={canViewReporter} photos={photos} />
 
           {/* Technician Closure Workflow (When in_progress and assigned) */}
           {canSubmitClosure && <ClosureSection ticketId={ticket.id} />}
 
-          <CompletionSummarySection notes={notes} />
-
-          {/* Closure Photos (When completed/closed) */}
-          <TicketPhotosSection photos={photos} phase="closure" title="維修完工照片" />
+          <CompletionSummarySection notes={notes} photos={photos} />
 
           {/* Progress Notes */}
           <TicketNotesSection ticketId={ticket.id} notes={notes} canAddNote={canAddNote} />
