@@ -67,6 +67,17 @@ export function ThemeBootScript() {
         root.classList.toggle("dark", resolvedMode === "dark");
         root.style.colorScheme = resolvedMode;
 
+        if (mode === "system" && window.matchMedia) {
+          var systemMedia = window.matchMedia("(prefers-color-scheme: dark)");
+          var applySystemTheme = function () {
+            var resolved = systemMedia.matches ? "dark" : "light";
+            root.classList.toggle("dark", resolved === "dark");
+            root.style.colorScheme = resolved;
+          };
+
+          systemMedia.addEventListener("change", applySystemTheme);
+        }
+
       } catch (e) {
         console.warn("ThemeBootScript error:", e);
       }
