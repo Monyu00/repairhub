@@ -78,7 +78,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           reporterEmail: session.email,
           page: 1,
           pageSize: 1,
-          viewerContext: { role: null },
+          viewerContext: {
+            role: session.role,
+            userId: session.userId,
+            email: session.email,
+          },
         })
       : Promise.resolve(null),
     activeTab === "all"
@@ -89,7 +93,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             page: currentPage,
             pageSize,
             sort: { field: "created_at", ascending: false },
-            viewerContext: { role: null },
+            viewerContext: {
+              role: session.role,
+              userId: session.userId,
+              email: session.email,
+            },
           })
         : Promise.resolve<QueryTicketsResult>({ tickets: [], totalCount: 0 }),
   ]);
