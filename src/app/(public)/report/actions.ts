@@ -1,8 +1,10 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 import { getSession } from "@/server/auth/session";
 import { type CreateTicketFieldKey, createTicket } from "@/server/tickets/lifecycle";
+import { verifyTurnstileToken } from "@/server/turnstile";
 
 export type FormState = {
   success?: boolean;
@@ -13,6 +15,14 @@ export type FormState = {
 
 export async function submitReport(_prevState: FormState, formData: FormData): Promise<FormState> {
   try {
+    const captchaToken = formData.get("cf-turnstile-response")?.toString() ?? "";
+    if (!(await verifyTurnstileToken(captchaToken))) {
+      return {
+        success: false,
+        error: TURNSTILE_ERROR_MESSAGE,
+      };
+    }
+
     let photosBase64: string[] = [];
     try {
       photosBase64 = JSON.parse(formData.get("photos")?.toString() || "[]");

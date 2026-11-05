@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -13,6 +13,7 @@ import {
   StarIcon,
 } from "lucide-react";
 
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnstile/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 import { cn } from "@/lib/utils";
 
 import { confirmFix, reopenTicket } from "../_actions/track-actions";
@@ -53,6 +55,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
 
   function openDialog(type: ActionType) {
     setActionType(type);
@@ -60,30 +64,43 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
     setFeedback("");
     setError(null);
     setSuccess(false);
+    setCaptchaToken(null);
     setDialogOpen(true);
   }
 
   function handleSubmit() {
+    if (!captchaToken) {
+      setError(TURNSTILE_ERROR_MESSAGE);
+      return;
+    }
+
     setError(null);
 
     startTransition(async () => {
-      let result: { success: boolean; error?: string };
+      try {
+        let result: { success: boolean; error?: string };
 
-      if (actionType === "confirm") {
-        result = await confirmFix(ticketId, email, rating ?? undefined);
-      } else {
-        result = await reopenTicket(ticketId, email, feedback);
-      }
+        if (actionType === "confirm") {
+          result = await confirmFix(ticketId, email, captchaToken, rating ?? undefined);
+        } else {
+          result = await reopenTicket(ticketId, email, captchaToken, feedback);
+        }
 
-      if (result.success) {
-        setSuccess(true);
-        // Refresh the page data after a brief delay so user sees success state
-        setTimeout(() => {
-          setDialogOpen(false);
-          router.refresh();
-        }, 1500);
-      } else {
-        setError(result.error ?? "操作失敗，請稍後再試");
+        if (result.success) {
+          setSuccess(true);
+          // Refresh the page data after a brief delay so user sees success state
+          setTimeout(() => {
+            setDialogOpen(false);
+            router.refresh();
+          }, 1500);
+        } else {
+          setError(result.error ?? "操作失敗，請稍後再試");
+        }
+      } catch {
+        setError("操作失敗，請稍後再試");
+      } finally {
+        setCaptchaToken(null);
+        turnstileRef.current?.reset();
       }
     });
   }
@@ -225,6 +242,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                 </div>
               )}
 
+              <TurnstileWidget ref={turnstileRef} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+
               {/* Error display */}
               {error && (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-foreground text-sm">
@@ -241,7 +260,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isPending || !email.trim() || (!isConfirm && !feedback.trim())}
+                disabled={isPending || !captchaToken || !email.trim() || (!isConfirm && !feedback.trim())}
                 variant={isConfirm ? "default" : "destructive"}
               >
                 {isPending && (

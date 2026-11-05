@@ -1,7 +1,9 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 import { transitionTicket } from "@/server/tickets/lifecycle";
+import { verifyTurnstileToken } from "@/server/turnstile";
 
 interface ActionResult {
   success: boolean;
@@ -11,9 +13,18 @@ interface ActionResult {
 /**
  * Thin Adapter: Confirms repair fix and closes the ticket (Reporter).
  */
-export async function confirmFix(ticketId: string, email: string, rating?: number): Promise<ActionResult> {
+export async function confirmFix(
+  ticketId: string,
+  email: string,
+  captchaToken: string,
+  rating?: number,
+): Promise<ActionResult> {
   if (!email.trim()) {
     return { success: false, error: "請輸入電子郵件地址" };
+  }
+
+  if (!(await verifyTurnstileToken(captchaToken))) {
+    return { success: false, error: TURNSTILE_ERROR_MESSAGE };
   }
 
   const supabase = createAdminClient();
@@ -31,13 +42,22 @@ export async function confirmFix(ticketId: string, email: string, rating?: numbe
 /**
  * Thin Adapter: Reopens an unfinished or unresolved ticket (Reporter).
  */
-export async function reopenTicket(ticketId: string, email: string, feedback: string): Promise<ActionResult> {
+export async function reopenTicket(
+  ticketId: string,
+  email: string,
+  captchaToken: string,
+  feedback: string,
+): Promise<ActionResult> {
   if (!email.trim()) {
     return { success: false, error: "請輸入電子郵件地址" };
   }
 
   if (!feedback.trim()) {
     return { success: false, error: "請輸入問題反饋說明" };
+  }
+
+  if (!(await verifyTurnstileToken(captchaToken))) {
+    return { success: false, error: TURNSTILE_ERROR_MESSAGE };
   }
 
   const supabase = createAdminClient();

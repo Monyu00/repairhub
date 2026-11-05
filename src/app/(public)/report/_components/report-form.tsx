@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { AlertCircleIcon, ArrowLeftIcon } from "lucide-react";
 
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnstile/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -92,8 +93,10 @@ export function ReportForm({
   const [selectedSpaceId, setSelectedSpaceId] = useState<string>(defaultSpaceId);
   const [equipmentSelection, setEquipmentSelection] = useState<string>(defaultEquipmentId);
   const [customEquipmentName, setCustomEquipmentName] = useState<string>("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [state, formAction, isPending] = useActionState(submitReport, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
   const skipUnloadWarningRef = useRef(false);
 
   // Available spaces for currently selected building
@@ -110,6 +113,13 @@ export function ReportForm({
       router.push(`/track/${state.ticketId}`);
     }
   }, [state.success, state.ticketId, router]);
+
+  useEffect(() => {
+    if (state === initialState) return;
+
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
+  }, [state]);
 
   // Server-returned field errors are rendered after the state update, so link and focus them here.
   useEffect(() => {
@@ -128,7 +138,9 @@ export function ReportForm({
       if (skipUnloadWarningRef.current) return;
 
       const hasContent = Array.from(new FormData(form).entries()).some(([name, value]) => {
-        if (typeof value === "string") return name !== "photos" && value.trim().length > 0;
+        if (typeof value === "string") {
+          return name !== "photos" && name !== "cf-turnstile-response" && value.trim().length > 0;
+        }
         return value.size > 0;
       });
 
@@ -415,7 +427,10 @@ export function ReportForm({
           </div>
         </div>
 
-        <Button type="submit" disabled={isPending} className="h-11 w-full font-medium text-base">
+        <TurnstileWidget ref={turnstileRef} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+        <input type="hidden" name="cf-turnstile-response" value={captchaToken ?? ""} />
+
+        <Button type="submit" disabled={isPending || !captchaToken} className="h-11 w-full font-medium text-base">
           {isPending ? (
             <>
               <Spinner className="mr-2 size-4" />

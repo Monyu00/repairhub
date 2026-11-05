@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Calendar, CheckCircle2, ExternalLink, Inbox, Loader2, Lock, MapPin, Plus, RotateCcw } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnstile/turnstile-widget";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 import type { TicketRecord } from "@/server/tickets/query";
 
 import { confirmFix, reopenTicket } from "../track/[ticketId]/_actions/track-actions";
@@ -46,6 +48,15 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
   } | null>(null);
   const [feedback, setFeedback] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
+
+  function openDialog(type: "confirm" | "reopen", ticketId: string) {
+    setActiveDialog({ type, ticketId });
+    setFeedback("");
+    setErrorMsg(null);
+    setCaptchaToken(null);
+  }
 
   if (!userEmail) {
     return (
@@ -84,26 +95,38 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
   const handleAction = () => {
     if (!activeDialog) return;
+    if (!captchaToken) {
+      setErrorMsg(TURNSTILE_ERROR_MESSAGE);
+      return;
+    }
+
     setErrorMsg(null);
 
     startTransition(async () => {
-      let result: { success: boolean; error?: string };
-      if (activeDialog.type === "confirm") {
-        result = await confirmFix(activeDialog.ticketId, userEmail);
-      } else {
-        if (!feedback.trim()) {
-          setErrorMsg("請填寫問題說明");
-          return;
+      try {
+        let result: { success: boolean; error?: string };
+        if (activeDialog.type === "confirm") {
+          result = await confirmFix(activeDialog.ticketId, userEmail, captchaToken);
+        } else {
+          if (!feedback.trim()) {
+            setErrorMsg("請填寫問題說明");
+            return;
+          }
+          result = await reopenTicket(activeDialog.ticketId, userEmail, captchaToken, feedback.trim());
         }
-        result = await reopenTicket(activeDialog.ticketId, userEmail, feedback.trim());
-      }
 
-      if (result.success) {
-        setActiveDialog(null);
-        setFeedback("");
-        router.refresh();
-      } else {
-        setErrorMsg(result.error ?? "操作失敗，請稍後再試");
+        if (result.success) {
+          setActiveDialog(null);
+          setFeedback("");
+          router.refresh();
+        } else {
+          setErrorMsg(result.error ?? "操作失敗，請稍後再試");
+        }
+      } catch {
+        setErrorMsg("操作失敗，請稍後再試");
+      } finally {
+        setCaptchaToken(null);
+        turnstileRef.current?.reset();
       }
     });
   };
@@ -166,11 +189,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                         size="sm"
                         variant="outline"
                         className="h-7 text-destructive text-xs hover:bg-destructive/10"
-                        onClick={() => {
-                          setActiveDialog({ type: "reopen", ticketId: ticket.id });
-                          setFeedback("");
-                          setErrorMsg(null);
-                        }}
+                        onClick={() => openDialog("reopen", ticket.id)}
                       >
                         <RotateCcw className="mr-1 size-3" />
                         問題仍在
@@ -178,10 +197,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                       <Button
                         size="sm"
                         className="h-7 bg-emerald-600 text-white text-xs hover:bg-emerald-700"
-                        onClick={() => {
-                          setActiveDialog({ type: "confirm", ticketId: ticket.id });
-                          setErrorMsg(null);
-                        }}
+                        onClick={() => openDialog("confirm", ticket.id)}
                       >
                         <CheckCircle2 className="mr-1 size-3" />
                         確認修復
@@ -202,7 +218,10 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
       <Dialog
         open={Boolean(activeDialog)}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null);
+          if (!open) {
+            setActiveDialog(null);
+            setCaptchaToken(null);
+          }
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -231,6 +250,8 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
             </div>
           )}
 
+          <TurnstileWidget ref={turnstileRef} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+
           {errorMsg && <p className="text-destructive text-xs">{errorMsg}</p>}
 
           <DialogFooter className="gap-2 sm:gap-0">
@@ -246,7 +267,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
             <Button
               type="button"
               size="sm"
-              disabled={isPending}
+              disabled={isPending || !captchaToken || (activeDialog?.type === "reopen" && !feedback.trim())}
               onClick={handleAction}
               className={activeDialog?.type === "confirm" ? "bg-emerald-600 text-white hover:bg-emerald-700" : ""}
             >
