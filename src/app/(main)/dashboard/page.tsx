@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { fetchInternalAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
 
-import { fetchDashboardOpenTickets, fetchDashboardSummary } from "./_actions/dashboard-summary";
+import { fetchDashboardSummary } from "./_actions/dashboard-summary";
 import { DashboardAnnouncementsCard } from "./_components/dashboard-announcements-card";
 import { DashboardOpenQueue } from "./_components/dashboard-open-queue";
 import { DashboardQuickLinks } from "./_components/dashboard-quick-links";
@@ -23,9 +23,8 @@ export default async function DashboardPage() {
   const isAdmin = session.role === "admin";
   const roleName = isAdmin ? "系統管理者" : "維修技師";
   const viewerContext = { role: session.role, userId: session.userId };
-  const [summary, openTickets, internalAnnouncements] = await Promise.all([
+  const [summary, internalAnnouncements] = await Promise.all([
     fetchDashboardSummary(session.supabase, viewerContext),
-    fetchDashboardOpenTickets(session.supabase, viewerContext),
     fetchInternalAnnouncements(5),
   ]);
 
@@ -66,7 +65,7 @@ export default async function DashboardPage() {
       <DashboardSummaryCards summary={summary} isAdmin={isAdmin} />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <DashboardOpenQueue tickets={openTickets} />
+        <DashboardOpenQueue tickets={summary.openTickets} />
         <DashboardAnnouncementsCard announcements={internalAnnouncements} isAdmin={isAdmin} />
       </div>
 

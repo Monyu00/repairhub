@@ -516,6 +516,10 @@ export type Database = {
         Args: { p_delivery_id: string };
         Returns: number;
       };
+      report_aggregates: {
+        Args: { p_from: string | null; p_to: string | null };
+        Returns: Json;
+      };
       reorder_categories: {
         Args: { ordered_ids: string[] };
         Returns: undefined;

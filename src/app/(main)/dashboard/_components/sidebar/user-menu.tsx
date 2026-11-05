@@ -13,12 +13,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUser } from "@/hooks/use-user";
 import type { UserRole } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
 
 interface UserMenuProps {
-  user: {
+  user?: {
     email: string;
     name?: string;
     avatarUrl?: string;
@@ -33,10 +34,19 @@ function getRoleLabel(role?: UserRole | null) {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
+  const projection = useUser();
   const [isPending, startTransition] = useTransition();
 
-  const displayName = user.name ?? user.email.split("@")[0];
-  const roleLabel = getRoleLabel(user.role);
+  const email = user?.email ?? projection?.email;
+  const displayName = [user?.name, projection?.displayName, email?.split("@")[0]].find((value) => value) ?? "";
+  const avatarUrl = user?.avatarUrl ?? projection?.avatarUrl;
+  const role = user?.role ?? projection?.role ?? null;
+
+  if (!email) {
+    return null;
+  }
+
+  const roleLabel = getRoleLabel(role);
 
   return (
     <DropdownMenu>
@@ -46,7 +56,7 @@ export function UserMenu({ user }: UserMenuProps) {
           className="flex items-center gap-2 rounded-lg p-1 text-left transition-colors hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Avatar className="size-8 rounded-lg">
-            <AvatarImage src={user.avatarUrl ?? undefined} alt={displayName} />
+            <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
             <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
           </Avatar>
         </button>
@@ -55,12 +65,12 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="size-9 rounded-lg">
-              <AvatarImage src={user.avatarUrl ?? undefined} alt={displayName} />
+              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
               <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{displayName}</span>
-              <span className="truncate text-muted-foreground text-xs">{user.email}</span>
+              <span className="truncate text-muted-foreground text-xs">{email}</span>
             </div>
           </div>
         </DropdownMenuLabel>

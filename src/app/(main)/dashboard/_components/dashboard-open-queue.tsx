@@ -55,6 +55,7 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
               <li key={ticket.id}>
                 <Link
                   href={`/dashboard/tickets/${ticket.id}`}
+                  prefetch={false}
                   className="group flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   <div className="min-w-0">

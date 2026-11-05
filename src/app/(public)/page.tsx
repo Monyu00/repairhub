@@ -47,15 +47,33 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const categoryId = params.category && params.category !== "all" ? params.category : undefined;
   const searchTerm = params.q?.trim() || undefined;
 
-  const session = await getSession();
-  const isLoggedIn = Boolean(session?.email);
   const supabase = createAdminClient();
+  const sessionPromise = getSession();
+  const publicTicketsPromise =
+    activeTab === "all"
+      ? queryTickets(supabase, {
+          status,
+          buildingId,
+          categoryId,
+          search: searchTerm,
+          page: currentPage,
+          pageSize,
+          sort: { field: "created_at", ascending: false },
+          viewerContext: { role: null },
+        })
+      : null;
 
-  // Concurrently fetch metadata for filters and public announcements
-  const [buildingsRes, categoriesRes, myTicketsSummary, announcements] = await Promise.all([
+  // Start independent metadata, session, and public Ticket reads together.
+  const [session, buildingsRes, categoriesRes, announcements] = await Promise.all([
+    sessionPromise,
     supabase.from("buildings").select("id, name, code").order("code"),
     supabase.from("categories").select("id, name").eq("is_active", true).order("sort_order"),
-    isLoggedIn && session?.email
+    fetchPublicAnnouncements(3),
+  ]);
+
+  const isLoggedIn = Boolean(session?.email);
+  const [myTicketsSummary, ticketsResult] = await Promise.all([
+    isLoggedIn && session?.email && activeTab === "all"
       ? queryTickets(supabase, {
           reporterEmail: session.email,
           page: 1,
@@ -67,48 +85,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           },
         })
       : Promise.resolve(null),
-    fetchPublicAnnouncements(3),
+    activeTab === "all"
+      ? (publicTicketsPromise ?? Promise.resolve<QueryTicketsResult>({ tickets: [], totalCount: 0 }))
+      : isLoggedIn && session?.email
+        ? queryTickets(supabase, {
+            reporterEmail: session.email,
+            page: currentPage,
+            pageSize,
+            sort: { field: "created_at", ascending: false },
+            viewerContext: {
+              role: session.role,
+              userId: session.userId,
+              email: session.email,
+            },
+          })
+        : Promise.resolve<QueryTicketsResult>({ tickets: [], totalCount: 0 }),
   ]);
 
   const buildings = buildingsRes.data ?? [];
   const categories = categoriesRes.data ?? [];
-  const myTicketsCount = myTicketsSummary?.totalCount;
-
-  // Fetch ticket records according to active tab
-  let ticketsResult: QueryTicketsResult = { tickets: [], totalCount: 0 };
-
-  if (activeTab === "my-tickets") {
-    if (isLoggedIn && session?.email) {
-      ticketsResult = await queryTickets(supabase, {
-        reporterEmail: session.email,
-        page: currentPage,
-        pageSize,
-        sort: { field: "created_at", ascending: false },
-        viewerContext: {
-          role: session.role,
-          userId: session.userId,
-          email: session.email,
-        },
-      });
-    }
-  } else {
-    // All tickets (public list with privacy redaction)
-    ticketsResult = await queryTickets(supabase, {
-      status,
-      buildingId,
-      categoryId,
-      search: searchTerm,
-      page: currentPage,
-      pageSize,
-      sort: { field: "created_at", ascending: false },
-      viewerContext: {
-        role: session?.role ?? null,
-        userId: session?.userId,
-        email: session?.email,
-      },
-    });
-  }
-
+  const myTicketsCount =
+    myTicketsSummary?.totalCount ?? (activeTab === "my-tickets" ? ticketsResult.totalCount : undefined);
   const totalPages = Math.max(1, Math.ceil(ticketsResult.totalCount / pageSize));
 
   return (
