@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
@@ -8,9 +8,11 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnstile/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 
 import { sendPasswordResetEmail } from "../_actions/actions";
 
@@ -21,6 +23,8 @@ const forgotPasswordSchema = z.object({
 export function ForgotPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
 
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -30,17 +34,28 @@ export function ForgotPasswordForm() {
   });
 
   async function onSubmit(data: z.infer<typeof forgotPasswordSchema>) {
-    setLoading(true);
-    const res = await sendPasswordResetEmail(data.email);
-    setLoading(false);
-
-    if (!res.success) {
-      toast.error("發送重設信失敗", { description: res.error });
+    if (!captchaToken) {
+      toast.error("發送重設信失敗", { description: TURNSTILE_ERROR_MESSAGE });
       return;
     }
 
-    setSubmittedEmail(data.email);
-    toast.success("密碼重設信已寄出！");
+    setLoading(true);
+    try {
+      const res = await sendPasswordResetEmail(data.email, captchaToken);
+      if (!res.success) {
+        toast.error("發送重設信失敗", { description: res.error });
+        return;
+      }
+
+      setSubmittedEmail(data.email);
+      toast.success("密碼重設信已寄出！");
+    } catch {
+      toast.error("發送重設信失敗", { description: "目前無法處理您的請求，請稍後再試" });
+    } finally {
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
+      setLoading(false);
+    }
   }
 
   if (submittedEmail) {
@@ -94,7 +109,8 @@ export function ForgotPasswordForm() {
           )}
         />
       </FieldGroup>
-      <Button className="w-full" type="submit" disabled={loading}>
+      <TurnstileWidget ref={turnstileRef} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+      <Button className="w-full" type="submit" disabled={loading || !captchaToken}>
         {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Mail className="mr-2 size-4" />}
         寄送密碼重設信
       </Button>

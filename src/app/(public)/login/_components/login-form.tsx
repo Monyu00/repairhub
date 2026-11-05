@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,9 +11,11 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnstile/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 
 import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
@@ -43,6 +45,8 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   const router = useRouter();
   const [mode, setMode] = useState<FormMode>("login");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -62,39 +66,69 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   });
 
   async function onLoginSubmit(data: z.infer<typeof loginSchema>) {
-    setLoading(true);
-    const res = await loginWithEmail(data);
-    if (!res.success) {
-      toast.error("登入失敗", { description: res.error });
-      setLoading(false);
+    if (!captchaToken) {
+      toast.error("登入失敗", { description: TURNSTILE_ERROR_MESSAGE });
       return;
     }
 
-    toast.success("登入成功！");
-    const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
-    router.push(destination);
-    router.refresh();
+    setLoading(true);
+    try {
+      const res = await loginWithEmail({ ...data, captchaToken });
+      if (!res.success) {
+        toast.error("登入失敗", { description: res.error });
+        return;
+      }
+
+      toast.success("登入成功！");
+      const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+      router.push(destination);
+      router.refresh();
+    } catch {
+      toast.error("登入失敗", { description: "目前無法處理您的請求，請稍後再試" });
+    } finally {
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
+      setLoading(false);
+    }
   }
 
   async function onRegisterSubmit(data: z.infer<typeof registerSchema>) {
+    if (!captchaToken) {
+      toast.error("註冊失敗", { description: TURNSTILE_ERROR_MESSAGE });
+      return;
+    }
+
     setLoading(true);
-    const res = await registerWithEmail({ email: data.email, password: data.password });
-    if (!res.success) {
-      toast.error("註冊失敗", { description: res.error });
+    try {
+      const res = await registerWithEmail({ email: data.email, password: data.password, captchaToken });
+      if (!res.success) {
+        toast.error("註冊失敗", { description: res.error });
+        return;
+      }
+
+      if (res.needsEmailVerification) {
+        toast.success("註冊成功！請前往 Email 收取驗證信。");
+        router.push("/check-email");
+        return;
+      }
+
+      toast.success("註冊成功！");
+      const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+      router.push(destination);
+      router.refresh();
+    } catch {
+      toast.error("註冊失敗", { description: "目前無法處理您的請求，請稍後再試" });
+    } finally {
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
       setLoading(false);
-      return;
     }
+  }
 
-    if (res.needsEmailVerification) {
-      toast.success("註冊成功！請前往 Email 收取驗證信。");
-      router.push("/check-email");
-      return;
-    }
-
-    toast.success("註冊成功！");
-    const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
-    router.push(destination);
-    router.refresh();
+  function switchMode(nextMode: FormMode) {
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
+    setMode(nextMode);
   }
 
   return (
@@ -153,7 +187,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               )}
             />
           </FieldGroup>
-          <Button className="w-full" type="submit" disabled={loading}>
+          <TurnstileWidget
+            key={mode}
+            ref={turnstileRef}
+            onSuccess={setCaptchaToken}
+            onExpire={() => setCaptchaToken(null)}
+          />
+          <Button className="w-full" type="submit" disabled={loading || !captchaToken}>
             {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
             登入
           </Button>
@@ -223,7 +263,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               )}
             />
           </FieldGroup>
-          <Button className="w-full" type="submit" disabled={loading}>
+          <TurnstileWidget
+            key={mode}
+            ref={turnstileRef}
+            onSuccess={setCaptchaToken}
+            onExpire={() => setCaptchaToken(null)}
+          />
+          <Button className="w-full" type="submit" disabled={loading || !captchaToken}>
             {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
             註冊帳號
           </Button>
@@ -236,7 +282,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
             還沒有帳號嗎？{" "}
             <button
               type="button"
-              onClick={() => setMode("register")}
+              onClick={() => switchMode("register")}
               className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
             >
               立即註冊
@@ -247,7 +293,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
             已有帳號？{" "}
             <button
               type="button"
-              onClick={() => setMode("login")}
+              onClick={() => switchMode("login")}
               className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
             >
               登入帳號
