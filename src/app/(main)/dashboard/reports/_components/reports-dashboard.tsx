@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { AvgResolutionChart } from "./avg-resolution-chart";
 import { BuildingDistributionChart } from "./building-distribution-chart";
+import { CampusMap } from "./campus-map";
 import { CategoryDistributionChart } from "./category-distribution-chart";
 import { DateRangeFilter } from "./date-range-filter";
 import { MonthlyTicketsChart } from "./monthly-tickets-chart";
@@ -23,6 +24,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
     kpi,
     monthlyTrends,
     buildingDistribution,
+    campusBuildings,
     categoryDistribution,
     resolutionTrends,
     technicianPerformance,
@@ -120,6 +122,8 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
 
       {/* Charts Grid */}
       <div className="space-y-6">
+        <CampusMap buildings={campusBuildings} />
+
         {/* Row 1: Volume Trend & Resolution Trend */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <MonthlyTicketsChart data={monthlyTrends} />

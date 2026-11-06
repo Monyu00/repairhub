@@ -42,6 +42,19 @@ interface ReportAggregatePayload {
     building_code: string;
     count: number;
   }>;
+  campus_buildings?: Array<{
+    building_id: string;
+    building_code: string;
+    building_name: string;
+    status_counts?: {
+      pending?: number;
+      in_progress?: number;
+      completed?: number;
+      closed?: number;
+      cancelled?: number;
+      total?: number;
+    };
+  }>;
   category_distribution?: Array<{
     category_id: string;
     category_name: string;
@@ -182,6 +195,7 @@ function emptyReportData(filter: ReportFilterResolution): ReportData {
     },
     monthlyTrends: [],
     buildingDistribution: [],
+    campusBuildings: [],
     categoryDistribution: [],
     resolutionTrends: [],
     technicianPerformance: [],
@@ -241,6 +255,25 @@ export async function fetchReportDataWithClient(
       count: row.count,
       percentage: totalTickets > 0 ? Number(((row.count / totalTickets) * 100).toFixed(1)) : 0,
       fill: THEME_CHART_COLORS[index % THEME_CHART_COLORS.length],
+    })),
+    campusBuildings: (payload.campus_buildings ?? []).map((row) => ({
+      buildingId: row.building_id,
+      buildingCode: row.building_code,
+      buildingName: row.building_name,
+      statusCounts: {
+        pending: row.status_counts?.pending ?? 0,
+        in_progress: row.status_counts?.in_progress ?? 0,
+        completed: row.status_counts?.completed ?? 0,
+        closed: row.status_counts?.closed ?? 0,
+        cancelled: row.status_counts?.cancelled ?? 0,
+        total:
+          row.status_counts?.total ??
+          (row.status_counts?.pending ?? 0) +
+            (row.status_counts?.in_progress ?? 0) +
+            (row.status_counts?.completed ?? 0) +
+            (row.status_counts?.closed ?? 0) +
+            (row.status_counts?.cancelled ?? 0),
+      },
     })),
     categoryDistribution: (payload.category_distribution ?? []).map((row, index) => ({
       categoryId: row.category_id,

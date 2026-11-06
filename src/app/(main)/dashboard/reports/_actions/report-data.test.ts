@@ -18,6 +18,21 @@ const aggregatePayload = {
   monthly_trends: [{ month: "2026-11", total: 4, completed: 2, pending_or_progress: 2 }],
   resolution_trends: [{ month: "2026-11", avg_hours: 24, avg_days: 1, completed_count: 2 }],
   building_distribution: [{ building_id: "building-1", building_name: "行政大樓", building_code: "ADM", count: 4 }],
+  campus_buildings: [
+    {
+      building_id: "building-1",
+      building_code: "A",
+      building_name: "A 棟",
+      status_counts: {
+        pending: 1,
+        in_progress: 1,
+        completed: 1,
+        closed: 1,
+        cancelled: 0,
+        total: 4,
+      },
+    },
+  ],
   category_distribution: [{ category_id: "category-1", category_name: "水電", count: 3 }],
   technician_performance: [
     {
@@ -120,6 +135,21 @@ test("Report loader maps aggregate sections without raw Ticket rows", async () =
       fill: "var(--chart-1)",
     },
   ]);
+  assert.deepEqual(result.campusBuildings, [
+    {
+      buildingId: "building-1",
+      buildingCode: "A",
+      buildingName: "A 棟",
+      statusCounts: {
+        pending: 1,
+        in_progress: 1,
+        completed: 1,
+        closed: 1,
+        cancelled: 0,
+        total: 4,
+      },
+    },
+  ]);
   assert.deepEqual(result.technicianPerformance, [
     {
       technicianId: "technician-1",
@@ -145,6 +175,7 @@ test("Report loader handles empty ranges and invalid custom dates without raw ro
       monthly_trends: [],
       resolution_trends: [],
       building_distribution: [],
+      campus_buildings: [],
       category_distribution: [],
       technician_performance: [],
       satisfaction: { distribution: [] },
@@ -161,6 +192,7 @@ test("Report loader handles empty ranges and invalid custom dates without raw ro
   assert.deepEqual(calls[0]?.args, { p_from: null, p_to: null });
   assert.deepEqual(result.monthlyTrends, []);
   assert.deepEqual(result.buildingDistribution, []);
+  assert.deepEqual(result.campusBuildings, []);
   assert.deepEqual(
     result.satisfaction.distribution.map((row) => row.count),
     [0, 0, 0, 0, 0],

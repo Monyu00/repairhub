@@ -1,3 +1,5 @@
+import type { TicketStatus } from "@/server/tickets/lifecycle";
+
 export type DateRangePreset = "30d" | "90d" | "6m" | "1y" | "all" | "custom";
 
 export interface DateRangeFilterState {
@@ -20,6 +22,16 @@ export interface BuildingDistributionStat {
   count: number;
   percentage: number;
   fill?: string;
+}
+
+/** Per-Building status counts for one interactive campus map zone. */
+export type CampusBuildingStatusCounts = Record<TicketStatus, number> & { total: number };
+
+export interface CampusBuildingStat {
+  buildingId: string;
+  buildingCode: string;
+  buildingName: string;
+  statusCounts: CampusBuildingStatusCounts;
 }
 
 export interface CategoryDistributionStat {
@@ -89,6 +101,7 @@ export interface ReportData {
   kpi: ReportKpiSummary;
   monthlyTrends: MonthlyTicketStat[];
   buildingDistribution: BuildingDistributionStat[];
+  campusBuildings: CampusBuildingStat[];
   categoryDistribution: CategoryDistributionStat[];
   resolutionTrends: AvgResolutionTimeStat[];
   technicianPerformance: TechnicianPerformanceStat[];
