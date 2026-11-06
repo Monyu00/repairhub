@@ -21,6 +21,18 @@ function makeCampusBuilding(code: string, total: number): CampusBuildingStat {
       cancelled: total > 4 ? 1 : 0,
       total,
     },
+    recentTickets:
+      total > 0
+        ? [
+            {
+              id: `ticket-${code}`,
+              ticketNumber: `T-${code}`,
+              description: `${code} 棟近期工單`,
+              status: "pending",
+              createdAt: "2026-11-04T12:00:00.000Z",
+            },
+          ]
+        : [],
   };
 }
 
@@ -88,6 +100,8 @@ test("CampusMapView renders every map code with accessible selected state", () =
   assert.match(markup, /aria-pressed="true"/);
   assert.match(markup, /待處理/);
   assert.match(markup, /已取消/);
+  assert.match(markup, /A 棟近期工單/);
+  assert.match(markup, /href="\/dashboard\/tickets\?building=building-A"/);
 });
 
 test("CampusMapView shows a distinct empty state for a zero-count Building", () => {
@@ -97,4 +111,15 @@ test("CampusMapView shows a distinct empty state for a zero-count Building", () 
 
   assert.match(markup, /此期間沒有工單/);
   assert.match(markup, /0 件/);
+});
+
+test("CampusMapView shows an empty state when a Building has no recent Tickets", () => {
+  const building = makeCampusBuilding("A", 5);
+  building.recentTickets = [];
+
+  const markup = renderToStaticMarkup(
+    <CampusMapView buildings={[building]} onSelect={() => undefined} selectedCode="A" />,
+  );
+
+  assert.match(markup, /此期間沒有近期工單/);
 });

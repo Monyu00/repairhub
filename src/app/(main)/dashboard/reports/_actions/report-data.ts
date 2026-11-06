@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 import type { DateRangePreset, ReportData } from "../_components/report-types";
 
@@ -54,6 +55,13 @@ interface ReportAggregatePayload {
       cancelled?: number;
       total?: number;
     };
+    recent_tickets?: Array<{
+      id: string;
+      ticket_number?: string | null;
+      description: string;
+      status: TicketStatus;
+      created_at: string;
+    }>;
   }>;
   category_distribution?: Array<{
     category_id: string;
@@ -274,6 +282,13 @@ export async function fetchReportDataWithClient(
             (row.status_counts?.closed ?? 0) +
             (row.status_counts?.cancelled ?? 0),
       },
+      recentTickets: (row.recent_tickets ?? []).map((ticket) => ({
+        id: ticket.id,
+        ticketNumber: ticket.ticket_number ?? null,
+        description: ticket.description,
+        status: ticket.status,
+        createdAt: ticket.created_at,
+      })),
     })),
     categoryDistribution: (payload.category_distribution ?? []).map((row, index) => ({
       categoryId: row.category_id,

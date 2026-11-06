@@ -32,6 +32,15 @@ export interface CampusBuildingStat {
   buildingCode: string;
   buildingName: string;
   statusCounts: CampusBuildingStatusCounts;
+  recentTickets: CampusRecentTicket[];
+}
+
+export interface CampusRecentTicket {
+  id: string;
+  ticketNumber: string | null;
+  description: string;
+  status: TicketStatus;
+  createdAt: string;
 }
 
 export interface CategoryDistributionStat {

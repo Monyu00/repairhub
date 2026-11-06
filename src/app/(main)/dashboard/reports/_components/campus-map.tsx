@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 
-import { CircleSlash2 } from "lucide-react";
+import Link from "next/link";
+
+import { ArrowRight, CircleSlash2 } from "lucide-react";
 
 import { getTicketStatusPresentation } from "@/components/tickets/ticket-status";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 
@@ -90,11 +94,22 @@ function getZoneLabel(building: CampusBuildingStat | undefined, code: string) {
   return building?.buildingName ?? code;
 }
 
+function formatTicketDate(iso: string) {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime())
+    ? iso
+    : date.toLocaleDateString("zh-TW", {
+        month: "2-digit",
+        day: "2-digit",
+      });
+}
+
 export function CampusMapView({ buildings, onSelect, selectedCode }: CampusMapViewProps) {
   const buildingsByCode = new Map(buildings.map((building) => [building.buildingCode, building]));
   const selectedBuilding = buildingsByCode.get(selectedCode);
   const selectedCounts = selectedBuilding?.statusCounts;
   const selectedTotal = selectedCounts?.total ?? 0;
+  const recentTickets = selectedBuilding?.recentTickets ?? [];
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)]">
@@ -198,21 +213,63 @@ export function CampusMapView({ buildings, onSelect, selectedCode }: CampusMapVi
               </EmptyHeader>
             </Empty>
           ) : (
-            <div className="flex flex-col gap-2">
-              {STATUS_ORDER.map((status) => {
-                const presentation = getTicketStatusPresentation(status);
-                return (
-                  <div
-                    className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2"
-                    key={status}
-                  >
-                    <Badge variant={presentation.badgeVariant}>{presentation.label}</Badge>
-                    <span className="font-semibold text-foreground text-sm tabular-nums">
-                      {selectedCounts?.[status] ?? 0}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                {STATUS_ORDER.map((status) => {
+                  const presentation = getTicketStatusPresentation(status);
+                  return (
+                    <div
+                      className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2"
+                      key={status}
+                    >
+                      <Badge variant={presentation.badgeVariant}>{presentation.label}</Badge>
+                      <span className="font-semibold text-foreground text-sm tabular-nums">
+                        {selectedCounts?.[status] ?? 0}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Separator />
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-medium text-sm">近期工單</h3>
+                  {selectedBuilding ? (
+                    <Button asChild size="xs" variant="outline">
+                      <Link href={`/dashboard/tickets?building=${encodeURIComponent(selectedBuilding.buildingId)}`}>
+                        查看報修單
+                        <ArrowRight data-icon="inline-end" />
+                      </Link>
+                    </Button>
+                  ) : null}
+                </div>
+
+                {recentTickets.length === 0 ? (
+                  <p className="text-muted-foreground text-xs">此期間沒有近期工單</p>
+                ) : (
+                  <ul className="flex flex-col gap-2">
+                    {recentTickets.map((ticket) => {
+                      const presentation = getTicketStatusPresentation(ticket.status);
+                      return (
+                        <li className="flex flex-col gap-1.5 rounded-md border border-border/60 p-2.5" key={ticket.id}>
+                          <div className="flex items-center justify-between gap-2">
+                            <Badge variant={presentation.badgeVariant}>{presentation.label}</Badge>
+                            <time className="text-muted-foreground text-xs" dateTime={ticket.createdAt}>
+                              {formatTicketDate(ticket.createdAt)}
+                            </time>
+                          </div>
+                          <p className="line-clamp-2 text-sm">{ticket.description}</p>
+                          {ticket.ticketNumber ? (
+                            <p className="text-muted-foreground text-xs">#{ticket.ticketNumber}</p>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
           )}
         </CardContent>

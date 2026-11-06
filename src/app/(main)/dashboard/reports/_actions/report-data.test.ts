@@ -31,6 +31,15 @@ const aggregatePayload = {
         cancelled: 0,
         total: 4,
       },
+      recent_tickets: [
+        {
+          id: "ticket-1",
+          ticket_number: "T-001",
+          description: "冷氣出風口異音",
+          status: "pending" as const,
+          created_at: "2026-11-04T12:00:00.000Z",
+        },
+      ],
     },
   ],
   category_distribution: [{ category_id: "category-1", category_name: "水電", count: 3 }],
@@ -148,6 +157,15 @@ test("Report loader maps aggregate sections without raw Ticket rows", async () =
         cancelled: 0,
         total: 4,
       },
+      recentTickets: [
+        {
+          id: "ticket-1",
+          ticketNumber: "T-001",
+          description: "冷氣出風口異音",
+          status: "pending",
+          createdAt: "2026-11-04T12:00:00.000Z",
+        },
+      ],
     },
   ]);
   assert.deepEqual(result.technicianPerformance, [

@@ -15,6 +15,8 @@ as $$
     select
       t.id,
       t.status,
+      t.ticket_number,
+      t.description,
       t.category_id,
       t.assigned_to,
       t.rating,
@@ -34,6 +36,31 @@ as $$
     left join public.profiles p on p.id = t.assigned_to
     where (p_from is null or t.created_at >= p_from)
       and (p_to is null or t.created_at <= p_to)
+  ),
+  recent_ticket_summaries as (
+    select
+      building_id,
+      jsonb_agg(jsonb_build_object(
+        'id', id,
+        'ticket_number', ticket_number,
+        'description', description,
+        'status', status,
+        'created_at', created_at
+      ) order by created_at desc) as recent_tickets
+    from (
+      select
+        building_id,
+        id,
+        ticket_number,
+        description,
+        status,
+        created_at,
+        row_number() over (partition by building_id order by created_at desc) as row_number
+      from filtered
+      where building_id is not null
+    ) recent
+    where row_number <= 3
+    group by building_id
   ),
   kpi as (
     select
@@ -94,11 +121,13 @@ as $$
       count(f.id) filter (where f.status = 'completed')::int as completed_count,
       count(f.id) filter (where f.status = 'closed')::int as closed_count,
       count(f.id) filter (where f.status = 'cancelled')::int as cancelled_count,
-      count(f.id)::int as total_count
+      count(f.id)::int as total_count,
+      coalesce(recent_ticket_summaries.recent_tickets, '[]'::jsonb) as recent_tickets
     from campus_map_codes mc
     join public.buildings b on b.code = mc.code
     left join filtered f on f.building_id = b.id
-    group by b.id, b.code, b.name
+    left join recent_ticket_summaries on recent_ticket_summaries.building_id = b.id
+    group by b.id, b.code, b.name, recent_ticket_summaries.recent_tickets
   ),
   category_distribution as (
     select
@@ -207,7 +236,8 @@ as $$
           'closed', closed_count,
           'cancelled', cancelled_count,
           'total', total_count
-        )
+        ),
+        'recent_tickets', recent_tickets
       ) order by building_code)
       from campus_buildings
     ), '[]'::jsonb),
