@@ -118,7 +118,7 @@ export function CampusMapView({ buildings, onSelect, selectedCode }: CampusMapVi
           <CardTitle>校園工單分佈</CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4">
-          <div className="relative aspect-[16/11] min-h-[480px] overflow-hidden rounded-lg border border-border/70 bg-muted/20 sm:min-h-[540px]">
+          <div className="relative h-[480px] w-full overflow-hidden rounded-lg border border-border/70 bg-muted/20 sm:h-[540px]">
             <svg
               aria-hidden="true"
               className="absolute inset-0 size-full"
