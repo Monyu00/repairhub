@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { SatisfactionReportData } from "@/app/(main)/dashboard/reports/_components/report-types";
+import type { SatisfactionReportData } from "@/app/(main)/dashboard/(app)/reports/_components/report-types";
 
 /**
  * Calculates satisfaction report data for a given date range.

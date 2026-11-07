@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { ExternalLink, ShieldCheck, Wrench } from "lucide-react";
 
@@ -17,7 +18,11 @@ export default async function DashboardPage() {
   const session = await getSession();
 
   if (!session || (session.role !== "admin" && session.role !== "technician")) {
-    return null;
+    redirect("/");
+  }
+
+  if (session.mustChangePassword) {
+    redirect("/change-password");
   }
 
   const isAdmin = session.role === "admin";

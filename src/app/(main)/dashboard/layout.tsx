@@ -31,12 +31,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     getSession(),
   ]);
 
-  if (!session || (session.role !== "admin" && session.role !== "technician")) {
+  if (!session) {
     redirect("/");
-  }
-
-  if (session.mustChangePassword) {
-    redirect("/change-password");
   }
 
   const projection: UserProjection = {

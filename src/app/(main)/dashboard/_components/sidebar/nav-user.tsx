@@ -2,7 +2,9 @@
 
 import { useTransition } from "react";
 
-import { LogOut, Shield } from "lucide-react";
+import Link from "next/link";
+
+import { LogOut, Shield, UserCog } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -86,6 +88,12 @@ export function NavUser() {
               <span>身分：{roleLabel}</span>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/profile">
+                <UserCog className="mr-2 size-4" />
+                個人設定
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem
               disabled={isPending}
               onClick={() => {
