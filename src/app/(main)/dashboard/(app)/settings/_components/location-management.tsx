@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { BulkImportDialog } from "@/app/(main)/dashboard/_components/bulk-import-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,7 +47,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { LocationCatalogBuilding, LocationCatalogSpace } from "@/lib/locations";
 import { cn } from "@/lib/utils";
 
-import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import {
   createBuilding,
   createSpace,

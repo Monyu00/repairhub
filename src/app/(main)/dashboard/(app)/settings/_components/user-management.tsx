@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { BulkImportDialog } from "@/app/(main)/dashboard/_components/bulk-import-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +57,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { compareUserRole } from "@/lib/users/projection";
 
-import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import type { CategoryItem } from "../_actions/category-actions";
 import {
   batchToggleUserActive,

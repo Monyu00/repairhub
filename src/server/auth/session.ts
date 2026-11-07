@@ -1,5 +1,7 @@
 import { cache } from "react";
 
+import { redirect } from "next/navigation";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
@@ -93,6 +95,27 @@ export async function requireAdmin(): Promise<AdminContext> {
     throw new AuthError("FORBIDDEN", "僅系統管理者可執行此操作");
   }
   return session as AdminContext;
+}
+
+export type DashboardSession = AuthenticatedUser & { role: "admin" | "technician" };
+
+/**
+ * Guard for the back-office shell (/dashboard). General accounts and accounts that
+ * still owe a password change never enter it: Personal Settings is a dialog opened
+ * from the user menu instead.
+ */
+export async function requireDashboardAccess(): Promise<DashboardSession> {
+  const session = await getSession();
+
+  if (!session || (session.role !== "admin" && session.role !== "technician")) {
+    redirect("/");
+  }
+
+  if (session.mustChangePassword) {
+    redirect("/change-password");
+  }
+
+  return session as DashboardSession;
 }
 
 /**

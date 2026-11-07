@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, UserCog } from "lucide-react";
 
+import { PersonalSettingsDialog } from "@/app/(main)/dashboard/profile/_components/personal-settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,15 +16,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUser } from "@/hooks/use-user";
-import type { UserRole } from "@/lib/users/projection";
+import { getUserRoleLabel } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
-
-function getRoleLabel(role?: UserRole | null) {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
-  return "一般使用者";
-}
 
 function firstText(...values: Array<string | null | undefined>) {
   return values.find((value) => value) ?? "";
@@ -33,6 +28,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const projection = useUser();
   const [isPending, startTransition] = useTransition();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!projection) {
     return null;
@@ -41,7 +37,7 @@ export function NavUser() {
   const email = firstText(projection.email);
   const name = firstText(projection.displayName, email ? email.split("@")[0] : undefined, "使用者");
   const avatar = projection.avatarUrl ?? "";
-  const roleLabel = getRoleLabel(projection.role);
+  const roleLabel = getUserRoleLabel(projection.role);
 
   return (
     <SidebarMenu>
@@ -86,6 +82,10 @@ export function NavUser() {
               <span>身分：{roleLabel}</span>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onSelect={() => setSettingsOpen(true)}>
+              <UserCog className="mr-2 size-4" />
+              個人設定
+            </DropdownMenuItem>
             <DropdownMenuItem
               disabled={isPending}
               onClick={() => {
@@ -100,6 +100,7 @@ export function NavUser() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <PersonalSettingsDialog onOpenChange={setSettingsOpen} open={settingsOpen} />
       </SidebarMenuItem>
     </SidebarMenu>
   );

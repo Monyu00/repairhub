@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, UserCog } from "lucide-react";
 
+import { PersonalSettingsDialog } from "@/app/(main)/dashboard/profile/_components/personal-settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/hooks/use-user";
-import type { UserRole } from "@/lib/users/projection";
+import { getUserRoleLabel, type UserRole } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
 
@@ -27,15 +28,10 @@ interface UserMenuProps {
   };
 }
 
-function getRoleLabel(role?: UserRole | null) {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
-  return "一般使用者";
-}
-
 export function UserMenu({ user }: UserMenuProps) {
   const projection = useUser();
   const [isPending, startTransition] = useTransition();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const email = user?.email ?? projection?.email;
   const displayName = [user?.name, projection?.displayName, email?.split("@")[0]].find((value) => value) ?? "";
@@ -46,7 +42,7 @@ export function UserMenu({ user }: UserMenuProps) {
     return null;
   }
 
-  const roleLabel = getRoleLabel(role);
+  const roleLabel = getUserRoleLabel(role);
 
   return (
     <DropdownMenu>
@@ -80,6 +76,10 @@ export function UserMenu({ user }: UserMenuProps) {
           <span>身分：{roleLabel}</span>
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer" onSelect={() => setSettingsOpen(true)}>
+          <UserCog className="mr-2 size-4" />
+          個人設定
+        </DropdownMenuItem>
         <DropdownMenuItem
           disabled={isPending}
           onClick={() => {
@@ -93,6 +93,8 @@ export function UserMenu({ user }: UserMenuProps) {
           登出
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <PersonalSettingsDialog onOpenChange={setSettingsOpen} open={settingsOpen} />
     </DropdownMenu>
   );
 }

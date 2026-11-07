@@ -1,4 +1,4 @@
-import { compareUserProjection, resolveUserProjection, type UserProjection } from "./projection";
+import { compareUserProjection, getUserRoleLabel, resolveUserProjection, type UserProjection } from "./projection";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -94,6 +94,12 @@ test("uses the first non-empty auth metadata display name", () => {
   );
 
   assert.equal(result.displayName, "Metadata Name");
+});
+
+test("labels every UserRole, with no role falling back to the general user label", () => {
+  assert.equal(getUserRoleLabel("admin"), "系統管理員 (Admin)");
+  assert.equal(getUserRoleLabel("technician"), "維修技師 (Technician)");
+  assert.equal(getUserRoleLabel(null), "一般使用者");
 });
 
 test("uses auth metadata display_name as the third name fallback", () => {
