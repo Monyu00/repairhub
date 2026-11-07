@@ -17,15 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useUser } from "@/hooks/use-user";
-import type { UserRole } from "@/lib/users/projection";
+import { getUserRoleLabel } from "@/lib/users/projection";
 import { getInitials } from "@/lib/utils";
 import { signOutAction } from "@/server/auth/actions";
-
-function getRoleLabel(role?: UserRole | null) {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
-  return "一般使用者";
-}
 
 function firstText(...values: Array<string | null | undefined>) {
   return values.find((value) => value) ?? "";
@@ -43,7 +37,7 @@ export function NavUser() {
   const email = firstText(projection.email);
   const name = firstText(projection.displayName, email ? email.split("@")[0] : undefined, "使用者");
   const avatar = projection.avatarUrl ?? "";
-  const roleLabel = getRoleLabel(projection.role);
+  const roleLabel = getUserRoleLabel(projection.role);
 
   return (
     <SidebarMenu>

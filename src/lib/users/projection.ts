@@ -73,6 +73,12 @@ export function compareUserRole(a: UserRole | null, b: UserRole | null): number 
   return roleRanking(a) - roleRanking(b);
 }
 
+export function getUserRoleLabel(role: UserRole | null): string {
+  if (role === "admin") return "系統管理員 (Admin)";
+  if (role === "technician") return "維修技師 (Technician)";
+  return "一般使用者";
+}
+
 export function compareUserProjection(a: UserProjection, b: UserProjection): number {
   if (a.isActive !== b.isActive) {
     return a.isActive ? -1 : 1;

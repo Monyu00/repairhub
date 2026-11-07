@@ -9,17 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { getUserRoleLabel } from "@/lib/users/projection";
 
 import { type MyProfile, updateMyProfile } from "../_actions/profile-actions";
 import { profileInputSchema } from "../_actions/profile-input";
 
 type ProfileFormErrors = Partial<Record<"displayName" | "department" | "phone", string>>;
-
-function getRoleLabel(role: MyProfile["role"]) {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
-  return "一般使用者";
-}
 
 interface PersonalProfileFormProps {
   profile: MyProfile;
@@ -118,12 +113,16 @@ export function PersonalProfileForm({ profile }: PersonalProfileFormProps) {
 
           <div className="grid gap-2 rounded-lg border border-border bg-muted/20 p-3 text-sm">
             <div className="flex flex-wrap items-center justify-between gap-1">
+              <span className="text-muted-foreground">頭像</span>
+              <span className="font-medium break-all text-foreground">{profile.avatarUrl ?? "未設定"}</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-1">
               <span className="text-muted-foreground">電子郵件</span>
               <span className="font-medium break-all text-foreground">{profile.email}</span>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-1">
               <span className="text-muted-foreground">系統權限角色</span>
-              <span className="font-medium text-foreground">{getRoleLabel(profile.role)}</span>
+              <span className="font-medium text-foreground">{getUserRoleLabel(profile.role)}</span>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-1">
               <span className="text-muted-foreground">帳號狀態</span>

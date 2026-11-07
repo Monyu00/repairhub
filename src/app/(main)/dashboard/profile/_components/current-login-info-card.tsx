@@ -1,12 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUserRoleLabel } from "@/lib/users/projection";
 
 import type { MyProfile } from "../_actions/profile-actions";
-
-function getRoleLabel(role: MyProfile["role"]) {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
-  return "一般使用者";
-}
 
 interface CurrentLoginInfoCardProps {
   profile: MyProfile;
@@ -27,7 +22,7 @@ export function CurrentLoginInfoCard({ profile }: CurrentLoginInfoCardProps) {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
             <dt className="text-muted-foreground">角色</dt>
-            <dd className="font-medium text-foreground">{getRoleLabel(profile.role)}</dd>
+            <dd className="font-medium text-foreground">{getUserRoleLabel(profile.role)}</dd>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
             <dt className="text-muted-foreground">帳號是否啟用</dt>
