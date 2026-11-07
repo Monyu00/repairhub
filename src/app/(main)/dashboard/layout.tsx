@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { Home } from "lucide-react";
 
@@ -13,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { UserProjection } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
-import { getSession } from "@/server/auth/session";
+import { requireDashboardAccess } from "@/server/auth/session";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
@@ -28,12 +27,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const [variant, collapsible, session] = await Promise.all([
     getPreference("sidebar_variant"),
     getPreference("sidebar_collapsible"),
-    getSession(),
+    requireDashboardAccess(),
   ]);
-
-  if (!session) {
-    redirect("/");
-  }
 
   const projection: UserProjection = {
     id: session.userId,

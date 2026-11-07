@@ -1,9 +1,11 @@
 import {
+  canDeleteOwnAccount,
   changePasswordFormSchema,
   changePasswordSchema,
   notificationPreferencesSchema,
   profileInputSchema,
   resolveNotificationPreferences,
+  visibleNotificationPreferenceKeys,
 } from "./profile-input";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -116,4 +118,17 @@ test("changePasswordFormSchema 兩欄不一致會被擋下", () => {
     confirmPassword: "new-pass-123",
   });
   assert.equal(match.success, true);
+});
+
+test("visibleNotificationPreferenceKeys 依角色決定要顯示的項目", () => {
+  assert.deepEqual(visibleNotificationPreferenceKeys("technician"), ["ticketStatus", "newTicket"]);
+  assert.deepEqual(visibleNotificationPreferenceKeys("admin"), ["ticketStatus"]);
+  assert.deepEqual(visibleNotificationPreferenceKeys(null), ["ticketStatus"]);
+});
+
+test("canDeleteOwnAccount 只擋下最後一位系統管理者", () => {
+  assert.equal(canDeleteOwnAccount({ role: "admin", activeAdminCount: 1 }), false);
+  assert.equal(canDeleteOwnAccount({ role: "admin", activeAdminCount: 2 }), true);
+  assert.equal(canDeleteOwnAccount({ role: "technician", activeAdminCount: 1 }), true);
+  assert.equal(canDeleteOwnAccount({ role: null, activeAdminCount: 0 }), true);
 });

@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,6 +8,7 @@ import { getSession, safeAction } from "@/server/auth/session";
 
 import type { NotificationPreferences } from "./profile-input";
 import {
+  canDeleteOwnAccount,
   changePasswordSchema,
   notificationPreferencesSchema,
   profileInputSchema,
@@ -29,8 +28,6 @@ export interface MyProfile {
 }
 
 export type ProfileResult = { success: boolean; error?: string };
-
-const PROFILE_PATH = "/dashboard/profile";
 
 export interface MyProfileResult {
   profile: MyProfile | null;
@@ -100,7 +97,6 @@ export async function updateMyProfile(data: {
       return { success: false, error: "更新個人資料失敗，請稍後再試" };
     }
 
-    revalidatePath(PROFILE_PATH);
     return { success: true };
   });
 }
@@ -136,7 +132,6 @@ export async function updateNotificationPreferences(data: {
       return { success: false, error: "更新通知設定失敗，請稍後再試" };
     }
 
-    revalidatePath(PROFILE_PATH);
     return { success: true };
   });
 }
@@ -203,6 +198,64 @@ export async function changeMyPassword(data: {
     if (flagError) {
       console.error("Failed to clear must_change_password:", flagError);
       return { success: false, error: "密碼已更新，但無法完成登入準備，請重新登入後再試" };
+    }
+
+    return { success: true };
+  });
+}
+
+export async function deleteMyAccount(data: { currentPassword: string; captchaToken: string }): Promise<ProfileResult> {
+  return safeAction(async () => {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, error: "尚未登入，請先登入" };
+    }
+
+    if (!data.captchaToken) {
+      return { success: false, error: "請先完成安全驗證" };
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return { success: false, error: "伺服器設定不完整，請聯絡系統管理者" };
+    }
+
+    // 與 changeMyPassword 同一條重驗證路徑：用非 cookie 的獨立 client，不寫入也不取代目前 session。
+    const verifyClient = createSupabaseClient(supabaseUrl, supabaseKey);
+    const { error: verifyError } = await verifyClient.auth.signInWithPassword({
+      email: session.email,
+      password: data.currentPassword,
+      options: { captchaToken: data.captchaToken },
+    });
+
+    if (verifyError) {
+      return {
+        success: false,
+        error: verifyError.code === "captcha_failed" ? "安全驗證失敗或已過期，請重試" : "目前密碼錯誤",
+      };
+    }
+
+    if (session.role === "admin") {
+      const { count } = await createAdminClient()
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("user_role", "admin")
+        .eq("is_active", true);
+
+      if (!canDeleteOwnAccount({ role: session.role, activeAdminCount: count ?? 0 })) {
+        return { success: false, error: "系統需要至少一位系統管理者，請先指派新的系統管理者再刪除帳號" };
+      }
+    }
+
+    // 刪除 auth user 會連帶刪除 profiles（ON DELETE CASCADE），已指派的單據改為未指派，
+    // 已提出的單據與其紀錄留在系統中，但無法再以這個帳號查詢或管理。
+    const { error: deleteError } = await createAdminClient().auth.admin.deleteUser(session.userId);
+
+    if (deleteError) {
+      console.error("Failed to delete own account:", deleteError);
+      return { success: false, error: "刪除帳號失敗，請稍後再試或聯絡系統管理者" };
     }
 
     return { success: true };

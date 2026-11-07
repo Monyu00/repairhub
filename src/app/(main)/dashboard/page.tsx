@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { ExternalLink, ShieldCheck, Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchInternalAnnouncements } from "@/server/announcements";
-import { getSession } from "@/server/auth/session";
+import { requireDashboardAccess } from "@/server/auth/session";
 
 import { fetchDashboardSummary } from "./_actions/dashboard-summary";
 import { DashboardAnnouncementsCard } from "./_components/dashboard-announcements-card";
@@ -15,15 +14,7 @@ import { DashboardQuickLinks } from "./_components/dashboard-quick-links";
 import { DashboardSummaryCards } from "./_components/dashboard-summary-cards";
 
 export default async function DashboardPage() {
-  const session = await getSession();
-
-  if (!session || (session.role !== "admin" && session.role !== "technician")) {
-    redirect("/");
-  }
-
-  if (session.mustChangePassword) {
-    redirect("/change-password");
-  }
+  const session = await requireDashboardAccess();
 
   const isAdmin = session.role === "admin";
   const roleName = isAdmin ? "系統管理者" : "維修技師";

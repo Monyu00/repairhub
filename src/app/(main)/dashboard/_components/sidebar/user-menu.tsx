@@ -1,11 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
-
-import Link from "next/link";
+import { useState, useTransition } from "react";
 
 import { LogOut, Shield, UserCog } from "lucide-react";
 
+import { PersonalSettingsDialog } from "@/app/(main)/dashboard/profile/_components/personal-settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -32,6 +31,7 @@ interface UserMenuProps {
 export function UserMenu({ user }: UserMenuProps) {
   const projection = useUser();
   const [isPending, startTransition] = useTransition();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const email = user?.email ?? projection?.email;
   const displayName = [user?.name, projection?.displayName, email?.split("@")[0]].find((value) => value) ?? "";
@@ -76,11 +76,9 @@ export function UserMenu({ user }: UserMenuProps) {
           <span>身分：{roleLabel}</span>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard/profile">
-            <UserCog className="mr-2 size-4" />
-            個人設定
-          </Link>
+        <DropdownMenuItem className="cursor-pointer" onSelect={() => setSettingsOpen(true)}>
+          <UserCog className="mr-2 size-4" />
+          個人設定
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={isPending}
@@ -95,6 +93,8 @@ export function UserMenu({ user }: UserMenuProps) {
           登出
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <PersonalSettingsDialog onOpenChange={setSettingsOpen} open={settingsOpen} />
     </DropdownMenu>
   );
 }

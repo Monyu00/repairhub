@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { UserRole } from "@/lib/users/projection";
+
 export interface NotificationPreferences {
   ticketStatus: boolean;
   newTicket: boolean;
@@ -25,6 +27,16 @@ export const notificationPreferencesSchema = z.object({
   ticketStatus: z.boolean(),
   newTicket: z.boolean(),
 });
+
+/** 通知設定依角色顯示：只有維修技師能訂閱類別並接收新報修通知（見 enqueue_new_ticket_notification）。 */
+export function visibleNotificationPreferenceKeys(role: UserRole | null): Array<keyof NotificationPreferences> {
+  return role === "technician" ? ["ticketStatus", "newTicket"] : ["ticketStatus"];
+}
+
+/** 最後一位系統管理者不能自刪帳號，否則沒有人能再建立或管理帳號。 */
+export function canDeleteOwnAccount(input: { role: UserRole | null; activeAdminCount: number }): boolean {
+  return input.role !== "admin" || input.activeAdminCount > 1;
+}
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "請輸入目前密碼"),

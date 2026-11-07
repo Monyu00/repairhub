@@ -1,11 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
-
-import Link from "next/link";
+import { useState, useTransition } from "react";
 
 import { LogOut, Shield, UserCog } from "lucide-react";
 
+import { PersonalSettingsDialog } from "@/app/(main)/dashboard/profile/_components/personal-settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -29,6 +28,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const projection = useUser();
   const [isPending, startTransition] = useTransition();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!projection) {
     return null;
@@ -82,11 +82,9 @@ export function NavUser() {
               <span>身分：{roleLabel}</span>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard/profile">
-                <UserCog className="mr-2 size-4" />
-                個人設定
-              </Link>
+            <DropdownMenuItem className="cursor-pointer" onSelect={() => setSettingsOpen(true)}>
+              <UserCog className="mr-2 size-4" />
+              個人設定
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={isPending}
@@ -102,6 +100,7 @@ export function NavUser() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <PersonalSettingsDialog onOpenChange={setSettingsOpen} open={settingsOpen} />
       </SidebarMenuItem>
     </SidebarMenu>
   );
