@@ -216,6 +216,7 @@ export type Database = {
           id: string;
           is_active: boolean;
           must_change_password: boolean;
+          notification_preferences: Json;
           phone: string | null;
           updated_at: string;
           user_role: Database["public"]["Enums"]["user_role"] | null;
@@ -226,6 +227,7 @@ export type Database = {
           id: string;
           is_active?: boolean;
           must_change_password?: boolean;
+          notification_preferences?: Json;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
@@ -236,6 +238,7 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           must_change_password?: boolean;
+          notification_preferences?: Json;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
