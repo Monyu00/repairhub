@@ -26,13 +26,11 @@ interface TicketDetailViewProps {
 
 export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashboard/tickets" }: TicketDetailViewProps) {
   const { ticket, photos, notes } = detail;
-  const assignedTo = ticket.assignedTo;
   const isAdmin = userRole === "admin";
-  const isAssignedTech = userId !== null && assignedTo === userId;
   const canViewReporter = isAdmin || userRole === "technician";
   const capabilities = getTicketDetailCapabilities(detail, { role: userRole, userId });
   const canAddNote = capabilities.progressNote.enabled;
-  const canSubmitClosure = (isAssignedTech || isAdmin) && ticket.status === "in_progress";
+  const canSubmitClosure = capabilities.closure.enabled;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -65,11 +63,7 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
           <div className="flex items-center gap-2">
             {isAdmin && <AdminActions ticketId={ticket.id} capabilities={capabilities} />}
             {userRole === "technician" && (
-              <TechnicianClaimButton
-                ticketId={ticket.id}
-                status={ticket.status}
-                isAssignedToMe={userId !== null && assignedTo === userId}
-              />
+              <TechnicianClaimButton ticketId={ticket.id} capability={capabilities.claim} />
             )}
           </div>
         </div>
