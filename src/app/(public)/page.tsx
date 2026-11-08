@@ -4,8 +4,8 @@ import { PublicAnnouncementsBanner } from "@/components/announcements/public-ann
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
-import { type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
-import { getPublicTickets } from "@/server/tickets/read";
+import type { QueryTicketsResult } from "@/server/tickets/query";
+import { getMyTickets, getPublicTickets } from "@/server/tickets/read";
 
 import { HomepageViewLinks } from "./_components/homepage-view-links";
 import { MyTicketList } from "./_components/my-ticket-list";
@@ -69,7 +69,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const isLoggedIn = Boolean(session?.email);
   const [myTicketsSummary, ticketsResult] = await Promise.all([
     isLoggedIn && session?.email && activeTab === "all"
-      ? queryTickets(supabase, {
+      ? getMyTickets(supabase, {
           reporterEmail: session.email,
           page: 1,
           pageSize: 1,
@@ -83,11 +83,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     activeTab === "all"
       ? (publicTicketsPromise ?? Promise.resolve<QueryTicketsResult>({ tickets: [], totalCount: 0 }))
       : isLoggedIn && session?.email
-        ? queryTickets(supabase, {
+        ? getMyTickets(supabase, {
             reporterEmail: session.email,
             page: currentPage,
             pageSize,
-            sort: { field: "created_at", ascending: false },
             viewerContext: {
               role: session.role,
               userId: session.userId,

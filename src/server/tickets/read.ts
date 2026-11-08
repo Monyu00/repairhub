@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
-import { type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
+import { type QueryTicketsOptions, type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
 
 export type TicketReadAdapter = SupabaseClient<Database>;
 
@@ -12,6 +12,13 @@ export interface PublicTicketListOptions {
   buildingId?: string;
   categoryId?: string;
   search?: string;
+}
+
+export interface MyTicketsOptions {
+  reporterEmail: string;
+  page: number;
+  pageSize: number;
+  viewerContext: QueryTicketsOptions["viewerContext"];
 }
 
 const PUBLIC_TICKET_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed"];
@@ -29,5 +36,15 @@ export async function getPublicTickets(
     pageSize: options.pageSize,
     sort: { field: "created_at", ascending: false },
     viewerContext: { role: null },
+  });
+}
+
+export async function getMyTickets(adapter: TicketReadAdapter, options: MyTicketsOptions): Promise<QueryTicketsResult> {
+  return queryTickets(adapter, {
+    reporterEmail: options.reporterEmail,
+    page: options.page,
+    pageSize: options.pageSize,
+    sort: { field: "created_at", ascending: false },
+    viewerContext: options.viewerContext,
   });
 }
