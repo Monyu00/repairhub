@@ -4,6 +4,7 @@ import { PublicAnnouncementsBanner } from "@/components/announcements/public-ann
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 import type { QueryTicketsResult } from "@/server/tickets/query";
 import { getMyTickets, getPublicTickets } from "@/server/tickets/read";
 
@@ -43,6 +44,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const buildingId = params.building && params.building !== "all" ? params.building : undefined;
   const categoryId = params.category && params.category !== "all" ? params.category : undefined;
+  const status = params.status && params.status !== "all" ? (params.status as TicketStatus) : undefined;
   const searchTerm = params.q?.trim() || undefined;
 
   const supabase = createAdminClient();
@@ -50,6 +52,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const publicTicketsPromise =
     activeTab === "all"
       ? getPublicTickets(supabase, {
+          status,
           buildingId,
           categoryId,
           search: searchTerm,

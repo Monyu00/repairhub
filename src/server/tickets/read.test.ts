@@ -266,6 +266,25 @@ test("getPublicTickets fails closed for invalid public list input", async () => 
   assert.equal(operations.length, 0);
 });
 
+test("getPublicTickets fails closed for malformed building and category filters", async () => {
+  const { adapter, operations } = createInMemoryAdapter();
+
+  const buildingResult = await getPublicTickets(adapter, {
+    page: 1,
+    pageSize: 10,
+    buildingId: "not-a-building",
+  });
+  const categoryResult = await getPublicTickets(adapter, {
+    page: 1,
+    pageSize: 10,
+    categoryId: "not-a-category",
+  });
+
+  assert.deepEqual(buildingResult, { tickets: [], totalCount: 0 });
+  assert.deepEqual(categoryResult, { tickets: [], totalCount: 0 });
+  assert.equal(operations.length, 0);
+});
+
 test("getPublicTickets fails closed when the read fails", async () => {
   const originalConsoleError = console.error;
   console.error = () => undefined;
@@ -290,8 +309,7 @@ test("getTechnicianQueueTickets applies pending status, subscribed categories, d
   });
 
   const result = await getTechnicianQueueTickets(adapter, {
-    technicianId: "00000000-0000-4000-8000-000000000001",
-    viewerContext: { role: "technician" },
+    viewerContext: { role: "technician", userId: "00000000-0000-4000-8000-000000000001" },
   });
 
   assert.deepEqual(
@@ -316,8 +334,7 @@ test("getTechnicianQueueTickets fails closed when category subscription cannot b
   const { adapter, operations } = createTechnicianQueueAdapter({ categoryError: { message: "read failed" } });
 
   const result = await getTechnicianQueueTickets(adapter, {
-    technicianId: "00000000-0000-4000-8000-000000000001",
-    viewerContext: { role: "technician" },
+    viewerContext: { role: "technician", userId: "00000000-0000-4000-8000-000000000001" },
   });
 
   assert.deepEqual(result, { tickets: [], totalCount: 0, subscribedCategoryIds: [] });
@@ -335,8 +352,7 @@ test("getTechnicianQueueTickets fails closed when the ticket read fails", async 
 
   try {
     const result = await getTechnicianQueueTickets(adapter, {
-      technicianId: "00000000-0000-4000-8000-000000000001",
-      viewerContext: { role: "technician" },
+      viewerContext: { role: "technician", userId: "00000000-0000-4000-8000-000000000001" },
     });
 
     assert.deepEqual(result, { tickets: [], totalCount: 0, subscribedCategoryIds: [categoryId] });
@@ -344,6 +360,23 @@ test("getTechnicianQueueTickets fails closed when the ticket read fails", async 
   } finally {
     console.error = originalConsoleError;
   }
+});
+
+test("getTechnicianQueueTickets fails closed for malformed or missing identity", async () => {
+  const { adapter, operations } = createTechnicianQueueAdapter({
+    categoryIds: ["00000000-0000-4000-8000-000000000002"],
+  });
+
+  const malformedResult = await getTechnicianQueueTickets(adapter, {
+    viewerContext: { role: "technician", userId: "not-a-technician" },
+  });
+  const missingResult = await getTechnicianQueueTickets(adapter, {
+    viewerContext: { role: "technician" },
+  });
+
+  assert.deepEqual(malformedResult, { tickets: [], totalCount: 0, subscribedCategoryIds: [] });
+  assert.deepEqual(missingResult, { tickets: [], totalCount: 0, subscribedCategoryIds: [] });
+  assert.equal(operations.length, 0);
 });
 
 test("getRepairRecords limits technicians to their assigned tickets", async () => {
@@ -529,22 +562,8 @@ test("getRepairRecords fails closed for a malformed technician filter", async ()
   assert.equal(lookups(), 0);
 });
 
-test("getRepairRecords treats an invalid status as the valid default", async () => {
-  const rows = [
-    {
-      id: "pending",
-      status: "pending",
-      created_at: "2026-01-02T00:00:00.000Z",
-      updated_at: "2026-01-02T00:00:00.000Z",
-    },
-    {
-      id: "completed",
-      status: "completed",
-      created_at: "2026-01-01T00:00:00.000Z",
-      updated_at: "2026-01-01T00:00:00.000Z",
-    },
-  ];
-  const { adapter } = createRowAdapter({ rows });
+test("getRepairRecords fails closed for an invalid status", async () => {
+  const { adapter, lookups } = createRowAdapter();
 
   const result = await getRepairRecords(adapter, {
     status: "invalid",
@@ -556,10 +575,8 @@ test("getRepairRecords treats an invalid status as the valid default", async () 
     },
   });
 
-  assert.deepEqual(
-    result.tickets.map(({ id }) => id),
-    ["completed"],
-  );
+  assert.deepEqual(result, { tickets: [], totalCount: 0, page: 1, pageSize: 10 });
+  assert.equal(lookups(), 0);
 });
 
 test("getRepairRecords fails closed when the read fails", async () => {

@@ -14,6 +14,7 @@ export type TicketReadAdapter = SupabaseClient<Database>;
 export interface PublicTicketListOptions {
   page: number;
   pageSize: number;
+  status?: TicketStatus;
   buildingId?: string;
   categoryId?: string;
   search?: string;
@@ -27,7 +28,6 @@ export interface MyTicketsOptions {
 }
 
 export interface TechnicianQueueOptions {
-  technicianId: string;
   viewerContext: QueryTicketsOptions["viewerContext"];
 }
 
@@ -51,13 +51,14 @@ export interface RepairRecordsResult extends QueryTicketsResult {
 const PUBLIC_TICKET_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed"];
 const REPAIR_RECORDS_STATUSES: TicketStatus[] = ["in_progress", "completed", "closed"];
 const REPAIR_RECORDS_PAGE_SIZE = 10;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function getPublicTickets(
   adapter: TicketReadAdapter,
   options: PublicTicketListOptions,
 ): Promise<QueryTicketsResult> {
   return queryTickets(adapter, {
-    status: PUBLIC_TICKET_STATUSES,
+    status: options.status ?? PUBLIC_TICKET_STATUSES,
     buildingId: options.buildingId,
     categoryId: options.categoryId,
     search: options.search,
@@ -82,10 +83,12 @@ export async function getTechnicianQueueTickets(
   adapter: TicketReadAdapter,
   options: TechnicianQueueOptions,
 ): Promise<TechnicianQueueResult> {
-  const { data, error } = await adapter
-    .from("technician_categories")
-    .select("category_id")
-    .eq("technician_id", options.technicianId);
+  const { userId } = options.viewerContext;
+  if (!userId || !UUID_PATTERN.test(userId)) {
+    return { tickets: [], totalCount: 0, subscribedCategoryIds: [] };
+  }
+
+  const { data, error } = await adapter.from("technician_categories").select("category_id").eq("technician_id", userId);
 
   if (error) {
     console.error("getTechnicianQueueTickets category error:", error);
@@ -118,10 +121,11 @@ export async function getRepairRecords(
   }
 
   const requestedStatus = options.status;
-  const status: TicketStatus[] =
-    requestedStatus && REPAIR_RECORDS_STATUSES.includes(requestedStatus as TicketStatus)
-      ? [requestedStatus as TicketStatus]
-      : REPAIR_RECORDS_STATUSES;
+  if (requestedStatus && !REPAIR_RECORDS_STATUSES.includes(requestedStatus as TicketStatus)) {
+    return { tickets: [], totalCount: 0, page, pageSize: REPAIR_RECORDS_PAGE_SIZE };
+  }
+
+  const status: TicketStatus[] = requestedStatus ? [requestedStatus as TicketStatus] : REPAIR_RECORDS_STATUSES;
 
   const assignedTo =
     viewer.role === "technician"

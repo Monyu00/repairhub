@@ -9,7 +9,8 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { createClient } from "@/lib/supabase/client";
 import { getTicketById, type TicketRecord } from "@/server/tickets/query";
 
-import { claimTicket, fetchTechnicianQueue } from "../[id]/_actions/ticket-actions";
+import { fetchTechnicianQueue } from "../_actions/queue-actions";
+import { claimTicket } from "../[id]/_actions/ticket-actions";
 import { PendingTicketCard } from "./pending-ticket-card";
 
 interface PendingTicketsViewProps {
