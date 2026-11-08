@@ -9,23 +9,22 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { TicketDetailActionCapability } from "@/server/tickets/capabilities";
 
 import { claimTicket } from "../_actions/ticket-actions";
 
 interface TechnicianClaimButtonProps {
   ticketId: string;
-  status: string;
-  isAssignedToMe?: boolean;
+  capability: TicketDetailActionCapability;
 }
 
-export function TechnicianClaimButton({ ticketId, status, isAssignedToMe }: TechnicianClaimButtonProps) {
+export function TechnicianClaimButton({ ticketId, capability }: TechnicianClaimButtonProps) {
   const router = useRouter();
   const [isClaiming, setIsClaiming] = useState(false);
-
-  const isPending = status === "pending";
+  const { enabled, disabledReason } = capability;
 
   const handleClaim = async () => {
-    if (!isPending || isClaiming) return;
+    if (!enabled || isClaiming) return;
 
     setIsClaiming(true);
     try {
@@ -44,36 +43,23 @@ export function TechnicianClaimButton({ ticketId, status, isAssignedToMe }: Tech
     }
   };
 
-  const getDisabledReason = () => {
-    if (isPending) return "";
-    if (status === "in_progress") {
-      return isAssignedToMe ? "您已接此單據（維修中）" : "此案件已被其他技師接單處理中";
-    }
-    const reasons: Record<string, string> = {
-      completed: "此案件維修已完工",
-      closed: "此案件已結案",
-      cancelled: "此案件已取消",
-    };
-    return reasons[status] ?? "此案件目前狀態無法接單";
-  };
-
   const claimButton = (
     <Button
       size="sm"
-      variant={isPending ? "default" : "secondary"}
-      disabled={!isPending || isClaiming}
+      variant={enabled ? "default" : "secondary"}
+      disabled={!enabled || isClaiming}
       onClick={handleClaim}
       className="gap-1.5 text-xs shadow-xs"
     >
       {isClaiming ? <Loader2 className="size-3.5 animate-spin" /> : <Hand className="size-3.5" />}
       <span>
-        {isPending && (isClaiming ? "接單中..." : "立即接單")}
-        {!isPending && "已不可接單"}
+        {enabled && (isClaiming ? "接單中..." : "立即接單")}
+        {!enabled && "已不可接單"}
       </span>
     </Button>
   );
 
-  if (!isPending) {
+  if (!enabled) {
     return (
       <TooltipProvider>
         <Tooltip>
@@ -81,7 +67,7 @@ export function TechnicianClaimButton({ ticketId, status, isAssignedToMe }: Tech
             <span className="inline-block cursor-not-allowed">{claimButton}</span>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <p>{getDisabledReason()}</p>
+            <p>{disabledReason}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

@@ -25,16 +25,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import type { TicketDetailCapabilities } from "@/server/tickets/capabilities";
 
 import { cancelTicket, returnToPending } from "../_actions/ticket-actions";
 import { AssignTechnicianDialog } from "./assign-technician-dialog";
 
 interface AdminActionsProps {
   ticketId: string;
-  status: string;
+  capabilities: TicketDetailCapabilities;
 }
 
-export function AdminActions({ ticketId, status }: AdminActionsProps) {
+export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
   // Cancel dialog state
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -44,9 +45,9 @@ export function AdminActions({ ticketId, status }: AdminActionsProps) {
   const [returnOpen, setReturnOpen] = useState(false);
   const [isReturning, setIsReturning] = useState(false);
 
-  const canAssign = status === "pending";
-  const canCancel = status === "pending" || status === "in_progress";
-  const canReturnToPending = status === "in_progress";
+  const canAssign = capabilities.assign.enabled;
+  const canCancel = capabilities.cancel.enabled;
+  const canReturnToPending = capabilities.returnToPending.enabled;
 
   if (!canAssign && !canCancel && !canReturnToPending) {
     return null;
