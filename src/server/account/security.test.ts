@@ -1,4 +1,4 @@
-import { type AccountSecurityAdapter, changePassword, changeRequiredPassword } from "./security";
+import { type AccountSecurityAdapter, applyRequiredPasswordChange, changePassword } from "./security";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -31,14 +31,6 @@ function createAdapter(options: { updateError?: { code?: string }; flagError?: E
   return { adapter, state };
 }
 
-test("changes the password and clears Password Change Required", async () => {
-  const { adapter, state } = createAdapter();
-
-  assert.deepEqual(await changePassword(adapter, VALID_INPUT), { success: true });
-  assert.equal(state.updatedPassword, "new-pass-1");
-  assert.equal(state.flagCleared, true);
-});
-
 test("rejects missing Turnstile before changing a password", async () => {
   const { adapter, state } = createAdapter();
 
@@ -57,68 +49,58 @@ test("rejects a wrong current password before changing a password", async () => 
   assert.equal(state.flagCleared, false);
 });
 
-test("enforces the 8-character minimum before changing a password", async () => {
-  const { adapter, state } = createAdapter();
+const FLOWS = [
+  {
+    name: "self-service password change",
+    success: (adapter: AccountSecurityAdapter) => changePassword(adapter, VALID_INPUT),
+    tooShort: (adapter: AccountSecurityAdapter) => changePassword(adapter, { ...VALID_INPUT, newPassword: "1234567" }),
+    updateError: (adapter: AccountSecurityAdapter) => changePassword(adapter, VALID_INPUT),
+    flagError: (adapter: AccountSecurityAdapter) => changePassword(adapter, VALID_INPUT),
+  },
+  {
+    name: "required password change",
+    success: (adapter: AccountSecurityAdapter) => applyRequiredPasswordChange(adapter, "new-pass-1"),
+    tooShort: (adapter: AccountSecurityAdapter) => applyRequiredPasswordChange(adapter, "1234567"),
+    updateError: (adapter: AccountSecurityAdapter) => applyRequiredPasswordChange(adapter, "new-pass-1"),
+    flagError: (adapter: AccountSecurityAdapter) => applyRequiredPasswordChange(adapter, "new-pass-1"),
+  },
+];
 
-  const result = await changePassword(adapter, { ...VALID_INPUT, newPassword: "1234567" });
-  assert.deepEqual(result, { success: false, error: "新密碼長度至少需要 8 個字元" });
-  assert.equal(state.updatedPassword, null);
-  assert.equal(state.flagCleared, false);
-});
+for (const flow of FLOWS) {
+  test(`${flow.name} changes the password and clears Password Change Required`, async () => {
+    const { adapter, state } = createAdapter();
 
-test("maps known Supabase password-update errors", async () => {
-  const { adapter, state } = createAdapter({ updateError: { code: "same_password" } });
-
-  const result = await changePassword(adapter, VALID_INPUT);
-  assert.deepEqual(result, { success: false, error: "新密碼不可與目前密碼相同" });
-  assert.equal(state.flagCleared, false);
-});
-
-test("does not report full success when Password Change Required clearing fails", async () => {
-  const { adapter, state } = createAdapter({ flagError: new Error("profile update failed") });
-
-  const result = await changePassword(adapter, VALID_INPUT);
-  assert.deepEqual(result, {
-    success: false,
-    error: "密碼已更新，但無法完成登入準備，請重新登入後再試",
+    assert.deepEqual(await flow.success(adapter), { success: true });
+    assert.equal(state.updatedPassword, "new-pass-1");
+    assert.equal(state.flagCleared, true);
   });
-  assert.equal(state.updatedPassword, "new-pass-1");
-  assert.equal(state.flagCleared, false);
-});
 
-test("changes the required password without verifying the current password", async () => {
-  const { adapter, state } = createAdapter();
+  test(`${flow.name} enforces the 8-character minimum`, async () => {
+    const { adapter, state } = createAdapter();
 
-  assert.deepEqual(await changeRequiredPassword(adapter, "new-pass-1"), { success: true });
-  assert.equal(state.updatedPassword, "new-pass-1");
-  assert.equal(state.flagCleared, true);
-});
-
-test("enforces the 8-character minimum before changing the required password", async () => {
-  const { adapter, state } = createAdapter();
-
-  const result = await changeRequiredPassword(adapter, "1234567");
-  assert.deepEqual(result, { success: false, error: "新密碼長度至少需要 8 個字元" });
-  assert.equal(state.updatedPassword, null);
-  assert.equal(state.flagCleared, false);
-});
-
-test("maps known Supabase password-update errors for the required flow", async () => {
-  const { adapter, state } = createAdapter({ updateError: { code: "same_password" } });
-
-  const result = await changeRequiredPassword(adapter, "new-pass-1");
-  assert.deepEqual(result, { success: false, error: "新密碼不可與目前密碼相同" });
-  assert.equal(state.flagCleared, false);
-});
-
-test("does not report full success when required-flow flag clearing fails", async () => {
-  const { adapter, state } = createAdapter({ flagError: new Error("profile update failed") });
-
-  const result = await changeRequiredPassword(adapter, "new-pass-1");
-  assert.deepEqual(result, {
-    success: false,
-    error: "密碼已更新，但無法完成登入準備，請重新登入後再試",
+    const result = await flow.tooShort(adapter);
+    assert.deepEqual(result, { success: false, error: "新密碼長度至少需要 8 個字元" });
+    assert.equal(state.updatedPassword, null);
+    assert.equal(state.flagCleared, false);
   });
-  assert.equal(state.updatedPassword, "new-pass-1");
-  assert.equal(state.flagCleared, false);
-});
+
+  test(`${flow.name} maps known Supabase password-update errors`, async () => {
+    const { adapter, state } = createAdapter({ updateError: { code: "same_password" } });
+
+    const result = await flow.updateError(adapter);
+    assert.deepEqual(result, { success: false, error: "新密碼不可與目前密碼相同" });
+    assert.equal(state.flagCleared, false);
+  });
+
+  test(`${flow.name} does not report full success when Password Change Required clearing fails`, async () => {
+    const { adapter, state } = createAdapter({ flagError: new Error("profile update failed") });
+
+    const result = await flow.flagError(adapter);
+    assert.deepEqual(result, {
+      success: false,
+      error: "密碼已更新，但無法完成登入準備，請重新登入後再試",
+    });
+    assert.equal(state.updatedPassword, "new-pass-1");
+    assert.equal(state.flagCleared, false);
+  });
+}

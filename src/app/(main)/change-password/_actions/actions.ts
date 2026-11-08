@@ -1,10 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  changeRequiredPassword as applyRequiredPassword,
-  createSupabaseAccountSecurityAdapter,
-} from "@/server/account/security";
+import { applyRequiredPasswordChange, createSupabaseAccountSecurityAdapter } from "@/server/account/security";
 import { getSession } from "@/server/auth/session";
 
 export async function changeRequiredPassword(password: string) {
@@ -16,7 +13,7 @@ export async function changeRequiredPassword(password: string) {
     return { success: false, error: "此帳號不需要變更密碼" };
   }
 
-  return applyRequiredPassword(
+  return applyRequiredPasswordChange(
     createSupabaseAccountSecurityAdapter({ ...session, admin: createAdminClient() }),
     password,
   );

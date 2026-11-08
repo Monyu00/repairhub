@@ -5,11 +5,11 @@ import { changePasswordSchema } from "@/server/personal-settings/input";
 
 export type PasswordVerification = { ok: true } | { ok: false; error: string };
 
-export interface AccountSecurityAdapter {
-  verifyCurrentPassword(input: { password: string; captchaToken: string }): Promise<PasswordVerification>;
-  updatePassword(password: string): Promise<{ error?: { code?: string } | null }>;
-  clearPasswordChangeRequired(): Promise<{ error?: unknown }>;
-}
+export type AccountSecurityAdapter = {
+  verifyCurrentPassword: (input: { password: string; captchaToken: string }) => Promise<PasswordVerification>;
+  updatePassword: (password: string) => Promise<{ error?: { code?: string } | null }>;
+  clearPasswordChangeRequired: () => Promise<{ error?: unknown }>;
+};
 
 // 這幾種錯誤使用者自己能處理，收斂成通用訊息只會讓人拿同一組密碼重試。
 const PASSWORD_UPDATE_ERRORS: Record<string, string> = {
@@ -61,9 +61,7 @@ export function createSupabaseAccountSecurityAdapter(session: {
   admin: SupabaseClient<Database>;
 }): AccountSecurityAdapter {
   return {
-    async verifyCurrentPassword(input) {
-      return verifyCurrentPassword(session, input);
-    },
+    verifyCurrentPassword: (input) => verifyCurrentPassword(session, input),
     async updatePassword(password) {
       const { error } = await session.supabase.auth.updateUser({ password });
       if (error) {
@@ -106,7 +104,7 @@ export async function changePassword(
   return applyPasswordChange(adapter, parsed.data.newPassword);
 }
 
-export async function changeRequiredPassword(
+export async function applyRequiredPasswordChange(
   adapter: AccountSecurityAdapter,
   password: string,
 ): Promise<{ success: boolean; error?: string }> {
