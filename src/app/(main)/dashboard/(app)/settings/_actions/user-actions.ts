@@ -3,19 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  compareUserProjection,
-  resolveUserProjection,
-  type UserProjection,
-  type UserRole,
-} from "@/lib/users/projection";
+import type { UserRole } from "@/lib/users/projection";
+import { createSupabaseAccountListAdapter, type ListAccount, readAccountList } from "@/server/account/list";
 import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus } from "@/server/auth";
 
-export interface UserItem extends Omit<UserProjection, "id"> {
-  id: string;
-  createdAt: string;
-  lastSignInAt: string | null;
-}
+export type UserItem = ListAccount;
 
 export interface UserStats {
   reporterStats: {
@@ -34,51 +26,21 @@ export interface UserStats {
 }
 
 export async function fetchUsers(): Promise<{ success: boolean; error?: string; users: UserItem[] }> {
-  const result = await safeAction(async () => {
-    await requireAdmin();
+  const result = await safeAction(requireAdmin);
 
-    const adminClient = createAdminClient();
-    const { data: authData, error: authError } = await adminClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
-
-    if (authError) {
-      console.error("Failed to fetch auth users via admin client:", authError);
-      return { success: false, error: "無法讀取使用者帳號資料", users: [] };
-    }
-
-    const { data: profiles, error: profileError } = await adminClient.from("profiles").select("*");
-
-    if (profileError) {
-      console.error("Failed to fetch profiles:", profileError);
-      return { success: false, error: "無法讀取使用者個人檔案資料", users: [] };
-    }
-
-    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-
-    const users: UserItem[] = (authData.users || []).map((authUser) => {
-      const profile = profileMap.get(authUser.id);
-      const { id, ...projection } = resolveUserProjection(authUser, profile);
-
-      return {
-        ...projection,
-        id,
-        createdAt: authUser.created_at,
-        lastSignInAt: authUser.last_sign_in_at ?? null,
-      };
-    });
-
-    users.sort(compareUserProjection);
-
-    return { success: true, users };
-  });
-
-  if (!result.success) {
+  if ("success" in result) {
     return { success: false, error: result.error, users: [] };
   }
 
-  return result;
+  try {
+    return {
+      success: true,
+      users: await readAccountList(createSupabaseAccountListAdapter(createAdminClient())),
+    };
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    return { success: false, error: "讀取使用者清單失敗，請稍後再試", users: [] };
+  }
 }
 
 export async function createUser(data: {
