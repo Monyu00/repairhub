@@ -152,7 +152,7 @@ export async function updateNotificationPreferences(data: {
 
     const parsed = notificationPreferencesSchema.safeParse(data);
     if (!parsed.success) {
-      return { success: false, error: "通知設定格式不正確" };
+      return { success: false, error: "通知偏好格式不正確" };
     }
 
     // 全關也是合法值，兩個 key 一律寫入（ADR-0009 契約）。
@@ -168,7 +168,7 @@ export async function updateNotificationPreferences(data: {
 
     if (error) {
       console.error("Failed to update notification preferences:", error);
-      return { success: false, error: "更新通知設定失敗，請稍後再試" };
+      return { success: false, error: "更新通知偏好失敗，請稍後再試" };
     }
 
     return { success: true };

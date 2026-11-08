@@ -64,7 +64,7 @@ export function AccountSecurityCard({ mustChangePassword }: AccountSecurityCardP
           <KeyRound className="size-4 text-primary" />
           帳號安全
         </CardTitle>
-        <CardDescription>變更密碼時需要先驗證目前密碼，其裝置的登入狀態不受影響。</CardDescription>
+        <CardDescription>變更密碼時需要先驗證目前密碼，其他裝置的登入狀態不受影響。</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {mustChangePassword && (

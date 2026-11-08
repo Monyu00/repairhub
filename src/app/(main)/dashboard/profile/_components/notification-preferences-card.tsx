@@ -47,18 +47,18 @@ export function NotificationPreferencesCard({ profile, onSaved }: NotificationPr
       const result = await updateNotificationPreferences(next);
       if (!result.success) {
         setPreferences(preferences);
-        toast.error("通知設定儲存失敗", { description: result.error });
+        toast.error("通知偏好儲存失敗", { description: result.error });
         return;
       }
       onSaved({ preferences: next });
-      toast.success("通知設定已儲存");
+      toast.success("通知偏好已儲存");
     });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>通知設定</CardTitle>
+        <CardTitle>通知偏好</CardTitle>
         <CardDescription>選擇你想收到的電子郵件通知，關閉後系統不會再寄送對應通知。</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

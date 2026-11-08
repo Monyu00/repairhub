@@ -16,7 +16,7 @@ import { PersonalProfileForm } from "./personal-profile-form";
 
 const PROFILE_TABS = [
   { value: "profile", label: "個人資料" },
-  { value: "notifications", label: "通知設定" },
+  { value: "notifications", label: "通知偏好" },
   { value: "security", label: "帳號安全" },
 ] as const;
 

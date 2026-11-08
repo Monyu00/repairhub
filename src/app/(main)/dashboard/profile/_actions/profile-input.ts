@@ -28,7 +28,7 @@ export const notificationPreferencesSchema = z.object({
   newTicket: z.boolean(),
 });
 
-/** 通知設定依角色顯示：只有維修技師能訂閱類別並接收新報修通知（見 enqueue_new_ticket_notification）。 */
+/** 通知偏好依角色顯示：只有維修技師能訂閱類別並接收新報修通知（見 enqueue_new_ticket_notification）。 */
 export function visibleNotificationPreferenceKeys(role: UserRole | null): Array<keyof NotificationPreferences> {
   return role === "technician" ? ["ticketStatus", "newTicket"] : ["ticketStatus"];
 }
