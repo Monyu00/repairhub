@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getUserRoleLabel } from "@/lib/users/projection";
-
-import type { MyProfile } from "../_actions/profile-actions";
+import type { MyProfile } from "@/server/personal-settings/actions";
 
 interface CurrentLoginInfoCardProps {
   profile: MyProfile;

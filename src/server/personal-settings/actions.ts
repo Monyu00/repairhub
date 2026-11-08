@@ -6,14 +6,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
 import { type AuthenticatedUser, getSession, safeAction } from "@/server/auth/session";
 
-import type { NotificationPreferences } from "./profile-input";
+import type { NotificationPreferences } from "./input";
 import {
   canDeleteOwnAccount,
   changePasswordSchema,
   notificationPreferencesSchema,
   profileInputSchema,
   resolveNotificationPreferences,
-} from "./profile-input";
+} from "./input";
 
 export interface MyProfile {
   displayName: string | null;

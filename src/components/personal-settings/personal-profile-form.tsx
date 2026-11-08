@@ -10,9 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getUserRoleLabel } from "@/lib/users/projection";
-
-import { type MyProfile, updateMyProfile } from "../_actions/profile-actions";
-import { profileInputSchema } from "../_actions/profile-input";
+import { type MyProfile, updateMyProfile } from "@/server/personal-settings/actions";
+import { profileInputSchema } from "@/server/personal-settings/input";
 
 type ProfileFormErrors = Partial<Record<"displayName" | "department" | "phone", string>>;
 

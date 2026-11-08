@@ -6,9 +6,8 @@ import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-
-import { type MyProfile, updateNotificationPreferences } from "../_actions/profile-actions";
-import { type NotificationPreferences, visibleNotificationPreferenceKeys } from "../_actions/profile-input";
+import { type MyProfile, updateNotificationPreferences } from "@/server/personal-settings/actions";
+import { type NotificationPreferences, visibleNotificationPreferenceKeys } from "@/server/personal-settings/input";
 
 interface NotificationOption {
   key: keyof NotificationPreferences;

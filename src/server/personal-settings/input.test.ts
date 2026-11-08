@@ -6,7 +6,7 @@ import {
   profileInputSchema,
   resolveNotificationPreferences,
   visibleNotificationPreferenceKeys,
-} from "./profile-input";
+} from "./input";
 import assert from "node:assert/strict";
 import test from "node:test";
 

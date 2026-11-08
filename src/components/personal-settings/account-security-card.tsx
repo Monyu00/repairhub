@@ -16,9 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import { changeMyPassword } from "../_actions/profile-actions";
-import { changePasswordFormSchema } from "../_actions/profile-input";
+import { changeMyPassword } from "@/server/personal-settings/actions";
+import { changePasswordFormSchema } from "@/server/personal-settings/input";
 
 interface AccountSecurityCardProps {
   mustChangePassword: boolean;

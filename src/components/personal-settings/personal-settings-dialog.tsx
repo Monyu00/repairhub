@@ -6,8 +6,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fetchMyProfile, type MyProfile } from "@/server/personal-settings/actions";
 
-import { fetchMyProfile, type MyProfile } from "../_actions/profile-actions";
 import { AccountSecurityCard } from "./account-security-card";
 import { CurrentLoginInfoCard } from "./current-login-info-card";
 import { DeleteAccountCard } from "./delete-account-card";

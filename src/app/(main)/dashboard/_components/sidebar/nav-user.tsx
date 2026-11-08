@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 
 import { LogOut, Shield, UserCog } from "lucide-react";
 
-import { PersonalSettingsDialog } from "@/app/(main)/dashboard/profile/_components/personal-settings-dialog";
+import { PersonalSettingsDialog } from "@/components/personal-settings/personal-settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

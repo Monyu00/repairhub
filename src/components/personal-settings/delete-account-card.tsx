@@ -21,8 +21,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { signOutAction } from "@/server/auth/actions";
-
-import { deleteMyAccount } from "../_actions/profile-actions";
+import { deleteMyAccount } from "@/server/personal-settings/actions";
 
 interface DeleteAccountCardProps {
   email: string;
