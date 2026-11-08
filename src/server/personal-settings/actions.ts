@@ -7,13 +7,7 @@ import type { UserRole } from "@/lib/users/projection";
 import { type AuthenticatedUser, getSession, safeAction } from "@/server/auth/session";
 
 import type { NotificationPreferences } from "./input";
-import {
-  canDeleteOwnAccount,
-  changePasswordSchema,
-  notificationPreferencesSchema,
-  profileInputSchema,
-  resolveNotificationPreferences,
-} from "./input";
+import { canDeleteOwnAccount, changePasswordSchema, notificationPreferencesSchema, profileInputSchema } from "./input";
 
 export interface MyProfile {
   displayName: string | null;
@@ -80,33 +74,29 @@ async function verifyCurrentPassword(
 }
 
 export async function fetchMyProfile(): Promise<MyProfileResult> {
-  const session = await getSession();
-  if (!session) {
-    return { profile: null };
-  }
-
-  const { data, error } = await session.supabase
-    .from("profiles")
-    .select("display_name, department, phone, notification_preferences")
-    .eq("id", session.userId)
-    .maybeSingle();
-
-  if (error) {
+  let session: AuthenticatedUser | null;
+  try {
+    session = await getSession();
+  } catch (error) {
     console.error("Failed to load own profile:", error);
     return { profile: null, loadError: "無法讀取個人資料，請稍後再試" };
   }
 
+  if (!session) {
+    return { profile: null };
+  }
+
   return {
     profile: {
-      displayName: data?.display_name ?? null,
-      department: data?.department ?? null,
-      phone: data?.phone ?? null,
+      displayName: session.displayName,
+      department: session.department,
+      phone: session.phone,
       email: session.email,
       avatarUrl: session.avatarUrl ?? null,
       role: session.role,
       isActive: session.isActive,
       mustChangePassword: session.mustChangePassword,
-      preferences: resolveNotificationPreferences(data?.notification_preferences),
+      preferences: session.notificationPreferences,
     },
   };
 }

@@ -6,9 +6,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
-import { resolveUserProjection, type UserProjection } from "@/lib/users/projection";
+import { type CurrentAccount, createSupabaseAccountAdapter, readCurrentAccount } from "@/server/account/current";
 
-export interface AuthenticatedUser extends Omit<UserProjection, "avatarUrl" | "id"> {
+export interface AuthenticatedUser extends Omit<CurrentAccount, "avatarUrl" | "id"> {
   userId: string;
   avatarUrl?: string;
   supabase: SupabaseClient<Database>;
@@ -37,32 +37,14 @@ export class AuthError extends Error {
  */
 export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const account = await readCurrentAccount(createSupabaseAccountAdapter(supabase));
+  if (!account) return null;
 
-  if (userError || !user) {
-    return null;
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("user_role, display_name, department, phone, is_active, must_change_password")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const projection = resolveUserProjection(user, profile);
-
-  if (!projection.isActive) {
-    return null;
-  }
-
-  const { id: userId, avatarUrl, ...identity } = projection;
+  const { id: userId, avatarUrl, ...identity } = account;
 
   return {
     ...identity,
-    role: profile?.user_role ?? null,
+    role: account.role,
     userId,
     avatarUrl: avatarUrl ?? undefined,
     supabase,
