@@ -31,9 +31,10 @@ const NOTIFICATION_OPTIONS: Record<keyof NotificationPreferences, NotificationOp
 
 interface NotificationPreferencesCardProps {
   profile: MyProfile;
+  onSaved: (patch: Partial<MyProfile>) => void;
 }
 
-export function NotificationPreferencesCard({ profile }: NotificationPreferencesCardProps) {
+export function NotificationPreferencesCard({ profile, onSaved }: NotificationPreferencesCardProps) {
   const [preferences, setPreferences] = useState(profile.preferences);
   const [isPending, startTransition] = useTransition();
   const options = visibleNotificationPreferenceKeys(profile.role).map((key) => NOTIFICATION_OPTIONS[key]);
@@ -49,6 +50,7 @@ export function NotificationPreferencesCard({ profile }: NotificationPreferences
         toast.error("通知設定儲存失敗", { description: result.error });
         return;
       }
+      onSaved({ preferences: next });
       toast.success("通知設定已儲存");
     });
   };

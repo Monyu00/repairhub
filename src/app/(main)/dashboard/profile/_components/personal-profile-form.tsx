@@ -18,9 +18,10 @@ type ProfileFormErrors = Partial<Record<"displayName" | "department" | "phone", 
 
 interface PersonalProfileFormProps {
   profile: MyProfile;
+  onSaved: (patch: Partial<MyProfile>) => void;
 }
 
-export function PersonalProfileForm({ profile }: PersonalProfileFormProps) {
+export function PersonalProfileForm({ profile, onSaved }: PersonalProfileFormProps) {
   const [values, setValues] = useState({
     displayName: profile.displayName ?? "",
     department: profile.department ?? "",
@@ -52,6 +53,7 @@ export function PersonalProfileForm({ profile }: PersonalProfileFormProps) {
         toast.error("個人資料儲存失敗", { description: result.error });
         return;
       }
+      onSaved(parsed.data);
       toast.success("個人資料已儲存");
     });
   };

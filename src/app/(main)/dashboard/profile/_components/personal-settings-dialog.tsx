@@ -33,6 +33,12 @@ export function PersonalSettingsDialog({ open, onOpenChange }: PersonalSettingsD
   const [, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<ProfileTab>("profile");
 
+  // 分頁切換會 unmount 子元件，子元件的 useState 只在 mount 時讀 profile；
+  // 儲存後回寫快照，切走再切回才不會看到存檔前的舊值。
+  const handleSaved = (patch: Partial<MyProfile>) => {
+    setProfile((previous) => (previous ? { ...previous, ...patch } : previous));
+  };
+
   useEffect(() => {
     if (!open) return;
 
@@ -74,11 +80,11 @@ export function PersonalSettingsDialog({ open, onOpenChange }: PersonalSettingsD
         </TabsList>
 
         <TabsContent className="mt-0" value="profile">
-          <PersonalProfileForm profile={profile} />
+          <PersonalProfileForm profile={profile} onSaved={handleSaved} />
         </TabsContent>
 
         <TabsContent className="mt-0" value="notifications">
-          <NotificationPreferencesCard profile={profile} />
+          <NotificationPreferencesCard profile={profile} onSaved={handleSaved} />
         </TabsContent>
 
         <TabsContent className="mt-0" value="security">
