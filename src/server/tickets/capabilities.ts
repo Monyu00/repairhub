@@ -1,6 +1,6 @@
 import type { TicketDetail } from "./detail";
 
-export type TicketDetailActionName = "assign" | "cancel" | "returnToPending" | "claim" | "closure" | "progressNote";
+type TicketDetailActionName = "assign" | "cancel" | "returnToPending" | "claim" | "closure" | "progressNote";
 
 export interface TicketDetailActionCapability {
   enabled: boolean;
