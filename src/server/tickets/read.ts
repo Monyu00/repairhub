@@ -2,7 +2,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
-import { type QueryTicketsOptions, type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
+import {
+  type QueryTicketsOptions,
+  type QueryTicketsResult,
+  queryTickets,
+  type ViewerContext,
+} from "@/server/tickets/query";
 
 export type TicketReadAdapter = SupabaseClient<Database>;
 
@@ -30,7 +35,22 @@ export interface TechnicianQueueResult extends QueryTicketsResult {
   subscribedCategoryIds: string[];
 }
 
+export interface RepairRecordsOptions {
+  search?: string;
+  status?: string;
+  technicianId?: string;
+  page?: string;
+  viewer: ViewerContext;
+}
+
+export interface RepairRecordsResult extends QueryTicketsResult {
+  page: number;
+  pageSize: number;
+}
+
 const PUBLIC_TICKET_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed"];
+const REPAIR_RECORDS_STATUSES: TicketStatus[] = ["in_progress", "completed", "closed"];
+const REPAIR_RECORDS_PAGE_SIZE = 10;
 
 export async function getPublicTickets(
   adapter: TicketReadAdapter,
@@ -84,4 +104,41 @@ export async function getTechnicianQueueTickets(
   });
 
   return { ...result, subscribedCategoryIds };
+}
+
+export async function getRepairRecords(
+  adapter: TicketReadAdapter,
+  options: RepairRecordsOptions,
+): Promise<RepairRecordsResult> {
+  const { viewer } = options;
+  const page = Math.max(1, Number.parseInt(options.page ?? "1", 10) || 1);
+  const isPrivileged = viewer.role === "admin" || viewer.role === "technician";
+  if (!isPrivileged || !viewer.userId) {
+    return { tickets: [], totalCount: 0, page, pageSize: REPAIR_RECORDS_PAGE_SIZE };
+  }
+
+  const requestedStatus = options.status;
+  const status: TicketStatus[] =
+    requestedStatus && REPAIR_RECORDS_STATUSES.includes(requestedStatus as TicketStatus)
+      ? [requestedStatus as TicketStatus]
+      : REPAIR_RECORDS_STATUSES;
+
+  const assignedTo =
+    viewer.role === "technician"
+      ? viewer.userId
+      : options.technicianId && options.technicianId !== "all"
+        ? options.technicianId
+        : undefined;
+
+  const result = await queryTickets(adapter, {
+    search: options.search?.trim() || undefined,
+    status,
+    assignedTo,
+    page,
+    pageSize: REPAIR_RECORDS_PAGE_SIZE,
+    sort: { field: "created_at", ascending: false },
+    viewerContext: viewer,
+  });
+
+  return { ...result, page, pageSize: REPAIR_RECORDS_PAGE_SIZE };
 }

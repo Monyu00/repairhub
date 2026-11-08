@@ -1,6 +1,12 @@
 import type { Database } from "@/lib/supabase/database.types";
 
-import { getMyTickets, getPublicTickets, getTechnicianQueueTickets, type TicketReadAdapter } from "./read";
+import {
+  getMyTickets,
+  getPublicTickets,
+  getRepairRecords,
+  getTechnicianQueueTickets,
+  type TicketReadAdapter,
+} from "./read";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -8,6 +14,49 @@ type CapturedOperation = {
   method: string;
   args: unknown[];
 };
+
+type Row = Record<string, unknown>;
+
+function createRowAdapter({ rows = [], error = null }: { rows?: Row[]; error?: Record<string, unknown> | null } = {}) {
+  let filtered = [...rows];
+  let lookups = 0;
+  const builder = {
+    select: () => builder,
+    in: (column: string, values: string[]) => {
+      filtered = filtered.filter((row) => values.includes(String(row[column])));
+      return builder;
+    },
+    eq: (column: string, value: string) => {
+      filtered = filtered.filter((row) => row[column] === value);
+      return builder;
+    },
+    filter: () => builder,
+    or: () => builder,
+    order: (column: string, { ascending }: { ascending: boolean }) => {
+      filtered.sort((left, right) => {
+        const compare = String(left[column]).localeCompare(String(right[column]));
+        return ascending ? compare : -compare;
+      });
+      return builder;
+    },
+    range: (from: number, to: number) => {
+      const count = filtered.length;
+      return Promise.resolve({
+        data: filtered.slice(from, to + 1),
+        count,
+        error,
+      });
+    },
+  };
+  const adapter = {
+    from: () => {
+      lookups += 1;
+      return builder;
+    },
+  };
+
+  return { adapter: adapter as unknown as TicketReadAdapter, lookups: () => lookups };
+}
 
 function createInMemoryAdapter({
   data = [],
@@ -292,6 +341,247 @@ test("getTechnicianQueueTickets fails closed when the ticket read fails", async 
 
     assert.deepEqual(result, { tickets: [], totalCount: 0, subscribedCategoryIds: [categoryId] });
     assert.equal(operations.length, 6);
+  } finally {
+    console.error = originalConsoleError;
+  }
+});
+
+test("getRepairRecords limits technicians to their assigned tickets", async () => {
+  const rows = [
+    {
+      id: "own",
+      status: "in_progress",
+      assigned_to: "00000000-0000-4000-8000-000000000003",
+      description: "own ticket",
+      created_at: "2026-01-02T00:00:00.000Z",
+      updated_at: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      id: "other",
+      status: "completed",
+      assigned_to: "00000000-0000-4000-8000-000000000004",
+      description: "other ticket",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
+  ];
+  const { adapter } = createRowAdapter({ rows });
+
+  const result = await getRepairRecords(adapter, {
+    page: "1",
+    viewer: {
+      role: "technician",
+      userId: "00000000-0000-4000-8000-000000000003",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    result.tickets.map(({ id }) => id),
+    ["own"],
+  );
+  assert.equal(result.totalCount, 1);
+});
+
+test("getRepairRecords scopes admin records by the selected technician", async () => {
+  const rows = [
+    {
+      id: "first-technician",
+      status: "completed",
+      assigned_to: "00000000-0000-4000-8000-000000000003",
+      created_at: "2026-01-02T00:00:00.000Z",
+      updated_at: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      id: "second-technician",
+      status: "closed",
+      assigned_to: "00000000-0000-4000-8000-000000000004",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
+  ];
+  const allAdapter = createRowAdapter({ rows });
+  const allRecords = await getRepairRecords(allAdapter.adapter, {
+    page: "1",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    allRecords.tickets.map(({ id }) => id),
+    ["first-technician", "second-technician"],
+  );
+
+  const selectedAdapter = createRowAdapter({ rows });
+  const selectedRecords = await getRepairRecords(selectedAdapter.adapter, {
+    technicianId: "00000000-0000-4000-8000-000000000004",
+    page: "1",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    selectedRecords.tickets.map(({ id }) => id),
+    ["second-technician"],
+  );
+});
+
+test("getRepairRecords defaults to valid repair record statuses", async () => {
+  const rows = [
+    {
+      id: "pending",
+      status: "pending",
+      created_at: "2026-01-05T00:00:00.000Z",
+      updated_at: "2026-01-05T00:00:00.000Z",
+    },
+    {
+      id: "in-progress",
+      status: "in_progress",
+      created_at: "2026-01-04T00:00:00.000Z",
+      updated_at: "2026-01-04T00:00:00.000Z",
+    },
+    {
+      id: "completed",
+      status: "completed",
+      created_at: "2026-01-03T00:00:00.000Z",
+      updated_at: "2026-01-03T00:00:00.000Z",
+    },
+    {
+      id: "closed",
+      status: "closed",
+      created_at: "2026-01-02T00:00:00.000Z",
+      updated_at: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      id: "cancelled",
+      status: "cancelled",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
+  ];
+  const { adapter } = createRowAdapter({ rows });
+
+  const result = await getRepairRecords(adapter, {
+    page: "1",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    result.tickets.map(({ id }) => id),
+    ["in-progress", "completed", "closed"],
+  );
+});
+
+test("getRepairRecords sorts by newest first and paginates by page", async () => {
+  const rows = Array.from({ length: 12 }, (_, index) => ({
+    id: `ticket-${index + 1}`,
+    status: "completed",
+    created_at: `2026-01-${String(index + 1).padStart(2, "0")}T00:00:00.000Z`,
+    updated_at: `2026-01-${String(index + 1).padStart(2, "0")}T00:00:00.000Z`,
+  }));
+  const { adapter } = createRowAdapter({ rows });
+
+  const result = await getRepairRecords(adapter, {
+    page: "2",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    result.tickets.map(({ id }) => id),
+    ["ticket-2", "ticket-1"],
+  );
+  assert.equal(result.totalCount, 12);
+  assert.equal(result.page, 2);
+  assert.equal(result.pageSize, 10);
+});
+
+test("getRepairRecords fails closed for a malformed technician filter", async () => {
+  const { adapter, lookups } = createRowAdapter({
+    rows: [{ id: "ticket", status: "completed" }],
+  });
+
+  const result = await getRepairRecords(adapter, {
+    technicianId: "not-a-technician",
+    page: "1",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(result.tickets, []);
+  assert.equal(result.totalCount, 0);
+  assert.equal(lookups(), 0);
+});
+
+test("getRepairRecords treats an invalid status as the valid default", async () => {
+  const rows = [
+    {
+      id: "pending",
+      status: "pending",
+      created_at: "2026-01-02T00:00:00.000Z",
+      updated_at: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      id: "completed",
+      status: "completed",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
+  ];
+  const { adapter } = createRowAdapter({ rows });
+
+  const result = await getRepairRecords(adapter, {
+    status: "invalid",
+    page: "1",
+    viewer: {
+      role: "admin",
+      userId: "00000000-0000-4000-8000-000000000002",
+      email: null,
+    },
+  });
+
+  assert.deepEqual(
+    result.tickets.map(({ id }) => id),
+    ["completed"],
+  );
+});
+
+test("getRepairRecords fails closed when the read fails", async () => {
+  const originalConsoleError = console.error;
+  console.error = () => undefined;
+  const { adapter } = createRowAdapter({
+    rows: [{ id: "ticket", status: "completed" }],
+    error: { message: "read failed" },
+  });
+
+  try {
+    const result = await getRepairRecords(adapter, {
+      page: "1",
+      viewer: {
+        role: "admin",
+        userId: "00000000-0000-4000-8000-000000000002",
+        email: null,
+      },
+    });
+
+    assert.deepEqual(result.tickets, []);
+    assert.equal(result.totalCount, 0);
   } finally {
     console.error = originalConsoleError;
   }
