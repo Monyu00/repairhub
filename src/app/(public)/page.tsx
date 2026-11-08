@@ -4,8 +4,8 @@ import { PublicAnnouncementsBanner } from "@/components/announcements/public-ann
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchPublicAnnouncements } from "@/server/announcements";
 import { getSession } from "@/server/auth/session";
-import type { TicketStatus } from "@/server/tickets/lifecycle";
 import { type QueryTicketsResult, queryTickets } from "@/server/tickets/query";
+import { getPublicTickets } from "@/server/tickets/read";
 
 import { HomepageViewLinks } from "./_components/homepage-view-links";
 import { MyTicketList } from "./_components/my-ticket-list";
@@ -41,8 +41,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     Math.min(100, Number.parseInt(params.pageSize ?? String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE),
   );
 
-  const activeStatuses: TicketStatus[] = ["pending", "in_progress", "completed"];
-  const status = params.status && params.status !== "all" ? (params.status as TicketStatus) : activeStatuses;
   const buildingId = params.building && params.building !== "all" ? params.building : undefined;
   const categoryId = params.category && params.category !== "all" ? params.category : undefined;
   const searchTerm = params.q?.trim() || undefined;
@@ -51,15 +49,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const sessionPromise = getSession();
   const publicTicketsPromise =
     activeTab === "all"
-      ? queryTickets(supabase, {
-          status,
+      ? getPublicTickets(supabase, {
           buildingId,
           categoryId,
           search: searchTerm,
           page: currentPage,
           pageSize,
-          sort: { field: "created_at", ascending: false },
-          viewerContext: { role: null },
         })
       : null;
 
