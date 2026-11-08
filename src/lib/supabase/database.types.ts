@@ -11,7 +11,7 @@ export type Database = {
       announcements: {
         Row: {
           audience: Database["public"]["Enums"]["announcement_audience"];
-          author_id: string;
+          author_id: string | null;
           body: string;
           category: Database["public"]["Enums"]["announcement_category"];
           created_at: string;
@@ -24,7 +24,7 @@ export type Database = {
         };
         Insert: {
           audience: Database["public"]["Enums"]["announcement_audience"];
-          author_id: string;
+          author_id?: string | null;
           body: string;
           category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;
@@ -37,7 +37,7 @@ export type Database = {
         };
         Update: {
           audience?: Database["public"]["Enums"]["announcement_audience"];
-          author_id?: string;
+          author_id?: string | null;
           body?: string;
           category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;

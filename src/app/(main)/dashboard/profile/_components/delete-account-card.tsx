@@ -108,6 +108,7 @@ export function DeleteAccountCard({ email, disabled = false }: DeleteAccountCard
                 <li>你提出的報修單據與維修紀錄會留在系統中，但無法再以這個帳號查詢或管理。</li>
                 <li>被指派給你的維修單據會改回未指派。</li>
                 <li>訂閱的類別會一併移除。</li>
+                <li>你發布的公告會保留，作者顯示為系統人員。</li>
                 <li>之後需要請系統管理者重新建立帳號才能再次使用。</li>
               </ul>
             </AlertDescription>

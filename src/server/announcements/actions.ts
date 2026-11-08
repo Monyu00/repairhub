@@ -16,7 +16,7 @@ export interface AnnouncementItem {
   category: AnnouncementCategory;
   audience: AnnouncementAudience;
   is_pinned: boolean;
-  author_id: string;
+  author_id: string | null;
   published_at: string;
   expires_at: string | null;
   created_at: string;
