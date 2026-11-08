@@ -36,6 +36,12 @@ export interface MyProfileResult {
 
 type PasswordVerification = { ok: true } | { ok: false; error: string };
 
+// 這幾種錯誤使用者自己能處理，收斂成通用訊息只會讓人拿同一組密碼重試。
+const PASSWORD_UPDATE_ERRORS: Record<string, string> = {
+  same_password: "新密碼不可與目前密碼相同",
+  weak_password: "新密碼強度不足，請改用更複雜的密碼",
+};
+
 /**
  * 變更密碼與刪除帳號都要先用目前密碼重驗身分；用非 cookie 的獨立 client，
  * 重驗證不寫入也不取代目前 session cookie。
@@ -206,7 +212,7 @@ export async function changeMyPassword(data: {
 
     if (updateError) {
       console.error("Failed to change own password:", updateError);
-      return { success: false, error: "密碼更新失敗，請稍後再試" };
+      return { success: false, error: PASSWORD_UPDATE_ERRORS[updateError.code ?? ""] ?? "密碼更新失敗，請稍後再試" };
     }
 
     // 旗標只在 /change-password 清過；這裡一併清掉，否則帳號仍會被導回變更密碼頁。

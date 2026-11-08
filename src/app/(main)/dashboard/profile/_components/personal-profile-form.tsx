@@ -53,7 +53,8 @@ export function PersonalProfileForm({ profile, onSaved }: PersonalProfileFormPro
         toast.error("個人資料儲存失敗", { description: result.error });
         return;
       }
-      onSaved(parsed.data);
+      // 空字串在 server 端會存成 NULL，快照跟著正規化，切換分頁回來才與 DB 一致。
+      onSaved({ ...parsed.data, department: parsed.data.department || null, phone: parsed.data.phone || null });
       toast.success("個人資料已儲存");
     });
   };
