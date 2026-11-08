@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/server/auth/session";
-import type { TicketStatus } from "@/server/tickets/lifecycle";
-import { queryTickets } from "@/server/tickets/query";
+import { getRepairRecords } from "@/server/tickets/read";
 
 import { RepairRecordsContent } from "./_components/repair-records-content";
 import type { TechnicianOption } from "./_components/repair-records-types";
@@ -22,12 +21,8 @@ interface PageProps {
   }>;
 }
 
-const PAGE_SIZE = 10;
-const VALID_STATUSES: TicketStatus[] = ["in_progress", "completed", "closed"];
-
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
-  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
   const session = await getSession();
 
@@ -68,33 +63,17 @@ export default async function Page({ searchParams }: PageProps) {
     }));
   }
 
-  // Determine status filter
-  const requestedStatus = params.status;
-  const statusFilter: TicketStatus[] =
-    requestedStatus && VALID_STATUSES.includes(requestedStatus as TicketStatus)
-      ? [requestedStatus as TicketStatus]
-      : VALID_STATUSES;
-
-  let assignedTo: string | undefined;
-  if (isTechnician) {
-    assignedTo = session.userId;
-  } else if (isAdmin && params.technician && params.technician !== "all") {
-    assignedTo = params.technician;
-  }
-
-  const search = params.q?.trim() || undefined;
-
-  const { tickets: records, totalCount } = await queryTickets(supabase, {
-    search,
-    status: statusFilter,
-    assignedTo,
+  const {
+    tickets: records,
+    totalCount,
     page,
-    pageSize: PAGE_SIZE,
-    viewerContext: {
-      role: userRole,
-      userId: session.userId,
-      email: session.email,
-    },
+    pageSize,
+  } = await getRepairRecords(supabase, {
+    search: params.q,
+    status: params.status,
+    technicianId: params.technician,
+    page: params.page,
+    viewer: session,
   });
 
   return (
@@ -112,7 +91,7 @@ export default async function Page({ searchParams }: PageProps) {
         records={records}
         totalCount={totalCount}
         currentPage={page}
-        pageSize={PAGE_SIZE}
+        pageSize={pageSize}
         isAdmin={isAdmin}
         technicians={technicians}
       />
