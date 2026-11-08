@@ -3,19 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  compareUserProjection,
-  resolveUserProjection,
-  type UserProjection,
-  type UserRole,
-} from "@/lib/users/projection";
+import type { UserRole } from "@/lib/users/projection";
+import { createSupabaseAccountListAdapter, readAccountList, type ListAccount } from "@/server/account/list";
 import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus } from "@/server/auth";
 
-export interface UserItem extends Omit<UserProjection, "id"> {
-  id: string;
-  createdAt: string;
-  lastSignInAt: string | null;
-}
+export type UserItem = ListAccount;
 
 export interface UserStats {
   reporterStats: {
@@ -37,41 +29,10 @@ export async function fetchUsers(): Promise<{ success: boolean; error?: string; 
   const result = await safeAction(async () => {
     await requireAdmin();
 
-    const adminClient = createAdminClient();
-    const { data: authData, error: authError } = await adminClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
-
-    if (authError) {
-      console.error("Failed to fetch auth users via admin client:", authError);
-      return { success: false, error: "無法讀取使用者帳號資料", users: [] };
-    }
-
-    const { data: profiles, error: profileError } = await adminClient.from("profiles").select("*");
-
-    if (profileError) {
-      console.error("Failed to fetch profiles:", profileError);
-      return { success: false, error: "無法讀取使用者個人檔案資料", users: [] };
-    }
-
-    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
-
-    const users: UserItem[] = (authData.users || []).map((authUser) => {
-      const profile = profileMap.get(authUser.id);
-      const { id, ...projection } = resolveUserProjection(authUser, profile);
-
-      return {
-        ...projection,
-        id,
-        createdAt: authUser.created_at,
-        lastSignInAt: authUser.last_sign_in_at ?? null,
-      };
-    });
-
-    users.sort(compareUserProjection);
-
-    return { success: true, users };
+    return {
+      success: true as const,
+      users: await readAccountList(createSupabaseAccountListAdapter(createAdminClient())),
+    };
   });
 
   if (!result.success) {
