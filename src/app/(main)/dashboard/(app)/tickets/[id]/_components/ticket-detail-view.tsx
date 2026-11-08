@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
+import { getTicketDetailCapabilities } from "@/server/tickets/capabilities";
 import type { TicketDetail } from "@/server/tickets/detail";
 
 import { AdminActions } from "./admin-actions";
@@ -29,7 +30,8 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
   const isAdmin = userRole === "admin";
   const isAssignedTech = userId !== null && assignedTo === userId;
   const canViewReporter = isAdmin || userRole === "technician";
-  const canAddNote = isAssignedTech || isAdmin;
+  const capabilities = getTicketDetailCapabilities(detail, { role: userRole, userId });
+  const canAddNote = capabilities.progressNote.enabled;
   const canSubmitClosure = (isAssignedTech || isAdmin) && ticket.status === "in_progress";
 
   return (
@@ -61,7 +63,7 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
 
           {/* Header Actions */}
           <div className="flex items-center gap-2">
-            {isAdmin && <AdminActions ticketId={ticket.id} status={ticket.status} />}
+            {isAdmin && <AdminActions ticketId={ticket.id} capabilities={capabilities} />}
             {userRole === "technician" && (
               <TechnicianClaimButton
                 ticketId={ticket.id}
