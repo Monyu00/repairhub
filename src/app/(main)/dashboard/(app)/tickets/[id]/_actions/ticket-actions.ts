@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin, requireAuth, safeAction } from "@/server/auth";
 import { actorFromAuthUser, transitionTicket } from "@/server/tickets/lifecycle";
+import { getTechnicianQueueTickets } from "@/server/tickets/read";
 
 /**
  * Adds a progress note to the ticket without changing its status.
@@ -53,6 +54,39 @@ export async function addProgressNote(
     revalidatePath(`/dashboard/tickets/${ticketId}`);
     return { success: true };
   });
+}
+
+/**
+ * Loads the authenticated technician's pending queue through the ticket read scope.
+ */
+export async function fetchTechnicianQueue(): Promise<
+  | {
+      success: true;
+      tickets: Awaited<ReturnType<typeof getTechnicianQueueTickets>>["tickets"];
+      subscribedCategoryIds: string[];
+    }
+  | { success: false; error?: string }
+> {
+  const result = await safeAction(async () => {
+    const user = await requireAuth();
+
+    if (user.role !== "technician") {
+      return { success: true as const, tickets: [], subscribedCategoryIds: [] };
+    }
+
+    const queue = await getTechnicianQueueTickets(user.supabase, {
+      technicianId: user.userId,
+      viewerContext: { role: user.role, userId: user.userId, email: user.email },
+    });
+
+    return { success: true as const, ...queue };
+  });
+
+  if (!result.success) {
+    return { success: false, error: result.error };
+  }
+
+  return result;
 }
 
 /**

@@ -21,6 +21,15 @@ export interface MyTicketsOptions {
   viewerContext: QueryTicketsOptions["viewerContext"];
 }
 
+export interface TechnicianQueueOptions {
+  technicianId: string;
+  viewerContext: QueryTicketsOptions["viewerContext"];
+}
+
+export interface TechnicianQueueResult extends QueryTicketsResult {
+  subscribedCategoryIds: string[];
+}
+
 const PUBLIC_TICKET_STATUSES: TicketStatus[] = ["pending", "in_progress", "completed"];
 
 export async function getPublicTickets(
@@ -47,4 +56,32 @@ export async function getMyTickets(adapter: TicketReadAdapter, options: MyTicket
     sort: { field: "created_at", ascending: false },
     viewerContext: options.viewerContext,
   });
+}
+
+export async function getTechnicianQueueTickets(
+  adapter: TicketReadAdapter,
+  options: TechnicianQueueOptions,
+): Promise<TechnicianQueueResult> {
+  const { data, error } = await adapter
+    .from("technician_categories")
+    .select("category_id")
+    .eq("technician_id", options.technicianId);
+
+  if (error) {
+    console.error("getTechnicianQueueTickets category error:", error);
+    return { tickets: [], totalCount: 0, subscribedCategoryIds: [] };
+  }
+
+  const subscribedCategoryIds = (data ?? []).map((row) => row.category_id);
+  if (subscribedCategoryIds.length === 0) {
+    return { tickets: [], totalCount: 0, subscribedCategoryIds };
+  }
+
+  const result = await queryTickets(adapter, {
+    status: "pending",
+    categoryId: subscribedCategoryIds,
+    viewerContext: options.viewerContext,
+  });
+
+  return { ...result, subscribedCategoryIds };
 }

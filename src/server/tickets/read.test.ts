@@ -1,6 +1,6 @@
 import type { Database } from "@/lib/supabase/database.types";
 
-import { getMyTickets, getPublicTickets, type TicketReadAdapter } from "./read";
+import { getMyTickets, getPublicTickets, getTechnicianQueueTickets, type TicketReadAdapter } from "./read";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -54,6 +54,63 @@ function createInMemoryAdapter({
     },
   };
   const adapter = { from: () => builder };
+
+  return { adapter: adapter as unknown as TicketReadAdapter, operations };
+}
+
+function createTechnicianQueueAdapter({
+  categoryIds = [],
+  categoryError = null,
+  data = [],
+  count = data.length,
+  error = null,
+}: {
+  categoryIds?: string[];
+  categoryError?: Record<string, unknown> | null;
+  data?: unknown[];
+  count?: number;
+  error?: Record<string, unknown> | null;
+} = {}) {
+  const operations: CapturedOperation[] = [];
+
+  const createBuilder = (result: { data: unknown[]; count: number; error: Record<string, unknown> | null }) => {
+    const builder = {
+      select: (...args: unknown[]) => {
+        operations.push({ method: "select", args });
+        return builder;
+      },
+      eq: (...args: unknown[]) => {
+        operations.push({ method: "eq", args });
+        return builder;
+      },
+      in: (...args: unknown[]) => {
+        operations.push({ method: "in", args });
+        return builder;
+      },
+      order: (...args: unknown[]) => {
+        operations.push({ method: "order", args });
+        return builder;
+      },
+      range: (...args: unknown[]) => {
+        operations.push({ method: "range", args });
+        return Promise.resolve(result);
+      },
+      // biome-ignore lint/suspicious/noThenProperty: Supabase query builders are thenable.
+      then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
+        Promise.resolve(result).then(resolve, reject),
+    };
+    return builder;
+  };
+
+  const ticketBuilder = createBuilder({ data, count, error });
+  const categoryBuilder = createBuilder({
+    data: categoryIds.map((id) => ({ category_id: id })),
+    count: categoryIds.length,
+    error: categoryError,
+  });
+  const adapter = {
+    from: (table: string) => (table === "technician_categories" ? categoryBuilder : ticketBuilder),
+  };
 
   return { adapter: adapter as unknown as TicketReadAdapter, operations };
 }
@@ -170,6 +227,71 @@ test("getPublicTickets fails closed when the read fails", async () => {
 
     assert.deepEqual(result, { tickets: [], totalCount: 0 });
     assert.equal(operations.length, 4);
+  } finally {
+    console.error = originalConsoleError;
+  }
+});
+
+test("getTechnicianQueueTickets applies pending status, subscribed categories, default ordering, and redaction", async () => {
+  const categoryIds = ["00000000-0000-4000-8000-000000000002", "00000000-0000-4000-8000-000000000003"];
+  const { adapter, operations } = createTechnicianQueueAdapter({
+    categoryIds,
+    data: [{ id: "ticket-1", reporter_email: "reporter@example.com" }],
+    count: 1,
+  });
+
+  const result = await getTechnicianQueueTickets(adapter, {
+    technicianId: "00000000-0000-4000-8000-000000000001",
+    viewerContext: { role: "technician" },
+  });
+
+  assert.deepEqual(
+    operations.filter(({ method }) => method === "eq").map(({ args }) => args),
+    [
+      ["technician_id", "00000000-0000-4000-8000-000000000001"],
+      ["status", "pending"],
+    ],
+  );
+  assert.deepEqual(operations.find(({ method }) => method === "in")?.args, ["category_id", categoryIds]);
+  assert.deepEqual(operations.find(({ method }) => method === "order")?.args, ["created_at", { ascending: false }]);
+  assert.equal(
+    operations.find(({ method }) => method === "range"),
+    undefined,
+  );
+  assert.deepEqual(result.subscribedCategoryIds, categoryIds);
+  assert.equal(result.totalCount, 1);
+  assert.equal(result.tickets[0]?.reporterEmail, "reporter@example.com");
+});
+
+test("getTechnicianQueueTickets fails closed when category subscription cannot be read", async () => {
+  const { adapter, operations } = createTechnicianQueueAdapter({ categoryError: { message: "read failed" } });
+
+  const result = await getTechnicianQueueTickets(adapter, {
+    technicianId: "00000000-0000-4000-8000-000000000001",
+    viewerContext: { role: "technician" },
+  });
+
+  assert.deepEqual(result, { tickets: [], totalCount: 0, subscribedCategoryIds: [] });
+  assert.equal(operations.length, 2);
+});
+
+test("getTechnicianQueueTickets fails closed when the ticket read fails", async () => {
+  const originalConsoleError = console.error;
+  console.error = () => undefined;
+  const categoryId = "00000000-0000-4000-8000-000000000002";
+  const { adapter, operations } = createTechnicianQueueAdapter({
+    categoryIds: [categoryId],
+    error: { message: "ticket read failed" },
+  });
+
+  try {
+    const result = await getTechnicianQueueTickets(adapter, {
+      technicianId: "00000000-0000-4000-8000-000000000001",
+      viewerContext: { role: "technician" },
+    });
+
+    assert.deepEqual(result, { tickets: [], totalCount: 0, subscribedCategoryIds: [categoryId] });
+    assert.equal(operations.length, 6);
   } finally {
     console.error = originalConsoleError;
   }

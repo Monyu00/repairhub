@@ -7,9 +7,9 @@ import { toast } from "sonner";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { createClient } from "@/lib/supabase/client";
-import { getTicketById, queryTickets, type TicketRecord } from "@/server/tickets/query";
+import { getTicketById, type TicketRecord } from "@/server/tickets/query";
 
-import { claimTicket } from "../[id]/_actions/ticket-actions";
+import { claimTicket, fetchTechnicianQueue } from "../[id]/_actions/ticket-actions";
 import { PendingTicketCard } from "./pending-ticket-card";
 
 interface PendingTicketsViewProps {
@@ -41,41 +41,17 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
     async function loadData() {
       setIsLoading(true);
 
-      // 1. Fetch technician's subscribed categories
-      const { data: techCats, error: techCatsError } = await supabase
-        .from("technician_categories")
-        .select("category_id")
-        .eq("technician_id", userId);
+      const result = await fetchTechnicianQueue();
 
-      if (techCatsError) {
-        console.error("Error fetching technician categories:", techCatsError);
-      }
-
-      const catIds = (techCats ?? []).map((tc) => tc.category_id);
       if (isMounted) {
-        setSubscribedCategoryIds(catIds);
-      }
-
-      if (catIds.length === 0) {
-        if (isMounted) {
+        if (!result.success) {
+          console.error("Error fetching technician queue:", result.error);
           setTickets([]);
-          setIsLoading(false);
+          setSubscribedCategoryIds([]);
+        } else {
+          setTickets(result.tickets);
+          setSubscribedCategoryIds(result.subscribedCategoryIds);
         }
-        return;
-      }
-
-      // 2. Fetch pending tickets in subscribed categories using deep queryTickets
-      const { tickets: pendingTickets } = await queryTickets(supabase, {
-        status: "pending",
-        categoryId: catIds,
-        viewerContext: {
-          role: canViewReporter ? "technician" : null,
-          userId,
-        },
-      });
-
-      if (isMounted) {
-        setTickets(pendingTickets);
         setIsLoading(false);
       }
     }
@@ -85,7 +61,7 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
     return () => {
       isMounted = false;
     };
-  }, [userId, supabase, canViewReporter]);
+  }, []);
 
   // Realtime subscription setup
   useEffect(() => {
