@@ -4,7 +4,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
-import { getSession, safeAction } from "@/server/auth/session";
+import { type AuthenticatedUser, getSession, safeAction } from "@/server/auth/session";
 
 import type { NotificationPreferences } from "./profile-input";
 import {
@@ -32,6 +32,45 @@ export type ProfileResult = { success: boolean; error?: string };
 export interface MyProfileResult {
   profile: MyProfile | null;
   loadError?: string;
+}
+
+type PasswordVerification = { ok: true } | { ok: false; error: string };
+
+/**
+ * 變更密碼與刪除帳號都要先用目前密碼重驗身分；用非 cookie 的獨立 client，
+ * 重驗證不寫入也不取代目前 session cookie。
+ */
+async function verifyCurrentPassword(
+  session: AuthenticatedUser,
+  input: { password: string; captchaToken: string },
+): Promise<PasswordVerification> {
+  // 空 token 打到 auth 只會拿到籠統的 invalid_credentials，先在本機擋下並說清楚原因。
+  if (!input.captchaToken) {
+    return { ok: false, error: "請先完成安全驗證" };
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return { ok: false, error: "伺服器設定不完整，請聯絡系統管理者" };
+  }
+
+  const { error } = await createSupabaseClient(supabaseUrl, supabaseKey).auth.signInWithPassword({
+    email: session.email,
+    password: input.password,
+    options: { captchaToken: input.captchaToken },
+  });
+
+  if (error) {
+    // captcha 失敗與密碼錯誤是兩件事，前者不該被說成「目前密碼錯誤」。
+    return {
+      ok: false,
+      error: error.code === "captcha_failed" ? "安全驗證失敗或已過期，請重試" : "目前密碼錯誤",
+    };
+  }
+
+  return { ok: true };
 }
 
 export async function fetchMyProfile(): Promise<MyProfileResult> {
@@ -152,32 +191,13 @@ export async function changeMyPassword(data: {
       return { success: false, error: parsed.error.issues[0]?.message ?? "密碼格式不正確" };
     }
 
-    // 空 token 打到 auth 只會拿到籠統的 invalid_credentials，先在本機擋下並說清楚原因。
-    if (!data.captchaToken) {
-      return { success: false, error: "請先完成安全驗證" };
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return { success: false, error: "伺服器設定不完整，請聯絡系統管理者" };
-    }
-
-    // 非 cookie 的獨立 client：重驗證不寫入也不取代目前 session cookie。
-    const verifyClient = createSupabaseClient(supabaseUrl, supabaseKey);
-    const { error: verifyError } = await verifyClient.auth.signInWithPassword({
-      email: session.email,
+    const verified = await verifyCurrentPassword(session, {
       password: parsed.data.currentPassword,
-      options: { captchaToken: data.captchaToken },
+      captchaToken: data.captchaToken,
     });
 
-    if (verifyError) {
-      // captcha 失敗與密碼錯誤是兩件事，前者不該被說成「目前密碼錯誤」。
-      return {
-        success: false,
-        error: verifyError.code === "captcha_failed" ? "安全驗證失敗或已過期，請重試" : "目前密碼錯誤",
-      };
+    if (!verified.ok) {
+      return { success: false, error: verified.error };
     }
 
     const { error: updateError } = await session.supabase.auth.updateUser({
@@ -186,7 +206,7 @@ export async function changeMyPassword(data: {
 
     if (updateError) {
       console.error("Failed to change own password:", updateError);
-      return { success: false, error: updateError.message };
+      return { success: false, error: "密碼更新失敗，請稍後再試" };
     }
 
     // 旗標只在 /change-password 清過；這裡一併清掉，否則帳號仍會被導回變更密碼頁。
@@ -211,34 +231,19 @@ export async function deleteMyAccount(data: { currentPassword: string; captchaTo
       return { success: false, error: "尚未登入，請先登入" };
     }
 
-    if (!data.captchaToken) {
-      return { success: false, error: "請先完成安全驗證" };
-    }
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return { success: false, error: "伺服器設定不完整，請聯絡系統管理者" };
-    }
-
-    // 與 changeMyPassword 同一條重驗證路徑：用非 cookie 的獨立 client，不寫入也不取代目前 session。
-    const verifyClient = createSupabaseClient(supabaseUrl, supabaseKey);
-    const { error: verifyError } = await verifyClient.auth.signInWithPassword({
-      email: session.email,
+    const verified = await verifyCurrentPassword(session, {
       password: data.currentPassword,
-      options: { captchaToken: data.captchaToken },
+      captchaToken: data.captchaToken,
     });
 
-    if (verifyError) {
-      return {
-        success: false,
-        error: verifyError.code === "captcha_failed" ? "安全驗證失敗或已過期，請重試" : "目前密碼錯誤",
-      };
+    if (!verified.ok) {
+      return { success: false, error: verified.error };
     }
 
+    const admin = createAdminClient();
+
     if (session.role === "admin") {
-      const { count } = await createAdminClient()
+      const { count } = await admin
         .from("profiles")
         .select("id", { count: "exact", head: true })
         .eq("user_role", "admin")
@@ -251,7 +256,7 @@ export async function deleteMyAccount(data: { currentPassword: string; captchaTo
 
     // 刪除 auth user 會連帶刪除 profiles（ON DELETE CASCADE），已指派的單據改為未指派，
     // 已提出的單據與其紀錄留在系統中，但無法再以這個帳號查詢或管理。
-    const { error: deleteError } = await createAdminClient().auth.admin.deleteUser(session.userId);
+    const { error: deleteError } = await admin.auth.admin.deleteUser(session.userId);
 
     if (deleteError) {
       console.error("Failed to delete own account:", deleteError);
