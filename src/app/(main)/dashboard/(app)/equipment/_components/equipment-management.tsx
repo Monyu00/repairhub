@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Edit2, FileUp, FilterX, HardDrive, History, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { BulkImportDialog } from "@/app/(main)/dashboard/_components/bulk-import-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { LocationCatalogBuilding } from "@/lib/locations";
 
-import { BulkImportDialog } from "../../_components/bulk-import-dialog";
 import {
   createEquipment,
   type EquipmentFormData,

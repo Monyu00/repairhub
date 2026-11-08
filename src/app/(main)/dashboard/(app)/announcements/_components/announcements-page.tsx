@@ -114,7 +114,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         category: (data as CreateAnnouncementInput).category ?? "general",
         audience: (data.audience as AnnouncementAudience) ?? "all",
         is_pinned: Boolean(data.is_pinned),
-        author_id: "",
+        author_id: null,
         published_at: data.published_at ?? new Date().toISOString(),
         expires_at: data.expires_at ?? null,
         created_at: new Date().toISOString(),

@@ -98,6 +98,10 @@ _Avoid_: Notification log, mail queue, trigger chain
 A single queued Email send for one Ticket event and one recipient.
 _Avoid_: Notification, message, attempt
 
+**Notification Preference**:
+A per-account switch controlling whether one event type delivers Email to that account. Stored as a flat object on the account's profile; a missing event key defaults to enabled.
+_Avoid_: Subscription, opt-out, notification setting, 通知訂閱
+
 ### Workflow
 
 **Claim**:
@@ -148,3 +152,13 @@ The ticket lifecycle is finished. Either the reporter confirmed satisfaction or 
 
 **Cancelled** (`cancelled`):
 The ticket was invalidated by an admin (e.g., duplicate, not actionable). Terminal state.
+
+### Account
+
+**Personal Settings** (個人設定):
+The screen where a logged-in account manages its own profile fields, Notification Preferences, and Account Security. Available to every account regardless of role; admin maintenance screens are separate.
+_Avoid_: Account settings, my profile, preferences page, 帳號設定
+
+**Account Security** (帳號安全):
+The credential self-service part of Personal Settings: verifying the current Password and setting a new one. Excludes admin-issued resets, role, and activation state.
+_Avoid_: Security settings, password settings, 密碼設定

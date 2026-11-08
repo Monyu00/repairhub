@@ -57,6 +57,7 @@ There is currently no automated test command. Run build, lint, check, or other v
 Keep feature code close to the route that owns it.
 
 - Dashboard routes: `src/app/(main)/dashboard/<screen>/page.tsx`
+- Admin/technician-only dashboard screens live in the route group `src/app/(main)/dashboard/(app)/<screen>/page.tsx`; route groups do not change URLs.
 - Screen-specific components, data, and schemas: `src/app/(main)/dashboard/<screen>/_components/`
 - Shared dashboard components: `src/app/(main)/dashboard/_components/`
 - Shared application components: `src/components/`

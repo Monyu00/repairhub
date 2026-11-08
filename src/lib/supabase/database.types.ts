@@ -11,7 +11,7 @@ export type Database = {
       announcements: {
         Row: {
           audience: Database["public"]["Enums"]["announcement_audience"];
-          author_id: string;
+          author_id: string | null;
           body: string;
           category: Database["public"]["Enums"]["announcement_category"];
           created_at: string;
@@ -24,7 +24,7 @@ export type Database = {
         };
         Insert: {
           audience: Database["public"]["Enums"]["announcement_audience"];
-          author_id: string;
+          author_id?: string | null;
           body: string;
           category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;
@@ -37,7 +37,7 @@ export type Database = {
         };
         Update: {
           audience?: Database["public"]["Enums"]["announcement_audience"];
-          author_id?: string;
+          author_id?: string | null;
           body?: string;
           category?: Database["public"]["Enums"]["announcement_category"];
           created_at?: string;
@@ -216,6 +216,7 @@ export type Database = {
           id: string;
           is_active: boolean;
           must_change_password: boolean;
+          notification_preferences: Json;
           phone: string | null;
           updated_at: string;
           user_role: Database["public"]["Enums"]["user_role"] | null;
@@ -226,6 +227,7 @@ export type Database = {
           id: string;
           is_active?: boolean;
           must_change_password?: boolean;
+          notification_preferences?: Json;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
@@ -236,6 +238,7 @@ export type Database = {
           id?: string;
           is_active?: boolean;
           must_change_password?: boolean;
+          notification_preferences?: Json;
           phone?: string | null;
           updated_at?: string;
           user_role?: Database["public"]["Enums"]["user_role"] | null;
