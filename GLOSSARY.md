@@ -30,6 +30,10 @@ _Avoid_: Manager, supervisor, operator
 The resolved read model for one account.
 _Avoid_: User record, profile, auth user
 
+**Account**:
+The login identity and its profile state for one user. User Projection is the read model for one Account.
+_Avoid_: User record, auth user, profile row
+
 **Bulk Import**:
 An admin file upload that creates many records at once, validates rows before writing, skips existing records, and reports valid, skipped, and failed rows.
 _Avoid_: Batch update, migration, sync
