@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
-import { createSupabaseAccountListAdapter, readAccountList, type ListAccount } from "@/server/account/list";
+import { createSupabaseAccountListAdapter, type ListAccount, readAccountList } from "@/server/account/list";
 import { checkActiveAdminRetention, requireAdmin, safeAction, setUserActiveStatus } from "@/server/auth";
 
 export type UserItem = ListAccount;
@@ -26,20 +26,21 @@ export interface UserStats {
 }
 
 export async function fetchUsers(): Promise<{ success: boolean; error?: string; users: UserItem[] }> {
-  const result = await safeAction(async () => {
-    await requireAdmin();
+  const result = await safeAction(requireAdmin);
 
-    return {
-      success: true as const,
-      users: await readAccountList(createSupabaseAccountListAdapter(createAdminClient())),
-    };
-  });
-
-  if (!result.success) {
+  if ("success" in result) {
     return { success: false, error: result.error, users: [] };
   }
 
-  return result;
+  try {
+    return {
+      success: true,
+      users: await readAccountList(createSupabaseAccountListAdapter(createAdminClient())),
+    };
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+    return { success: false, error: "讀取使用者清單失敗，請稍後再試", users: [] };
+  }
 }
 
 export async function createUser(data: {

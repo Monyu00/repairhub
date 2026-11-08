@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
-import { resolveUserProjection, type UserRole } from "@/lib/users/projection";
+import type { UserRole } from "@/lib/users/projection";
 import { type NotificationPreferences, resolveNotificationPreferences } from "@/server/personal-settings/input";
+
+import { type AccountSource, mapAccountSource } from "./source";
 
 export interface CurrentAccount {
   id: string;
@@ -18,10 +20,7 @@ export interface CurrentAccount {
 }
 
 export interface AccountAdapter {
-  readCurrent(): Promise<{
-    user: Parameters<typeof resolveUserProjection>[0];
-    profile?: (Parameters<typeof resolveUserProjection>[1] & { notification_preferences?: unknown }) | null;
-  } | null>;
+  readCurrent(): Promise<AccountSource | null>;
 }
 
 export function createSupabaseAccountAdapter(supabase: SupabaseClient<Database>): AccountAdapter {
@@ -48,13 +47,15 @@ export function createSupabaseAccountAdapter(supabase: SupabaseClient<Database>)
 
 export async function readCurrentAccount(adapter: AccountAdapter): Promise<CurrentAccount | null> {
   const source = await adapter.readCurrent();
-  if (!source?.user || !source.profile) return null;
+  if (!source) return null;
 
-  const projection = resolveUserProjection(source.user, source.profile);
+  const projection = mapAccountSource(source);
+  if (!projection) return null;
   if (!projection.isActive) return null;
 
   return {
     ...projection,
-    notificationPreferences: resolveNotificationPreferences(source.profile.notification_preferences),
+    role: source.profile?.user_role ?? null,
+    notificationPreferences: resolveNotificationPreferences(source.profile?.notification_preferences),
   };
 }

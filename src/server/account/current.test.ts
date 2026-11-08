@@ -30,6 +30,34 @@ test("uses profile values and resolves notification preferences", async () => {
   });
 });
 
+test("does not fall back to metadata role when profile role is null", async () => {
+  const account = await readCurrentAccount({
+    async readCurrent() {
+      return {
+        user: {
+          id: "user-1",
+          email: "user@example.com",
+          user_metadata: { full_name: "Metadata Name", user_role: "admin" },
+        },
+        profile: { user_role: null },
+      };
+    },
+  });
+
+  assert.deepEqual(account, {
+    id: "user-1",
+    email: "user@example.com",
+    displayName: "Metadata Name",
+    role: null,
+    department: null,
+    phone: null,
+    avatarUrl: null,
+    isActive: true,
+    mustChangePassword: false,
+    notificationPreferences: { ticketStatus: true, newTicket: true },
+  });
+});
+
 test("treats a missing profile as no valid Account", async () => {
   const account = await readCurrentAccount({
     async readCurrent() {

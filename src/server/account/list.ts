@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
-import { compareUserProjection, resolveUserProjection, type UserProjection } from "@/lib/users/projection";
+import { compareUserProjection, type UserProjection } from "@/lib/users/projection";
 import { type NotificationPreferences, resolveNotificationPreferences } from "@/server/personal-settings/input";
+
+import { type AccountSource, mapAccountSource } from "./source";
 
 const MAX_ACCOUNT_LIST_SIZE = 1000;
 
@@ -13,11 +15,11 @@ export interface ListAccount extends UserProjection {
 }
 
 export interface AccountListSource {
-  user: Parameters<typeof resolveUserProjection>[0] & {
+  user: AccountSource["user"] & {
     created_at: string;
     last_sign_in_at?: string | null;
   };
-  profile?: (Parameters<typeof resolveUserProjection>[1] & { notification_preferences?: unknown }) | null;
+  profile?: AccountSource["profile"];
 }
 
 export interface AccountListAdapter {
@@ -51,11 +53,17 @@ export async function readAccountList(adapter: AccountListAdapter): Promise<List
   const sources = await adapter.readList();
 
   return sources
-    .map(({ user, profile }) => ({
-      ...resolveUserProjection(user, profile),
-      createdAt: user.created_at,
-      lastSignInAt: user.last_sign_in_at ?? null,
-      notificationPreferences: resolveNotificationPreferences(profile?.notification_preferences),
-    }))
+    .map((source) => {
+      const projection = mapAccountSource(source);
+      if (!projection) return null;
+
+      return {
+        ...projection,
+        createdAt: source.user.created_at,
+        lastSignInAt: source.user.last_sign_in_at ?? null,
+        notificationPreferences: resolveNotificationPreferences(source.profile?.notification_preferences),
+      };
+    })
+    .filter((account): account is ListAccount => account !== null)
     .sort(compareUserProjection);
 }

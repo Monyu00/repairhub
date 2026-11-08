@@ -44,7 +44,6 @@ export const getSession = cache(async (): Promise<AuthenticatedUser | null> => {
 
   return {
     ...identity,
-    role: account.role,
     userId,
     avatarUrl: avatarUrl ?? undefined,
     supabase,
