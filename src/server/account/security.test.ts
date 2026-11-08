@@ -1,4 +1,4 @@
-import { type AccountSecurityAdapter, changePassword } from "./security";
+import { type AccountSecurityAdapter, changePassword, changeRequiredPassword } from "./security";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -78,6 +78,43 @@ test("does not report full success when Password Change Required clearing fails"
   const { adapter, state } = createAdapter({ flagError: new Error("profile update failed") });
 
   const result = await changePassword(adapter, VALID_INPUT);
+  assert.deepEqual(result, {
+    success: false,
+    error: "密碼已更新，但無法完成登入準備，請重新登入後再試",
+  });
+  assert.equal(state.updatedPassword, "new-pass-1");
+  assert.equal(state.flagCleared, false);
+});
+
+test("changes the required password without verifying the current password", async () => {
+  const { adapter, state } = createAdapter();
+
+  assert.deepEqual(await changeRequiredPassword(adapter, "new-pass-1"), { success: true });
+  assert.equal(state.updatedPassword, "new-pass-1");
+  assert.equal(state.flagCleared, true);
+});
+
+test("enforces the 8-character minimum before changing the required password", async () => {
+  const { adapter, state } = createAdapter();
+
+  const result = await changeRequiredPassword(adapter, "1234567");
+  assert.deepEqual(result, { success: false, error: "新密碼長度至少需要 8 個字元" });
+  assert.equal(state.updatedPassword, null);
+  assert.equal(state.flagCleared, false);
+});
+
+test("maps known Supabase password-update errors for the required flow", async () => {
+  const { adapter, state } = createAdapter({ updateError: { code: "same_password" } });
+
+  const result = await changeRequiredPassword(adapter, "new-pass-1");
+  assert.deepEqual(result, { success: false, error: "新密碼不可與目前密碼相同" });
+  assert.equal(state.flagCleared, false);
+});
+
+test("does not report full success when required-flow flag clearing fails", async () => {
+  const { adapter, state } = createAdapter({ flagError: new Error("profile update failed") });
+
+  const result = await changeRequiredPassword(adapter, "new-pass-1");
   assert.deepEqual(result, {
     success: false,
     error: "密碼已更新，但無法完成登入準備，請重新登入後再試",

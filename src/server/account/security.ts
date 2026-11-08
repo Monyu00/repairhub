@@ -103,7 +103,26 @@ export async function changePassword(
     return { success: false, error: verified.error };
   }
 
-  const { error: updateError } = await adapter.updatePassword(parsed.data.newPassword);
+  return applyPasswordChange(adapter, parsed.data.newPassword);
+}
+
+export async function changeRequiredPassword(
+  adapter: AccountSecurityAdapter,
+  password: string,
+): Promise<{ success: boolean; error?: string }> {
+  const parsed = changePasswordSchema.pick({ newPassword: true }).safeParse({ newPassword: password });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "密碼格式不正確" };
+  }
+
+  return applyPasswordChange(adapter, parsed.data.newPassword);
+}
+
+async function applyPasswordChange(
+  adapter: AccountSecurityAdapter,
+  newPassword: string,
+): Promise<{ success: boolean; error?: string }> {
+  const { error: updateError } = await adapter.updatePassword(newPassword);
   if (updateError) {
     return { success: false, error: PASSWORD_UPDATE_ERRORS[updateError.code ?? ""] ?? "密碼更新失敗，請稍後再試" };
   }
