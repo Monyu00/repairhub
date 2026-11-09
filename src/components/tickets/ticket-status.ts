@@ -13,19 +13,19 @@ const PRESENTATION_BY_STATUS: Record<TicketStatus, TicketStatusPresentation> = {
   pending: {
     label: "待處理",
     icon: ClockIcon,
-    dotClass: "bg-amber-500",
+    dotClass: "bg-warning",
     badgeVariant: "warning",
   },
   in_progress: {
     label: "維修中",
     icon: WrenchIcon,
-    dotClass: "bg-blue-500 animate-pulse motion-reduce:animate-none",
+    dotClass: "bg-info animate-pulse motion-reduce:animate-none",
     badgeVariant: "info",
   },
   completed: {
     label: "已完工",
     icon: CheckCircle2Icon,
-    dotClass: "bg-emerald-500",
+    dotClass: "bg-success",
     badgeVariant: "success",
   },
   closed: {

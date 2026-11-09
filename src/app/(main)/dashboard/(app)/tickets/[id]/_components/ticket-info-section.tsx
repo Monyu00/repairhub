@@ -79,10 +79,10 @@ export function TicketInfoSection({ ticket, canViewReporter, photos }: TicketInf
 
         {/* Satisfaction Rating (If provided) */}
         {ticket.rating != null && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/20 bg-warning/5 p-3">
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 font-semibold text-foreground text-xs">
-                <Star className="size-4 fill-amber-400 text-amber-500" />
+                <Star className="size-4 fill-warning text-warning" />
                 通報人完工服務評分
               </span>
               <div className="flex items-center gap-0.5">
@@ -92,7 +92,7 @@ export function TicketInfoSection({ ticket, canViewReporter, photos }: TicketInf
                     className={cn(
                       "size-3.5",
                       s <= (ticket.rating ?? 0)
-                        ? "fill-amber-400 text-amber-500"
+                        ? "fill-warning text-warning"
                         : "fill-transparent text-muted-foreground/30",
                     )}
                   />

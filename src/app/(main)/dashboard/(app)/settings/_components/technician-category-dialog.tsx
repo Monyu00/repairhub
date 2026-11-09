@@ -100,7 +100,7 @@ export function TechnicianCategoryDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Wrench className="h-5 w-5 text-muted-foreground " />
               設定技師負責報修類別
             </DialogTitle>
             <DialogDescription>

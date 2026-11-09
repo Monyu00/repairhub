@@ -458,10 +458,10 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">維修技師</CardTitle>
-            <Wrench className="h-4 w-4 text-blue-500" />
+            <Wrench className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-blue-600 dark:text-blue-400">{stats.techCount}</div>
+            <div className="font-bold text-2xl text-muted-foreground ">{stats.techCount}</div>
             <p className="text-muted-foreground text-xs">可被指派工單並進行維修簽核</p>
           </CardContent>
         </Card>
@@ -584,7 +584,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-emerald-600 text-xs hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+                  className="h-8 text-xs text-success-text hover:bg-success/10 dark:hover:bg-success/15"
                   onClick={() => handleBatchToggleClick(true)}
                 >
                   <Power className="mr-1.5 h-3.5 w-3.5" />
@@ -743,7 +743,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                         <TableCell className="hidden lg:table-cell">
                           {!isTech && <span className="text-muted-foreground text-xs">—</span>}
                           {isTech && subscribedCategories.length === 0 && (
-                            <span className="text-amber-600 text-xs italic dark:text-amber-400">未設定類別</span>
+                            <span className="text-warning-text text-xs italic ">未設定類別</span>
                           )}
                           {isTech && subscribedCategories.length > 0 && (
                             <div className="flex max-w-[240px] flex-wrap gap-1">
@@ -787,7 +787,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                               </DropdownMenuItem>
                               {isTech && (
                                 <DropdownMenuItem onClick={() => handleCategoryClick(user)}>
-                                  <Tag className="mr-2 h-4 w-4 text-blue-500" />
+                                  <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
                                   設定負責類別
                                 </DropdownMenuItem>
                               )}
@@ -801,7 +801,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                                 className={
                                   user.isActive
                                     ? "text-destructive focus:text-destructive"
-                                    : "text-emerald-600 focus:text-emerald-600 dark:text-emerald-400"
+                                    : "text-success-text focus:text-success-text "
                                 }
                               >
                                 {user.isActive ? (

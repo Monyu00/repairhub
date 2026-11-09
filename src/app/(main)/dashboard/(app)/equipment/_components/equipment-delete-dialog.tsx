@@ -85,7 +85,7 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
                 </div>
               )}
               {!isChecking && ticketCount > 0 && (
-                <div className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 text-xs dark:text-amber-400">
+                <div className="flex items-start gap-2 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <div>
                     <span className="font-semibold">警告：</span>此設備已有 {ticketCount} 筆歷史報修單引用。

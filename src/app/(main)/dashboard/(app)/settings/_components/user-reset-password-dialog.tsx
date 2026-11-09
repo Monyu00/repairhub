@@ -98,7 +98,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
         {isSuccess ? (
           <div>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <DialogTitle className="flex items-center gap-2 text-success-text ">
                 <CheckCircle2 className="h-5 w-5" />
                 密碼重設成功
               </DialogTitle>
@@ -114,7 +114,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                   <span className="select-all truncate">{savedPassword}</span>
                   <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyPassword} title="複製密碼">
                     {copiedPassword ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                      <Check className="h-3.5 w-3.5 text-success-text" />
                     ) : (
                       <Copy className="h-3.5 w-3.5" />
                     )}
@@ -122,7 +122,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-800 text-xs dark:text-amber-300">
+              <div className="flex items-start gap-2.5 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>請複製並提供新密碼給該使用者，關閉後將無法再次檢視此明文密碼。</span>
               </div>

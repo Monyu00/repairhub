@@ -92,7 +92,7 @@ export function QRCard({ item }: QRCardProps) {
                 className="size-7 rounded-md bg-background/80 backdrop-blur-xs hover:bg-muted"
                 aria-label="複製報修連結"
               >
-                {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                {copied ? <Check className="size-3.5 text-success-text" /> : <Copy className="size-3.5" />}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">複製報修連結</TooltipContent>

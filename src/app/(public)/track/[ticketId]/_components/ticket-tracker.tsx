@@ -84,7 +84,7 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
           {/* Rating display on closed ticket */}
           {ticket.status === "closed" && rating != null && (
             <div className="p-5 sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/20 bg-warning/5 p-3.5">
                 <div className="space-y-1">
                   <span className="font-semibold text-foreground text-xs">通報人完工服務評分</span>
                   <div className="flex items-center gap-1">
@@ -93,7 +93,7 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
                         key={s}
                         className={cn(
                           "size-4",
-                          s <= rating ? "fill-amber-400 text-amber-500" : "fill-transparent text-muted-foreground/30",
+                          s <= rating ? "fill-warning text-warning" : "fill-transparent text-muted-foreground/30",
                         )}
                       />
                     ))}

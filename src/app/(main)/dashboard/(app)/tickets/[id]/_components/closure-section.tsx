@@ -50,9 +50,9 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
   };
 
   return (
-    <Card className="border-emerald-500/30 bg-emerald-500/5 shadow-2xs dark:bg-emerald-950/10">
-      <CardHeader className="border-emerald-500/20 border-b pb-3">
-        <CardTitle className="flex items-center gap-2 font-semibold text-base text-emerald-700 dark:text-emerald-400">
+    <Card className="border-success/30 bg-success/5 shadow-2xs dark:bg-success/10">
+      <CardHeader className="border-success/20 border-b pb-3">
+        <CardTitle className="flex items-center gap-2 font-semibold text-base text-success-text ">
           <CheckCircle2 className="size-4" />
           維修完工與提交結案
         </CardTitle>
@@ -63,7 +63,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between font-semibold text-foreground text-xs">
               <span className="flex items-center gap-1.5">
-                <Upload className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                <Upload className="size-3.5 text-success-text " />
                 完工照片上傳
                 <span className="text-destructive">*</span>
               </span>
@@ -107,7 +107,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
             <Button
               type="submit"
               variant="default"
-              className="gap-2 bg-emerald-600 font-medium text-white shadow-xs hover:bg-emerald-700"
+              className="gap-2 bg-success font-medium text-success-foreground shadow-xs hover:bg-success/80"
               disabled={isSubmitting}
             >
               {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}

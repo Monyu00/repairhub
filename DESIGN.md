@@ -15,6 +15,15 @@ colors:
   accent: "oklch(0.97 0 0)"
   accent-foreground: "oklch(0.205 0 0)"
   destructive: "oklch(0.577 0.245 27.325)"
+  success: "oklch(0.596 0.145 163.225)"
+  success-foreground: "oklch(1 0 0)"
+  success-text: "oklch(0.508 0.118 165.612)"
+  warning: "oklch(0.666 0.179 58.318)"
+  warning-foreground: "oklch(0.205 0 0)"
+  warning-text: "oklch(0.555 0.163 48.998)"
+  info: "oklch(0.546 0.245 262.881)"
+  info-foreground: "oklch(1 0 0)"
+  info-text: "oklch(0.488 0.243 264.376)"
   border: "oklch(0.922 0 0)"
   input: "oklch(0.922 0 0)"
   ring: "oklch(0.708 0 0)"
@@ -137,6 +146,11 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 ### Destructive
 - **Signal Crimson (信號赤紅)** (`oklch(0.577 0.245 27.325)` / Dark: `oklch(0.704 0.191 22.216)`): 緊急通報、設備停機故障、退件重開單及危險刪除動作。
 
+### Status
+- **Success** (`oklch(0.596 0.145 163.225)`): 已完工、保固中與成功確認；`success-text` 用於淡色狀態底上的文字。
+- **Warning** (`oklch(0.666 0.179 58.318)`): 待處理、保固過期與不可逆操作提醒；實心底使用黑色 `warning-foreground`。
+- **Info** (`oklch(0.546 0.245 262.881)`): 維修中與資訊性標籤；`info-text` 用於淡色狀態底上的文字。
+
 ### Named Rules
 **The Ink and Signal Rule.** 全站介面除基礎灰階階調外，飽和彩色僅限於明確的工單狀態指示（如信號赤紅代表緊急/故障），嚴禁在非狀態性元件上添加裝飾性彩色背景。
 
@@ -218,7 +232,7 @@ RepairHub 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴
 ### Status Badges
 - **Shape:** 全圓膠囊狀 (`rounded-4xl`)。
 - **規格:** 固定高度 20px (`h-5 px-2 py-0.5 text-xs font-medium`)。
-- **語意樣式:** 支援 `default` (碳墨主色), `secondary` (淺灰中立), `destructive` (警示赤紅), `outline` (細線空心)。
+- **語意樣式:** 支援 `default` (碳墨主色), `secondary` (淺灰中立), `destructive` (警示赤紅), `success` (成功), `warning` (警示), `info` (資訊), `outline` (細線空心)。
 
 ### Navigation / Sidebar
 - **結構:** 左側導覽列支援標準與收合圖示模式（Collapsible icon mode）。
@@ -237,5 +251,5 @@ RepairHub 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴
 - **Don't** 寫死任何非主題色彩碼（如 `#2563eb`、`bg-blue-600` 或任意 OKLCH 常數）。
 - **Don't** 使用大半徑高模糊的擴散陰影（如 `shadow-2xl`），破壞平面層疊與公約設計的俐落質感。
 - **Don't** 將操作按鈕設定為全圓膠囊形（Pill shape），造成控制項與狀態標籤的認知混淆。
-- **Don't** 隨意修改 `src/components/ui/` 核心組件代碼，保持 shadcn 組件庫原汁原味。
+- **Don't** 隨意修改 `src/components/ui/` 核心組件代碼，保持 shadcn 組件庫原汁原味；唯一例外是專案明確擴充 Badge 狀態 variants 時，可更新 `badge.tsx`。
 - **Don't** 在無狀態意義的卡片或容器上任意疊加飽和色彩背景。

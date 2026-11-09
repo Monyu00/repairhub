@@ -196,7 +196,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                       </Button>
                       <Button
                         size="sm"
-                        className="h-7 bg-emerald-600 text-white text-xs hover:bg-emerald-700"
+                        className="h-7 bg-success text-success-foreground text-xs hover:bg-success/80"
                         onClick={() => openDialog("confirm", ticket.id)}
                       >
                         <CheckCircle2 className="mr-1 size-3" />
@@ -269,7 +269,9 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
               size="sm"
               disabled={isPending || !captchaToken || (activeDialog?.type === "reopen" && !feedback.trim())}
               onClick={handleAction}
-              className={activeDialog?.type === "confirm" ? "bg-emerald-600 text-white hover:bg-emerald-700" : ""}
+              className={
+                activeDialog?.type === "confirm" ? "bg-success text-success-foreground hover:bg-success/80" : ""
+              }
             >
               {isPending && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
               {activeDialog?.type === "confirm" ? "確認結案" : "送出反饋"}
