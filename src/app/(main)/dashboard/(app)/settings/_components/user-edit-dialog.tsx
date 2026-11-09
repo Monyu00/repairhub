@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
-import { Loader2, ShieldCheck, User, Wrench } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { UserItem } from "../_actions/user-actions";
+import { UserRoleOption } from "./user-role-option";
 
 interface UserEditDialogProps {
   open: boolean;
@@ -138,22 +139,13 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                      <span>系統管理者 (Admin)</span>
-                    </div>
+                    <UserRoleOption userRole="admin" />
                   </SelectItem>
                   <SelectItem value="technician">
-                    <div className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4 text-muted-foreground " />
-                      <span>維修技師 (Technician)</span>
-                    </div>
+                    <UserRoleOption userRole="technician" />
                   </SelectItem>
                   <SelectItem value="user">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <span>一般使用者 (User)</span>
-                    </div>
+                    <UserRoleOption userRole="user" />
                   </SelectItem>
                 </SelectContent>
               </Select>

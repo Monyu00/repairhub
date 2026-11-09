@@ -25,7 +25,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
           <Link
             href={`/dashboard/tickets/${row.original.id}`}
             aria-label={`查看報修單 ${id.slice(0, 8)}`}
-            className="font-mono font-semibold text-primary text-xs relative z-10"
+            className="font-mono font-semibold text-primary text-xs relative z-10 focus-visible:ring-2 focus-visible:ring-ring"
           >
             #{id.slice(0, 8)}
           </Link>

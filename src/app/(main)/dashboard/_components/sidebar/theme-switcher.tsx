@@ -25,18 +25,16 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
     })),
   );
 
-  const cycleTheme = () => {
-    const currentIndex = THEME_CYCLE.indexOf(themeMode);
-    const nextTheme = THEME_CYCLE[(currentIndex + 1) % THEME_CYCLE.length];
+  const nextTheme = THEME_CYCLE[(THEME_CYCLE.indexOf(themeMode) + 1) % THEME_CYCLE.length];
 
+  const cycleTheme = () => {
     setPreference("theme_mode", nextTheme);
   };
 
-  const nextTheme = THEME_CYCLE[(THEME_CYCLE.indexOf(themeMode) + 1) % THEME_CYCLE.length];
   const label = `目前為${THEME_LABELS[themeMode]}，切換為${THEME_LABELS[nextTheme]}`;
 
   return (
-    <Button size="icon" onClick={cycleTheme} aria-label={label} title={label} className={className}>
+    <Button size="icon" onClick={cycleTheme} aria-label={label} className={className}>
       {/* SYSTEM */}
       <Monitor aria-hidden="true" className="hidden [html[data-theme-mode=system]_&]:block" />
 
