@@ -15,7 +15,10 @@ muted: "oklch(0.97 0 0)"
 muted-foreground: "oklch(0.556 0 0)"
 accent: "oklch(0.97 0 0)"
 accent-foreground: "oklch(0.205 0 0)"
+popover: "oklch(1 0 0)"
+popover-foreground: "oklch(0.145 0 0)"
 destructive: "oklch(0.577 0.245 27.325)"
+destructive-foreground: "oklch(0.985 0 0)"
 success: "oklch(0.596 0.145 163.225)"
 success-foreground: "oklch(1 0 0)"
 success-text: "oklch(0.508 0.118 165.612)"
@@ -28,11 +31,19 @@ info-text: "oklch(0.488 0.243 264.376)"
 border: "oklch(0.922 0 0)"
 input: "oklch(0.922 0 0)"
 ring: "oklch(0.708 0 0)"
+chart-1: "oklch(0.87 0 0)"
+chart-2: "oklch(0.556 0 0)"
+chart-3: "oklch(0.439 0 0)"
+chart-4: "oklch(0.371 0 0)"
+chart-5: "oklch(0.269 0 0)"
 sidebar: "oklch(0.985 0 0)"
 sidebar-foreground: "oklch(0.145 0 0)"
 sidebar-primary: "oklch(0.205 0 0)"
 sidebar-primary-foreground: "oklch(0.985 0 0)"
+sidebar-accent: "oklch(0.97 0 0)"
+sidebar-accent-foreground: "oklch(0.205 0 0)"
 sidebar-border: "oklch(0.922 0 0)"
+sidebar-ring: "oklch(0.708 0 0)"
 typography:
 display:
 fontFamily: "var(--font-geist), system-ui, sans-serif"
@@ -61,12 +72,19 @@ fontFamily: "var(--font-geist), system-ui, sans-serif"
 fontSize: "0.75rem"
 fontWeight: 500
 lineHeight: "1rem"
+mono:
+fontFamily: "var(--font-geist-mono), ui-monospace, monospace"
+fontSize: "0.75rem"
+fontWeight: 500
+lineHeight: "1rem"
 rounded:
 sm: "6px"
 md: "8px"
 lg: "10px"
 xl: "14px"
 2xl: "18px"
+3xl: "22px"
+4xl: "26px"
 pill: "9999px"
 spacing:
 xs: "4px"
@@ -107,11 +125,23 @@ rounded: "{rounded.lg}"
 padding: "4px 10px"
 height: "32px"
 badge:
-backgroundColor: "{colors.primary}"
-textColor: "{colors.primary-foreground}"
-rounded: "{rounded.pill}"
-padding: "2px 8px"
+backgroundColor: "oklch(0.205 0 0 / 10%)"
+textColor: "{colors.primary}"
+rounded: "{rounded.4xl}"
+padding: "0 8px"
 height: "20px"
+button-destructive:
+backgroundColor: "oklch(0.577 0.245 27.325 / 10%)"
+textColor: "{colors.destructive}"
+rounded: "{rounded.lg}"
+padding: "0 10px"
+height: "32px"
+sidebar-nav-item:
+backgroundColor: "transparent"
+textColor: "{colors.sidebar-foreground}"
+rounded: "{rounded.md}"
+padding: "0 8px"
+height: "32px"
 ---
 
 # Design System: RepairHub
@@ -145,6 +175,7 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 - **Muted Dust (次要淺灰)** (`oklch(0.97 0 0)` / Dark: `oklch(0.269 0 0)`): 次級容器底色、次要按鈕背景與 hover 狀態微反饋。
 - **Technical Slate (輔助灰階)** (`oklch(0.556 0 0)` / Dark: `oklch(0.708 0 0)`): 次要描述、欄位說明文字與工單時間戳記。
 - **Hairline Border (規律細線)** (`oklch(0.922 0 0)` / Dark: `oklch(1 0 0 / 10%)`): 分割線、表單外框與元件結構輪廓。
+- **Paper Popover (浮層紙面)** (`oklch(1 0 0)` / Dark: `oklch(0.205 0 0)`): 選單、對話框與浮出面板的表面色。
 
 ### Destructive
 
@@ -155,6 +186,10 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 - **Success** (`oklch(0.596 0.145 163.225)`): 已完工、保固中與成功確認；`success-text` 用於淡色狀態底上的文字。
 - **Warning** (`oklch(0.666 0.179 58.318)`): 待處理、保固過期與不可逆操作提醒；實心底使用黑色 `warning-foreground`。
 - **Info** (`oklch(0.546 0.245 262.881)`): 維修中與資訊性標籤；`info-text` 用於淡色狀態底上的文字。
+
+### Chart
+
+- **Chart Scale (灰階資料階調)** (`chart-1` 到 `chart-5`，由 `oklch(0.87 0 0)` 递降至 `oklch(0.269 0 0)`): 統計圖表的序列色階，用資料對比取代裝飾性彩色。
 
 ### Named Rules
 
@@ -168,7 +203,7 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 **Body Font:** Geist (`var(--font-geist)`, fallback system-ui, sans-serif)
 **Label/Mono Font:** Geist Mono (`var(--font-geist-mono)`, fallback monospace)
 
-**Character:** 現代俐落的無襯線字型 Geist 搭配高辨識度的 Geist Mono，展現工程工具的嚴謹度與易讀性。系統支援透過 `data-font` 屬性動態掛載 18 種字體族群。
+**Character:** 現代俐落的無襯線字型 Geist 搭配高辨識度的 Geist Mono，展現工程工具的嚴謹度與易讀性。`font-heading` 是 `font-sans` 的語意別名，兩者共用同一套 Geist 字體；系統另支援透過 `data-font` 屬性動態掛載 18 種字體族群。
 
 ### Hierarchy
 
@@ -177,6 +212,7 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 - **Title** (600 SemiBold, 1rem / 16px, line-height 1.5rem): 卡片標題、表頭欄位名稱、快速導航區塊標題。
 - **Body** (400 Regular, 0.875rem / 14px, line-height 1.25rem): 標準說明內文、表格資料列、表單輸入內容。
 - **Label** (500 Medium, 0.75rem / 12px, line-height 1rem): 狀態膠囊 Badge、輔助詮釋文字、時間戳記。
+- **Mono** (500 Medium, 0.75rem / 12px, line-height 1rem): 工單編號、地點代碼與時間戳記的等寬對齊。
 
 ### Named Rules
 
@@ -190,6 +226,7 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 - **卡片節奏 (Card Spacing):** 標準卡片內距使用 `--card-spacing: 16px` (`p-4` 或 `p-6`)，緊湊型卡片使用 `12px` (`data-size="sm"`: `p-3`)。
 - **操作列排版 (Action Row):** 表格與列表頂部操作列採用 `flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4`，確保行動端自動折疊、桌面端橫向展開。
 - **高密度管理格線 (Admin Grid):** 後台看板與報表卡片採用 2 到 3 欄等寬網格 (`grid gap-4 sm:grid-cols-2 lg:grid-cols-3`)，保持一致的視覺密度。
+- **側欄節奏 (Sidebar Width):** 桌面側欄預設 16rem，收合圖示模式 3rem，行動抽屜 18rem；主內容維持可預期的閱讀寬度與高資訊密度。
 
 ## Elevation & Depth
 
@@ -207,10 +244,10 @@ RepairHub 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴
 
 ## Shapes
 
-- **基礎圓角 (Base Radius):** 預設值為 `0.625rem` (10px)。
+- **基礎圓角 (Base Radius):** 預設值為 `0.625rem` (10px)，並由此推導出 6/8/10/14/18/22/26px 的圓角階梯。
 - **按鈕與表單 (Button & Input):** `rounded-lg` (10px)，緊湊規格使用 `rounded-[min(var(--radius-md),10px)]` (8px)。
 - **容器卡片 (Card & Dialog):** `rounded-xl` (14px)，外框與子元素圖片圓角聯動適配。
-- **狀態標籤 (Badges & Pills):** `rounded-4xl` (全圓形膠囊 / 9999px)。
+- **狀態標籤 (Badges & Pills):** `rounded-4xl` 預設為 26px；在 20px 高的 Badge 上實際呈現為全圓膠囊。真正需要幾何正圓的頭像、開關與狀態點才使用 `rounded-full`。
 
 ### Named Rules
 
@@ -247,12 +284,14 @@ RepairHub 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴
 
 - **Shape:** 全圓膠囊狀 (`rounded-4xl`)。
 - **規格:** 固定高度 20px (`h-5 px-2 py-0.5 text-xs font-medium`)。
-- **語意樣式:** 支援 `default` (碳墨主色), `secondary` (淺灰中立), `destructive` (警示赤紅), `success` (成功), `warning` (警示), `info` (資訊), `outline` (細線空心)。
+- **語意樣式:** 狀態用 10% 到 20% 的淡色底搭配對應語意文字色；`default` 是碳墨淡底、`secondary` 是次級灰底、`destructive` 是赤紅淡底、`success` / `warning` / `info` 分別使用各自的淡色狀態底。
+- **Focus:** 聚焦時顯示 3px 的 `ring-ring/50` 焦點環。
 
 ### Navigation / Sidebar
 
-- **結構:** 左側導覽列支援標準與收合圖示模式（Collapsible icon mode）。
+- **結構:** 左側導覽列支援標準、收合圖示、浮動與嵌入式模式；行動端轉為 18rem 抽屜。
 - **樣式:** 獨立語意變數 `--sidebar`、`--sidebar-border` 與 `--sidebar-accent`，與主工作區形成乾淨的邊界切割。
+- **狀態:** 選單項目 hover / active 使用 `sidebar-accent`，焦點使用 `focus-visible:ring-2`。
 
 ## Do's and Don'ts
 
