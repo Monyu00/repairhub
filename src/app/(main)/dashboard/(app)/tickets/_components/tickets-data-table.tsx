@@ -249,7 +249,7 @@ export function TicketsDataTable({
           <span>全校報修單據</span>
         </TabsTrigger>
         <TabsTrigger value="pending" className="gap-1.5 px-3 text-xs">
-          <Zap className="size-3.5 fill-amber-500/20 text-amber-500" />
+          <Zap className="size-3.5 fill-warning/20 text-warning" />
           <span>待處理接單 (即時)</span>
         </TabsTrigger>
       </TabsList>

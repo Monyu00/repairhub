@@ -145,7 +145,7 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
                   </SelectItem>
                   <SelectItem value="technician">
                     <div className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <Wrench className="h-4 w-4 text-muted-foreground " />
                       <span>維修技師 (Technician)</span>
                     </div>
                   </SelectItem>

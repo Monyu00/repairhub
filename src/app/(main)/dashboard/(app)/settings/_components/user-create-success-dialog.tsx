@@ -62,7 +62,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+          <DialogTitle className="flex items-center gap-2 text-success-text ">
             <CheckCircle2 className="h-5 w-5" />
             使用者帳號建立成功
           </DialogTitle>
@@ -76,7 +76,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
               <div className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 font-mono text-sm">
                 <span className="select-all truncate">{email}</span>
                 <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyEmail} title="複製 Email">
-                  {copiedEmail ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedEmail ? <Check className="h-3.5 w-3.5 text-success-text" /> : <Copy className="h-3.5 w-3.5" />}
                 </Button>
               </div>
             </div>
@@ -87,7 +87,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
                 <span className="select-all truncate">{password}</span>
                 <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyPassword} title="複製密碼">
                   {copiedPassword ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    <Check className="h-3.5 w-3.5 text-success-text" />
                   ) : (
                     <Copy className="h-3.5 w-3.5" />
                   )}
@@ -96,7 +96,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
             </div>
           </div>
 
-          <div className="flex items-start gap-2.5 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-800 text-xs dark:text-amber-300">
+          <div className="flex items-start gap-2.5 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               <strong>重要提示：</strong>

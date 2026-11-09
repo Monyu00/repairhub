@@ -105,7 +105,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 border-amber-500/30 text-amber-700 text-xs hover:bg-amber-500/10 dark:text-amber-400"
+          className="gap-1.5 border-warning/30 text-warning-text text-xs hover:bg-warning/10 "
           onClick={() => setReturnOpen(true)}
         >
           <RotateCcw className="size-3.5" />
@@ -174,7 +174,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
       <AlertDialog open={returnOpen} onOpenChange={setReturnOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+            <AlertDialogTitle className="flex items-center gap-2 text-warning-text ">
               <AlertTriangle className="size-5" />
               確認將單據退回待處理？
             </AlertDialogTitle>
@@ -190,7 +190,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
                 void handleReturnToPending();
               }}
               disabled={isReturning}
-              className="gap-1.5 bg-amber-600 text-white hover:bg-amber-700"
+              className="gap-1.5 bg-warning text-warning-foreground hover:bg-warning/80"
             >
               {isReturning && <Loader2 className="size-3.5 animate-spin" />}
               <span>確認退回</span>

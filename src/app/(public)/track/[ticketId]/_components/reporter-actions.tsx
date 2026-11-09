@@ -143,8 +143,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                     className={cn(
                       "size-6 transition-colors",
                       isFilled
-                        ? "fill-amber-400 text-amber-500"
-                        : "fill-transparent text-muted-foreground/30 group-hover:text-amber-400/70",
+                        ? "fill-warning text-warning"
+                        : "fill-transparent text-muted-foreground/30 group-hover:text-warning-text",
                     )}
                   />
                 </button>
@@ -185,7 +185,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
           {success ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <CheckCircle2Icon className="size-10 text-emerald-500" />
+              <CheckCircle2Icon className="size-10 text-success-text" />
               <p className="font-medium text-foreground">
                 {isConfirm ? "已確認修復，報修單已結案" : "已回報問題，工單已退回維修中"}
               </p>
@@ -198,7 +198,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                   <span className="text-muted-foreground">服務評分</span>
                   {rating ? (
                     <span className="flex items-center gap-1 font-medium text-foreground">
-                      <StarIcon className="size-3.5 fill-amber-400 text-amber-500" />
+                      <StarIcon className="size-3.5 fill-warning text-warning" />
                       {rating} 星（{RATING_LABELS[rating]}）
                     </span>
                   ) : (

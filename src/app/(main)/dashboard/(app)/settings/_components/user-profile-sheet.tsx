@@ -149,7 +149,7 @@ export function UserProfileSheet({
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              className="w-full text-info-text hover:text-info-text "
               onClick={() => onManageCategories(user)}
             >
               <Tag className="mr-1.5 h-3.5 w-3.5" />
@@ -235,7 +235,7 @@ export function UserProfileSheet({
                 ))}
               </div>
             ) : (
-              <p className="rounded-md border border-amber-500/20 bg-amber-500/10 p-2.5 text-amber-600 text-xs italic dark:text-amber-400">
+              <p className="rounded-md border border-warning/20 bg-warning/10 p-2.5 text-warning-text text-xs italic ">
                 尚未指定任何負責之報修類別，請點擊上方按鈕進行指派。
               </p>
             )}
@@ -271,21 +271,17 @@ export function UserProfileSheet({
 
                 <div className="grid grid-cols-3 gap-2">
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-amber-600 text-lg dark:text-amber-400">
-                      {stats.reporterStats.pending}
-                    </div>
+                    <div className="font-bold text-warning-text text-lg ">{stats.reporterStats.pending}</div>
                     <div className="text-muted-foreground text-xs">待處理</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-blue-600 text-lg dark:text-blue-400">
-                      {stats.reporterStats.inProgress}
-                    </div>
+                    <div className="font-bold text-info-text text-lg ">{stats.reporterStats.inProgress}</div>
                     <div className="text-muted-foreground text-xs">處理中</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-emerald-600 text-lg dark:text-emerald-400">
+                    <div className="font-bold text-success-text text-lg ">
                       {stats.reporterStats.completed + stats.reporterStats.closed}
                     </div>
                     <div className="text-muted-foreground text-xs">已完成/結案</div>
@@ -298,24 +294,22 @@ export function UserProfileSheet({
                 <div>
                   <div className="mb-2 flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs">
-                      <Wrench className="h-3.5 w-3.5 text-blue-500" />
+                      <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
                       技師工單指派與處置
                     </span>
-                    <span className="font-bold text-blue-600 text-xs dark:text-blue-400">
+                    <span className="font-bold text-info-text text-xs ">
                       {stats.technicianStats.totalAssigned} 筆指派
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <Card className="border-blue-200 bg-blue-500/5 p-2.5 text-center shadow-2xs dark:border-blue-900/40">
-                      <div className="font-bold text-blue-600 text-lg dark:text-blue-400">
-                        {stats.technicianStats.inProgress}
-                      </div>
+                    <Card className="border-info/20 bg-info/5 p-2.5 text-center shadow-2xs dark:border-info/30">
+                      <div className="font-bold text-info-text text-lg ">{stats.technicianStats.inProgress}</div>
                       <div className="text-muted-foreground text-xs">目前處置中工單</div>
                     </Card>
 
-                    <Card className="border-emerald-200 bg-emerald-500/5 p-2.5 text-center shadow-2xs dark:border-emerald-900/40">
-                      <div className="font-bold text-emerald-600 text-lg dark:text-emerald-400">
+                    <Card className="border-success/20 bg-success/5 p-2.5 text-center shadow-2xs dark:border-success/30">
+                      <div className="font-bold text-success-text text-lg ">
                         {stats.technicianStats.completedOrClosed}
                       </div>
                       <div className="text-muted-foreground text-xs">已修復完成工單</div>
