@@ -12,12 +12,14 @@
 
 ## 核心能力
 
-- **零阻力報修**：公開報修表與 QR Code 綁定地點／空間／設備，免登入也能在數十秒內完成通報。
+- **零阻力報修**：公開報修表與 QR Code 綁定地點／空間／設備，免登入也能在數十秒內完成通報；匿名寫入由 Cloudflare Turnstile 保護。
 - **地點與設備兩級管理**：地點（Building）與空間（Space）組成場域樹，設備（Equipment）可各自綁定 QR Code 並累積維修履歷。
 - **批次匯入**：管理員可用 XLSX／CSV 批次建立地點、設備與使用者；已存在記錄會略過，並逐列回報建立、略過與失敗結果。匯入或重設的使用者帳號以完整 Email 作為預設密碼，必須先改密碼才能使用管理後台。
+- 新增與重設的密碼最少 8 碼。
 - **工單生命週期閉環**：接單、完工（須附照片與維修說明）、報修者確認或七日自動關單、未完成重開單（Reopen）。
-- **Email 通知**：新工單與狀態變更由資料庫觸發器派送，收件人為報修者與已訂閱分類的技師；失敗只記錄錯誤與重試時間，不中斷工單寫入。
+- **Email 通知**：新工單與狀態變更由資料庫觸發器派送，收件人為報修者與已訂閱分類且未關閉偏好的技師；失敗只記錄錯誤與重試時間，不中斷工單寫入。
 - **管理後台**：待修佇列、工單詳情與時間軸、維修紀錄、QR Code 批次產生與匯出、Excel／PDF 報表、滿意度分析、公告與系統設定。
+- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、調整 Email 通知偏好與刪除帳號。
 - **響應式與主題**：手機現場操作、桌面管理中心兩種密度；淺色／深色模式與主題預設檔，全站使用語意化 CSS 變數。
 
 ## 技術棧
@@ -63,6 +65,8 @@ npm run dev
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 專案 URL（瀏覽器可見） |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 瀏覽器用的 publishable key |
 | `SUPABASE_SECRET_KEY` | 僅伺服端使用的 secret key，絕不可加 `NEXT_PUBLIC_` 前綴 |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile 網站金鑰 |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile 驗證金鑰，Supabase Auth CAPTCHA 與應用伺服端須相同 |
 
 Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example](supabase/functions/.env.example)）：
 
@@ -82,6 +86,7 @@ Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repai
 | `/report` | 報修表單（可選地點、空間、設備，支援上傳照片） | 公開 |
 | `/track` | 報修進度查詢（免登入追蹤） | 公開 |
 | `/login`、`/forgot-password`、`/reset-password` | 帳號流程 | 公開 |
+| `/check-email` | 註冊後等待信箱驗證 | 公開 |
 | `/dashboard` | 總覽：待修數量、公告、快速入口 | 登入 |
 | `/dashboard/tickets`、`/dashboard/tickets/[id]` | 待修佇列與工單詳情（接單、完工、退回、取消） | 登入 |
 | `/dashboard/my-tickets` | 我通報的工單 | 登入 |
@@ -139,8 +144,6 @@ Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/noti
 
 ## 文件
 
-### 文件
-
 - [docs/notifications.md](docs/notifications.md)：Email 通知基礎、必要 secrets 與正式環境佈建
 - [PRODUCT.md](PRODUCT.md)：產品定位、使用者與能力邊界
 - [GLOSSARY.md](GLOSSARY.md)：領域詞彙與禁用詞
@@ -156,3 +159,5 @@ Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/noti
 - [0005-notification-dispatch-failures-do-not-block-tickets.md](docs/adr/0005-notification-dispatch-failures-do-not-block-tickets.md)：派送失敗不阻斷工單
 - [0006-open-registration-and-login-to-any-email-domain.md](docs/adr/0006-open-registration-and-login-to-any-email-domain.md)：開放任意網域註冊登入
 - [0007-bulk-import-forces-password-reset.md](docs/adr/0007-bulk-import-forces-password-reset.md)：批次匯入使用者的預設密碼需強制重設
+- [0008-cloudflare-turnstile-for-anonymous-writes.md](docs/adr/0008-cloudflare-turnstile-for-anonymous-writes.md)：匿名寫入用 Cloudflare Turnstile 保護
+- [0009-notification-preferences-on-profiles.md](docs/adr/0009-notification-preferences-on-profiles.md)：通知偏好存在個人檔案
