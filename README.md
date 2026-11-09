@@ -24,14 +24,14 @@
 
 ## 技術棧
 
-| 層級 | 使用技術 |
-| --- | --- |
-| 前端框架 | Next.js 16（App Router）、React 19、TypeScript strict |
-| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react |
-| 後端服務 | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault |
-| 背景工作 | Deno Edge Function `send-ticket-email`，透過 Resend 寄信 |
-| 資料視覺 | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode |
-| 工具鏈 | Biome、husky + lint-staged、tsx |
+| 層級       | 使用技術                                                                |
+| ---------- | ----------------------------------------------------------------------- |
+| 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                   |
+| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                |
+| 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault |
+| 背景工作   | Deno Edge Function `send-ticket-email`，透過 Resend 寄信                |
+| 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                        |
+| 工具鏈     | Biome、husky + lint-staged、tsx                                         |
 
 本地元件放在 `src/components/ui/` 與 `src/components/calendar/`，任何客製化都在使用處進行，不修改這些目錄。
 
@@ -46,13 +46,13 @@ npm run dev
 
 常用指令：
 
-| 指令 | 用途 |
-| --- | --- |
-| `npm run dev` | 啟動開發伺服器 |
-| `npm run build` | 產出正式版本（使用 `--webpack`） |
-| `npm run lint` / `npm run check` | Biome 檢查 |
-| `npm run check:fix` / `npm run format` | 自動修正與排版 |
-| `npm run generate:presets` | 重新產生主題預設檔 |
+| 指令                                   | 用途                             |
+| -------------------------------------- | -------------------------------- |
+| `npm run dev`                          | 啟動開發伺服器                   |
+| `npm run build`                        | 產出正式版本（使用 `--webpack`） |
+| `npm run lint` / `npm run check`       | Biome 檢查                       |
+| `npm run check:fix` / `npm run format` | 自動修正與排版                   |
+| `npm run generate:presets`             | 重新產生主題預設檔               |
 
 資料庫 migration 依時間排序放在 `supabase/migrations/`，套用方式與 Email 通知的正式環境佈建流程見 [docs/notifications.md](docs/notifications.md)。
 
@@ -60,42 +60,42 @@ npm run dev
 
 應用程式（`.env.local`，參考 [.env.local.example](.env.local.example)）：
 
-| 變數 | 用途 |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 專案 URL（瀏覽器可見） |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 瀏覽器用的 publishable key |
-| `SUPABASE_SECRET_KEY` | 僅伺服端使用的 secret key，絕不可加 `NEXT_PUBLIC_` 前綴 |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile 網站金鑰 |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile 驗證金鑰，Supabase Auth CAPTCHA 與應用伺服端須相同 |
+| 變數                                   | 用途                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase 專案 URL（瀏覽器可見）                                         |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 瀏覽器用的 publishable key                                              |
+| `SUPABASE_SECRET_KEY`                  | 僅伺服端使用的 secret key，絕不可加 `NEXT_PUBLIC_` 前綴                 |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`       | Cloudflare Turnstile 網站金鑰                                           |
+| `TURNSTILE_SECRET_KEY`                 | Cloudflare Turnstile 驗證金鑰，Supabase Auth CAPTCHA 與應用伺服端須相同 |
 
 Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example](supabase/functions/.env.example)）：
 
-| 變數 | 用途 |
-| --- | --- |
-| `REPAIRHUB_EDGE_FUNCTION_SECRET` | DB 呼叫 Edge Function 的內部密鑰，須與 Vault 值完全相同 |
-| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定 |
-| `APP_BASE_URL` | 郵件中的連結網域 |
+| 變數                                                 | 用途                                                    |
+| ---------------------------------------------------- | ------------------------------------------------------- |
+| `REPAIRHUB_EDGE_FUNCTION_SECRET`                     | DB 呼叫 Edge Function 的內部密鑰，須與 Vault 值完全相同 |
+| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定                                         |
+| `APP_BASE_URL`                                       | 郵件中的連結網域                                        |
 
 Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
 
 ## 畫面結構
 
-| 路徑 | 內容 | 存取 |
-| --- | --- | --- |
-| `/` | 首頁：服務說明與「我要報修」入口 | 公開 |
-| `/report` | 報修表單（可選地點、空間、設備，支援上傳照片） | 公開 |
-| `/track` | 報修進度查詢（免登入追蹤） | 公開 |
-| `/login`、`/forgot-password`、`/reset-password` | 帳號流程 | 公開 |
-| `/check-email` | 註冊後等待信箱驗證 | 公開 |
-| `/dashboard` | 總覽：待修數量、公告、快速入口 | 登入 |
-| `/dashboard/tickets`、`/dashboard/tickets/[id]` | 待修佇列與工單詳情（接單、完工、退回、取消） | 登入 |
-| `/dashboard/my-tickets` | 我通報的工單 | 登入 |
-| `/dashboard/equipment` | 設備與履歷管理（支援 XLSX／CSV 匯入） | 管理員 |
-| `/dashboard/repair-records` | 維修紀錄查詢 | 登入 |
-| `/dashboard/qr-codes` | QR Code 批次產生、列印與匯出 | 管理員 |
-| `/dashboard/reports` | 統計報表（Excel／PDF 匯出、滿意度） | 管理員 |
-| `/dashboard/announcements` | 系統公告管理 | 管理員 |
-| `/dashboard/settings` | 地點、空間、分類、人員與權限設定（支援 XLSX／CSV 匯入） | 管理員 |
+| 路徑                                            | 內容                                                    | 存取   |
+| ----------------------------------------------- | ------------------------------------------------------- | ------ |
+| `/`                                             | 首頁：服務說明與「我要報修」入口                        | 公開   |
+| `/report`                                       | 報修表單（可選地點、空間、設備，支援上傳照片）          | 公開   |
+| `/track`                                        | 報修進度查詢（免登入追蹤）                              | 公開   |
+| `/login`、`/forgot-password`、`/reset-password` | 帳號流程                                                | 公開   |
+| `/check-email`                                  | 註冊後等待信箱驗證                                      | 公開   |
+| `/dashboard`                                    | 總覽：待修數量、公告、快速入口                          | 登入   |
+| `/dashboard/tickets`、`/dashboard/tickets/[id]` | 待修佇列與工單詳情（接單、完工、退回、取消）            | 登入   |
+| `/dashboard/my-tickets`                         | 我通報的工單                                            | 登入   |
+| `/dashboard/equipment`                          | 設備與履歷管理（支援 XLSX／CSV 匯入）                   | 管理員 |
+| `/dashboard/repair-records`                     | 維修紀錄查詢                                            | 登入   |
+| `/dashboard/qr-codes`                           | QR Code 批次產生、列印與匯出                            | 管理員 |
+| `/dashboard/reports`                            | 統計報表（Excel／PDF 匯出、滿意度）                     | 管理員 |
+| `/dashboard/announcements`                      | 系統公告管理                                            | 管理員 |
+| `/dashboard/settings`                           | 地點、空間、分類、人員與權限設定（支援 XLSX／CSV 匯入） | 管理員 |
 
 ## 系統架構
 

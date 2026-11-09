@@ -11,22 +11,22 @@
 
 Public homepage:
 
-| Viewport | TTFB | FCP | LCP | Font Requests | Ticket Prefetches |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Mobile 390x844 | 21.1 ms | 372 ms | 372 ms | 1 | 0 |
-| Desktop 1440x900 | 22.6 ms | 416 ms | 416 ms | 1 | 0 |
+| Viewport         |    TTFB |    FCP |    LCP | Font Requests | Ticket Prefetches |
+| ---------------- | ------: | -----: | -----: | ------------: | ----------------: |
+| Mobile 390x844   | 21.1 ms | 372 ms | 372 ms |             1 |                 0 |
+| Desktop 1440x900 | 22.6 ms | 416 ms | 416 ms |             1 |                 0 |
 
 Dashboard:
 
-| Viewport | TTFB | FCP | LCP | Browser Auth Requests | Browser Profile Requests |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Mobile 390x844 | 21.5 ms | 588 ms | 588 ms | 0 | 0 |
-| Desktop 1440x900 | 21.9 ms | 552 ms | 552 ms | 0 | 0 |
+| Viewport         |    TTFB |    FCP |    LCP | Browser Auth Requests | Browser Profile Requests |
+| ---------------- | ------: | -----: | -----: | --------------------: | -----------------------: |
+| Mobile 390x844   | 21.5 ms | 588 ms | 588 ms |                     0 |                        0 |
+| Desktop 1440x900 | 21.9 ms | 552 ms | 552 ms |                     0 |                        0 |
 
 Reports:
 
-| Viewport | TTFB | FCP | LCP |
-| --- | ---: | ---: | ---: |
+| Viewport         |    TTFB |    FCP |    LCP |
+| ---------------- | ------: | -----: | -----: |
 | Desktop 1440x900 | 21.8 ms | 792 ms | 792 ms |
 
 The public homepage baseline was 22 Font requests and 8 RSC prefetches. Repeated Ticket rows now have `prefetch={false}`; remaining prefetches are `/login` and `/report`, which are primary navigation paths.
