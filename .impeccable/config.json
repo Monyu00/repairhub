@@ -38,27 +38,21 @@
       {
         "rule": "undersized-ui-text",
         "value": "*",
-        "files": [
-          "docs/diagrams/architecture.html"
-        ],
+        "files": ["docs/diagrams/architecture.html"],
         "createdAt": "2026-11-02T01:02:43.444Z",
         "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
       },
       {
         "rule": "undersized-ui-text",
         "value": "*",
-        "files": [
-          "docs/diagrams/ticket-status.html"
-        ],
+        "files": ["docs/diagrams/ticket-status.html"],
         "createdAt": "2026-11-02T01:02:43.555Z",
         "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
       },
       {
         "rule": "undersized-ui-text",
         "value": "*",
-        "files": [
-          "docs/diagrams/notification-pipeline.html"
-        ],
+        "files": ["docs/diagrams/notification-pipeline.html"],
         "createdAt": "2026-11-02T01:02:43.659Z",
         "reason": "Diagram Design doc-inline ramp fixes 7-12px labels inside figures; user confirmed using that skill for diagrams"
       }

@@ -1,8 +1,9 @@
 ---
+
 target: 前台首頁
 total_score: 25
 max_score: 40
-na_heuristics: 
+na_heuristics:
 p0_count: 0
 p1_count: 3
 p2_count: 2
@@ -12,25 +13,26 @@ target_path: "D:\\RepairHub\\src\\app\\(public)\\page.tsx"
 timestamp: 2026-10-17T15-54-39Z
 slug: src-app-public-page-tsx
 ---
+
 ⚠️ DEGRADED: single-context (spawn_agent unavailable in this session)
 
 ## 前台首頁 Critique
 
 ### Design Health Score
 
-| # | Heuristic | Score | Key Issue |
-|---|---|---|---|
-| 1 | Visibility of System Status | 2 | 篩選與搜尋使用 `useTransition`，但 pending 狀態未呈現；慢速網路下不會顯示正在更新。 |
-| 2 | Match System / Real World | 3 | 校園報修用語直覺，但「我要通報報修」語意重複，狀態流程也缺少簡短說明。 |
-| 3 | User Control and Freedom | 3 | 重置、清除、分頁與返回路徑清楚；桌面表格列沒有鍵盤入口。 |
-| 4 | Consistency and Standards | 2 | 手機卡片是可聚焦的 Link，桌面表格列卻只能滑鼠點擊；Tabs 也缺少對應 panel。 |
-| 5 | Error Prevention | 3 | 篩選選項受限，空狀態能引導重設或直接報修。 |
-| 6 | Recognition Rather Than Recall | 3 | 選項大多可見，但三個 Select 沒有可存取名稱，搜尋在手機也沒有可見送出按鈕。 |
-| 7 | Flexibility and Efficiency | 3 | 桌面表格密度、分頁與手機卡片切換有效；尚缺快速狀態入口或常用條件。 |
-| 8 | Aesthetic and Minimalist Design | 3 | 整體乾淨一致，但手機首屏被 Hero、公告與三層篩選占滿，第一筆案件落到約 807px。 |
-| 9 | Error Recovery | 2 | 空狀態良好；查詢失敗沒有獨立錯誤態，使用者可能誤以為只是沒有資料。 |
-| 10 | Help and Documentation | 1 | 沒有狀態圖例、報修流程說明或可即時取得的協助入口。 |
-| **Total** |  | **25/40** | **Acceptable** |
+| #         | Heuristic                       | Score     | Key Issue                                                                           |
+| --------- | ------------------------------- | --------- | ----------------------------------------------------------------------------------- |
+| 1         | Visibility of System Status     | 2         | 篩選與搜尋使用 `useTransition`，但 pending 狀態未呈現；慢速網路下不會顯示正在更新。 |
+| 2         | Match System / Real World       | 3         | 校園報修用語直覺，但「我要通報報修」語意重複，狀態流程也缺少簡短說明。              |
+| 3         | User Control and Freedom        | 3         | 重置、清除、分頁與返回路徑清楚；桌面表格列沒有鍵盤入口。                            |
+| 4         | Consistency and Standards       | 2         | 手機卡片是可聚焦的 Link，桌面表格列卻只能滑鼠點擊；Tabs 也缺少對應 panel。          |
+| 5         | Error Prevention                | 3         | 篩選選項受限，空狀態能引導重設或直接報修。                                          |
+| 6         | Recognition Rather Than Recall  | 3         | 選項大多可見，但三個 Select 沒有可存取名稱，搜尋在手機也沒有可見送出按鈕。          |
+| 7         | Flexibility and Efficiency      | 3         | 桌面表格密度、分頁與手機卡片切換有效；尚缺快速狀態入口或常用條件。                  |
+| 8         | Aesthetic and Minimalist Design | 3         | 整體乾淨一致，但手機首屏被 Hero、公告與三層篩選占滿，第一筆案件落到約 807px。       |
+| 9         | Error Recovery                  | 2         | 空狀態良好；查詢失敗沒有獨立錯誤態，使用者可能誤以為只是沒有資料。                  |
+| 10        | Help and Documentation          | 1         | 沒有狀態圖例、報修流程說明或可即時取得的協助入口。                                  |
+| **Total** |                                 | **25/40** | **Acceptable**                                                                      |
 
 ### Design Specificity Verdict
 
