@@ -31,7 +31,7 @@ const PRESENTATION_BY_STATUS: Record<TicketStatus, TicketStatusPresentation> = {
   closed: {
     label: "已結案",
     icon: ArchiveIcon,
-    dotClass: "bg-zinc-400 dark:bg-zinc-500",
+    dotClass: "bg-muted-foreground/60",
     badgeVariant: "secondary",
   },
   cancelled: {
