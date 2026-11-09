@@ -27,3 +27,12 @@ test("getTicketStatusPresentation uses canonical Ticket status labels", () => {
   assert.equal(getTicketStatusPresentation("closed").label, "已結案");
   assert.equal(getTicketStatusPresentation("cancelled").label, "已取消");
 });
+
+test("getTicketStatusPresentation uses semantic theme tokens", () => {
+  const rawPaletteClass =
+    /\b(?:bg|text|border)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink)-\d{2,3}\b/;
+
+  for (const status of statuses) {
+    assert.doesNotMatch(getTicketStatusPresentation(status).dotClass, rawPaletteClass);
+  }
+});
