@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Calendar, Hand, Loader2, Mail, MapPin, Phone, User } from "lucide-react";
 
@@ -19,24 +19,11 @@ interface PendingTicketCardProps {
 }
 
 export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingTicketCardProps) {
-  const router = useRouter();
   const [isClaiming, setIsClaiming] = useState(false);
 
   const formattedDate = ticket.createdAt ? formatTicketDate(ticket.createdAt) : "-";
 
-  const handleCardClick = () => {
-    router.push(`/dashboard/tickets/${ticket.id}`);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
-      e.preventDefault();
-      handleCardClick();
-    }
-  };
-
-  const handleClaimClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleClaimClick = async () => {
     setIsClaiming(true);
     try {
       await onClaim(ticket.id);
@@ -46,13 +33,12 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
   };
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
-      className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-    >
+    <Card className="group relative cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-within:border-primary/40">
+      <Link
+        href={`/dashboard/tickets/${ticket.id}`}
+        aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
+        className="absolute inset-0 z-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      />
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
@@ -62,7 +48,7 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
             <span className="block font-medium text-foreground text-xs">{ticket.category.name}</span>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="relative z-10 flex shrink-0 items-center gap-2">
             <TicketStatusBadge status={ticket.status} />
             <Button
               size="xs"

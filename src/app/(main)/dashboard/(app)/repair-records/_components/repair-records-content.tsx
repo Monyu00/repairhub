@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ClipboardX, FilterX, Search, Wrench } from "lucide-react";
@@ -31,6 +32,66 @@ interface RepairRecordsContentProps {
   pageSize: number;
   isAdmin: boolean;
   technicians: TechnicianOption[];
+}
+
+interface RepairRecordTableRowProps {
+  record: RepairRecordItem;
+  isAdmin: boolean;
+  href: string;
+}
+
+export function RepairRecordTableRow({ record, isAdmin, href }: RepairRecordTableRowProps) {
+  const formattedDate = formatRepairRecordDate(record.createdAt);
+
+  return (
+    <TableRow className="relative cursor-pointer transition-colors hover:bg-muted/60 focus-within:bg-muted/70">
+      <TableCell className="py-3 font-medium font-mono text-xs">
+        <Link href={href} className="absolute inset-0 z-0" aria-hidden="true" tabIndex={-1} />
+        <Link
+          href={href}
+          aria-label={`查看報修單 ${record.id.slice(0, 8)}`}
+          className="relative z-10 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          #{record.id.slice(0, 8)}
+        </Link>
+      </TableCell>
+      <TableCell className="py-3">
+        <TicketStatusBadge status={record.status} />
+      </TableCell>
+      <TableCell className="py-3 font-medium text-xs">{record.category.name}</TableCell>
+      <TableCell className="py-3 text-xs">
+        <span>{formatTicketLocation(record, { includeFloor: true })}</span>
+      </TableCell>
+      <TableCell className="py-3 text-xs">
+        <p className="line-clamp-2 text-muted-foreground">{record.description}</p>
+      </TableCell>
+      {isAdmin && (
+        <TableCell className="py-3 text-xs">
+          {record.technicianName ? (
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">
+              <Wrench className="size-3 text-primary" />
+              <span>{record.technicianName}</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </TableCell>
+      )}
+      <TableCell className="py-3 text-xs">
+        {record.reporterName ? (
+          <div className="space-y-0.5">
+            <span className="block truncate font-medium text-foreground">{record.reporterName}</span>
+            {record.reporterDepartment && (
+              <span className="block truncate text-muted-foreground text-xs">{record.reporterDepartment}</span>
+            )}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </TableCell>
+      <TableCell className="whitespace-nowrap py-3 text-muted-foreground text-xs">{formattedDate}</TableCell>
+    </TableRow>
+  );
 }
 
 export function RepairRecordsContent({
@@ -97,10 +158,8 @@ export function RepairRecordsContent({
     updateFilters({ page: newPage.toString() });
   };
 
-  const handleRowClick = (id: string) => {
-    const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
-    router.push(`/dashboard/tickets/${id}?returnTo=${encodeURIComponent(returnTo)}`);
-  };
+  const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
+  const createDetailHref = (id: string) => `/dashboard/tickets/${id}?returnTo=${encodeURIComponent(returnTo)}`;
 
   const handleResetFilters = () => {
     setSearchTerm("");
@@ -226,65 +285,14 @@ export function RepairRecordsContent({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {records.map((record) => {
-                  const formattedDate = formatRepairRecordDate(record.createdAt);
-
-                  return (
-                    <TableRow
-                      key={record.id}
-                      onClick={() => handleRowClick(record.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleRowClick(record.id);
-                        }
-                      }}
-                      tabIndex={0}
-                      className="cursor-pointer transition-colors hover:bg-muted/60 focus-visible:bg-muted/70 focus-visible:outline-hidden"
-                    >
-                      <TableCell className="py-3 font-medium font-mono text-xs">#{record.id.slice(0, 8)}</TableCell>
-                      <TableCell className="py-3">
-                        <TicketStatusBadge status={record.status} />
-                      </TableCell>
-                      <TableCell className="py-3 font-medium text-xs">{record.category.name}</TableCell>
-                      <TableCell className="py-3 text-xs">
-                        <span>{formatTicketLocation(record, { includeFloor: true })}</span>
-                      </TableCell>
-                      <TableCell className="py-3 text-xs">
-                        <p className="line-clamp-2 text-muted-foreground">{record.description}</p>
-                      </TableCell>
-                      {isAdmin && (
-                        <TableCell className="py-3 text-xs">
-                          {record.technicianName ? (
-                            <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                              <Wrench className="size-3 text-primary" />
-                              <span>{record.technicianName}</span>
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      <TableCell className="py-3 text-xs">
-                        {record.reporterName ? (
-                          <div className="space-y-0.5">
-                            <span className="block truncate font-medium text-foreground">{record.reporterName}</span>
-                            {record.reporterDepartment && (
-                              <span className="block truncate text-muted-foreground text-xs">
-                                {record.reporterDepartment}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap py-3 text-muted-foreground text-xs">
-                        {formattedDate}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {records.map((record) => (
+                  <RepairRecordTableRow
+                    key={record.id}
+                    record={record}
+                    isAdmin={isAdmin}
+                    href={createDetailHref(record.id)}
+                  />
+                ))}
               </TableBody>
             </Table>
           </div>
@@ -292,14 +300,12 @@ export function RepairRecordsContent({
           {/* Mobile Card View */}
           <div className="grid gap-3 md:hidden">
             {records.map((record) => (
-              <button
-                type="button"
+              <RepairRecordMobileCard
                 key={record.id}
-                onClick={() => handleRowClick(record.id)}
-                className="w-full text-left"
-              >
-                <RepairRecordMobileCard record={record} isAdmin={isAdmin} />
-              </button>
+                record={record}
+                isAdmin={isAdmin}
+                href={createDetailHref(record.id)}
+              />
             ))}
           </div>
 
