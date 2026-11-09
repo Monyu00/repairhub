@@ -447,7 +447,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">系統管理者</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-destructive" />
+            <ShieldCheck aria-hidden="true" className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl text-destructive">{stats.adminCount}</div>
@@ -458,7 +458,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">維修技師</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground" />
+            <Wrench aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl text-muted-foreground ">{stats.techCount}</div>
@@ -469,7 +469,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="font-medium text-muted-foreground text-sm">一般使用者</CardTitle>
-            <UserCheck className="h-4 w-4 text-slate-500" />
+            <UserCheck aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl text-foreground">{stats.userCount}</div>

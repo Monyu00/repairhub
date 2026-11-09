@@ -13,7 +13,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
   if (role === "admin") {
     return (
       <Badge variant="destructive" className={cn("gap-1.5", className)}>
-        <ShieldCheck className="shrink-0" />
+        <ShieldCheck aria-hidden="true" className="shrink-0" />
         <span>系統管理者</span>
       </Badge>
     );
@@ -22,7 +22,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
   if (role === "technician") {
     return (
       <Badge variant="info" className={cn("gap-1.5", className)}>
-        <Wrench className="shrink-0" />
+        <Wrench aria-hidden="true" className="shrink-0" />
         <span>維修技師</span>
       </Badge>
     );
@@ -30,7 +30,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
 
   return (
     <Badge variant="outline" className={cn("gap-1.5", className)}>
-      <User className="shrink-0" />
+      <User aria-hidden="true" className="shrink-0" />
       <span>一般使用者</span>
     </Badge>
   );
