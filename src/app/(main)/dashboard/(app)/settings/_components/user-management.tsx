@@ -431,7 +431,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
   return (
     <div className="space-y-6">
-      {/* 4 Summary Cards: 總數、管理員、維修技師、一般使用者 */}
+      {/* 4 Summary Cards: 總數、系統管理者、維修技師、一般使用者 */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -550,9 +550,9 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">所有角色</SelectItem>
-                    <SelectItem value="admin">系統管理者 (Admin)</SelectItem>
-                    <SelectItem value="technician">維修技師 (Technician)</SelectItem>
-                    <SelectItem value="user">一般使用者 (User)</SelectItem>
+                    <SelectItem value="admin">系統管理者</SelectItem>
+                    <SelectItem value="technician">維修技師</SelectItem>
+                    <SelectItem value="user">一般使用者</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1047,7 +1047,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
               ) : (
                 <>
                   您即將批次停用 <strong className="text-foreground">{selectedIds.size}</strong>{" "}
-                  位使用者的帳號。停用後這些使用者將無法登入系統（系統將自動跳過您自己的管理員帳號）。
+                  位使用者的帳號。停用後這些使用者將無法登入系統（系統將自動跳過您自己的系統管理者帳號）。
                 </>
               )}
             </AlertDialogDescription>

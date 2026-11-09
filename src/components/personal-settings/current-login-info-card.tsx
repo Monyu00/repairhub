@@ -11,7 +11,7 @@ export function CurrentLoginInfoCard({ profile }: CurrentLoginInfoCardProps) {
     <Card>
       <CardHeader>
         <CardTitle>目前登入資訊</CardTitle>
-        <CardDescription>以下資訊由系統管理員維護，無法在此變更。</CardDescription>
+        <CardDescription>以下資訊由系統管理者維護，無法在此變更。</CardDescription>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-2 text-sm sm:grid-cols-2">

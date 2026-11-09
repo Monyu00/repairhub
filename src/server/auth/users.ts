@@ -64,7 +64,7 @@ export async function checkActiveAdminRetention(input: CheckAdminRetentionInput)
     console.error("Failed to count active admins:", countError);
     return {
       allowed: false,
-      error: "檢查管理員數量失敗",
+      error: "檢查系統管理者數量失敗",
     };
   }
 
@@ -74,7 +74,7 @@ export async function checkActiveAdminRetention(input: CheckAdminRetentionInput)
   if (remainingCount <= 0) {
     return {
       allowed: false,
-      error: "系統必須保留至少一位啟用的系統管理者 (Admin)",
+      error: "系統必須保留至少一位啟用的系統管理者",
       remainingCount,
     };
   }
@@ -107,7 +107,7 @@ export async function setUserActiveStatus(input: SetUserActiveInput): Promise<Se
   if (filteredUserIds.length === 0) {
     return {
       success: false,
-      error: "無法停用您自己的管理員帳號",
+      error: "無法停用您自己的系統管理者帳號",
       code: "SELF_DEACTIVATION",
     };
   }
@@ -127,7 +127,7 @@ export async function setUserActiveStatus(input: SetUserActiveInput): Promise<Se
       console.error("Failed to check target admin statuses:", targetAdminsError);
       return {
         success: false,
-        error: "檢查管理員狀態失敗",
+        error: "檢查系統管理者狀態失敗",
         code: "DATABASE_ERROR",
       };
     }

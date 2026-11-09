@@ -97,8 +97,8 @@ test("uses the first non-empty auth metadata display name", () => {
 });
 
 test("labels every UserRole, with no role falling back to the general user label", () => {
-  assert.equal(getUserRoleLabel("admin"), "系統管理員 (Admin)");
-  assert.equal(getUserRoleLabel("technician"), "維修技師 (Technician)");
+  assert.equal(getUserRoleLabel("admin"), "系統管理者");
+  assert.equal(getUserRoleLabel("technician"), "維修技師");
   assert.equal(getUserRoleLabel(null), "一般使用者");
 });
 

@@ -59,7 +59,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetHandle, TurnstileWidget
   if (!siteKey) {
     return (
       <Field data-invalid aria-invalid aria-label="安全驗證">
-        <FieldError>驗證服務尚未設定，請聯絡管理員</FieldError>
+        <FieldError>驗證服務尚未設定，請聯絡系統管理者</FieldError>
       </Field>
     );
   }

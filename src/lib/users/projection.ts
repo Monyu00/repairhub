@@ -74,8 +74,8 @@ export function compareUserRole(a: UserRole | null, b: UserRole | null): number 
 }
 
 export function getUserRoleLabel(role: UserRole | null): string {
-  if (role === "admin") return "系統管理員 (Admin)";
-  if (role === "technician") return "維修技師 (Technician)";
+  if (role === "admin") return "系統管理者";
+  if (role === "technician") return "維修技師";
   return "一般使用者";
 }
 
