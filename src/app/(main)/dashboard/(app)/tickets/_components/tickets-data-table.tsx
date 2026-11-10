@@ -62,10 +62,6 @@ export function TicketsDataTable({
     return `${pathname}?${params.toString()}`;
   };
 
-  const handleRowClick = (ticketId: string) => {
-    router.push(`/dashboard/tickets/${ticketId}`);
-  };
-
   const activeTab: "all" | "pending" = searchParams.get("tab") === "pending" ? "pending" : "all";
   const currentSort = searchParams.get("sort") ?? undefined;
 
@@ -159,14 +155,12 @@ export function TicketsDataTable({
           {/* Mobile Card View */}
           <div className="grid gap-3 md:hidden">
             {tickets.map((ticket) => (
-              <button
-                type="button"
+              <TicketMobileCard
                 key={ticket.id}
-                onClick={() => handleRowClick(ticket.id)}
-                className="w-full text-left"
-              >
-                <TicketMobileCard ticket={ticket} canViewReporter={canViewReporter} />
-              </button>
+                ticket={ticket}
+                canViewReporter={canViewReporter}
+                href={`/dashboard/tickets/${ticket.id}`}
+              />
             ))}
           </div>
 

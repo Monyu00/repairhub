@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Calendar, MapPin, User, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
@@ -11,13 +13,19 @@ import { formatRepairRecordDate, type RepairRecordItem } from "./repair-records-
 interface RepairRecordMobileCardProps {
   record: RepairRecordItem;
   isAdmin: boolean;
+  href: string;
 }
 
-export function RepairRecordMobileCard({ record, isAdmin }: RepairRecordMobileCardProps) {
+export function RepairRecordMobileCard({ record, isAdmin, href }: RepairRecordMobileCardProps) {
   const formattedDate = formatRepairRecordDate(record.createdAt);
 
   return (
-    <Card className="group cursor-pointer shadow-2xs transition-colors hover:border-primary/40">
+    <Card className="group relative cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-within:border-primary/40">
+      <Link
+        href={href}
+        aria-label={`查看報修單 ${record.id.slice(0, 8)}`}
+        className="absolute inset-0 z-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+      />
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center justify-between gap-2 border-border/50 border-b pb-2.5">
           <div className="flex items-center gap-2">
