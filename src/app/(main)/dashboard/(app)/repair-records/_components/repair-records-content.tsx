@@ -5,19 +5,13 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { ClipboardX, FilterX, Search, Wrench } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, ClipboardX, FilterX, Search, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatTicketLocation } from "@/lib/formatters";
@@ -200,7 +194,7 @@ export function RepairRecordsContent({
           <div className="flex items-center gap-1.5">
             <span className="text-muted-foreground text-xs">狀態：</span>
             <Select value={selectedStatus} onValueChange={(val) => updateFilters({ status: val })} disabled={isPending}>
-              <SelectTrigger className="h-8 w-[130px] text-xs">
+              <SelectTrigger aria-label="依狀態篩選維修紀錄" className="h-8 w-[130px] text-xs">
                 <SelectValue placeholder="維修狀態" />
               </SelectTrigger>
               <SelectContent>
@@ -221,7 +215,7 @@ export function RepairRecordsContent({
                 onValueChange={(val) => updateFilters({ technician: val })}
                 disabled={isPending}
               >
-                <SelectTrigger className="h-8 min-w-[150px] text-xs">
+                <SelectTrigger aria-label="依維修人員篩選維修紀錄" className="h-8 min-w-[150px] text-xs">
                   <SelectValue placeholder="全部維修人員" />
                 </SelectTrigger>
                 <SelectContent>
@@ -321,21 +315,35 @@ export function RepairRecordsContent({
               <Pagination className="mx-0 w-auto">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious
-                      text="上一頁"
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="default"
+                      aria-label="上一頁"
+                      disabled={currentPage <= 1 || isPending}
                       onClick={() => handlePageChange(currentPage - 1)}
-                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                      className="pl-1.5!"
+                    >
+                      <ChevronLeftIcon data-icon="inline-start" />
+                      <span className="hidden sm:block">上一頁</span>
+                    </Button>
                   </PaginationItem>
                   <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>
-                    <PaginationNext
-                      text="下一頁"
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="default"
+                      aria-label="下一頁"
+                      disabled={currentPage >= totalPages || isPending}
                       onClick={() => handlePageChange(currentPage + 1)}
-                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
+                      className="pr-1.5!"
+                    >
+                      <span className="hidden sm:block">下一頁</span>
+                      <ChevronRightIcon data-icon="inline-end" />
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
