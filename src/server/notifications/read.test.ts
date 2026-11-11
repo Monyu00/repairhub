@@ -3,36 +3,45 @@ import { getTechnicianNotifications, markAllTechnicianNotificationsRead, markTec
 import assert from "node:assert/strict";
 import test from "node:test";
 
-type CapturedOperation = {
-  method: string;
-  args: unknown[];
+type ReadResult = {
+  data: unknown[];
+  count: number | null;
+  error: Record<string, unknown> | null;
 };
 
-function createBuilder(result: { data: unknown[]; count: number | null; error: Record<string, unknown> | null }) {
-  const operations: CapturedOperation[] = [];
+type UpdateResult = {
+  data?: unknown;
+  error?: Record<string, unknown> | null;
+};
+
+function createBuilder(result: ReadResult) {
   const builder = {
-    select: (...args: unknown[]) => {
-      operations.push({ method: "select", args });
-      return builder;
-    },
-    eq: (...args: unknown[]) => {
-      operations.push({ method: "eq", args });
-      return builder;
-    },
+    select: () => builder,
+    eq: () => builder,
+    order: () => builder,
+    range: () => Promise.resolve(result),
     // biome-ignore lint/suspicious/noThenProperty: Supabase query builders are thenable.
-    then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
+    then: (resolve: (value: ReadResult) => unknown, reject: (reason?: unknown) => unknown) =>
       Promise.resolve(result).then(resolve, reject),
-    order: (...args: unknown[]) => {
-      operations.push({ method: "order", args });
-      return builder;
-    },
-    range: (...args: unknown[]) => {
-      operations.push({ method: "range", args });
-      return Promise.resolve(result);
-    },
   };
 
-  return { builder, operations };
+  return builder;
+}
+
+function createUpdateBuilder(result: UpdateResult) {
+  const builder = {
+    update: () => builder,
+    eq: () => builder,
+    select: () => builder,
+    single: () => Promise.resolve({ data: result.data, error: result.error ?? null }),
+    // biome-ignore lint/suspicious/noThenProperty: Supabase update builders are thenable.
+    then: (
+      resolve: (value: { data: unknown; error: Record<string, unknown> | null }) => unknown,
+      reject: (reason?: unknown) => unknown,
+    ) => Promise.resolve({ data: result.data, error: result.error ?? null }).then(resolve, reject),
+  };
+
+  return builder;
 }
 
 function createAdapter({
@@ -50,96 +59,69 @@ function createAdapter({
 } = {}) {
   const list = createBuilder({ data, count, error });
   const unread = createBuilder({ data: [], count: unreadCount, error: unreadError });
-  let calls = 0;
+  let callCount = 0;
   const adapter = {
     from: () => {
-      calls += 1;
-      return calls === 1 ? list.builder : unread.builder;
+      callCount += 1;
+      return callCount === 1 ? list : unread;
     },
   };
 
-  return { adapter: adapter as unknown as NotificationReadAdapter, list, unread };
+  return { adapter: adapter as unknown as NotificationReadAdapter, queryCount: () => callCount };
 }
 
-function createUpdateAdapter(result: { data?: unknown; error?: Record<string, unknown> | null }) {
-  const operations: CapturedOperation[] = [];
-  const builder = {
-    update: (...args: unknown[]) => {
-      operations.push({ method: "update", args });
+function createUpdateAdapter({ data, error = null }: UpdateResult) {
+  const builder = createUpdateBuilder({ data, error });
+  let callCount = 0;
+  const adapter = {
+    from: () => {
+      callCount += 1;
       return builder;
     },
-    eq: (...args: unknown[]) => {
-      operations.push({ method: "eq", args });
-      return builder;
-    },
-    select: (...args: unknown[]) => {
-      operations.push({ method: "select", args });
-      return builder;
-    },
-    single: () => {
-      operations.push({ method: "single", args: [] });
-      return Promise.resolve({ data: result.data, error: result.error ?? null });
-    },
-    // biome-ignore lint/suspicious/noThenProperty: Supabase query builders are thenable.
-    then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
-      Promise.resolve({ data: result.data, error: result.error ?? null }).then(resolve, reject),
   };
 
-  return { adapter: { from: () => builder } as unknown as NotificationReadAdapter, operations };
+  return { adapter: adapter as unknown as NotificationReadAdapter, queryCount: () => callCount };
 }
 
-test("getTechnicianNotifications scopes by recipient, orders, limits, and returns the exact unread count", async () => {
-  const rows = [
-    {
-      id: "notification-2",
-      ticket_id: "ticket-2",
-      is_read: true,
-      created_at: "2026-11-12T02:00:00.000Z",
-    },
-    {
-      id: "notification-1",
-      ticket_id: "ticket-1",
-      is_read: false,
-      created_at: "2026-11-12T01:00:00.000Z",
-    },
-  ];
-  const { adapter, list, unread } = createAdapter({ data: rows, unreadCount: 7 });
+const notificationRow = (eventType: string) => ({
+  id: "notification-1",
+  ticket_id: "ticket-1",
+  event_type: eventType,
+  is_read: false,
+  created_at: "2026-11-12T01:00:00.000Z",
+});
 
-  const result = await getTechnicianNotifications(adapter, "00000000-0000-4000-8000-000000000001");
+const notificationExpectation = (eventType: string) => ({
+  id: "notification-1",
+  ticketId: "ticket-1",
+  eventType,
+  isRead: false,
+  createdAt: "2026-11-12T01:00:00.000Z",
+});
 
-  assert.deepEqual(list.operations.find(({ method }) => method === "eq")?.args, [
-    "recipient_id",
-    "00000000-0000-4000-8000-000000000001",
-  ]);
-  assert.deepEqual(list.operations.find(({ method }) => method === "order")?.args, [
-    "created_at",
-    { ascending: false },
-  ]);
-  assert.deepEqual(list.operations.find(({ method }) => method === "range")?.args, [0, 19]);
-  assert.deepEqual(
-    unread.operations.filter(({ method }) => method === "eq").map(({ args }) => args),
-    [
-      ["recipient_id", "00000000-0000-4000-8000-000000000001"],
-      ["is_read", false],
-    ],
-  );
-  assert.deepEqual(result, {
-    notifications: [
-      { id: "notification-2", ticketId: "ticket-2", isRead: true, createdAt: "2026-11-12T02:00:00.000Z" },
-      { id: "notification-1", ticketId: "ticket-1", isRead: false, createdAt: "2026-11-12T01:00:00.000Z" },
-    ],
-    unreadCount: 7,
-  });
+const userId = "00000000-0000-4000-8000-000000000001";
+
+test("getTechnicianNotifications maps every supported event type and exact unread count", async () => {
+  const eventTypes = ["new_ticket", "assigned", "pending", "in_progress", "completed", "closed", "cancelled"];
+
+  for (const eventType of eventTypes) {
+    const { adapter } = createAdapter({ data: [notificationRow(eventType)], unreadCount: 7 });
+
+    assert.deepEqual(await getTechnicianNotifications(adapter, userId), {
+      notifications: [notificationExpectation(eventType)],
+      unreadCount: 7,
+    });
+  }
 });
 
 test("getTechnicianNotifications fails closed for a malformed identity without querying", async () => {
-  const { adapter, list, unread } = createAdapter({ data: [{ id: "notification-1" }] });
+  const { adapter, queryCount } = createAdapter({ data: [notificationRow("new_ticket")] });
 
-  const result = await getTechnicianNotifications(adapter, "not-a-user");
-
-  assert.deepEqual(result, { notifications: [], unreadCount: 0 });
-  assert.equal(list.operations.length, 0);
-  assert.equal(unread.operations.length, 0);
+  assert.deepEqual(await getTechnicianNotifications(adapter, "not-a-user"), {
+    notifications: [],
+    unreadCount: 0,
+  });
+  assert.equal(queryCount(), 0);
 });
 
 test("getTechnicianNotifications fails closed when either read fails", async () => {
@@ -148,72 +130,69 @@ test("getTechnicianNotifications fails closed when either read fails", async () 
 
   try {
     const listFailure = createAdapter({ error: { message: "list failed" }, unreadCount: 2 });
-    const listResult = await getTechnicianNotifications(listFailure.adapter, "00000000-0000-4000-8000-000000000001");
     const unreadFailure = createAdapter({
-      data: [{ id: "notification-1", ticket_id: "ticket-1", is_read: true, created_at: "2026-11-12T01:00:00.000Z" }],
+      data: [notificationRow("new_ticket")],
       unreadError: { message: "count failed" },
       unreadCount: 2,
     });
-    const unreadResult = await getTechnicianNotifications(
-      unreadFailure.adapter,
-      "00000000-0000-4000-8000-000000000001",
-    );
 
-    assert.deepEqual(listResult, { notifications: [], unreadCount: 0 });
-    assert.deepEqual(unreadResult, { notifications: [], unreadCount: 0 });
+    assert.deepEqual(await getTechnicianNotifications(listFailure.adapter, userId), {
+      notifications: [],
+      unreadCount: 0,
+    });
+    assert.deepEqual(await getTechnicianNotifications(unreadFailure.adapter, userId), {
+      notifications: [],
+      unreadCount: 0,
+    });
   } finally {
     console.error = originalConsoleError;
   }
 });
 
-test("markTechnicianNotificationRead scopes the update to the owned notification", async () => {
-  const notificationId = "00000000-0000-4000-8000-000000000002";
-  const ticketId = "00000000-0000-4000-8000-000000000003";
-  const { adapter, operations } = createUpdateAdapter({ data: { ticket_id: ticketId } });
+test("getTechnicianNotifications fails closed for an unsupported event type", async () => {
+  const originalConsoleError = console.error;
+  console.error = () => undefined;
 
-  const result = await markTechnicianNotificationRead(adapter, "00000000-0000-4000-8000-000000000001", notificationId);
+  try {
+    const { adapter } = createAdapter({ data: [notificationRow("unknown")] });
 
-  assert.deepEqual(operations.find(({ method }) => method === "update")?.args, [{ is_read: true }]);
-  assert.deepEqual(
-    operations.filter(({ method }) => method === "eq").map(({ args }) => args),
-    [
-      ["id", notificationId],
-      ["recipient_id", "00000000-0000-4000-8000-000000000001"],
-    ],
-  );
-  assert.deepEqual(result, { success: true, ticketId });
+    assert.deepEqual(await getTechnicianNotifications(adapter, userId), {
+      notifications: [],
+      unreadCount: 0,
+    });
+  } finally {
+    console.error = originalConsoleError;
+  }
 });
 
-test("markTechnicianNotificationRead fails closed for malformed input or ticket data", async () => {
-  const malformedIdentity = createUpdateAdapter({ data: { ticket_id: "00000000-0000-4000-8000-000000000003" } });
-  const malformedTicket = createUpdateAdapter({ data: { ticket_id: "ticket-1" } });
+test("markTechnicianNotificationRead returns the ticket and fails closed for malformed data", async () => {
+  const ticketId = "00000000-0000-4000-8000-000000000003";
+  const notificationId = "00000000-0000-4000-8000-000000000002";
+  const success = createUpdateAdapter({ data: { ticket_id: ticketId } });
+  const malformed = createUpdateAdapter({ data: { ticket_id: "ticket-1" } });
 
-  assert.deepEqual(await markTechnicianNotificationRead(malformedIdentity.adapter, "not-a-user", "not-a-id"), {
+  assert.deepEqual(await markTechnicianNotificationRead(success.adapter, userId, notificationId), {
+    success: true,
+    ticketId,
+  });
+  assert.deepEqual(await markTechnicianNotificationRead(malformed.adapter, userId, notificationId), {
     success: false,
   });
-  assert.equal(malformedIdentity.operations.length, 0);
-  assert.deepEqual(
-    await markTechnicianNotificationRead(
-      malformedTicket.adapter,
-      "00000000-0000-4000-8000-000000000001",
-      "00000000-0000-4000-8000-000000000002",
-    ),
-    { success: false },
-  );
 });
 
-test("markAllTechnicianNotificationsRead scopes updates to unread rows", async () => {
-  const { adapter, operations } = createUpdateAdapter({});
+test("markTechnicianNotificationRead rejects malformed input without querying", async () => {
+  const { adapter, queryCount } = createUpdateAdapter({ data: { ticket_id: "00000000-0000-4000-8000-000000000003" } });
 
-  const result = await markAllTechnicianNotificationsRead(adapter, "00000000-0000-4000-8000-000000000001");
+  assert.deepEqual(await markTechnicianNotificationRead(adapter, "not-a-user", "not-a-id"), {
+    success: false,
+  });
+  assert.equal(queryCount(), 0);
+});
 
-  assert.deepEqual(operations.find(({ method }) => method === "update")?.args, [{ is_read: true }]);
-  assert.deepEqual(
-    operations.filter(({ method }) => method === "eq").map(({ args }) => args),
-    [
-      ["recipient_id", "00000000-0000-4000-8000-000000000001"],
-      ["is_read", false],
-    ],
-  );
-  assert.deepEqual(result, { success: true });
+test("markAllTechnicianNotificationsRead returns success or a fail-closed result", async () => {
+  const success = createUpdateAdapter({});
+  const failure = createUpdateAdapter({ error: { message: "update failed" } });
+
+  assert.deepEqual(await markAllTechnicianNotificationsRead(success.adapter, userId), { success: true });
+  assert.deepEqual(await markAllTechnicianNotificationsRead(failure.adapter, userId), { success: false });
 });

@@ -91,6 +91,15 @@ BEGIN
     RAISE EXCEPTION 'A disabled or unsubscribed technician must not receive an in-app notification.';
   END IF;
 
+  BEGIN
+    INSERT INTO public.notifications (recipient_id, ticket_id, event_type)
+    VALUES (active_technician_id, first_ticket_id, 'new_ticket');
+
+    RAISE EXCEPTION 'New-ticket in-app notifications must remain deduplicated.';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+
   IF EXISTS (
     SELECT 1
     FROM pg_policies

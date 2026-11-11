@@ -17,6 +17,7 @@ DECLARE
   self_claim_ticket_id UUID := gen_random_uuid();
   disabled_ticket_id UUID := gen_random_uuid();
   failure_ticket_id UUID := gen_random_uuid();
+  repeated_ticket_id UUID := gen_random_uuid();
   notification_count INTEGER;
   ticket_status TEXT;
 BEGIN
@@ -138,6 +139,16 @@ BEGIN
       'in-app-ticket-reporter@example.com',
       '0912345678',
       technician_id
+  ),
+  (
+    repeated_ticket_id,
+    'in_progress',
+    category_id,
+    space_id,
+    'In-app repeated status smoke fixture',
+    'in-app-ticket-reporter@example.com',
+    '0912345678',
+    technician_id
     );
 
   PERFORM set_config(
@@ -291,6 +302,28 @@ BEGIN
     WHERE ticket_id = failure_ticket_id
   ) THEN
     RAISE EXCEPTION 'A failed in-app notification insert must not remain.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = repeated_ticket_id;
+
+  UPDATE public.tickets
+  SET status = 'in_progress'
+  WHERE id = repeated_ticket_id;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = repeated_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = repeated_ticket_id
+    AND event_type = 'completed'
+    AND recipient_id = technician_id;
+
+  IF notification_count <> 2 THEN
+    RAISE EXCEPTION 'Expected two repeated completed notifications, found %.', notification_count;
   END IF;
 END
 $$;

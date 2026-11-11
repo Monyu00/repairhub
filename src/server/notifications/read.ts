@@ -8,7 +8,7 @@ type NotificationDatabase = Omit<Database, "public"> & {
       notifications: {
         Row: {
           created_at: string;
-          event_type: string;
+          event_type: TechnicianNotificationEventType;
           id: string;
           is_read: boolean;
           recipient_id: string;
@@ -38,9 +38,19 @@ type NotificationDatabase = Omit<Database, "public"> & {
 
 export type NotificationReadAdapter = SupabaseClient<NotificationDatabase>;
 
+export type TechnicianNotificationEventType =
+  | "new_ticket"
+  | "assigned"
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "closed"
+  | "cancelled";
+
 export interface TechnicianNotification {
   id: string;
   ticketId: string;
+  eventType: TechnicianNotificationEventType;
   isRead: boolean;
   createdAt: string;
 }
@@ -57,6 +67,15 @@ export interface MarkNotificationResult {
 
 const MAX_NOTIFICATIONS = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EVENT_TYPES: readonly TechnicianNotificationEventType[] = [
+  "new_ticket",
+  "assigned",
+  "pending",
+  "in_progress",
+  "completed",
+  "closed",
+  "cancelled",
+];
 
 function parseNotification(row: unknown): TechnicianNotification | null {
   if (typeof row !== "object" || row === null) return null;
@@ -64,6 +83,8 @@ function parseNotification(row: unknown): TechnicianNotification | null {
   if (
     typeof value.id !== "string" ||
     typeof value.ticket_id !== "string" ||
+    typeof value.event_type !== "string" ||
+    !EVENT_TYPES.includes(value.event_type as TechnicianNotificationEventType) ||
     typeof value.is_read !== "boolean" ||
     typeof value.created_at !== "string"
   ) {
@@ -73,6 +94,7 @@ function parseNotification(row: unknown): TechnicianNotification | null {
   return {
     id: value.id,
     ticketId: value.ticket_id,
+    eventType: value.event_type as TechnicianNotificationEventType,
     isRead: value.is_read,
     createdAt: value.created_at,
   };
@@ -88,7 +110,7 @@ export async function getTechnicianNotifications(
   const [listResult, unreadResult] = await Promise.all([
     adapter
       .from("notifications")
-      .select("id,ticket_id,is_read,created_at")
+      .select("id,ticket_id,event_type,is_read,created_at")
       .eq("recipient_id", userId)
       .order("created_at", { ascending: false })
       .range(0, MAX_NOTIFICATIONS - 1),

@@ -9,5 +9,5 @@ A separate in-app preference set doubles the settings UI, the schema, and the te
 ## Consequences
 
 - Turning off a Notification Preference also silences the matching In-app Notification, not just the Delivery.
-- One DB trigger path writes both the Delivery and the In-app Notification, so a missing in-app record and a missing Delivery debug from the same place.
+- The new-ticket readiness trigger writes both the Delivery and the In-app Notification. Status-event In-app Notifications use a separate ticket update trigger, so status-event gaps debug from that trigger.
 - Per-channel quiet hours or frequency controls need new fields first; the flat preference object deliberately does not anticipate them.

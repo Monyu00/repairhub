@@ -17,7 +17,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { markAllNotificationsRead, markNotificationRead } from "@/server/notifications/actions";
-import type { TechnicianNotification, TechnicianNotificationsResult } from "@/server/notifications/read";
+import type {
+  TechnicianNotification,
+  TechnicianNotificationEventType,
+  TechnicianNotificationsResult,
+} from "@/server/notifications/read";
 
 interface NotificationBellProps {
   result: TechnicianNotificationsResult;
@@ -33,6 +37,16 @@ function formatCreatedAt(iso: string) {
     hour12: false,
   }).format(new Date(iso));
 }
+
+const NOTIFICATION_LABELS: Record<TechnicianNotificationEventType, string> = {
+  new_ticket: "新報修單",
+  assigned: "已指派",
+  pending: "退回待處理",
+  in_progress: "維修中",
+  completed: "已完工",
+  closed: "已結案",
+  cancelled: "已取消",
+};
 
 export function NotificationBell({ result }: NotificationBellProps) {
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +131,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
                       notification.isRead ? "bg-transparent" : "bg-primary",
                     )}
                   />
-                  <span className="min-w-0 flex-1 font-medium">新報修單</span>
+                  <span className="min-w-0 flex-1 font-medium">{NOTIFICATION_LABELS[notification.eventType]}</span>
                 </span>
                 <span className="mt-0.5 block text-muted-foreground text-xs">
                   {formatCreatedAt(notification.createdAt)}
