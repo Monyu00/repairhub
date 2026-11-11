@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { UserProjection } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
+import { getTechnicianNotifications } from "@/server/notifications/read";
 import { requireDashboardAccess } from "@/server/auth/session";
 import { getPreference } from "@/server/server-actions";
 
@@ -42,6 +43,9 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     mustChangePassword: session.mustChangePassword,
   };
 
+  const notifications =
+    session.role === "technician" ? await getTechnicianNotifications(session.supabase, session.userId) : undefined;
+
   return (
     <UserProjectionProvider projection={projection}>
       <SidebarProvider
@@ -52,7 +56,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant={variant} collapsible={collapsible} />
+        <AppSidebar notifications={notifications} variant={variant} collapsible={collapsible} />
         <SidebarInset
           id="main-content"
           tabIndex={-1}

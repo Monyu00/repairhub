@@ -17,12 +17,18 @@ import {
 import { APP_CONFIG } from "@/config/app-config";
 import { useUser } from "@/hooks/use-user";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
+import type { TechnicianNotificationsResult } from "@/server/notifications/read";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { NotificationBell } from "./notification-bell";
 
-export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  notifications?: TechnicianNotificationsResult;
+}
+
+export function AppSidebar({ notifications, ...props }: AppSidebarProps) {
   const projection = useUser();
   const activeRole = projection?.role ?? null;
 
@@ -55,6 +61,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+          {activeRole === "technician" && notifications ? <NotificationBell result={notifications} /> : null}
         </SidebarHeader>
         <SidebarContent>
           <NavMain items={sidebarItems} userRole={activeRole} />
