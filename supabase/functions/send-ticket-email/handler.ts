@@ -1,11 +1,15 @@
-import { renderTicketEmail, type TicketEmailData, type TicketNotificationEvent } from "./templates.ts";
+import {
+  TICKET_NOTIFICATION_EVENTS,
+  renderTicketEmail,
+  type TicketEmailData,
+  type TicketNotificationEvent,
+} from "./templates.ts";
 
 export const SERVICE_SECRET_HEADER = "x-repairhub-service-secret";
 
 const MAX_IMMEDIATE_ATTEMPTS = 3;
 const MAX_DELIVERY_ATTEMPTS = 5;
 const PERSISTENT_RETRY_DELAYS_MINUTES = [5, 15, 60, 360] as const;
-const SUPPORTED_EVENT_TYPES = ["new_ticket", "in_progress", "completed", "closed"] as const;
 
 export type TicketEmailDisplayData = Omit<TicketEmailData, "trackingUrl">;
 
@@ -113,7 +117,7 @@ function nextPersistentAttempt(
 }
 
 function isTicketNotificationEvent(value: string): value is TicketNotificationEvent {
-  return (SUPPORTED_EVENT_TYPES as readonly string[]).includes(value);
+  return (TICKET_NOTIFICATION_EVENTS as readonly string[]).includes(value);
 }
 
 function isValidRecipientEmail(value: string): boolean {

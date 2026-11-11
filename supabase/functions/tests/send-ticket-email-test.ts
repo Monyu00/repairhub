@@ -185,6 +185,42 @@ test("sends the new-ticket Email with a bounded description and no Reporter cont
   assert.deepEqual(state.sent, [{ deliveryId: "delivery-new-ticket", messageId: "resend-message-new-ticket" }]);
 });
 
+test("sends the report-submitted Email confirming the Reporter's submission", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-report-submitted",
+    eventType: "report_submitted",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:report_submitted",
+  });
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-report-submitted" });
+    },
+  });
+
+  const response = await handler(request("delivery-report-submitted"));
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.to, "reporter@example.com");
+  assert.equal(messages[0]?.subject, "【RepairHub】報修已收到 #12345678");
+  assert.match(messages[0]?.html ?? "", /您的報修已成功送出/);
+  assert.match(messages[0]?.html ?? "", /待處理/);
+  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
+  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.match(messages[0]?.text ?? "", /您的報修已成功送出，我們會盡快安排人員處理。/);
+  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
+  assert.equal(
+    messages[0]?.idempotencyKey,
+    "repairhub:ticket:12345678-1234-1234-1234-123456789abc:report_submitted",
+  );
+  assert.deepEqual(state.sent, [
+    { deliveryId: "delivery-report-submitted", messageId: "resend-message-report-submitted" },
+  ]);
+});
+
 test("does not send a new-ticket Email to an invalid recipient", async () => {
   const { repository, state } = createRepository();
   state.claim = createDelivery({
