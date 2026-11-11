@@ -52,8 +52,8 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
             此期間尚無技師派工紀錄
           </div>
         ) : (
-          <div className="space-y-4">
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+            <ChartContainer config={chartConfig} className="h-[240px] w-full">
               <BarChart layout="vertical" data={data} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-border/40" />
                 <YAxis
@@ -90,7 +90,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
             </ChartContainer>
 
             {/* Technician Summary Table/Badges */}
-            <div className="grid grid-cols-1 gap-2 border-border/40 border-t pt-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 border-border/40 border-t pt-2 sm:grid-cols-2 lg:border-t-0 lg:pt-0">
               {data.map((tech) => (
                 <div
                   key={tech.technicianId}
