@@ -70,9 +70,9 @@ export function AvgResolutionChart({ data }: AvgResolutionChartProps) {
                 content={
                   <ChartTooltipContent
                     indicator="line"
-                    formatter={(value, name) => (
+                    formatter={(value) => (
                       <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
-                        <span className="text-muted-foreground">{name}</span>
+                        <span className="text-muted-foreground">{chartConfig.avgDays.label}</span>
                         <span className="font-medium text-foreground">{value} 天</span>
                       </div>
                     )}

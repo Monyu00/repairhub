@@ -82,15 +82,18 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
                 content={
                   <ChartTooltipContent
                     indicator="dot"
-                    formatter={(value, name, item) => (
-                      <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
-                        <span className="text-muted-foreground">{name}</span>
-                        <span className="font-medium text-foreground tabular-nums">
-                          {value}
-                          {item.dataKey === "total" ? ` (${item.payload.completionRate}%)` : ""}
-                        </span>
-                      </div>
-                    )}
+                    formatter={(value, name, item) => {
+                      const label = chartConfig[item.dataKey as keyof typeof chartConfig]?.label ?? name;
+                      return (
+                        <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-medium text-foreground tabular-nums">
+                            {value}
+                            {item.dataKey === "total" ? ` (${item.payload.completionRate}%)` : ""}
+                          </span>
+                        </div>
+                      );
+                    }}
                   />
                 }
               />
