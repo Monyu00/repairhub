@@ -50,6 +50,11 @@ export interface TechnicianNotificationsResult {
   unreadCount: number;
 }
 
+export interface MarkNotificationResult {
+  success: boolean;
+  ticketId?: string;
+}
+
 const MAX_NOTIFICATIONS = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -109,4 +114,47 @@ export async function getTechnicianNotifications(
     notifications: notifications as TechnicianNotification[],
     unreadCount: unreadResult.count,
   };
+}
+
+export async function markTechnicianNotificationRead(
+  adapter: NotificationReadAdapter,
+  userId: string,
+  notificationId: string,
+): Promise<MarkNotificationResult> {
+  if (!UUID_PATTERN.test(userId) || !UUID_PATTERN.test(notificationId)) return { success: false };
+
+  const { data, error } = await adapter
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("id", notificationId)
+    .eq("recipient_id", userId)
+    .select("ticket_id")
+    .single();
+
+  if (error || !data || typeof data !== "object" || !UUID_PATTERN.test(data.ticket_id)) {
+    console.error("markTechnicianNotificationRead failed:", error ?? new Error("Malformed notification data"));
+    return { success: false };
+  }
+
+  return { success: true, ticketId: data.ticket_id };
+}
+
+export async function markAllTechnicianNotificationsRead(
+  adapter: NotificationReadAdapter,
+  userId: string,
+): Promise<MarkNotificationResult> {
+  if (!UUID_PATTERN.test(userId)) return { success: false };
+
+  const { error } = await adapter
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("recipient_id", userId)
+    .eq("is_read", false);
+
+  if (error) {
+    console.error("markAllTechnicianNotificationsRead failed:", error);
+    return { success: false };
+  }
+
+  return { success: true };
 }

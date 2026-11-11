@@ -1,5 +1,5 @@
 import type { NotificationReadAdapter } from "./read";
-import { getTechnicianNotifications } from "./read";
+import { getTechnicianNotifications, markAllTechnicianNotificationsRead, markTechnicianNotificationRead } from "./read";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -59,6 +59,33 @@ function createAdapter({
   };
 
   return { adapter: adapter as unknown as NotificationReadAdapter, list, unread };
+}
+
+function createUpdateAdapter(result: { data?: unknown; error?: Record<string, unknown> | null }) {
+  const operations: CapturedOperation[] = [];
+  const builder = {
+    update: (...args: unknown[]) => {
+      operations.push({ method: "update", args });
+      return builder;
+    },
+    eq: (...args: unknown[]) => {
+      operations.push({ method: "eq", args });
+      return builder;
+    },
+    select: (...args: unknown[]) => {
+      operations.push({ method: "select", args });
+      return builder;
+    },
+    single: () => {
+      operations.push({ method: "single", args: [] });
+      return Promise.resolve({ data: result.data, error: result.error ?? null });
+    },
+    // biome-ignore lint/suspicious/noThenProperty: Supabase query builders are thenable.
+    then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
+      Promise.resolve({ data: result.data, error: result.error ?? null }).then(resolve, reject),
+  };
+
+  return { adapter: { from: () => builder } as unknown as NotificationReadAdapter, operations };
 }
 
 test("getTechnicianNotifications scopes by recipient, orders, limits, and returns the exact unread count", async () => {
@@ -137,4 +164,56 @@ test("getTechnicianNotifications fails closed when either read fails", async () 
   } finally {
     console.error = originalConsoleError;
   }
+});
+
+test("markTechnicianNotificationRead scopes the update to the owned notification", async () => {
+  const notificationId = "00000000-0000-4000-8000-000000000002";
+  const ticketId = "00000000-0000-4000-8000-000000000003";
+  const { adapter, operations } = createUpdateAdapter({ data: { ticket_id: ticketId } });
+
+  const result = await markTechnicianNotificationRead(adapter, "00000000-0000-4000-8000-000000000001", notificationId);
+
+  assert.deepEqual(operations.find(({ method }) => method === "update")?.args, [{ is_read: true }]);
+  assert.deepEqual(
+    operations.filter(({ method }) => method === "eq").map(({ args }) => args),
+    [
+      ["id", notificationId],
+      ["recipient_id", "00000000-0000-4000-8000-000000000001"],
+    ],
+  );
+  assert.deepEqual(result, { success: true, ticketId });
+});
+
+test("markTechnicianNotificationRead fails closed for malformed input or ticket data", async () => {
+  const malformedIdentity = createUpdateAdapter({ data: { ticket_id: "00000000-0000-4000-8000-000000000003" } });
+  const malformedTicket = createUpdateAdapter({ data: { ticket_id: "ticket-1" } });
+
+  assert.deepEqual(await markTechnicianNotificationRead(malformedIdentity.adapter, "not-a-user", "not-a-id"), {
+    success: false,
+  });
+  assert.equal(malformedIdentity.operations.length, 0);
+  assert.deepEqual(
+    await markTechnicianNotificationRead(
+      malformedTicket.adapter,
+      "00000000-0000-4000-8000-000000000001",
+      "00000000-0000-4000-8000-000000000002",
+    ),
+    { success: false },
+  );
+});
+
+test("markAllTechnicianNotificationsRead scopes updates to unread rows", async () => {
+  const { adapter, operations } = createUpdateAdapter({});
+
+  const result = await markAllTechnicianNotificationsRead(adapter, "00000000-0000-4000-8000-000000000001");
+
+  assert.deepEqual(operations.find(({ method }) => method === "update")?.args, [{ is_read: true }]);
+  assert.deepEqual(
+    operations.filter(({ method }) => method === "eq").map(({ args }) => args),
+    [
+      ["recipient_id", "00000000-0000-4000-8000-000000000001"],
+      ["is_read", false],
+    ],
+  );
+  assert.deepEqual(result, { success: true });
 });

@@ -1,17 +1,23 @@
 "use client";
 
+import { useState, useTransition } from "react";
+
+import { useRouter } from "next/navigation";
+
 import { Bell } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import type { TechnicianNotificationsResult } from "@/server/notifications/read";
+import { markAllNotificationsRead, markNotificationRead } from "@/server/notifications/actions";
+import type { TechnicianNotification, TechnicianNotificationsResult } from "@/server/notifications/read";
 
 interface NotificationBellProps {
   result: TechnicianNotificationsResult;
@@ -29,7 +35,40 @@ function formatCreatedAt(iso: string) {
 }
 
 export function NotificationBell({ result }: NotificationBellProps) {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const badge = result.unreadCount > 9 ? "9+" : String(result.unreadCount);
+
+  function handleNotificationClick(notification: TechnicianNotification, event: Event) {
+    event.preventDefault();
+    setError(null);
+    if (notification.isRead) {
+      router.push(`/dashboard/tickets/${notification.ticketId}`);
+      return;
+    }
+
+    startTransition(async () => {
+      const actionResult = await markNotificationRead(notification.id);
+      if (!actionResult.success) {
+        setError(actionResult.error);
+        return;
+      }
+      router.push(`/dashboard/tickets/${actionResult.ticketId}`);
+    });
+  }
+
+  function handleMarkAllClick(event: Event) {
+    event.preventDefault();
+    setError(null);
+    startTransition(async () => {
+      const actionResult = await markAllNotificationsRead();
+      if (!actionResult.success) {
+        setError(actionResult.error);
+        return;
+      }
+    });
+  }
 
   return (
     <div className="flex justify-center">
@@ -50,11 +89,26 @@ export function NotificationBell({ result }: NotificationBellProps) {
         <DropdownMenuContent align="end" className="w-[calc(100vw-1.5rem)] max-w-80">
           <DropdownMenuLabel>通知</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {result.unreadCount > 0 ? (
+            <DropdownMenuItem disabled={isPending} onSelect={handleMarkAllClick}>
+              全部已讀
+            </DropdownMenuItem>
+          ) : null}
+          {error ? (
+            <DropdownMenuLabel role="alert" className="text-destructive">
+              {error}
+            </DropdownMenuLabel>
+          ) : null}
           {result.notifications.length === 0 ? (
             <DropdownMenuLabel className="font-normal text-muted-foreground">目前沒有通知</DropdownMenuLabel>
           ) : (
             result.notifications.map((notification) => (
-              <DropdownMenuLabel key={notification.id} className="rounded-md px-1.5 py-2">
+              <DropdownMenuItem
+                key={notification.id}
+                className="rounded-md px-1.5 py-2"
+                disabled={isPending}
+                onSelect={(event) => handleNotificationClick(notification, event)}
+              >
                 <span className="flex items-center gap-2">
                   <span
                     aria-hidden="true"
@@ -68,7 +122,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
                 <span className="mt-0.5 block text-muted-foreground text-xs">
                   {formatCreatedAt(notification.createdAt)}
                 </span>
-              </DropdownMenuLabel>
+              </DropdownMenuItem>
             ))
           )}
         </DropdownMenuContent>
