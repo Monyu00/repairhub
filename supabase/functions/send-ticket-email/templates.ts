@@ -8,11 +8,21 @@ export interface TicketEmailData {
   trackingUrl: string;
 }
 
-export type TicketNotificationEvent = "new_ticket" | "in_progress" | "completed" | "closed";
+export const TICKET_NOTIFICATION_EVENTS = [
+  "new_ticket",
+  "report_submitted",
+  "in_progress",
+  "completed",
+  "closed",
+] as const;
+
+export type TicketNotificationEvent = (typeof TICKET_NOTIFICATION_EVENTS)[number];
 
 export function ticketStatusLabel(eventType: string): string {
   switch (eventType) {
     case "new_ticket":
+      return "待處理";
+    case "report_submitted":
       return "待處理";
     case "in_progress":
       return "維修中";
@@ -38,6 +48,11 @@ const TICKET_EMAIL_COPY: Record<
     subject: (shortId, categoryName) => `【RepairHub】新報修案件 #${shortId}：${categoryName}`,
     heading: "新報修案件需要處理",
     intro: "您好，有新的報修案件符合您訂閱的類別。",
+  },
+  report_submitted: {
+    subject: (shortId) => `【RepairHub】報修已收到 #${shortId}`,
+    heading: "報修已成功送出",
+    intro: "您好，您的報修已成功送出，我們會盡快安排人員處理。",
   },
   in_progress: {
     subject: (shortId) => `【RepairHub】案件 #${shortId} 已開始維修`,

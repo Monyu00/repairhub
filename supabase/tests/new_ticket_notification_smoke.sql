@@ -110,17 +110,29 @@ BEGIN
   FROM public.notification_log
   WHERE ticket_id = ready_ticket_id;
 
-  IF delivery_count <> 1 THEN
-    RAISE EXCEPTION 'Expected one eligible Technician delivery, found %.', delivery_count;
+  IF delivery_count <> 2 THEN
+    RAISE EXCEPTION 'Expected one Technician dispatch and one Reporter confirmation, found %.', delivery_count;
   END IF;
 
   SELECT id, event_key, recipient_email
   INTO delivery_id, delivery_event_key, delivery_recipient
   FROM public.notification_log
-  WHERE ticket_id = ready_ticket_id;
+  WHERE ticket_id = ready_ticket_id
+    AND event_type = 'new_ticket';
 
   IF delivery_recipient <> 'eligible@example.com' THEN
     RAISE EXCEPTION 'Expected normalized eligible recipient, found %.', delivery_recipient;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = ready_ticket_id
+      AND event_type = 'report_submitted'
+      AND recipient_email = 'reporter@example.com'
+      AND event_key = format('ticket:%s:report_submitted', ready_ticket_id)
+  ) THEN
+    RAISE EXCEPTION 'Expected one report_submitted Delivery for the Reporter.';
   END IF;
 
   SELECT count(*)
@@ -151,12 +163,12 @@ BEGIN
     WHEN unique_violation THEN NULL;
   END;
 
-  IF has_function_privilege('anon', 'public.enqueue_new_ticket_notification()', 'EXECUTE') THEN
-    RAISE EXCEPTION 'anon must not execute enqueue_new_ticket_notification.';
+  IF has_function_privilege('anon', 'public.enqueue_ticket_ready_notification()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'anon must not execute enqueue_ticket_ready_notification.';
   END IF;
 
-  IF has_function_privilege('authenticated', 'public.enqueue_new_ticket_notification()', 'EXECUTE') THEN
-    RAISE EXCEPTION 'authenticated must not execute enqueue_new_ticket_notification.';
+  IF has_function_privilege('authenticated', 'public.enqueue_ticket_ready_notification()', 'EXECUTE') THEN
+    RAISE EXCEPTION 'authenticated must not execute enqueue_ticket_ready_notification.';
   END IF;
 END
 $$;

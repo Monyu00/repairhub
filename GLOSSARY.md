@@ -102,6 +102,10 @@ _Avoid_: Notification log, mail queue, trigger chain
 A single queued Email send for one Ticket event and one recipient.
 _Avoid_: Notification, message, attempt
 
+**Submission Confirmation**:
+The Delivery confirming to the Reporter that their Ticket was successfully created. Sent when the Ticket is ready for notifications, separate from the notice sent to subscribed Technicians.
+_Avoid_: 報修成功信, receipt, acknowledgement
+
 **Notification Preference**:
 A per-account switch controlling whether one event type delivers Email to that account. Stored as a flat object on the account's profile; a missing event key defaults to enabled.
 _Avoid_: Subscription, opt-out, notification setting, 通知訂閱

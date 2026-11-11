@@ -113,6 +113,7 @@ BEGIN
     FROM public.notification_log
     WHERE ticket_id = ready_ticket_id
       AND recipient_email = 'pref-tech-disabled@example.com'
+      AND event_type = 'new_ticket'
   ) THEN
     RAISE EXCEPTION 'a. A disabled new_ticket preference must not write a Delivery.';
   END IF;
@@ -121,11 +122,35 @@ BEGIN
   FROM public.notification_log
   WHERE ticket_id = ready_ticket_id;
 
-  IF delivery_count <> 2 THEN
-    RAISE EXCEPTION 'a. Expected the enabled and explicitly-true Technicians, found %.', delivery_count;
+  IF delivery_count <> 3 THEN
+    RAISE EXCEPTION 'a. Expected two Technician Dispatches and one Reporter confirmation, found %.', delivery_count;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = ready_ticket_id
+      AND event_type = 'report_submitted'
+      AND recipient_email = 'pref-tech-disabled@example.com'
+      AND event_key = format('ticket:%s:report_submitted', ready_ticket_id)
+  ) THEN
+    RAISE EXCEPTION 'a. A disabled new_ticket preference must not block the ticket_status-gated Reporter confirmation.';
   END IF;
 
   -- b. The Reporter preference gates the status change, and completed/closed share its key.
+  UPDATE public.tickets
+  SET notification_ready_at = now()
+  WHERE id = status_ticket_disabled_id;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = status_ticket_disabled_id
+      AND event_type = 'report_submitted'
+  ) THEN
+    RAISE EXCEPTION 'b. A disabled ticket_status preference must not write a report_submitted Delivery.';
+  END IF;
+
   UPDATE public.tickets
   SET status = 'in_progress'
   WHERE id IN (status_ticket_disabled_id, status_ticket_enabled_id);
@@ -222,8 +247,8 @@ BEGIN
       ('authenticated', 'public.enqueue_notification_delivery(UUID, TEXT, TEXT, TIMESTAMPTZ)'),
       ('anon', 'public.enqueue_ticket_status_notification()'),
       ('authenticated', 'public.enqueue_ticket_status_notification()'),
-      ('anon', 'public.enqueue_new_ticket_notification()'),
-      ('authenticated', 'public.enqueue_new_ticket_notification()')
+      ('anon', 'public.enqueue_ticket_ready_notification()'),
+      ('authenticated', 'public.enqueue_ticket_ready_notification()')
     ) AS gated(role_name, function_signature)
     WHERE has_function_privilege(gated.role_name::name, gated.function_signature::regprocedure, 'EXECUTE')
   ) THEN

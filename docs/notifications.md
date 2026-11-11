@@ -6,6 +6,8 @@ Issue #87 加入持久化回收：暫時性寄送失敗會依約五分鐘、十�
 
 Issue #89 加入 `new_ticket` 事件：Ticket 會在必要資料與報修照片提交完成後設定 `notification_ready_at`，trigger 只對符合 Category、active 且已訂閱的 Technician 建立 delivery，並以 Email 呈現最多 160 字的問題描述摘要，不包含 Reporter 電話或 Email。
 
+同一 readiness 點也會產生 `report_submitted` Submission Confirmation：以 `reporter_email` 為收件人，與 Reporter 狀態通知共用 `ticket_status` 偏好開關，讓匿名報修者也收到報修成功確認。
+
 ## 必要 secrets
 
 在 Supabase Vault 建立下列兩個 secret，兩者都不得寫入 repo：
@@ -46,18 +48,18 @@ Wizard 會依下列順序處理：
 1. 建立 RepairHub 專用的 scoped Supabase access token，並驗證 `notify.monyu.dev` 的 SPF、DKIM 與 DMARC。
 2. 建立限制在 `notify.monyu.dev` 的 Resend sending key，設定 Edge Function secrets 與 Supabase Vault。
 3. 先部署新版 `send-ticket-email`，再收斂既有 production 的 `pg_net` schema，最後套用 migration 與 retry cron。
-4. 以真實可收信地址完成四種通知、重播去重與暫時性失敗 retry 的 E2E。
+4. 以真實可收信地址完成五種通知、重播去重與暫時性失敗 retry 的 E2E。
 
 不要在正式環境使用 `supabase login`，因為瀏覽器登入流程會建立全帳號權限的 token。`SUPABASE_ACCESS_TOKEN` 與資料庫密碼只存在於該次 shell 環境，不會寫入 repo。`RESEND_REPLY_TO` 必須是可收信的監控信箱。
 
-目前四種通知不接收 Resend delivery webhook，這點與 Issue #32 的 out-of-scope 一致；重播去重由 `notification_log` 的 claim 邊界驗證，因此不需要建立沒有 consumer 的 webhook secret。
+目前五種通知不接收 Resend delivery webhook，這點與 Issue #32 的 out-of-scope 一致；重播去重由 `notification_log` 的 claim 邊界驗證，因此不需要建立沒有 consumer 的 webhook secret。
 
 ## Production E2E
 
 Wizard 最後會要求部署者建立一筆真實測試 Ticket，依序確認：
 
 - 符合 Category 的 active Technician 收到 `new_ticket`。
-- Reporter 收到 `in_progress`、`completed` 與 `closed`。
+- Reporter 收到 `report_submitted`、`in_progress`、`completed` 與 `closed`。
 - Ledger 的每筆 delivery 都是 `sent`，且 `resend_message_id` 已寫回。
 - 重播已寄送的 delivery 不會再產生 Email。
 - 模擬一筆暫時性失敗的 delivery 後，retry 路徑可送到 `sent`，或永久失敗會留下可診斷的 terminal state。
