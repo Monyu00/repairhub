@@ -12,8 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { UserProjection } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
-import { getTechnicianNotifications } from "@/server/notifications/read";
 import { requireDashboardAccess } from "@/server/auth/session";
+import { getTechnicianNotifications } from "@/server/notifications/read";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
