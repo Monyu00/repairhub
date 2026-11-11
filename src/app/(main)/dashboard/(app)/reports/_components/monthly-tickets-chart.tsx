@@ -32,19 +32,20 @@ const chartConfig = {
     label: "處理中/待處理",
     color: "var(--chart-4)",
   },
-  other: {
-    label: "其他狀態",
+  cancelled: {
+    label: "已取消",
     color: "var(--muted-foreground)",
   },
 } satisfies ChartConfig;
 
 export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
   const hasData = data.length > 0 && data.some((d) => d.total > 0);
-  const chartData = data.map((row) => ({
+  const monthlyChartData = data.map((row) => ({
     ...row,
-    other: Math.max(0, row.total - row.completed - row.pendingOrProgress),
+    cancelled: Math.max(0, row.total - row.completed - row.pendingOrProgress),
     completionRate: row.total > 0 ? Number(((row.completed / row.total) * 100).toFixed(1)) : 0,
   }));
+  const hasCancelledTickets = monthlyChartData.some((row) => row.cancelled > 0);
 
   return (
     <Card className="flex flex-col">
@@ -66,7 +67,7 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="min-h-[260px] w-full">
-            <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <ComposedChart data={monthlyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/40" />
               <XAxis
                 dataKey="month"
@@ -96,7 +97,15 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
               <ChartLegend content={<ChartLegendContent />} />
               <Bar dataKey="completed" stackId="status" fill="var(--color-completed)" maxBarSize={32} />
               <Bar dataKey="pendingOrProgress" stackId="status" fill="var(--color-pendingOrProgress)" maxBarSize={32} />
-              <Bar dataKey="other" stackId="status" fill="var(--color-other)" radius={[4, 4, 0, 0]} maxBarSize={32} />
+              {hasCancelledTickets && (
+                <Bar
+                  dataKey="cancelled"
+                  stackId="status"
+                  fill="var(--color-cancelled)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={32}
+                />
+              )}
               <Line dataKey="total" stroke="var(--color-total)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
             </ComposedChart>
           </ChartContainer>
