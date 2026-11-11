@@ -3,10 +3,8 @@
 import { useMemo } from "react";
 
 import { Tags } from "lucide-react";
-import { Cell, Pie, PieChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 import type { CategoryDistributionStat } from "./report-types";
 
@@ -17,19 +15,28 @@ interface CategoryDistributionChartProps {
 export function CategoryDistributionChart({ data }: CategoryDistributionChartProps) {
   const hasData = data.length > 0 && data.some((d) => d.count > 0);
 
-  const chartConfig = useMemo(() => {
-    const config: ChartConfig = {
-      count: {
-        label: "工單件數",
+  const chartData = useMemo(() => {
+    if (data.length <= 10) {
+      return data;
+    }
+
+    const other = data
+      .slice(10)
+      .reduce((sum, row) => ({ count: sum.count + row.count, percentage: sum.percentage + row.percentage }), {
+        count: 0,
+        percentage: 0,
+      });
+
+    return [
+      ...data.slice(0, 10),
+      {
+        categoryId: "__other__",
+        categoryName: "其他",
+        count: other.count,
+        percentage: Number(other.percentage.toFixed(1)),
+        fill: "var(--muted-foreground)",
       },
-    };
-    data.forEach((item, index) => {
-      config[item.categoryId] = {
-        label: item.categoryName,
-        color: item.fill || `var(--chart-${(index % 5) + 1})`,
-      };
-    });
-    return config;
+    ];
   }, [data]);
 
   return (
@@ -51,55 +58,26 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
             此期間無相關工單數據
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
-            <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[220px] w-full">
-              <PieChart>
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      hideLabel
-                      formatter={(value, name) => (
-                        <div className="flex min-w-24 items-center justify-between gap-2 text-xs">
-                          <span className="text-muted-foreground">{name}</span>
-                          <span className="font-medium text-foreground">{value} 件</span>
-                        </div>
-                      )}
-                    />
-                  }
-                />
-                <Pie
-                  data={data}
-                  dataKey="count"
-                  nameKey="categoryName"
-                  innerRadius={45}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  stroke="var(--background)"
-                  strokeWidth={2}
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={entry.categoryId} fill={entry.fill || `var(--chart-${(index % 5) + 1})`} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ChartContainer>
-
-            {/* Side Legends Grid */}
-            <div className="grid w-full grid-cols-2 gap-x-2 gap-y-1.5 text-xs md:w-52">
-              {data.map((item) => (
-                <div key={item.categoryId} className="flex items-center justify-between gap-1">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-xs"
-                      style={{ backgroundColor: item.fill || "var(--primary)" }}
-                    />
-                    <span className="truncate text-muted-foreground">{item.categoryName}</span>
-                  </div>
-                  <span className="font-medium text-foreground tabular-nums">{item.count}</span>
+          <div className="space-y-3">
+            {chartData.map((item) => (
+              <div key={item.categoryId} className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className="min-w-0 truncate text-muted-foreground">{item.categoryName}</span>
+                  <span className="shrink-0 font-medium text-foreground tabular-nums">
+                    {item.count} 件 ({item.percentage}%)
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${item.percentage}%`,
+                      backgroundColor: item.fill || "var(--chart-1)",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

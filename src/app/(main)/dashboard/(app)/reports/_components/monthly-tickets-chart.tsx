@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart3 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,10 +32,20 @@ const chartConfig = {
     label: "處理中/待處理",
     color: "var(--chart-4)",
   },
+  cancelled: {
+    label: "已取消",
+    color: "var(--muted-foreground)",
+  },
 } satisfies ChartConfig;
 
 export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
   const hasData = data.length > 0 && data.some((d) => d.total > 0);
+  const monthlyChartData = data.map((row) => ({
+    ...row,
+    cancelled: Math.max(0, row.total - row.completed - row.pendingOrProgress),
+    completionRate: row.total > 0 ? Number(((row.completed / row.total) * 100).toFixed(1)) : 0,
+  }));
+  const hasCancelledTickets = monthlyChartData.some((row) => row.cancelled > 0);
 
   return (
     <Card className="flex flex-col">
@@ -57,7 +67,7 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="min-h-[260px] w-full">
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <ComposedChart data={monthlyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/40" />
               <XAxis
                 dataKey="month"
@@ -68,11 +78,39 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
                 className="text-xs"
               />
               <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} className="text-xs" />
-              <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value, name, item) => {
+                      const label = chartConfig[item.dataKey as keyof typeof chartConfig]?.label ?? name;
+                      return (
+                        <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-medium text-foreground tabular-nums">
+                            {value}
+                            {item.dataKey === "total" ? ` (${item.payload.completionRate}%)` : ""}
+                          </span>
+                        </div>
+                      );
+                    }}
+                  />
+                }
+              />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} maxBarSize={32} />
-              <Bar dataKey="completed" fill="var(--color-completed)" radius={[4, 4, 0, 0]} maxBarSize={32} />
-            </BarChart>
+              <Bar dataKey="completed" stackId="status" fill="var(--color-completed)" maxBarSize={32} />
+              <Bar dataKey="pendingOrProgress" stackId="status" fill="var(--color-pendingOrProgress)" maxBarSize={32} />
+              {hasCancelledTickets && (
+                <Bar
+                  dataKey="cancelled"
+                  stackId="status"
+                  fill="var(--color-cancelled)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={32}
+                />
+              )}
+              <Line dataKey="total" stroke="var(--color-total)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+            </ComposedChart>
           </ChartContainer>
         )}
       </CardContent>

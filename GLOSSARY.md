@@ -112,6 +112,14 @@ _Avoid_: Subscription, opt-out, notification setting, 通知訂閱
 
 ### Workflow
 
+**Completion Rate**:
+The share of Tickets created in the selected report period whose current status is Completed or Closed.
+_Avoid_: success rate, closure ratio
+
+**Resolution Time**:
+Elapsed time from Ticket creation to the Ticket's latest status update for Tickets that are Completed or Closed.
+_Avoid_: handling time, duration
+
 **Claim**:
 The act of a technician voluntarily taking ownership of a pending ticket. Atomic operation — only one technician can successfully claim a given ticket.
 _Avoid_: Accept, take, pick up
