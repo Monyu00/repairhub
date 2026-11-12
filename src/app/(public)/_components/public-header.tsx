@@ -7,10 +7,10 @@ import { ThemeSwitcher } from "@/app/(main)/dashboard/_components/sidebar/theme-
 import { UserMenu } from "@/app/(main)/dashboard/_components/sidebar/user-menu";
 import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/lib/users/projection";
-import type { TechnicianNotificationsResult } from "@/server/notifications/read";
+import type { NotificationsResult } from "@/server/notifications/read";
 
 interface PublicHeaderProps {
-  notifications?: TechnicianNotificationsResult;
+  notifications?: NotificationsResult;
   user: {
     userId: string;
     email: string;

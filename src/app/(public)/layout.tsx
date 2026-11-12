@@ -2,14 +2,13 @@ import type { ReactNode } from "react";
 
 import { APP_CONFIG } from "@/config/app-config";
 import { getSession } from "@/server/auth/session";
-import { getTechnicianNotifications } from "@/server/notifications/read";
+import { getNotifications } from "@/server/notifications/read";
 
 import { PublicHeader } from "./_components/public-header";
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
-  const notifications =
-    session?.role === "technician" ? await getTechnicianNotifications(session.supabase, session.userId) : undefined;
+  const notifications = session ? await getNotifications(session.supabase, session.userId) : undefined;
 
   const user = session
     ? {

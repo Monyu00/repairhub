@@ -8,7 +8,7 @@ type NotificationDatabase = Omit<Database, "public"> & {
       notifications: {
         Row: {
           created_at: string;
-          event_type: TechnicianNotificationEventType;
+          event_type: NotificationEventType;
           id: string;
           is_read: boolean;
           recipient_id: string;
@@ -38,7 +38,7 @@ type NotificationDatabase = Omit<Database, "public"> & {
 
 export type NotificationReadAdapter = SupabaseClient<NotificationDatabase>;
 
-export type TechnicianNotificationEventType =
+export type NotificationEventType =
   | "new_ticket"
   | "assigned"
   | "pending"
@@ -47,16 +47,16 @@ export type TechnicianNotificationEventType =
   | "closed"
   | "cancelled";
 
-export interface TechnicianNotification {
+export interface NotificationItem {
   id: string;
   ticketId: string;
-  eventType: TechnicianNotificationEventType;
+  eventType: NotificationEventType;
   isRead: boolean;
   createdAt: string;
 }
 
-export interface TechnicianNotificationsResult {
-  notifications: TechnicianNotification[];
+export interface NotificationsResult {
+  notifications: NotificationItem[];
   unreadCount: number;
 }
 
@@ -67,7 +67,7 @@ export interface MarkNotificationResult {
 
 const MAX_NOTIFICATIONS = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const EVENT_TYPES: readonly TechnicianNotificationEventType[] = [
+const EVENT_TYPES: readonly NotificationEventType[] = [
   "new_ticket",
   "assigned",
   "pending",
@@ -77,14 +77,14 @@ const EVENT_TYPES: readonly TechnicianNotificationEventType[] = [
   "cancelled",
 ];
 
-function parseNotification(row: unknown): TechnicianNotification | null {
+function parseNotification(row: unknown): NotificationItem | null {
   if (typeof row !== "object" || row === null) return null;
   const value = row as Record<string, unknown>;
   if (
     typeof value.id !== "string" ||
     typeof value.ticket_id !== "string" ||
     typeof value.event_type !== "string" ||
-    !EVENT_TYPES.includes(value.event_type as TechnicianNotificationEventType) ||
+    !EVENT_TYPES.includes(value.event_type as NotificationEventType) ||
     typeof value.is_read !== "boolean" ||
     typeof value.created_at !== "string"
   ) {
@@ -94,16 +94,13 @@ function parseNotification(row: unknown): TechnicianNotification | null {
   return {
     id: value.id,
     ticketId: value.ticket_id,
-    eventType: value.event_type as TechnicianNotificationEventType,
+    eventType: value.event_type as NotificationEventType,
     isRead: value.is_read,
     createdAt: value.created_at,
   };
 }
 
-export async function getTechnicianNotifications(
-  adapter: NotificationReadAdapter,
-  userId: string,
-): Promise<TechnicianNotificationsResult> {
+export async function getNotifications(adapter: NotificationReadAdapter, userId: string): Promise<NotificationsResult> {
   const empty = { notifications: [], unreadCount: 0 };
   if (!UUID_PATTERN.test(userId)) return empty;
 
@@ -122,23 +119,23 @@ export async function getTechnicianNotifications(
   ]);
 
   if (listResult.error || unreadResult.error) {
-    console.error("getTechnicianNotifications error:", listResult.error ?? unreadResult.error);
+    console.error("getNotifications error:", listResult.error ?? unreadResult.error);
     return empty;
   }
 
   const notifications = (listResult.data ?? []).map(parseNotification);
   if (notifications.some((notification) => notification === null) || typeof unreadResult.count !== "number") {
-    console.error("getTechnicianNotifications received malformed data");
+    console.error("getNotifications received malformed data");
     return empty;
   }
 
   return {
-    notifications: notifications as TechnicianNotification[],
+    notifications: notifications as NotificationItem[],
     unreadCount: unreadResult.count,
   };
 }
 
-export async function markTechnicianNotificationRead(
+export async function markNotificationReadForUser(
   adapter: NotificationReadAdapter,
   userId: string,
   notificationId: string,
@@ -154,14 +151,14 @@ export async function markTechnicianNotificationRead(
     .single();
 
   if (error || !data || typeof data !== "object" || !UUID_PATTERN.test(data.ticket_id)) {
-    console.error("markTechnicianNotificationRead failed:", error ?? new Error("Malformed notification data"));
+    console.error("markNotificationReadForUser failed:", error ?? new Error("Malformed notification data"));
     return { success: false };
   }
 
   return { success: true, ticketId: data.ticket_id };
 }
 
-export async function markAllTechnicianNotificationsRead(
+export async function markAllNotificationsReadForUser(
   adapter: NotificationReadAdapter,
   userId: string,
 ): Promise<MarkNotificationResult> {
@@ -174,7 +171,7 @@ export async function markAllTechnicianNotificationsRead(
     .eq("is_read", false);
 
   if (error) {
-    console.error("markAllTechnicianNotificationsRead failed:", error);
+    console.error("markAllNotificationsReadForUser failed:", error);
     return { success: false };
   }
 

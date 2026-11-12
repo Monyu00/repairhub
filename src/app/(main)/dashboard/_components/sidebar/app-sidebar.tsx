@@ -17,14 +17,14 @@ import {
 import { APP_CONFIG } from "@/config/app-config";
 import { useUser } from "@/hooks/use-user";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
-import type { TechnicianNotificationsResult } from "@/server/notifications/read";
+import type { NotificationsResult } from "@/server/notifications/read";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  notifications?: TechnicianNotificationsResult;
+  notifications?: NotificationsResult;
 }
 
 export function AppSidebar({ notifications, ...props }: AppSidebarProps) {
