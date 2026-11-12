@@ -2,12 +2,15 @@ import Link from "next/link";
 
 import { LayoutDashboard, User, Wrench } from "lucide-react";
 
+import { NotificationBell } from "@/app/(main)/dashboard/_components/sidebar/notification-bell";
 import { ThemeSwitcher } from "@/app/(main)/dashboard/_components/sidebar/theme-switcher";
 import { UserMenu } from "@/app/(main)/dashboard/_components/sidebar/user-menu";
 import { Button } from "@/components/ui/button";
 import type { UserRole } from "@/lib/users/projection";
+import type { TechnicianNotificationsResult } from "@/server/notifications/read";
 
 interface PublicHeaderProps {
+  notifications?: TechnicianNotificationsResult;
   user: {
     userId: string;
     email: string;
@@ -17,7 +20,7 @@ interface PublicHeaderProps {
   } | null;
 }
 
-export function PublicHeader({ user }: PublicHeaderProps) {
+export function PublicHeader({ notifications, user }: PublicHeaderProps) {
   const isStaff = user?.role === "admin" || user?.role === "technician";
   const displayName = user?.displayName ?? (user?.email ? user.email.split("@")[0] : "");
 
@@ -48,6 +51,8 @@ export function PublicHeader({ user }: PublicHeaderProps) {
               </Link>
             </Button>
           )}
+
+          {notifications ? <NotificationBell result={notifications} /> : null}
 
           {/* User Section */}
           {user ? (

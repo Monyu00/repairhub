@@ -102,6 +102,10 @@ _Avoid_: Notification log, mail queue, trigger chain
 A single queued Email send for one Ticket event and one recipient.
 _Avoid_: Notification, message, attempt
 
+**In-app Notification** (站內通知):
+A per-recipient record of one Ticket event (new ticket in a subscribed category, or a status change on a claimed or assigned ticket) shown in the bell dropdown. Read state is tracked per notification.
+_Avoid_: Notification (ambiguous with Delivery), alert, push
+
 **Submission Confirmation**:
 The Delivery confirming to the Reporter that their Ticket was successfully created. Sent when the Ticket is ready for notifications, separate from the notice sent to subscribed Technicians.
 _Avoid_: 報修成功信, receipt, acknowledgement

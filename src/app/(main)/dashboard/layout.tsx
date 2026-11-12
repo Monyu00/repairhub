@@ -13,9 +13,11 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import type { UserProjection } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
 import { requireDashboardAccess } from "@/server/auth/session";
+import { getTechnicianNotifications } from "@/server/notifications/read";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
+import { NotificationBell } from "./_components/sidebar/notification-bell";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 import { UserMenu } from "./_components/sidebar/user-menu";
@@ -42,6 +44,9 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     mustChangePassword: session.mustChangePassword,
   };
 
+  const notifications =
+    session.role === "technician" ? await getTechnicianNotifications(session.supabase, session.userId) : undefined;
+
   return (
     <UserProjectionProvider projection={projection}>
       <SidebarProvider
@@ -52,7 +57,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant={variant} collapsible={collapsible} />
+        <AppSidebar notifications={notifications} variant={variant} collapsible={collapsible} />
         <SidebarInset
           id="main-content"
           tabIndex={-1}
@@ -97,6 +102,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
                     </span>
                   </Link>
                 </Button>
+                {notifications ? <NotificationBell result={notifications} /> : null}
                 <UserMenu />
                 <ThemeSwitcher />
                 <LayoutControls />
