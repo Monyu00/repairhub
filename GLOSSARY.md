@@ -103,7 +103,7 @@ A single queued Email send for one Ticket event and one recipient.
 _Avoid_: Notification, message, attempt
 
 **In-app Notification** (站內通知):
-A per-recipient record of one Ticket event (new ticket in a subscribed category, or a status change on a claimed or assigned ticket) shown in the bell dropdown. Read state is tracked per notification.
+An account's record of one Ticket event shown in the bell dropdown. The recipient depends on the event: subscribed Technicians and Admins receive new Ticket notices, while the assigned Technician and the Ticket's Reporter receive status changes. Read state is tracked per notification, and the event's actor never receives a notification for their own action.
 _Avoid_: Notification (ambiguous with Delivery), alert, push
 
 **Submission Confirmation**:
