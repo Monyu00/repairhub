@@ -10,4 +10,5 @@ A separate in-app preference set doubles the settings UI, the schema, and the te
 
 - Turning off a Notification Preference also silences the matching In-app Notification, not just the Delivery.
 - The new-ticket readiness trigger writes both the Delivery and the In-app Notification. Status-event In-app Notifications use a separate ticket update trigger, so status-event gaps debug from that trigger.
+- Ticket readiness runs from service-role intake, where `auth.uid()` is unavailable. The in-app `new_ticket` trigger therefore also treats the account whose Email matches `reporter_email` as the actor; a Reporter using a different Email keeps that documented Email-matching limitation. This in-app actor rule does not change Technician Email recipients.
 - Per-channel quiet hours or frequency controls need new fields first; the flat preference object deliberately does not anticipate them.

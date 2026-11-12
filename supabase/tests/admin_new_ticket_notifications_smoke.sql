@@ -13,6 +13,7 @@ DECLARE
   other_technician_id UUID := gen_random_uuid();
   admin_ticket_id UUID := gen_random_uuid();
   technician_ticket_id UUID := gen_random_uuid();
+  uid_actor_ticket_id UUID := gen_random_uuid();
   notification_count INTEGER;
 BEGIN
   PERFORM set_config('request.jwt.claims', NULL, true);
@@ -83,6 +84,15 @@ BEGIN
       'Technician actor smoke fixture',
       'technician-new-ticket-a@example.com',
       '0912345678'
+    ),
+    (
+      uid_actor_ticket_id,
+      'pending',
+      category_id,
+      space_id,
+      'auth.uid actor smoke fixture',
+      'uid-actor-reporter@example.com',
+      '0912345678'
     );
 
   UPDATE public.tickets
@@ -149,7 +159,39 @@ BEGIN
     RAISE EXCEPTION 'Both active Admins must receive the Technician-created Ticket Notice.';
   END IF;
 
-  -- Admin is in-app only; Technician actors also skip the Email Dispatch.
+  -- auth.uid() is the primary actor identity when a non-service-role caller writes readiness.
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('sub', other_admin_id, 'role', 'authenticated')::text,
+    true
+  );
+
+  UPDATE public.tickets
+  SET notification_ready_at = now()
+  WHERE id = uid_actor_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = uid_actor_ticket_id
+    AND recipient_id = other_admin_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'The auth.uid() actor must not receive their own new_ticket Notice.';
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = uid_actor_ticket_id
+    AND recipient_id = active_admin_id
+    AND event_type = 'new_ticket';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A non-actor Admin must still receive the new_ticket Notice.';
+  END IF;
+
+  PERFORM set_config('request.jwt.claims', NULL, true);
+
+  -- Admin is in-app only; Technician Email Dispatch behavior is unchanged.
   SELECT count(*) INTO notification_count
   FROM public.notification_log
   WHERE ticket_id = admin_ticket_id
@@ -181,8 +223,8 @@ BEGIN
     AND event_type = 'new_ticket'
     AND recipient_email = 'technician-new-ticket-a@example.com';
 
-  IF notification_count <> 0 THEN
-    RAISE EXCEPTION 'A Technician actor must not receive their own new_ticket Email Delivery.';
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A Technician actor must still receive the existing new_ticket Email Delivery.';
   END IF;
 
   SELECT count(*) INTO notification_count
@@ -197,11 +239,11 @@ BEGIN
 
   SELECT count(*) INTO notification_count
   FROM public.notification_log
-  WHERE ticket_id IN (admin_ticket_id, technician_ticket_id)
+  WHERE ticket_id IN (admin_ticket_id, technician_ticket_id, uid_actor_ticket_id)
     AND event_type = 'report_submitted';
 
-  IF notification_count <> 2 THEN
-    RAISE EXCEPTION 'The Reporter Submission Confirmation must remain in place for both Tickets.';
+  IF notification_count <> 3 THEN
+    RAISE EXCEPTION 'The Reporter Submission Confirmation must remain in place for every Ticket.';
   END IF;
 END
 $$;
