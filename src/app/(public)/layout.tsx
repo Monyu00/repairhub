@@ -2,11 +2,14 @@ import type { ReactNode } from "react";
 
 import { APP_CONFIG } from "@/config/app-config";
 import { getSession } from "@/server/auth/session";
+import { getTechnicianNotifications } from "@/server/notifications/read";
 
 import { PublicHeader } from "./_components/public-header";
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
+  const notifications =
+    session?.role === "technician" ? await getTechnicianNotifications(session.supabase, session.userId) : undefined;
 
   const user = session
     ? {
@@ -20,7 +23,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <PublicHeader user={user} />
+      <PublicHeader notifications={notifications} user={user} />
       <main id="main-content" tabIndex={-1} className="flex-1 scroll-mt-14">
         <a
           href="#main-content"
