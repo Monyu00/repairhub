@@ -17,6 +17,7 @@ import { getTechnicianNotifications } from "@/server/notifications/read";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
+import { NotificationBell } from "./_components/sidebar/notification-bell";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 import { UserMenu } from "./_components/sidebar/user-menu";
@@ -101,6 +102,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
                     </span>
                   </Link>
                 </Button>
+                {notifications ? <NotificationBell result={notifications} /> : null}
                 <UserMenu />
                 <ThemeSwitcher />
                 <LayoutControls />

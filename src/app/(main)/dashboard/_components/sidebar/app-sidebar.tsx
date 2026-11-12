@@ -22,7 +22,6 @@ import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { NotificationBell } from "./notification-bell";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   notifications?: TechnicianNotificationsResult;
@@ -61,7 +60,6 @@ export function AppSidebar({ notifications, ...props }: AppSidebarProps) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          {activeRole === "technician" && notifications ? <NotificationBell result={notifications} /> : null}
         </SidebarHeader>
         <SidebarContent>
           <NavMain items={sidebarItems} userRole={activeRole} />
