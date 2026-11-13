@@ -53,6 +53,19 @@ test("uses profile values over auth metadata", () => {
   });
 });
 
+test("uses the profile avatar over auth metadata", () => {
+  const result = resolveUserProjection(
+    {
+      id: "user-avatar",
+      email: "avatar@example.com",
+      user_metadata: { avatar_url: "https://example.com/metadata.png" },
+    },
+    { avatar_url: "https://example.com/profile.png" },
+  );
+
+  assert.equal(result.avatarUrl, "https://example.com/profile.png");
+});
+
 test("falls back to auth metadata when profile values are missing", () => {
   const result = resolveUserProjection(
     {

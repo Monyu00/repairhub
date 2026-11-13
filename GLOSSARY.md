@@ -175,6 +175,10 @@ The ticket was invalidated by an admin (e.g., duplicate, not actionable). Termin
 
 ### Account
 
+**Avatar** (頭像):
+The image an account chooses to represent itself. Stored on the account profile and editable only by that account.
+_Avoid_: Profile photo, user image, profile picture
+
 **Personal Settings** (個人設定):
 The screen where a logged-in account manages its own profile fields, Notification Preferences, and Account Security. Available to every account regardless of role; admin maintenance screens are separate.
 _Avoid_: Account settings, my profile, preferences page, 帳號設定

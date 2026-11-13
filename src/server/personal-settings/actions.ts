@@ -1,12 +1,13 @@
 "use server";
 
+import { removeStoredAvatar, uploadAvatar } from "@/lib/storage/avatar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
 import { changePassword, createSupabaseAccountSecurityAdapter, verifyCurrentPassword } from "@/server/account/security";
 import { type AuthenticatedUser, getSession, safeAction } from "@/server/auth/session";
 
 import type { NotificationPreferences } from "./input";
-import { canDeleteOwnAccount, notificationPreferencesSchema, profileInputSchema } from "./input";
+import { avatarInputSchema, canDeleteOwnAccount, notificationPreferencesSchema, profileInputSchema } from "./input";
 
 export interface MyProfile {
   displayName: string | null;
@@ -21,6 +22,7 @@ export interface MyProfile {
 }
 
 export type ProfileResult = { success: boolean; error?: string };
+export type AvatarResult = { success: boolean; error?: string; avatarUrl?: string | null };
 
 export interface MyProfileResult {
   profile: MyProfile | null;
@@ -87,6 +89,59 @@ export async function updateMyProfile(data: {
     }
 
     return { success: true };
+  });
+}
+
+export async function updateMyAvatar(data: { imageDataUrl?: string; remove?: boolean }): Promise<AvatarResult> {
+  return safeAction(async () => {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, error: "尚未登入，請先登入" };
+    }
+
+    const parsed = avatarInputSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: parsed.error.issues[0]?.message ?? "頭像格式不正確" };
+    }
+
+    const previousUrl = session.avatarUrl ?? null;
+    if (parsed.data.remove) {
+      const { error } = await session.supabase.from("profiles").update({ avatar_url: null }).eq("id", session.userId);
+
+      if (error) {
+        console.error("Failed to remove own avatar:", error);
+        return { success: false, error: "移除頭像失敗，請稍後再試" };
+      }
+
+      await removeStoredAvatar(session.supabase, previousUrl, session.userId);
+      return { success: true, avatarUrl: null };
+    }
+
+    if (!parsed.data.imageDataUrl) {
+      return { success: true, avatarUrl: previousUrl };
+    }
+
+    const uploaded = await uploadAvatar(session.supabase, {
+      userId: session.userId,
+      imageDataUrl: parsed.data.imageDataUrl,
+    });
+    if (!uploaded.success || !uploaded.publicUrl) {
+      return { success: false, error: uploaded.error };
+    }
+
+    const { error } = await session.supabase
+      .from("profiles")
+      .update({ avatar_url: uploaded.publicUrl })
+      .eq("id", session.userId);
+
+    if (error) {
+      console.error("Failed to save own avatar url:", error);
+      await removeStoredAvatar(session.supabase, uploaded.publicUrl, session.userId);
+      return { success: false, error: "頭像儲存失敗，請稍後再試" };
+    }
+
+    await removeStoredAvatar(session.supabase, previousUrl, session.userId);
+    return { success: true, avatarUrl: uploaded.publicUrl };
   });
 }
 

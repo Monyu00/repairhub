@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MAX_AVATAR_DATA_URL_CHARS } from "@/lib/storage/constants";
 import type { UserRole } from "@/lib/users/projection";
 
 export interface NotificationPreferences {
@@ -27,6 +28,22 @@ export const notificationPreferencesSchema = z.object({
   ticketStatus: z.boolean(),
   newTicket: z.boolean(),
 });
+
+export const avatarInputSchema = z
+  .object({
+    imageDataUrl: z.string().min(1).max(MAX_AVATAR_DATA_URL_CHARS).optional(),
+    remove: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      const hasUrl = Boolean(data.imageDataUrl);
+      return !(hasUrl && data.remove);
+    },
+    {
+      path: ["imageDataUrl"],
+      message: "頭像只能選擇上傳或移除其中一種",
+    },
+  );
 
 /** 通知偏好依角色顯示：只有維修技師能訂閱類別並接收新報修通知（見 enqueue_ticket_ready_notification）。 */
 export function visibleNotificationPreferenceKeys(role: UserRole | null): Array<keyof NotificationPreferences> {

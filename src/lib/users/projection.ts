@@ -38,6 +38,7 @@ interface AuthUser {
 }
 
 interface Profile {
+  avatar_url?: string | null;
   display_name?: string | null;
   department?: string | null;
   phone?: string | null;
@@ -57,7 +58,7 @@ export function resolveUserProjection(authUser: AuthUser, profile?: Profile | nu
     role: profile?.user_role ?? metadata?.user_role ?? null,
     department: profile?.department ?? metadata?.department ?? null,
     phone: profile?.phone ?? metadata?.phone ?? null,
-    avatarUrl: metadata?.avatar_url ?? null,
+    avatarUrl: profile?.avatar_url ?? metadata?.avatar_url ?? null,
     isActive: profile?.is_active ?? true,
     mustChangePassword: profile?.must_change_password ?? false,
   };
