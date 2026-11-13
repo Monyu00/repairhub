@@ -17,9 +17,9 @@
 - **批次匯入**：管理員可用 XLSX／CSV 批次建立地點、設備與使用者；已存在記錄會略過，並逐列回報建立、略過與失敗結果。匯入或重設的使用者帳號以完整 Email 作為預設密碼，必須先改密碼才能使用管理後台。
 - 新增與重設的密碼最少 8 碼。
 - **工單生命週期閉環**：接單、完工（須附照片與維修說明）、報修者確認或七日自動關單、未完成重開單（Reopen）。
-- **Email 通知**：新工單與狀態變更由資料庫觸發器派送，收件人為報修者與已訂閱分類且未關閉偏好的技師；失敗只記錄錯誤與重試時間，不中斷工單寫入。
+- **通知**：Email 通知報修者與已訂閱分類且未關閉偏好的技師；站內通知將新工單送到 Admin 與已訂閱分類的技師，狀態變更送到報修者與指派技師。偏好關閉會同時停用對應 Email 與站內通知；派送失敗只記錄錯誤與重試時間，不中斷工單寫入。
 - **管理後台**：待修佇列、工單詳情與時間軸、維修紀錄、QR Code 批次產生與匯出、Excel／PDF 報表、滿意度分析、公告與系統設定。
-- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、調整 Email 通知偏好與刪除帳號。
+- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、調整通知偏好與刪除帳號。
 - **響應式與主題**：手機現場操作、桌面管理中心兩種密度；淺色／深色模式與主題預設檔，全站使用語意化 CSS 變數。
 
 ## 技術棧
@@ -111,11 +111,11 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工。
 
-![工單記事、通知帳務與公告](docs/diagrams/data-model-detail.svg)
+![工單記事與通知](docs/diagrams/data-model-detail.svg)
 
-工單的附屬表：`ticket_notes` 同時承載維修記事與 `status_change` 流轉紀錄（對照上面的狀態機）、`notification_log` 是每封通知信的派送帳務（含重試次數與下次嘗試時間，對照通知派送流程）、`announcements` 由人員發布。圖分兩張是因為 Diagram Design 的 ER 上限為 8 個實體。
+工單的附屬表：`ticket_notes` 同時承載維修記事與 `status_change` 流轉紀錄（對照上面的狀態機）、`notification_log` 是每封通知信的派送帳務（含重試次數與下次嘗試時間，對照通知派送流程）、`notifications` 是每個登入帳號的站內通知記錄、`announcements` 由人員發布。圖分兩張是因為 Diagram Design 的 ER 上限為 8 個實體。
 
-Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)（列出全部 11 張表，含各表未畫進圖的欄位與 unique 條件）。實體定義以 `supabase/migrations/` 為準；各表共通的 `created_at` / `updated_at` 等稽核欄位未畫出。
+Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)（列出全部 12 張表，含各表未畫進圖的欄位與 unique 條件）。實體定義以 `supabase/migrations/` 為準；各表共通的 `created_at` / `updated_at` 等稽核欄位未畫出。
 
 ## 工單狀態
 
@@ -125,13 +125,13 @@ Mermaid 原始檔：[docs/diagrams/ticket-status.mmd](docs/diagrams/ticket-statu
 
 允許的流轉由 `src/server/tickets/lifecycle.ts` 統一檢查（錯誤碼 `INVALID_PREVIOUS_STATUS`），每筆流轉都會留下 `status_change` 記事；完工逾七日未回覆由 `pg_cron` 每日 03:00 UTC 自動結單。
 
-## 通知派送
+## 通知與派送
 
 ![Ticket 通知派送流程](docs/diagrams/notification-pipeline.svg)
 
 Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/notification-pipeline.mmd)。
 
-派送鏈為 `enqueue_notification_delivery` → `notification_log` → `invoke_notification_delivery` → `pg_net` → Edge Function `claim_notification_delivery` → Resend。事件鍵（`ticket:<id>:<event>:<ts>`）與 `ON CONFLICT DO NOTHING` 保證同一事件不重複寄送；每筆 delivery 最多五次 claim，其間隔約五分鐘、十五分鐘、一小時與六小時，由 `pg_cron` 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending 項目。詳情與 Vault 檢查見 [docs/notifications.md](docs/notifications.md)。
+Email 派送鏈為 `enqueue_notification_delivery` → `notification_log` → `invoke_notification_delivery` → `pg_net` → Edge Function `claim_notification_delivery` → Resend。事件鍵（`ticket:<id>:<event>:<ts>`）與 `ON CONFLICT DO NOTHING` 保證同一事件不重複寄送；每筆 delivery 最多五次 claim，其間隔約五分鐘、十五分鐘、一小時與六小時，由 `pg_cron` 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending 項目。站內通知由同一組偏好與事件資料寫入 `notifications`，不經過 Email 派送鏈。詳情與 Vault 檢查見 [docs/notifications.md](docs/notifications.md)。
 
 ## 開發規範
 
@@ -161,3 +161,4 @@ Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/noti
 - [0007-bulk-import-forces-password-reset.md](docs/adr/0007-bulk-import-forces-password-reset.md)：批次匯入使用者的預設密碼需強制重設
 - [0008-cloudflare-turnstile-for-anonymous-writes.md](docs/adr/0008-cloudflare-turnstile-for-anonymous-writes.md)：匿名寫入用 Cloudflare Turnstile 保護
 - [0009-notification-preferences-on-profiles.md](docs/adr/0009-notification-preferences-on-profiles.md)：通知偏好存在個人檔案
+- [0010-in-app-notifications-share-email-subscription-data.md](docs/adr/0010-in-app-notifications-share-email-subscription-data.md)：站內通知共用 Email 的訂閱與偏好資料

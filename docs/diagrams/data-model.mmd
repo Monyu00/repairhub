@@ -12,6 +12,8 @@ erDiagram
   tickets ||--o{ ticket_photos : "佐證照片"
   tickets ||--o{ ticket_notes : "記事與狀態流轉"
   tickets ||--o{ notification_log : "派送帳務"
+  tickets ||--o{ notifications : "站內通知"
+  profiles ||--o{ notifications : "接收"
   profiles |o--o{ ticket_notes : "作者"
   profiles ||--o{ announcements : "發布"
 
@@ -93,6 +95,13 @@ erDiagram
     text resend_message_id
     text last_error
   }
+  notifications {
+    uuid id PK
+    uuid recipient_id FK
+    uuid ticket_id FK
+    text event_type
+    bool is_read
+  }
   announcements {
     uuid id PK
     text title
@@ -103,7 +112,7 @@ erDiagram
   }
 ```
 
-權威來源：本檔列出全部 11 張表；`data-model.svg` 是領域總覽（8 實體，Diagram Design 的 ER 上限），
+權威來源：本檔列出全部 12 張表；`data-model.svg` 是領域總覽（8 實體，Diagram Design 的 ER 上限），
 `data-model-detail.svg` 是工單記事、通知帳務與公告的明細。
 
 未畫出的共用欄位：`created_at` / `updated_at`（各表皆有）、`tickets.reporter_name`、
