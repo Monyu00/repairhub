@@ -17,14 +17,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { markAllNotificationsRead, markNotificationRead } from "@/server/notifications/actions";
-import type {
-  TechnicianNotification,
-  TechnicianNotificationEventType,
-  TechnicianNotificationsResult,
-} from "@/server/notifications/read";
+import type { NotificationEventType, NotificationItem, NotificationsResult } from "@/server/notifications/read";
 
 interface NotificationBellProps {
-  result: TechnicianNotificationsResult;
+  result: NotificationsResult;
 }
 
 function formatCreatedAt(iso: string) {
@@ -38,7 +34,7 @@ function formatCreatedAt(iso: string) {
   }).format(new Date(iso));
 }
 
-const NOTIFICATION_LABELS: Record<TechnicianNotificationEventType, string> = {
+const NOTIFICATION_LABELS: Record<NotificationEventType, string> = {
   new_ticket: "新報修單",
   assigned: "已指派",
   pending: "退回待處理",
@@ -54,7 +50,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
   const router = useRouter();
   const badge = result.unreadCount > 9 ? "9+" : String(result.unreadCount);
 
-  function handleNotificationClick(notification: TechnicianNotification, event: Event) {
+  function handleNotificationClick(notification: NotificationItem, event: Event) {
     event.preventDefault();
     setError(null);
     if (notification.isRead) {

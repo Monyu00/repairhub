@@ -328,4 +328,475 @@ BEGIN
 END
 $$;
 
+DO $$
+DECLARE
+  building_id UUID := gen_random_uuid();
+  category_id UUID := gen_random_uuid();
+  space_id UUID := gen_random_uuid();
+  admin_id UUID := gen_random_uuid();
+  technician_id UUID := gen_random_uuid();
+  reporter_id UUID := gen_random_uuid();
+  mismatched_reporter_id UUID := gen_random_uuid();
+  disabled_reporter_id UUID := gen_random_uuid();
+  start_ticket_id UUID := gen_random_uuid();
+  completed_ticket_id UUID := gen_random_uuid();
+  confirmed_ticket_id UUID := gen_random_uuid();
+  auto_close_ticket_id UUID := gen_random_uuid();
+  cancelled_ticket_id UUID := gen_random_uuid();
+  unassigned_cancelled_ticket_id UUID := gen_random_uuid();
+  pending_cancelled_ticket_id UUID := gen_random_uuid();
+  pending_unassigned_cancelled_ticket_id UUID := gen_random_uuid();
+  disabled_ticket_id UUID := gen_random_uuid();
+  suggestion_ticket_id UUID := gen_random_uuid();
+  mismatched_ticket_id UUID := gen_random_uuid();
+  notification_count INTEGER;
+BEGIN
+  INSERT INTO public.buildings (id, name, code)
+  VALUES (building_id, 'Reporter Status Smoke Building', 'RSS-' || left(building_id::text, 8));
+
+  INSERT INTO public.categories (id, name, sort_order)
+  VALUES (category_id, 'Reporter Status Smoke Category', 9992);
+
+  INSERT INTO public.spaces (id, name, floor, building_id)
+  VALUES (space_id, 'Reporter Status Smoke Space', 1, building_id);
+
+  INSERT INTO auth.users (id, email)
+  VALUES
+    (admin_id, 'reporter-status-admin@example.com'),
+    (technician_id, 'reporter-status-technician@example.com'),
+    (reporter_id, 'Reporter.Status@Example.com'),
+    (mismatched_reporter_id, 'other.account@example.com'),
+    (disabled_reporter_id, 'disabled.reporter@example.com');
+
+  UPDATE public.profiles
+  SET user_role = 'admin'::public.user_role
+  WHERE id = admin_id;
+
+  UPDATE public.profiles
+  SET user_role = 'technician'::public.user_role
+  WHERE id = technician_id;
+
+  UPDATE public.profiles
+  SET notification_preferences = '{"ticket_status": false}'::jsonb
+  WHERE id = disabled_reporter_id;
+
+  INSERT INTO public.tickets (
+    id,
+    status,
+    category_id,
+    space_id,
+    description,
+    reporter_email,
+    reporter_phone,
+    assigned_to
+  )
+  VALUES
+    (
+      start_ticket_id,
+      'pending',
+      category_id,
+      space_id,
+      'Reporter in-progress smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      NULL
+    ),
+    (
+      completed_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Reporter completed smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      confirmed_ticket_id,
+      'completed',
+      category_id,
+      space_id,
+      'Reporter confirmed closure smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      auto_close_ticket_id,
+      'completed',
+      category_id,
+      space_id,
+      'Reporter auto-close smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      cancelled_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Reporter cancellation smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      unassigned_cancelled_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Unassigned cancellation smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      NULL
+    ),
+    (
+      pending_cancelled_ticket_id,
+      'pending',
+      category_id,
+      space_id,
+      'Pending cancellation smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      pending_unassigned_cancelled_ticket_id,
+      'pending',
+      category_id,
+      space_id,
+      'Pending unassigned cancellation smoke fixture',
+      'Reporter.Status@Example.com',
+      '0912345678',
+      NULL
+    ),
+    (
+      disabled_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Disabled Reporter preference smoke fixture',
+      'disabled.reporter@example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      suggestion_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Anonymous Reporter suggestion smoke fixture',
+      'anonymous.reporter@example.com',
+      '0912345678',
+      technician_id
+    ),
+    (
+      mismatched_ticket_id,
+      'in_progress',
+      category_id,
+      space_id,
+      'Mismatched Reporter Email smoke fixture',
+      'other.reporter@example.com',
+      '0912345678',
+      technician_id
+    );
+
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('sub', admin_id, 'role', 'authenticated')::text,
+    true
+  );
+
+  UPDATE public.tickets
+  SET status = 'in_progress', assigned_to = technician_id
+  WHERE id = start_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = start_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'in_progress';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'An assigned Reporter must receive one in_progress notification, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = start_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'in_progress';
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'An assignment must not duplicate the in_progress notification for the Technician.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = completed_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = completed_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'completed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A Reporter must receive one completed notification, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = completed_ticket_id
+    AND recipient_id = technician_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'The Technician actor must not receive their own completion notification, found %.', notification_count;
+  END IF;
+
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('sub', reporter_id, 'role', 'authenticated')::text,
+    true
+  );
+
+  UPDATE public.tickets
+  SET status = 'closed'
+  WHERE id = confirmed_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = confirmed_ticket_id
+    AND recipient_id = reporter_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'A Reporter-confirmed closure must not notify the Reporter, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = confirmed_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'closed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A Reporter-confirmed closure must still notify the Technician, found %.', notification_count;
+  END IF;
+
+  PERFORM set_config('request.jwt.claims', NULL, true);
+
+  UPDATE public.tickets
+  SET status = 'closed'
+  WHERE id = auto_close_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = auto_close_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'closed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'An auto-closed Ticket must notify its Reporter, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = auto_close_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'closed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'An auto-closed Ticket must still notify its Technician, found %.', notification_count;
+  END IF;
+
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('sub', admin_id, 'role', 'authenticated')::text,
+    true
+  );
+
+  UPDATE public.tickets
+  SET status = 'cancelled'
+  WHERE id = cancelled_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = cancelled_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A cancelled Ticket must notify its Reporter once, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = cancelled_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A cancelled Ticket must notify its Technician once, found %.', notification_count;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = cancelled_ticket_id
+      AND event_type = 'cancelled'
+      AND recipient_email = 'reporter.status@example.com'
+  ) THEN
+    RAISE EXCEPTION 'A cancelled Ticket must queue a Reporter cancellation email.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'cancelled'
+  WHERE id = unassigned_cancelled_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = unassigned_cancelled_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'An unassigned cancelled Ticket must still notify its Reporter, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = unassigned_cancelled_ticket_id
+    AND recipient_id = technician_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'An unassigned cancelled Ticket must not notify the Technician, found %.', notification_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'cancelled'
+  WHERE id = pending_cancelled_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = pending_cancelled_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'Cancelling a pending Ticket must notify its Reporter once, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = pending_cancelled_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'Cancelling a pending assigned Ticket must notify its Technician once, found %.', notification_count;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = pending_cancelled_ticket_id
+      AND event_type = 'cancelled'
+      AND recipient_email = 'reporter.status@example.com'
+  ) THEN
+    RAISE EXCEPTION 'Cancelling a pending Ticket must queue a Reporter cancellation email.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'cancelled'
+  WHERE id = pending_unassigned_cancelled_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = pending_unassigned_cancelled_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'cancelled';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'Cancelling a pending unassigned Ticket must still notify its Reporter, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = pending_unassigned_cancelled_ticket_id
+    AND recipient_id = technician_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'Cancelling a pending unassigned Ticket must not notify the Technician, found %.', notification_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = disabled_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = disabled_ticket_id;
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'A disabled ticket_status preference must not notify either recipient, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notification_log
+  WHERE ticket_id = disabled_ticket_id
+    AND event_type = 'completed';
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'A disabled ticket_status preference must not queue a Delivery, found %.', notification_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = suggestion_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = suggestion_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'completed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'An anonymous Reporter must not block the Technician notification, found %.', notification_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notifications
+    WHERE ticket_id = suggestion_ticket_id
+      AND recipient_id <> technician_id
+  ) THEN
+    RAISE EXCEPTION 'An anonymous Reporter must not receive an in-app notification.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = mismatched_ticket_id;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = mismatched_ticket_id
+    AND recipient_id IN (reporter_id, mismatched_reporter_id);
+
+  IF notification_count <> 0 THEN
+    RAISE EXCEPTION 'A Reporter Email that differs from the account Email must not notify the account, found %.', notification_count;
+  END IF;
+
+  SELECT count(*) INTO notification_count
+  FROM public.notifications
+  WHERE ticket_id = mismatched_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'completed';
+
+  IF notification_count <> 1 THEN
+    RAISE EXCEPTION 'A mismatched Reporter Email must not block the Technician notification, found %.', notification_count;
+  END IF;
+END
+$$;
+
 ROLLBACK;

@@ -1,5 +1,5 @@
 import type { NotificationReadAdapter } from "./read";
-import { getTechnicianNotifications, markAllTechnicianNotificationsRead, markTechnicianNotificationRead } from "./read";
+import { getNotifications, markAllNotificationsReadForUser, markNotificationReadForUser } from "./read";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -101,30 +101,30 @@ const notificationExpectation = (eventType: string) => ({
 
 const userId = "00000000-0000-4000-8000-000000000001";
 
-test("getTechnicianNotifications maps every supported event type and exact unread count", async () => {
+test("getNotifications maps every supported event type and exact unread count", async () => {
   const eventTypes = ["new_ticket", "assigned", "pending", "in_progress", "completed", "closed", "cancelled"];
 
   for (const eventType of eventTypes) {
     const { adapter } = createAdapter({ data: [notificationRow(eventType)], unreadCount: 7 });
 
-    assert.deepEqual(await getTechnicianNotifications(adapter, userId), {
+    assert.deepEqual(await getNotifications(adapter, userId), {
       notifications: [notificationExpectation(eventType)],
       unreadCount: 7,
     });
   }
 });
 
-test("getTechnicianNotifications fails closed for a malformed identity without querying", async () => {
+test("getNotifications fails closed for a malformed identity without querying", async () => {
   const { adapter, queryCount } = createAdapter({ data: [notificationRow("new_ticket")] });
 
-  assert.deepEqual(await getTechnicianNotifications(adapter, "not-a-user"), {
+  assert.deepEqual(await getNotifications(adapter, "not-a-user"), {
     notifications: [],
     unreadCount: 0,
   });
   assert.equal(queryCount(), 0);
 });
 
-test("getTechnicianNotifications fails closed when either read fails", async () => {
+test("getNotifications fails closed when either read fails", async () => {
   const originalConsoleError = console.error;
   console.error = () => undefined;
 
@@ -136,11 +136,11 @@ test("getTechnicianNotifications fails closed when either read fails", async () 
       unreadCount: 2,
     });
 
-    assert.deepEqual(await getTechnicianNotifications(listFailure.adapter, userId), {
+    assert.deepEqual(await getNotifications(listFailure.adapter, userId), {
       notifications: [],
       unreadCount: 0,
     });
-    assert.deepEqual(await getTechnicianNotifications(unreadFailure.adapter, userId), {
+    assert.deepEqual(await getNotifications(unreadFailure.adapter, userId), {
       notifications: [],
       unreadCount: 0,
     });
@@ -149,14 +149,14 @@ test("getTechnicianNotifications fails closed when either read fails", async () 
   }
 });
 
-test("getTechnicianNotifications fails closed for an unsupported event type", async () => {
+test("getNotifications fails closed for an unsupported event type", async () => {
   const originalConsoleError = console.error;
   console.error = () => undefined;
 
   try {
     const { adapter } = createAdapter({ data: [notificationRow("unknown")] });
 
-    assert.deepEqual(await getTechnicianNotifications(adapter, userId), {
+    assert.deepEqual(await getNotifications(adapter, userId), {
       notifications: [],
       unreadCount: 0,
     });
@@ -165,34 +165,34 @@ test("getTechnicianNotifications fails closed for an unsupported event type", as
   }
 });
 
-test("markTechnicianNotificationRead returns the ticket and fails closed for malformed data", async () => {
+test("markNotificationReadForUser returns the ticket and fails closed for malformed data", async () => {
   const ticketId = "00000000-0000-4000-8000-000000000003";
   const notificationId = "00000000-0000-4000-8000-000000000002";
   const success = createUpdateAdapter({ data: { ticket_id: ticketId } });
   const malformed = createUpdateAdapter({ data: { ticket_id: "ticket-1" } });
 
-  assert.deepEqual(await markTechnicianNotificationRead(success.adapter, userId, notificationId), {
+  assert.deepEqual(await markNotificationReadForUser(success.adapter, userId, notificationId), {
     success: true,
     ticketId,
   });
-  assert.deepEqual(await markTechnicianNotificationRead(malformed.adapter, userId, notificationId), {
+  assert.deepEqual(await markNotificationReadForUser(malformed.adapter, userId, notificationId), {
     success: false,
   });
 });
 
-test("markTechnicianNotificationRead rejects malformed input without querying", async () => {
+test("markNotificationReadForUser rejects malformed input without querying", async () => {
   const { adapter, queryCount } = createUpdateAdapter({ data: { ticket_id: "00000000-0000-4000-8000-000000000003" } });
 
-  assert.deepEqual(await markTechnicianNotificationRead(adapter, "not-a-user", "not-a-id"), {
+  assert.deepEqual(await markNotificationReadForUser(adapter, "not-a-user", "not-a-id"), {
     success: false,
   });
   assert.equal(queryCount(), 0);
 });
 
-test("markAllTechnicianNotificationsRead returns success or a fail-closed result", async () => {
+test("markAllNotificationsReadForUser returns success or a fail-closed result", async () => {
   const success = createUpdateAdapter({});
   const failure = createUpdateAdapter({ error: { message: "update failed" } });
 
-  assert.deepEqual(await markAllTechnicianNotificationsRead(success.adapter, userId), { success: true });
-  assert.deepEqual(await markAllTechnicianNotificationsRead(failure.adapter, userId), { success: false });
+  assert.deepEqual(await markAllNotificationsReadForUser(success.adapter, userId), { success: true });
+  assert.deepEqual(await markAllNotificationsReadForUser(failure.adapter, userId), { success: false });
 });

@@ -311,6 +311,34 @@ test("sends the closed Email after reporter confirmation or seven-day auto-close
   assert.deepEqual(state.sent, [{ deliveryId: "delivery-closed", messageId: "resend-message-closed" }]);
 });
 
+test("sends the cancelled Email when an Admin cancels the Ticket", async () => {
+  const { repository, state } = createRepository();
+  state.claim = createDelivery({
+    id: "delivery-cancelled",
+    eventType: "cancelled",
+    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:cancelled:1761208200",
+  });
+  const messages: EmailMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "resend-message-cancelled" });
+    },
+  });
+
+  const response = await handler(request("delivery-cancelled"));
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.to, "reporter@example.com");
+  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已取消");
+  assert.match(messages[0]?.html ?? "", /案件已取消/);
+  assert.match(messages[0]?.html ?? "", /已取消/);
+  assert.match(messages[0]?.text ?? "", /案件已取消/);
+  assert.match(messages[0]?.text ?? "", /已取消/);
+  assert.deepEqual(state.sent, [{ deliveryId: "delivery-cancelled", messageId: "resend-message-cancelled" }]);
+});
+
 test("allows a reopened Ticket to complete again with a new stable event key", async () => {
   const deliveries = [
     createDelivery({

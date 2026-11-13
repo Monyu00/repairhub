@@ -14,6 +14,7 @@ export const TICKET_NOTIFICATION_EVENTS = [
   "in_progress",
   "completed",
   "closed",
+  "cancelled",
 ] as const;
 
 export type TicketNotificationEvent = (typeof TICKET_NOTIFICATION_EVENTS)[number];
@@ -30,6 +31,8 @@ export function ticketStatusLabel(eventType: string): string {
       return "已完工";
     case "closed":
       return "已結案";
+    case "cancelled":
+      return "已取消";
     default:
       return "未知狀態";
   }
@@ -69,6 +72,11 @@ const TICKET_EMAIL_COPY: Record<
     subject: (shortId) => `【RepairHub】案件 #${shortId} 已結案`,
     heading: "案件已結案",
     intro: "您好，您的報修案件已完成並結案。",
+  },
+  cancelled: {
+    subject: (shortId) => `【RepairHub】案件 #${shortId} 已取消`,
+    heading: "案件已取消",
+    intro: "您好，您的報修案件已取消，若仍需處理請重新報修。",
   },
 };
 

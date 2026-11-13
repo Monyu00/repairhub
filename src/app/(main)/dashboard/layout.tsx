@@ -13,7 +13,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import type { UserProjection } from "@/lib/users/projection";
 import { cn } from "@/lib/utils";
 import { requireDashboardAccess } from "@/server/auth/session";
-import { getTechnicianNotifications } from "@/server/notifications/read";
+import { getNotifications } from "@/server/notifications/read";
 import { getPreference } from "@/server/server-actions";
 
 import { LayoutControls } from "./_components/sidebar/layout-controls";
@@ -44,8 +44,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     mustChangePassword: session.mustChangePassword,
   };
 
-  const notifications =
-    session.role === "technician" ? await getTechnicianNotifications(session.supabase, session.userId) : undefined;
+  const notifications = await getNotifications(session.supabase, session.userId);
 
   return (
     <UserProjectionProvider projection={projection}>
