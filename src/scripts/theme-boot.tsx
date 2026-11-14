@@ -70,6 +70,7 @@ export function ThemeBootScript() {
         if (mode === "system" && window.matchMedia) {
           var systemMedia = window.matchMedia("(prefers-color-scheme: dark)");
           var applySystemTheme = function () {
+            if (root.getAttribute("data-theme-mode") !== "system") return;
             var resolved = systemMedia.matches ? "dark" : "light";
             root.classList.toggle("dark", resolved === "dark");
             root.style.colorScheme = resolved;
