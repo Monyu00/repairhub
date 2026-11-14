@@ -19,7 +19,7 @@
 - **工單生命週期閉環**：接單、完工（須附照片與維修說明）、報修者確認或七日自動關單、未完成重開單（Reopen）。
 - **通知**：Email 通知報修者與已訂閱分類且未關閉偏好的技師；站內通知將新工單送到 Admin 與已訂閱分類的技師，狀態變更送到報修者與指派技師。偏好關閉會同時停用對應 Email 與站內通知；派送失敗只記錄錯誤與重試時間，不中斷工單寫入。
 - **管理後台**：待修佇列、工單詳情與時間軸、維修紀錄、QR Code 批次產生與匯出、Excel／PDF 報表、滿意度分析、公告與系統設定。
-- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、調整通知偏好與刪除帳號。
+- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、管理 Passkey、調整通知偏好與刪除帳號。
 - **響應式與主題**：手機現場操作、桌面管理中心兩種密度；淺色／深色模式與主題預設檔，全站使用語意化 CSS 變數。
 
 ## 技術棧
@@ -162,3 +162,4 @@ Email 派送鏈為 `enqueue_notification_delivery` → `notification_log` → `i
 - [0008-cloudflare-turnstile-for-anonymous-writes.md](docs/adr/0008-cloudflare-turnstile-for-anonymous-writes.md)：匿名寫入用 Cloudflare Turnstile 保護
 - [0009-notification-preferences-on-profiles.md](docs/adr/0009-notification-preferences-on-profiles.md)：通知偏好存在個人檔案
 - [0010-in-app-notifications-share-email-subscription-data.md](docs/adr/0010-in-app-notifications-share-email-subscription-data.md)：站內通知共用 Email 的訂閱與偏好資料
+- [0011-supabase-auth-passkeys.md](docs/adr/0011-supabase-auth-passkeys.md)：Passkey 登入與個人設定管理

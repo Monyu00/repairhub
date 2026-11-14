@@ -68,6 +68,18 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     },
   });
 
+  function completeLogin(mustChangePassword = false) {
+    toast.success("登入成功！");
+    const destination = mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+    router.push(destination);
+    router.refresh();
+  }
+
+  function resetTurnstile() {
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
+  }
+
   async function onLoginSubmit(data: z.infer<typeof loginSchema>) {
     if (!captchaToken) {
       toast.error("登入失敗", { description: TURNSTILE_ERROR_MESSAGE });
@@ -82,15 +94,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         return;
       }
 
-      toast.success("登入成功！");
-      const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
-      router.push(destination);
-      router.refresh();
+      completeLogin(res.mustChangePassword);
     } catch {
       toast.error("登入失敗", { description: "目前無法處理您的請求，請稍後再試" });
     } finally {
-      setCaptchaToken(null);
-      turnstileRef.current?.reset();
+      resetTurnstile();
       setLoading(false);
     }
   }
@@ -116,14 +124,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       }
 
       toast.success("註冊成功！");
-      const destination = res.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
-      router.push(destination);
-      router.refresh();
+      completeLogin(res.mustChangePassword);
     } catch {
       toast.error("註冊失敗", { description: "目前無法處理您的請求，請稍後再試" });
     } finally {
-      setCaptchaToken(null);
-      turnstileRef.current?.reset();
+      resetTurnstile();
       setLoading(false);
     }
   }
@@ -148,22 +153,17 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         return;
       }
 
-      toast.success("登入成功！");
-      const destination = sessionState.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
-      router.push(destination);
-      router.refresh();
+      completeLogin(sessionState.mustChangePassword);
     } catch {
       toast.error("登入失敗", { description: "目前無法處理您的請求，請稍後再試" });
     } finally {
-      setCaptchaToken(null);
-      turnstileRef.current?.reset();
+      resetTurnstile();
       setPasskeyLoading(false);
     }
   }
 
   function switchMode(nextMode: FormMode) {
-    setCaptchaToken(null);
-    turnstileRef.current?.reset();
+    resetTurnstile();
     setMode(nextMode);
   }
 

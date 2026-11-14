@@ -23,6 +23,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { describePasskeyError } from "@/lib/supabase/passkey-errors";
+import {
+  deleteMyPasskey,
+  getPasskeyRegistrationAccess,
+  listMyPasskeys,
+} from "@/server/personal-settings/passkey-actions";
 
 type Passkey = PasskeyListItem;
 
@@ -38,32 +43,31 @@ export function PasskeyManagementCard() {
   const [pendingDelete, setPendingDelete] = useState<Passkey | null>(null);
 
   const loadPasskeys = useCallback(async () => {
-    const { data, error } = await createClient().auth.passkey.list();
-    if (error) {
-      setError(describePasskeyError(error));
-      setPasskeys([]);
+    const result = await listMyPasskeys();
+    if (!result.success) {
+      setError(result.error);
+      setPasskeys(null);
       return;
     }
 
     setError(null);
-    setPasskeys(data ?? []);
+    setPasskeys(result.passkeys);
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    void loadPasskeys().then(() => {
-      if (cancelled) return;
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    void loadPasskeys();
   }, [loadPasskeys]);
 
   async function registerPasskey() {
     setBusy(true);
     setError(null);
+
+    const access = await getPasskeyRegistrationAccess();
+    if (!access.success) {
+      setBusy(false);
+      setError(access.error ?? "無法註冊 Passkey，請重新登入後再試。");
+      return;
+    }
 
     const { error } = await createClient().auth.registerPasskey();
     setBusy(false);
@@ -83,11 +87,11 @@ export function PasskeyManagementCard() {
     setDeletingId(pendingDelete.id);
     setError(null);
 
-    const { error } = await createClient().auth.passkey.delete({ passkeyId: pendingDelete.id });
+    const result = await deleteMyPasskey({ passkeyId: pendingDelete.id });
     setDeletingId(null);
 
-    if (error) {
-      setError(describePasskeyError(error));
+    if (!result.success) {
+      setError(result.error ?? "無法刪除 Passkey，請稍後再試。");
       return;
     }
 
@@ -97,7 +101,16 @@ export function PasskeyManagementCard() {
   }
 
   let passkeyContent: ReactNode;
-  if (passkeys === null) {
+  if (error && passkeys === null) {
+    passkeyContent = (
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed p-3">
+        <p className="text-muted-foreground text-sm">無法載入 Passkey。</p>
+        <Button size="sm" type="button" variant="outline" onClick={() => void loadPasskeys()}>
+          重試
+        </Button>
+      </div>
+    );
+  } else if (passkeys === null) {
     passkeyContent = <Skeleton className="h-16 w-full" />;
   } else if (passkeys.length === 0) {
     passkeyContent = (
@@ -112,7 +125,7 @@ export function PasskeyManagementCard() {
               <p className="text-foreground truncate text-sm font-medium">
                 {passkey.friendly_name ?? "未命名 Passkey"}
               </p>
-              <p className="text-muted-foreground mt-1 text-xs">
+              <p className="text-muted-foreground mt-1 font-mono text-xs">
                 建立於 {formatDateTime(passkey.created_at)}；
                 {passkey.last_used_at ? `最後使用於 ${formatDateTime(passkey.last_used_at)}` : "未曾使用"}
               </p>
