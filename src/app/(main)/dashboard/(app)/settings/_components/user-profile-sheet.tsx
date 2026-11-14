@@ -18,7 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -103,15 +103,16 @@ export function UserProfileSheet({
       <SheetContent className="w-full space-y-6 overflow-y-auto p-6 sm:max-w-md">
         <SheetHeader className="p-0 text-left">
           <div className="flex items-start gap-4">
-            <Avatar className="h-14 w-14 border-2 border-border font-semibold text-base shadow-xs">
+            <Avatar className="border-border size-14 border-2 text-base font-semibold shadow-xs">
+              <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName ?? user.email} />
               <AvatarFallback className="bg-primary/10 text-primary">
                 {getInitials(user.displayName, user.email)}
               </AvatarFallback>
             </Avatar>
 
             <div className="min-w-0 flex-1">
-              <SheetTitle className="truncate font-bold text-xl">{user.displayName ?? "（未設定姓名）"}</SheetTitle>
-              <SheetDescription className="mt-0.5 truncate font-mono text-muted-foreground text-xs">
+              <SheetTitle className="truncate text-xl font-bold">{user.displayName ?? "（未設定姓名）"}</SheetTitle>
+              <SheetDescription className="text-muted-foreground mt-0.5 truncate font-mono text-xs">
                 {user.email}
               </SheetDescription>
 
@@ -149,7 +150,7 @@ export function UserProfileSheet({
             <Button
               variant="outline"
               size="sm"
-              className="w-full text-info-text hover:text-info-text "
+              className="text-info-text hover:text-info-text w-full"
               onClick={() => onManageCategories(user)}
             >
               <Tag className="mr-1.5 h-3.5 w-3.5" />
@@ -172,27 +173,27 @@ export function UserProfileSheet({
 
         {/* Detailed Information */}
         <div className="space-y-3">
-          <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">帳號詳細資料</h4>
+          <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">帳號詳細資料</h4>
 
-          <div className="space-y-3 rounded-lg border bg-card p-3.5 text-sm">
+          <div className="bg-card space-y-3 rounded-lg border p-3.5 text-sm">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-muted-foreground text-xs">
+              <span className="text-muted-foreground flex items-center gap-2 text-xs">
                 <Building className="h-3.5 w-3.5" />
                 所屬部門 / 單位
               </span>
-              <span className="font-medium text-foreground text-xs">{user.department ?? "—"}</span>
+              <span className="text-foreground text-xs font-medium">{user.department ?? "—"}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-muted-foreground text-xs">
+              <span className="text-muted-foreground flex items-center gap-2 text-xs">
                 <Phone className="h-3.5 w-3.5" />
                 聯絡電話 / 分機
               </span>
-              <span className="font-medium font-mono text-foreground text-xs">{user.phone ?? "—"}</span>
+              <span className="text-foreground font-mono text-xs font-medium">{user.phone ?? "—"}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-muted-foreground text-xs">
+              <span className="text-muted-foreground flex items-center gap-2 text-xs">
                 <Calendar className="h-3.5 w-3.5" />
                 帳號建立日期
               </span>
@@ -200,7 +201,7 @@ export function UserProfileSheet({
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-muted-foreground text-xs">
+              <span className="text-muted-foreground flex items-center gap-2 text-xs">
                 <Clock className="h-3.5 w-3.5" />
                 最後登入時間
               </span>
@@ -213,13 +214,13 @@ export function UserProfileSheet({
         {isTech && (
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+              <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 擅長與負責報修類別
               </h4>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-primary text-xs"
+                className="text-primary h-6 px-2 text-xs"
                 onClick={() => onManageCategories(user)}
               >
                 變更
@@ -235,7 +236,7 @@ export function UserProfileSheet({
                 ))}
               </div>
             ) : (
-              <p className="rounded-md border border-warning/20 bg-warning/10 p-2.5 text-warning-text text-xs italic ">
+              <p className="border-warning/20 bg-warning/10 text-warning-text rounded-md border p-2.5 text-xs italic">
                 尚未指定任何負責之報修類別，請點擊上方按鈕進行指派。
               </p>
             )}
@@ -246,42 +247,42 @@ export function UserProfileSheet({
 
         {/* Ticket Activity & Statistics */}
         <div className="space-y-3">
-          <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">報修統計與活動紀錄</h4>
+          <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">報修統計與活動紀錄</h4>
 
           {isLoadingStats && (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-center py-8">
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               <span className="text-xs">載入報修統計中...</span>
             </div>
           )}
 
-          {!isLoadingStats && !stats && <p className="py-4 text-center text-muted-foreground text-xs">無統計資料</p>}
+          {!isLoadingStats && !stats && <p className="text-muted-foreground py-4 text-center text-xs">無統計資料</p>}
 
           {!isLoadingStats && stats && (
             <div className="space-y-4">
               {/* Reporter Stats */}
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs">
+                  <span className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
                     <FileText className="h-3.5 w-3.5" />
                     個人通報紀錄
                   </span>
-                  <span className="font-bold text-xs">{stats.reporterStats.total} 筆通報</span>
+                  <span className="text-xs font-bold">{stats.reporterStats.total} 筆通報</span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-warning-text text-lg ">{stats.reporterStats.pending}</div>
+                    <div className="text-warning-text text-lg font-bold">{stats.reporterStats.pending}</div>
                     <div className="text-muted-foreground text-xs">待處理</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-info-text text-lg ">{stats.reporterStats.inProgress}</div>
+                    <div className="text-info-text text-lg font-bold">{stats.reporterStats.inProgress}</div>
                     <div className="text-muted-foreground text-xs">處理中</div>
                   </Card>
 
                   <Card className="p-2.5 text-center shadow-2xs">
-                    <div className="font-bold text-success-text text-lg ">
+                    <div className="text-success-text text-lg font-bold">
                       {stats.reporterStats.completed + stats.reporterStats.closed}
                     </div>
                     <div className="text-muted-foreground text-xs">已完成/結案</div>
@@ -293,23 +294,23 @@ export function UserProfileSheet({
               {stats.technicianStats && (
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs">
-                      <Wrench className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                      <Wrench className="text-muted-foreground h-3.5 w-3.5" />
                       技師工單指派與處置
                     </span>
-                    <span className="font-bold text-info-text text-xs ">
+                    <span className="text-info-text text-xs font-bold">
                       {stats.technicianStats.totalAssigned} 筆指派
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <Card className="border-info/20 bg-info/5 p-2.5 text-center shadow-2xs dark:border-info/30">
-                      <div className="font-bold text-info-text text-lg ">{stats.technicianStats.inProgress}</div>
+                    <Card className="border-info/20 bg-info/5 dark:border-info/30 p-2.5 text-center shadow-2xs">
+                      <div className="text-info-text text-lg font-bold">{stats.technicianStats.inProgress}</div>
                       <div className="text-muted-foreground text-xs">目前處置中工單</div>
                     </Card>
 
-                    <Card className="border-success/20 bg-success/5 p-2.5 text-center shadow-2xs dark:border-success/30">
-                      <div className="font-bold text-success-text text-lg ">
+                    <Card className="border-success/20 bg-success/5 dark:border-success/30 p-2.5 text-center shadow-2xs">
+                      <div className="text-success-text text-lg font-bold">
                         {stats.technicianStats.completedOrClosed}
                       </div>
                       <div className="text-muted-foreground text-xs">已修復完成工單</div>
