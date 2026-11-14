@@ -1,0 +1,3 @@
+# Supabase Auth Passkeys
+
+Accounts can register a Passkey in Account Security and use it on the login page, while keeping Email/password as the recovery path. We use Supabase Auth's experimental Passkey API instead of self-hosting WebAuthn; the login ceremony is protected by the existing Turnstile, enrollment does not require Turnstile, and existing `must_change_password` and deactivation gates still apply. The WebAuthn relying party is deliberately limited to `repairhub.monyu.dev`, so changing it later would invalidate registered Passkeys. Management is limited to registering, listing, and deleting the signed-in Account's Passkeys; renaming, admin management, and Conditional UI are excluded.

@@ -184,5 +184,9 @@ The screen where a logged-in account manages its own profile fields, Notificatio
 _Avoid_: Account settings, my profile, preferences page, 帳號設定
 
 **Account Security** (帳號安全):
-The credential self-service part of Personal Settings: verifying the current Password, setting a new one, and replacing an admin-assisted initial Password. Excludes admin-issued resets, role, and activation state.
+The credential self-service part of Personal Settings: verifying the current Password, setting a new one, replacing an admin-assisted initial Password, and managing Passkeys. Excludes admin-issued resets, role, and activation state.
 _Avoid_: Security settings, password settings, 密碼設定
+
+**Passkey**:
+A passwordless credential registered by an Account and verified by the user's device to sign in. Bound to the site's WebAuthn relying party.
+_Avoid_: WebAuthn key, device key, 登入金鑰
