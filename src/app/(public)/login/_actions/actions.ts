@@ -45,3 +45,8 @@ export async function registerWithEmail(formData: { email: string; password: str
   const session = await getSession();
   return { success: true, needsEmailVerification: false, mustChangePassword: session?.mustChangePassword ?? false };
 }
+
+export async function getPasskeyLoginState() {
+  const session = await getSession();
+  return { success: Boolean(session), mustChangePassword: session?.mustChangePassword ?? false };
+}
