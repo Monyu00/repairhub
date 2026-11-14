@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Fingerprint, Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,9 +15,11 @@ import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/turnst
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
+import { describePasskeyError } from "@/lib/supabase/passkey-errors";
 import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 
-import { loginWithEmail, registerWithEmail } from "../_actions/actions";
+import { getPasskeyLoginState, loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
@@ -45,6 +47,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   const router = useRouter();
   const [mode, setMode] = useState<FormMode>("login");
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileWidgetHandle | null>(null);
 
@@ -125,6 +128,39 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     }
   }
 
+  async function onPasskeyLogin() {
+    if (!captchaToken) {
+      toast.error("登入失敗", { description: TURNSTILE_ERROR_MESSAGE });
+      return;
+    }
+
+    setPasskeyLoading(true);
+    try {
+      const { error } = await createClient().auth.signInWithPasskey({ options: { captchaToken } });
+      if (error) {
+        toast.error("登入失敗", { description: describePasskeyError(error) });
+        return;
+      }
+
+      const sessionState = await getPasskeyLoginState();
+      if (!sessionState.success) {
+        toast.error("登入失敗", { description: "無法確認登入狀態，請重新嘗試。" });
+        return;
+      }
+
+      toast.success("登入成功！");
+      const destination = sessionState.mustChangePassword ? "/change-password" : (redirectTo ?? "/dashboard");
+      router.push(destination);
+      router.refresh();
+    } catch {
+      toast.error("登入失敗", { description: "目前無法處理您的請求，請稍後再試" });
+    } finally {
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
+      setPasskeyLoading(false);
+    }
+  }
+
   function switchMode(nextMode: FormMode) {
     setCaptchaToken(null);
     turnstileRef.current?.reset();
@@ -168,7 +204,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                     <FieldLabel htmlFor="login-password">密碼</FieldLabel>
                     <Link
                       href="/forgot-password"
-                      className="text-muted-foreground text-xs hover:text-primary hover:underline"
+                      className="text-muted-foreground hover:text-primary text-xs hover:underline"
                     >
                       忘記密碼？
                     </Link>
@@ -196,6 +232,16 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           <Button className="w-full" type="submit" disabled={loading || !captchaToken}>
             {loading ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
             登入
+          </Button>
+          <Button
+            className="w-full"
+            type="button"
+            variant="outline"
+            disabled={passkeyLoading || !captchaToken}
+            onClick={onPasskeyLogin}
+          >
+            {passkeyLoading ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <Fingerprint />}
+            使用 Passkey 登入
           </Button>
         </form>
       ) : (
@@ -276,14 +322,14 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         </form>
       )}
 
-      <div className="text-center text-muted-foreground text-sm">
+      <div className="text-muted-foreground text-center text-sm">
         {mode === "login" ? (
           <>
             還沒有帳號嗎？{" "}
             <button
               type="button"
               onClick={() => switchMode("register")}
-              className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+              className="text-primary hover:text-primary/80 font-medium underline underline-offset-4"
             >
               立即註冊
             </button>
@@ -294,7 +340,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
             <button
               type="button"
               onClick={() => switchMode("login")}
-              className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+              className="text-primary hover:text-primary/80 font-medium underline underline-offset-4"
             >
               登入帳號
             </button>

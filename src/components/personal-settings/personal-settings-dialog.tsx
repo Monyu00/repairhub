@@ -12,6 +12,7 @@ import { AccountSecurityCard } from "./account-security-card";
 import { CurrentLoginInfoCard } from "./current-login-info-card";
 import { DeleteAccountCard } from "./delete-account-card";
 import { NotificationPreferencesCard } from "./notification-preferences-card";
+import { PasskeyManagementCard } from "./passkey-management-card";
 import { PersonalProfileForm } from "./personal-profile-form";
 
 const PROFILE_TABS = [
@@ -91,6 +92,7 @@ export function PersonalSettingsDialog({ open, onOpenChange }: PersonalSettingsD
           <div className="flex flex-col gap-4">
             <CurrentLoginInfoCard profile={profile} />
             <AccountSecurityCard mustChangePassword={profile.mustChangePassword} />
+            <PasskeyManagementCard />
             <DeleteAccountCard email={profile.email} disabled={profile.mustChangePassword} />
           </div>
         </TabsContent>
