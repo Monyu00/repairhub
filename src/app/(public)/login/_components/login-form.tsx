@@ -19,7 +19,7 @@ import { createClient } from "@/lib/supabase/client";
 import { describePasskeyError } from "@/lib/supabase/passkey-errors";
 import { TURNSTILE_ERROR_MESSAGE } from "@/lib/turnstile";
 
-import { getPasskeyLoginState, loginWithEmail, registerWithEmail } from "../_actions/actions";
+import { loginWithEmail, registerWithEmail } from "../_actions/actions";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "請輸入有效的 Email 地址。" }),
@@ -141,19 +141,18 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
 
     setPasskeyLoading(true);
     try {
-      const { error } = await createClient().auth.signInWithPasskey({ options: { captchaToken } });
+      const { data, error } = await createClient().auth.signInWithPasskey({ options: { captchaToken } });
       if (error) {
         toast.error("登入失敗", { description: describePasskeyError(error) });
         return;
       }
 
-      const sessionState = await getPasskeyLoginState();
-      if (!sessionState.success) {
-        toast.error("登入失敗", { description: "無法確認登入狀態，請重新嘗試。" });
+      if (!data.user) {
+        toast.error("登入失敗", { description: "無法取得登入資訊，請重新嘗試。" });
         return;
       }
 
-      completeLogin(sessionState.mustChangePassword);
+      completeLogin(false);
     } catch {
       toast.error("登入失敗", { description: "目前無法處理您的請求，請稍後再試" });
     } finally {
