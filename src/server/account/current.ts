@@ -35,7 +35,9 @@ export function createSupabaseAccountAdapter(supabase: SupabaseClient<Database>)
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("display_name, department, phone, user_role, is_active, must_change_password, notification_preferences")
+        .select(
+          "display_name, department, phone, avatar_url, user_role, is_active, must_change_password, notification_preferences",
+        )
         .eq("id", user.id)
         .maybeSingle();
 

@@ -1,4 +1,5 @@
 import {
+  avatarInputSchema,
   canDeleteOwnAccount,
   changePasswordFormSchema,
   changePasswordSchema,
@@ -131,4 +132,20 @@ test("canDeleteOwnAccount 只擋下最後一位系統管理者", () => {
   assert.equal(canDeleteOwnAccount({ role: "admin", activeAdminCount: 2 }), true);
   assert.equal(canDeleteOwnAccount({ role: "technician", activeAdminCount: 1 }), true);
   assert.equal(canDeleteOwnAccount({ role: null, activeAdminCount: 0 }), true);
+});
+
+test("avatarInputSchema accepts keep, remove or one data URL", () => {
+  const keep = avatarInputSchema.safeParse({});
+  assert.equal(keep.success, true);
+  if (keep.success) {
+    assert.deepEqual(keep.data, { remove: false });
+  }
+
+  assert.equal(avatarInputSchema.safeParse({ remove: true }).success, true);
+  assert.equal(avatarInputSchema.safeParse({ imageDataUrl: "data:image/webp;base64,aGk=" }).success, true);
+
+  assert.equal(
+    avatarInputSchema.safeParse({ remove: true, imageDataUrl: "data:image/webp;base64,aGk=" }).success,
+    false,
+  );
 });

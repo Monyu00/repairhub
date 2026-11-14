@@ -211,6 +211,7 @@ export type Database = {
       };
       profiles: {
         Row: {
+          avatar_url: string | null;
           department: string | null;
           display_name: string | null;
           id: string;
@@ -222,6 +223,7 @@ export type Database = {
           user_role: Database["public"]["Enums"]["user_role"] | null;
         };
         Insert: {
+          avatar_url?: string | null;
           department?: string | null;
           display_name?: string | null;
           id: string;
@@ -233,6 +235,7 @@ export type Database = {
           user_role?: Database["public"]["Enums"]["user_role"] | null;
         };
         Update: {
+          avatar_url?: string | null;
           department?: string | null;
           display_name?: string | null;
           id?: string;
