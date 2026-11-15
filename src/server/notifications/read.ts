@@ -2,50 +2,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 
-type NotificationDatabase = Omit<Database, "public"> & {
-  public: Database["public"] & {
-    Tables: Database["public"]["Tables"] & {
-      notifications: {
-        Row: {
-          created_at: string;
-          event_type: NotificationEventType;
-          id: string;
-          is_read: boolean;
-          recipient_id: string;
-          ticket_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          event_type: string;
-          id?: string;
-          is_read?: boolean;
-          recipient_id: string;
-          ticket_id: string;
-        };
-        Update: {
-          created_at?: string;
-          event_type?: string;
-          id?: string;
-          is_read?: boolean;
-          recipient_id?: string;
-          ticket_id?: string;
-        };
-        Relationships: [];
-      };
-    };
-  };
-};
+export type NotificationReadAdapter = SupabaseClient<Database>;
 
-export type NotificationReadAdapter = SupabaseClient<NotificationDatabase>;
+const EVENT_TYPES = ["new_ticket", "assigned", "pending", "in_progress", "completed", "closed", "cancelled"] as const;
 
-export type NotificationEventType =
-  | "new_ticket"
-  | "assigned"
-  | "pending"
-  | "in_progress"
-  | "completed"
-  | "closed"
-  | "cancelled";
+export type NotificationEventType = (typeof EVENT_TYPES)[number];
 
 export interface NotificationItem {
   id: string;
@@ -67,16 +28,6 @@ export interface MarkNotificationResult {
 
 const MAX_NOTIFICATIONS = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const EVENT_TYPES: readonly NotificationEventType[] = [
-  "new_ticket",
-  "assigned",
-  "pending",
-  "in_progress",
-  "completed",
-  "closed",
-  "cancelled",
-];
-
 function parseNotification(row: unknown): NotificationItem | null {
   if (typeof row !== "object" || row === null) return null;
   const value = row as Record<string, unknown>;
