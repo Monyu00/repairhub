@@ -175,6 +175,10 @@ The ticket was invalidated by an admin (e.g., duplicate, not actionable). Termin
 
 ### Account
 
+**Profile Role** (權限角色):
+The privileged role assigned to an Account and read from its profile; auth metadata does not override it.
+_Avoid_: auth role, metadata role
+
 **Avatar** (頭像):
 The image an account chooses to represent itself. Stored on the account profile and editable only by that account.
 _Avoid_: Profile photo, user image, profile picture
