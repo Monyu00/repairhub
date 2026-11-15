@@ -58,7 +58,7 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
                       {formatTicketLocation(ticket)} · {ticket.description}
                     </p>
                   </div>
-                  <time dateTime={ticket.createdAt} className="shrink-0 text-muted-foreground text-xs">
+                  <time dateTime={ticket.createdAt} className="shrink-0 font-mono text-muted-foreground text-xs">
                     {formatShortDateTime(ticket.createdAt)}
                   </time>
                 </Link>

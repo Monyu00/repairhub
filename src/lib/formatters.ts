@@ -38,13 +38,6 @@ const applicationDateFormatter = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",
 });
 
-const compactDateFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: APP_TIME_ZONE,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
 const dateFormatter = new Intl.DateTimeFormat("zh-TW", {
   timeZone: APP_TIME_ZONE,
   year: "numeric",
@@ -120,15 +113,18 @@ export function formatMediumDateTime(date: string | Date | null | undefined): st
   return mediumDateTimeFormatter.format(parsed);
 }
 
-export function getApplicationDateKey(date = new Date()): string {
-  return applicationDateFormatter.format(date);
+export function getApplicationDateKey(date: string | Date = new Date()): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  return applicationDateFormatter.format(parsed);
 }
 
 export function formatCompactDate(date: string | Date | null | undefined): string {
   const parsed = parseDate(date);
   if (!parsed) return "-";
 
-  return compactDateFormatter.format(parsed).replace(/-/g, "");
+  return applicationDateFormatter.format(parsed).replace(/-/g, "");
 }
 
 export function formatMonthDay(date: string | Date | null | undefined): string {

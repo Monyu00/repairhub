@@ -40,6 +40,7 @@ test("new formatter interfaces always format in Asia/Taipei", () => {
     assert.equal(getApplicationDateKey(new Date("2026-10-02T18:18:00.000Z")), "2026-10-03");
     assert.equal(formatCompactDate("2026-10-02T18:18:00.000Z"), "20261003");
     assert.equal(formatCompactDate(null), "-");
+    assert.equal(getApplicationDateKey("invalid"), "-");
   } finally {
     if (previousTimeZone === undefined) delete process.env.TZ;
     else process.env.TZ = previousTimeZone;

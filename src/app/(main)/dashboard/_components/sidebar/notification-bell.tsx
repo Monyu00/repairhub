@@ -119,7 +119,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
                   />
                   <span className="min-w-0 flex-1 font-medium">{NOTIFICATION_LABELS[notification.eventType]}</span>
                 </span>
-                <span className="mt-0.5 block text-muted-foreground text-xs">
+                <span className="mt-0.5 block font-mono text-muted-foreground text-xs">
                   {formatShortDateTime(notification.createdAt)}
                 </span>
               </DropdownMenuItem>
