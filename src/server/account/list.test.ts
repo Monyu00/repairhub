@@ -23,7 +23,7 @@ test("projects accounts, resolves notification preferences, and sorts by project
           email: "inactive@example.com",
           created_at: "2026-01-02T00:00:00.000Z",
           last_sign_in_at: "2026-01-03T00:00:00.000Z",
-          user_metadata: {},
+          user_metadata: { user_role: "admin" },
         },
         profile: { user_role: null, is_active: false, notification_preferences: { new_ticket: false } },
       },

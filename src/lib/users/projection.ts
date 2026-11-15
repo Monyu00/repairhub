@@ -27,6 +27,7 @@ interface UserMetadata {
   display_name?: string | null;
   department?: string | null;
   phone?: string | null;
+  user_role?: UserRole | null;
   avatar_url?: string | null;
 }
 

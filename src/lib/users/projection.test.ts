@@ -132,7 +132,7 @@ test("does not fall back to auth metadata when the profile role is null", () => 
     {
       id: "user-3",
       email: "role@example.com",
-      user_metadata: {},
+      user_metadata: { user_role: "technician" },
     },
     { user_role: null },
   );
