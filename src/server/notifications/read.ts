@@ -2,41 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
 
-type NotificationDatabase = Omit<Database, "public"> & {
-  public: Database["public"] & {
-    Tables: Database["public"]["Tables"] & {
-      notifications: {
-        Row: {
-          created_at: string;
-          event_type: NotificationEventType;
-          id: string;
-          is_read: boolean;
-          recipient_id: string;
-          ticket_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          event_type: string;
-          id?: string;
-          is_read?: boolean;
-          recipient_id: string;
-          ticket_id: string;
-        };
-        Update: {
-          created_at?: string;
-          event_type?: string;
-          id?: string;
-          is_read?: boolean;
-          recipient_id?: string;
-          ticket_id?: string;
-        };
-        Relationships: [];
-      };
-    };
-  };
-};
-
-export type NotificationReadAdapter = SupabaseClient<NotificationDatabase>;
+export type NotificationReadAdapter = SupabaseClient<Database>;
 
 export type NotificationEventType =
   | "new_ticket"

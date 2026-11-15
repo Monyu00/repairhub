@@ -209,6 +209,48 @@ export type Database = {
           },
         ];
       };
+      notifications: {
+        Row: {
+          created_at: string;
+          event_type: string;
+          id: string;
+          is_read: boolean;
+          recipient_id: string;
+          ticket_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_type: string;
+          id?: string;
+          is_read?: boolean;
+          recipient_id: string;
+          ticket_id: string;
+        };
+        Update: {
+          created_at?: string;
+          event_type?: string;
+          id?: string;
+          is_read?: boolean;
+          recipient_id?: string;
+          ticket_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_ticket_id_fkey";
+            columns: ["ticket_id"];
+            isOneToOne: false;
+            referencedRelation: "tickets";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -518,9 +560,22 @@ export type Database = {
         Args: { p_technician_id: string; p_ticket_id: string };
         Returns: boolean;
       };
+      enqueue_notification_delivery: {
+        Args: {
+          p_event_at?: string;
+          p_event_type: string;
+          p_recipient_email: string;
+          p_ticket_id: string;
+        };
+        Returns: undefined;
+      };
       invoke_notification_delivery: {
         Args: { p_delivery_id: string };
         Returns: number;
+      };
+      notification_preference_enabled: {
+        Args: { p_event_key: string; p_recipient_email: string };
+        Returns: boolean;
       };
       report_aggregates: {
         Args: { p_from: string | null; p_to: string | null };
