@@ -1,6 +1,8 @@
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
+import { formatCompactDate } from "@/lib/formatters";
+
 import type { PrintableQRItem } from "./types";
 
 /**
@@ -170,8 +172,7 @@ export async function exportQRCodesToPDF(
       doc.addImage(cardImage, "PNG", x, y, cardWidth, cardHeight, undefined, "FAST");
     }
 
-    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    doc.save(`${filenamePrefix}_${todayStr}.pdf`);
+    doc.save(`${filenamePrefix}_${formatCompactDate(new Date())}.pdf`);
 
     toast.success(`PDF 下載成功！共 ${items.length} 張 QR Code`, { id: toastId });
   } catch (error) {

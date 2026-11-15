@@ -124,6 +124,10 @@ _Avoid_: success rate, closure ratio
 Elapsed time from Ticket creation to the Ticket's latest status update for Tickets that are Completed or Closed.
 _Avoid_: handling time, duration
 
+**Application Date**:
+The Asia/Taipei calendar date used for business-day logic and date-based comparisons, independent of the viewer's local time zone.
+_Avoid_: today, UTC date, browser date
+
 **Claim**:
 The act of a technician voluntarily taking ownership of a pending ticket. Atomic operation — only one technician can successfully claim a given ticket.
 _Avoid_: Accept, take, pick up

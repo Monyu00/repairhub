@@ -1,14 +1,8 @@
 import { toast } from "sonner";
 
-import type { ReportData } from "./report-types";
+import { formatCompactDate, formatDateOnly } from "@/lib/formatters";
 
-function getTodayString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}${month}${day}`;
-}
+import type { ReportData } from "./report-types";
 
 const CANVAS_WIDTH = 1654; // A4 at ~140 DPI for high crispness
 const CANVAS_HEIGHT = 2338;
@@ -47,7 +41,7 @@ function renderPage1ToCanvas(data: ReportData): string {
   ctx.fillText(`統計區間：${data.kpi.activePeriodLabel}`, marginX, currentY + 36);
 
   ctx.textAlign = "right";
-  ctx.fillText(`匯出日期：${new Date().toLocaleDateString("zh-TW")}`, CANVAS_WIDTH - marginX, currentY + 36);
+  ctx.fillText(`匯出日期：${formatDateOnly(new Date())}`, CANVAS_WIDTH - marginX, currentY + 36);
   ctx.textAlign = "left";
 
   // Header Divider
@@ -573,7 +567,7 @@ export async function exportReportToPDF(data: ReportData): Promise<void> {
     doc.addImage(page2Img, "PNG", 0, 0, 210, 297, undefined, "FAST");
 
     const preset = data.filter.preset;
-    const filename = `repairhub-report-${preset}-${getTodayString()}.pdf`;
+    const filename = `repairhub-report-${preset}-${formatCompactDate(new Date())}.pdf`;
 
     doc.save(filename);
 

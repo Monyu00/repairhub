@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getApplicationDateKey } from "@/lib/formatters";
 import type { Database } from "@/lib/supabase/database.types";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 import type { TicketRecord, ViewerContext } from "@/server/tickets/query";
@@ -71,8 +72,8 @@ async function fetchDashboardSummary(
     return EMPTY_DASHBOARD_SUMMARY;
   }
 
-  const taipeiToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei" }).format(new Date());
-  const startOfToday = `${taipeiToday}T00:00:00+08:00`;
+  const applicationDate = getApplicationDateKey();
+  const startOfToday = `${applicationDate}T00:00:00+08:00`;
   const startOfWindow = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
   let categoryIds: string[] | undefined;
