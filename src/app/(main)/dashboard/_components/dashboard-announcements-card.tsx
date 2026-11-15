@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, Megaphone, Pin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatMonthDay } from "@/lib/formatters";
 import type { AnnouncementItem } from "@/server/announcements";
 
 interface DashboardAnnouncementsCardProps {
@@ -46,18 +47,6 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
       </Card>
     );
   }
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("zh-TW", {
-        month: "numeric",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   return (
     <Card className="border-border shadow-2xs">
@@ -118,7 +107,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="text-muted-foreground text-xs">{formatDateTime(item.published_at)}</span>
+                  <span className="text-muted-foreground text-xs">{formatMonthDay(item.published_at)}</span>
                   <span className="text-muted-foreground transition-transform">
                     {isExpanded ? (
                       <ChevronUp className="size-4" aria-hidden="true" />

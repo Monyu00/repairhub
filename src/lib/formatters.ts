@@ -1,5 +1,37 @@
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale/zh-TW";
+const APP_TIME_ZONE = "Asia/Taipei";
+
+const ticketDateFormatter = new Intl.DateTimeFormat("zh-TW", {
+  timeZone: APP_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+const shortDateFormatter = new Intl.DateTimeFormat("zh-TW", {
+  timeZone: APP_TIME_ZONE,
+  month: "numeric",
+  day: "numeric",
+});
+
+const dateFormatter = new Intl.DateTimeFormat("zh-TW", {
+  timeZone: APP_TIME_ZONE,
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+});
+
+function getFormattedPart(parts: Intl.DateTimeFormatPart[], type: Intl.DateTimeFormatPartTypes): string {
+  return parts.find((part) => part.type === type)?.value ?? "";
+}
+
+function parseDate(date: string | Date | null | undefined): Date | null {
+  if (!date) return null;
+  const parsed = typeof date === "string" ? new Date(date) : date;
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
 
 type TicketLocation = {
   building: {
@@ -37,8 +69,25 @@ export function formatTicketLocation(
  * Returns "-" if the input is null, undefined, or invalid.
  */
 export function formatTicketDate(date: string | Date | null | undefined): string {
-  if (!date) return "-";
-  const d = typeof date === "string" ? new Date(date) : date;
-  if (Number.isNaN(d.getTime())) return "-";
-  return format(d, "yyyy/MM/dd HH:mm", { locale: zhTW });
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  const parts = ticketDateFormatter.formatToParts(parsed);
+  return `${getFormattedPart(parts, "year")}/${getFormattedPart(parts, "month")}/${getFormattedPart(parts, "day")} ${getFormattedPart(parts, "hour")}:${getFormattedPart(parts, "minute")}`;
+}
+
+export function formatMonthDay(date: string | Date | null | undefined): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  const parts = shortDateFormatter.formatToParts(parsed);
+  return `${getFormattedPart(parts, "month")}/${getFormattedPart(parts, "day")}`;
+}
+
+export function formatDateOnly(date: string | Date | null | undefined): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  const parts = dateFormatter.formatToParts(parsed);
+  return `${getFormattedPart(parts, "year")}/${getFormattedPart(parts, "month")}/${getFormattedPart(parts, "day")}`;
 }

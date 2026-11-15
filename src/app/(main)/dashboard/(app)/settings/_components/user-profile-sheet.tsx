@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { formatTicketDate } from "@/lib/formatters";
 
 import type { CategoryItem } from "../_actions/category-actions";
 import { fetchUserStats, type UserItem, type UserStats } from "../_actions/user-actions";
@@ -68,22 +69,6 @@ export function UserProfileSheet({
   }, [open, user]);
 
   if (!user) return null;
-
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "未曾登入";
-    try {
-      const date = new Date(dateStr);
-      return new Intl.DateTimeFormat("zh-TW", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch {
-      return dateStr;
-    }
-  };
 
   const getInitials = (name: string | null, email: string) => {
     if (name?.trim()) {
@@ -197,7 +182,9 @@ export function UserProfileSheet({
                 <Calendar className="h-3.5 w-3.5" />
                 帳號建立日期
               </span>
-              <span className="text-muted-foreground text-xs">{formatDate(user.createdAt)}</span>
+              <span className="text-muted-foreground text-xs">
+                {user.createdAt ? formatTicketDate(user.createdAt) : "未曾登入"}
+              </span>
             </div>
 
             <div className="flex items-center justify-between">
@@ -205,7 +192,9 @@ export function UserProfileSheet({
                 <Clock className="h-3.5 w-3.5" />
                 最後登入時間
               </span>
-              <span className="text-muted-foreground text-xs">{formatDate(user.lastSignInAt)}</span>
+              <span className="text-muted-foreground text-xs">
+                {user.lastSignInAt ? formatTicketDate(user.lastSignInAt) : "未曾登入"}
+              </span>
             </div>
           </div>
         </div>

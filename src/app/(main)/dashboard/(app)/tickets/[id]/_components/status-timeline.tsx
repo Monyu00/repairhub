@@ -11,26 +11,13 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketNote } from "@/server/tickets/detail";
 
 interface StatusTimelineProps {
   createdAt: string;
   notes: TicketNote[];
   reporterName?: string | null;
-}
-
-function formatDateTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleString("zh-TW", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
 }
 
 function getStatusIcon(content: string) {
@@ -148,7 +135,7 @@ export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelin
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.createdAt)}</p>
+                    <p className="mt-0.5 text-muted-foreground text-xs">{formatTicketDate(item.createdAt)}</p>
                   </div>
                 </div>
               );

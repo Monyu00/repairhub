@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Megaphone, Pin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatMonthDay } from "@/lib/formatters";
 import type { AnnouncementItem } from "@/server/announcements";
 
 interface PublicAnnouncementsBannerProps {
@@ -23,18 +24,6 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
   // If there's only 1 announcement
   const currentAnnouncement = announcements[activeItemIndex] ?? announcements[0];
   const hasMultiple = announcements.length > 1;
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString("zh-TW", {
-        month: "numeric",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   return (
     <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 shadow-2xs transition-colors">
@@ -54,7 +43,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                 </Badge>
               )}
               <h2 className="font-semibold text-foreground text-sm">{currentAnnouncement.title}</h2>
-              <span className="text-foreground/70 text-xs">({formatDateTime(currentAnnouncement.published_at)})</span>
+              <span className="text-foreground/70 text-xs">({formatMonthDay(currentAnnouncement.published_at)})</span>
             </div>
 
             <div

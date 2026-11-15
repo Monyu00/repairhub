@@ -6,6 +6,7 @@ import { ArrowLeftIcon, StarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatDateOnly } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { TicketDetail } from "@/server/tickets/detail";
 
@@ -101,9 +102,7 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
                   </div>
                 </div>
                 {ticket.ratedAt && (
-                  <span className="text-muted-foreground text-xs">
-                    評分於 {new Date(ticket.ratedAt).toLocaleDateString("zh-TW")}
-                  </span>
+                  <span className="text-muted-foreground text-xs">評分於 {formatDateOnly(ticket.ratedAt)}</span>
                 )}
               </div>
             </div>
