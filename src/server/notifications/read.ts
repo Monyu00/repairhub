@@ -4,14 +4,9 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type NotificationReadAdapter = SupabaseClient<Database>;
 
-export type NotificationEventType =
-  | "new_ticket"
-  | "assigned"
-  | "pending"
-  | "in_progress"
-  | "completed"
-  | "closed"
-  | "cancelled";
+const EVENT_TYPES = ["new_ticket", "assigned", "pending", "in_progress", "completed", "closed", "cancelled"] as const;
+
+export type NotificationEventType = (typeof EVENT_TYPES)[number];
 
 export interface NotificationItem {
   id: string;
@@ -33,16 +28,6 @@ export interface MarkNotificationResult {
 
 const MAX_NOTIFICATIONS = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const EVENT_TYPES: readonly NotificationEventType[] = [
-  "new_ticket",
-  "assigned",
-  "pending",
-  "in_progress",
-  "completed",
-  "closed",
-  "cancelled",
-];
-
 function parseNotification(row: unknown): NotificationItem | null {
   if (typeof row !== "object" || row === null) return null;
   const value = row as Record<string, unknown>;
