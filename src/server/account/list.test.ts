@@ -65,7 +65,7 @@ test("projects accounts, resolves notification preferences, and sorts by project
       id: "inactive-admin",
       email: "inactive@example.com",
       displayName: null,
-      role: "admin",
+      role: null,
       department: null,
       phone: null,
       avatarUrl: null,

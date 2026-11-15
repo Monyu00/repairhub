@@ -127,7 +127,7 @@ test("uses auth metadata display_name as the third name fallback", () => {
 
   assert.equal(result.displayName, "Display Name");
 });
-test("falls back to the auth metadata role when the profile role is missing", () => {
+test("does not fall back to auth metadata when the profile role is null", () => {
   const result = resolveUserProjection(
     {
       id: "user-3",
@@ -137,7 +137,7 @@ test("falls back to the auth metadata role when the profile role is missing", ()
     { user_role: null },
   );
 
-  assert.equal(result.role, "technician");
+  assert.equal(result.role, null);
 });
 
 test("uses the profile active state when present", () => {

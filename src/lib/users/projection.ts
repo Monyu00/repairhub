@@ -55,7 +55,7 @@ export function resolveUserProjection(authUser: AuthUser, profile?: Profile | nu
     id: authUser.id,
     email: authUser.email ?? "",
     displayName: profile?.display_name ?? metadataDisplayName,
-    role: profile?.user_role ?? metadata?.user_role ?? null,
+    role: profile?.user_role ?? null,
     department: profile?.department ?? metadata?.department ?? null,
     phone: profile?.phone ?? metadata?.phone ?? null,
     avatarUrl: profile?.avatar_url ?? metadata?.avatar_url ?? null,

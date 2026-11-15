@@ -1,21 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
-import type { UserRole } from "@/lib/users/projection";
+import type { UserProjection } from "@/lib/users/projection";
 import { type NotificationPreferences, resolveNotificationPreferences } from "@/server/personal-settings/input";
 
 import { type AccountSource, mapAccountSource } from "./source";
 
-export interface CurrentAccount {
-  id: string;
-  email: string;
-  displayName: string | null;
-  role: UserRole | null;
-  department: string | null;
-  phone: string | null;
-  avatarUrl: string | null;
-  isActive: boolean;
-  mustChangePassword: boolean;
+export interface CurrentAccount extends UserProjection {
   notificationPreferences: NotificationPreferences;
 }
 
@@ -57,7 +48,6 @@ export async function readCurrentAccount(adapter: AccountAdapter): Promise<Curre
 
   return {
     ...projection,
-    role: source.profile?.user_role ?? null,
     notificationPreferences: resolveNotificationPreferences(source.profile?.notification_preferences),
   };
 }
