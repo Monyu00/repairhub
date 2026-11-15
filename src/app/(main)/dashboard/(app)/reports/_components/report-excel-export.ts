@@ -1,6 +1,8 @@
 import type { Workbook } from "exceljs";
 import { toast } from "sonner";
 
+import { formatCompactDate, formatTicketDate } from "@/lib/formatters";
+
 import type { ReportData } from "./report-types";
 
 interface ExcelColumn {
@@ -10,17 +12,6 @@ interface ExcelColumn {
 }
 
 type ExcelRow = Record<string, string | number>;
-
-/**
- * Formats a Date object into YYYYMMDD string for filenames
- */
-function getTodayString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}${month}${day}`;
-}
 
 function addReportWorksheet(workbook: Workbook, name: string, rows: ExcelRow[], columns: ExcelColumn[]) {
   const worksheet = workbook.addWorksheet(name);
@@ -60,7 +51,7 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
         備註: `共 ${data.satisfaction.totalRated} 筆有效評分`,
       },
       { 項目: "評分回應率", 數值: `${data.satisfaction.responseRate}%`, 備註: "結案案件提供評分之比例" },
-      { 項目: "報表匯出時間", 數值: new Date().toLocaleString("zh-TW"), 備註: "系統自動產出" },
+      { 項目: "報表匯出時間", 數值: formatTicketDate(new Date()), 備註: "系統自動產出" },
     ];
     addReportWorksheet(workbook, "總覽摘要", kpiRows, [
       { header: "項目", key: "項目", width: 18 },
@@ -156,7 +147,7 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
 
     // Filename: repairhub-report-{preset}-{YYYYMMDD}.xlsx
     const preset = data.filter.preset;
-    const filename = `repairhub-report-${preset}-${getTodayString()}.xlsx`;
+    const filename = `repairhub-report-${preset}-${formatCompactDate(new Date())}.xlsx`;
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

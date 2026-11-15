@@ -10,10 +10,32 @@ const ticketDateFormatter = new Intl.DateTimeFormat("zh-TW", {
   hourCycle: "h23",
 });
 
+const shortDateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
+  timeZone: APP_TIME_ZONE,
+  month: "numeric",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+const mediumDateTimeFormatter = new Intl.DateTimeFormat("zh-TW", {
+  timeZone: APP_TIME_ZONE,
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
 const shortDateFormatter = new Intl.DateTimeFormat("zh-TW", {
   timeZone: APP_TIME_ZONE,
   month: "numeric",
   day: "numeric",
+});
+
+const applicationDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: APP_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
 });
 
 const dateFormatter = new Intl.DateTimeFormat("zh-TW", {
@@ -74,6 +96,35 @@ export function formatTicketDate(date: string | Date | null | undefined): string
 
   const parts = ticketDateFormatter.formatToParts(parsed);
   return `${getFormattedPart(parts, "year")}/${getFormattedPart(parts, "month")}/${getFormattedPart(parts, "day")} ${getFormattedPart(parts, "hour")}:${getFormattedPart(parts, "minute")}`;
+}
+
+export function formatShortDateTime(date: string | Date | null | undefined): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  const parts = shortDateTimeFormatter.formatToParts(parsed);
+  return `${getFormattedPart(parts, "month")}/${getFormattedPart(parts, "day")} ${getFormattedPart(parts, "hour")}:${getFormattedPart(parts, "minute")}`;
+}
+
+export function formatMediumDateTime(date: string | Date | null | undefined): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  return mediumDateTimeFormatter.format(parsed);
+}
+
+export function getApplicationDateKey(date: string | Date = new Date()): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  return applicationDateFormatter.format(parsed);
+}
+
+export function formatCompactDate(date: string | Date | null | undefined): string {
+  const parsed = parseDate(date);
+  if (!parsed) return "-";
+
+  return applicationDateFormatter.format(parsed).replace(/-/g, "");
 }
 
 export function formatMonthDay(date: string | Date | null | undefined): string {

@@ -6,22 +6,11 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatShortDateTime, formatTicketLocation } from "@/lib/formatters";
 import type { TicketRecord } from "@/server/tickets/query";
 
 interface DashboardOpenQueueProps {
   tickets: TicketRecord[];
-}
-
-function formatOpenedAt(value: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Taipei",
-  }).format(new Date(value));
 }
 
 export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
@@ -69,8 +58,8 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
                       {formatTicketLocation(ticket)} · {ticket.description}
                     </p>
                   </div>
-                  <time dateTime={ticket.createdAt} className="shrink-0 text-muted-foreground text-xs">
-                    {formatOpenedAt(ticket.createdAt)}
+                  <time dateTime={ticket.createdAt} className="shrink-0 font-mono text-muted-foreground text-xs">
+                    {formatShortDateTime(ticket.createdAt)}
                   </time>
                 </Link>
               </li>

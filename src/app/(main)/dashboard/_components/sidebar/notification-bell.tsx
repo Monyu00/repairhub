@@ -15,23 +15,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatShortDateTime } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { markAllNotificationsRead, markNotificationRead } from "@/server/notifications/actions";
 import type { NotificationEventType, NotificationItem, NotificationsResult } from "@/server/notifications/read";
 
 interface NotificationBellProps {
   result: NotificationsResult;
-}
-
-function formatCreatedAt(iso: string) {
-  return new Intl.DateTimeFormat("zh-TW", {
-    timeZone: "Asia/Taipei",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(iso));
 }
 
 const NOTIFICATION_LABELS: Record<NotificationEventType, string> = {
@@ -129,8 +119,8 @@ export function NotificationBell({ result }: NotificationBellProps) {
                   />
                   <span className="min-w-0 flex-1 font-medium">{NOTIFICATION_LABELS[notification.eventType]}</span>
                 </span>
-                <span className="mt-0.5 block text-muted-foreground text-xs">
-                  {formatCreatedAt(notification.createdAt)}
+                <span className="mt-0.5 block font-mono text-muted-foreground text-xs">
+                  {formatShortDateTime(notification.createdAt)}
                 </span>
               </DropdownMenuItem>
             ))

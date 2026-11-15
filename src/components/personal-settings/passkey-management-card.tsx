@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatMediumDateTime } from "@/lib/formatters";
 import { createClient } from "@/lib/supabase/client";
 import { describePasskeyError } from "@/lib/supabase/passkey-errors";
 import {
@@ -30,10 +31,6 @@ import {
 } from "@/server/personal-settings/passkey-actions";
 
 type Passkey = PasskeyListItem;
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("zh-TW", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
-}
 
 export function PasskeyManagementCard() {
   const [passkeys, setPasskeys] = useState<Passkey[] | null>(null);
@@ -126,8 +123,8 @@ export function PasskeyManagementCard() {
                 {passkey.friendly_name ?? "未命名 Passkey"}
               </p>
               <p className="text-muted-foreground mt-1 font-mono text-xs">
-                建立於 {formatDateTime(passkey.created_at)}；
-                {passkey.last_used_at ? `最後使用於 ${formatDateTime(passkey.last_used_at)}` : "未曾使用"}
+                建立於 {formatMediumDateTime(passkey.created_at)}；
+                {passkey.last_used_at ? `最後使用於 ${formatMediumDateTime(passkey.last_used_at)}` : "未曾使用"}
               </p>
             </div>
             <AlertDialog

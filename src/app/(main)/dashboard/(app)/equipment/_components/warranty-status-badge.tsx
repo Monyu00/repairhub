@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { getApplicationDateKey } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 
 export type WarrantyStatus = "none" | "active" | "expired";
@@ -6,8 +7,7 @@ export type WarrantyStatus = "none" | "active" | "expired";
 export function getWarrantyStatus(warrantyExpiry: string | null | undefined): WarrantyStatus {
   if (!warrantyExpiry) return "none";
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  return todayStr <= warrantyExpiry ? "active" : "expired";
+  return getApplicationDateKey() <= warrantyExpiry ? "active" : "expired";
 }
 
 interface WarrantyStatusBadgeProps {
