@@ -55,6 +55,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatTicketDate } from "@/lib/formatters";
 import { compareUserRole } from "@/lib/users/projection";
 
 import type { CategoryItem } from "../_actions/category-actions";
@@ -413,22 +414,6 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
   const isFiltersModified = searchQuery !== "" || roleFilter !== "all" || statusFilter !== "active";
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "未曾登入";
-    try {
-      const date = new Date(dateStr);
-      return new Intl.DateTimeFormat("zh-TW", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch {
-      return dateStr;
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* 4 Summary Cards: 總數、系統管理者、維修技師、一般使用者 */}
@@ -759,13 +744,13 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           className="hidden text-muted-foreground text-xs md:table-cell"
                           suppressHydrationWarning
                         >
-                          {formatDate(user.createdAt)}
+                          {user.createdAt ? formatTicketDate(user.createdAt) : "未曾登入"}
                         </TableCell>
                         <TableCell
                           className="hidden text-muted-foreground text-xs sm:table-cell"
                           suppressHydrationWarning
                         >
-                          {formatDate(user.lastSignInAt)}
+                          {user.lastSignInAt ? formatTicketDate(user.lastSignInAt) : "未曾登入"}
                         </TableCell>
                         <TableCell className="text-right">
                           {/* Meatballs dropdown action menu */}

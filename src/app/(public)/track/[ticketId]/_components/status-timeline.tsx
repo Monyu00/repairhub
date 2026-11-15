@@ -8,6 +8,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketNote } from "@/server/tickets/detail";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 
@@ -15,16 +16,6 @@ interface StatusTimelineProps {
   createdAt: string;
   currentStatus: TicketStatus;
   events: TicketNote[];
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 function getStatusIcon(content: string) {
@@ -106,7 +97,7 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
                 <p className={`font-medium text-sm ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
                   {item.content}
                 </p>
-                <p className="mt-0.5 text-muted-foreground text-xs">{formatDateTime(item.createdAt)}</p>
+                <p className="mt-0.5 text-muted-foreground text-xs">{formatTicketDate(item.createdAt)}</p>
               </div>
             </div>
           );

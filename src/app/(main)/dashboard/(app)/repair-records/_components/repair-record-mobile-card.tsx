@@ -6,9 +6,9 @@ import { Calendar, MapPin, User, Wrench } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 
-import { formatRepairRecordDate, type RepairRecordItem } from "./repair-records-types";
+import type { RepairRecordItem } from "./repair-records-types";
 
 interface RepairRecordMobileCardProps {
   record: RepairRecordItem;
@@ -17,7 +17,7 @@ interface RepairRecordMobileCardProps {
 }
 
 export function RepairRecordMobileCard({ record, isAdmin, href }: RepairRecordMobileCardProps) {
-  const formattedDate = formatRepairRecordDate(record.createdAt);
+  const formattedDate = formatTicketDate(record.createdAt);
 
   return (
     <Card className="group relative cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-within:border-primary/40">

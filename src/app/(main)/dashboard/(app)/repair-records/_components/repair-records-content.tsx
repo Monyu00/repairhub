@@ -14,10 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatTicketLocation } from "@/lib/formatters";
+import { formatTicketDate, formatTicketLocation } from "@/lib/formatters";
 
 import { RepairRecordMobileCard } from "./repair-record-mobile-card";
-import { formatRepairRecordDate, type RepairRecordItem, type TechnicianOption } from "./repair-records-types";
+import type { RepairRecordItem, TechnicianOption } from "./repair-records-types";
 
 interface RepairRecordsContentProps {
   records: RepairRecordItem[];
@@ -35,7 +35,7 @@ interface RepairRecordTableRowProps {
 }
 
 export function RepairRecordTableRow({ record, isAdmin, href }: RepairRecordTableRowProps) {
-  const formattedDate = formatRepairRecordDate(record.createdAt);
+  const formattedDate = formatTicketDate(record.createdAt);
 
   return (
     <TableRow className="relative cursor-pointer transition-colors hover:bg-muted/60 focus-within:bg-muted/70">

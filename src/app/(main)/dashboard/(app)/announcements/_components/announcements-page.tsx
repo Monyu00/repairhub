@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatTicketDate } from "@/lib/formatters";
 import {
   type AnnouncementAudience,
   type AnnouncementCategory,
@@ -141,21 +142,6 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
       setAnnouncements((prev) => prev.filter((item) => item.id !== deletingAnnouncement.id));
     } else {
       toast.error(res.error ?? "刪除失敗");
-    }
-  };
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleString("zh-TW", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateStr;
     }
   };
 
@@ -406,13 +392,13 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                         <TableCell>{renderAudienceBadge(item.audience)}</TableCell>
 
                         <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
-                          {formatDateTime(item.published_at)}
+                          {formatTicketDate(item.published_at)}
                         </TableCell>
 
                         <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
                           {item.expires_at ? (
                             <span className={isExp ? "font-medium text-destructive/80" : ""}>
-                              {formatDateTime(item.expires_at)}
+                              {formatTicketDate(item.expires_at)}
                             </span>
                           ) : (
                             <span className="text-muted-foreground/50">永不過期</span>

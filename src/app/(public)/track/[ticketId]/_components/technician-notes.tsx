@@ -1,19 +1,10 @@
 import { MessageSquareIcon } from "lucide-react";
 
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketNote } from "@/server/tickets/detail";
 
 interface TechnicianNotesProps {
   notes: TicketNote[];
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function TechnicianNotes({ notes }: TechnicianNotesProps) {
@@ -29,7 +20,7 @@ export function TechnicianNotes({ notes }: TechnicianNotesProps) {
         {notes.map((note) => (
           <div key={note.id} className="space-y-1.5 rounded-lg border border-border bg-muted/40 p-3">
             <p className="whitespace-pre-wrap text-foreground text-sm">{note.content}</p>
-            <p className="text-muted-foreground text-xs">{formatDateTime(note.createdAt)}</p>
+            <p className="text-muted-foreground text-xs">{formatTicketDate(note.createdAt)}</p>
           </div>
         ))}
       </div>

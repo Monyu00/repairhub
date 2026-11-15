@@ -8,6 +8,7 @@ import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { formatDateOnly } from "@/lib/formatters";
 
 import {
   type EquipmentRow,
@@ -106,7 +107,7 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
                     <TicketStatusBadge status={ticket.status} />
                     <div className="flex items-center gap-1 text-muted-foreground text-xs">
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(ticket.created_at).toLocaleDateString("zh-TW")}</span>
+                      <span>{formatDateOnly(ticket.created_at)}</span>
                     </div>
                   </div>
 

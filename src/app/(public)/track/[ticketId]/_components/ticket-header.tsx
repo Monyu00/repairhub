@@ -1,22 +1,13 @@
 import { CalendarIcon } from "lucide-react";
 
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
+import { formatTicketDate } from "@/lib/formatters";
 import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 interface TicketHeaderProps {
   ticketId: string;
   status: TicketStatus;
   createdAt: string;
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function TicketHeader({ ticketId, status, createdAt }: TicketHeaderProps) {
@@ -35,7 +26,7 @@ export function TicketHeader({ ticketId, status, createdAt }: TicketHeaderProps)
 
       <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
         <CalendarIcon className="size-3.5 shrink-0" />
-        <span>提交時間：{formatDateTime(createdAt)}</span>
+        <span>提交時間：{formatTicketDate(createdAt)}</span>
       </div>
     </div>
   );
