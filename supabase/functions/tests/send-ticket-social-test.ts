@@ -27,9 +27,11 @@ function createDelivery(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createRepository(options: { ticketFound?: boolean; targetFound?: boolean } = {}) {
+function createRepository(
+  options: { ticketFound?: boolean; targetFound?: boolean; claim?: Record<string, unknown> } = {},
+) {
   const state = {
-    claim: createDelivery() as object | null,
+    claim: (options.claim ?? createDelivery()) as object | null,
     ticketFound: options.ticketFound ?? true,
     targetFound: options.targetFound ?? true,
     sent: [] as Array<{ deliveryId: string; messageId: string }>,
@@ -143,6 +145,25 @@ test("claims the social delivery and posts concise zh-TW plain text with mention
     ].join("\n"),
   );
   assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "discord-message-1" }]);
+});
+
+test("accepts new_ticket social deliveries with the same concise format", async () => {
+  const { repository } = createRepository({
+    claim: createDelivery({ eventType: "new_ticket" }),
+  });
+  const messages: DiscordMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "discord-message-new-ticket" });
+    },
+  });
+
+  const response = await handler(request());
+
+  assert.equal(response.status, 200);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0]?.content.split("\n")[1], "狀態：待處理");
 });
 
 test("marks a missing active target as a permanent failure without sending", async () => {
