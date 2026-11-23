@@ -3,6 +3,12 @@ export const SERVICE_SECRET_HEADER = "x-repairhub-service-secret";
 const MAX_IMMEDIATE_ATTEMPTS = 3;
 const MAX_DELIVERY_ATTEMPTS = 5;
 const PERSISTENT_RETRY_DELAYS_MINUTES = [5, 15, 60, 360] as const;
+const STATUS_LABELS: Record<string, string> = {
+  in_progress: "處理中",
+  completed: "已完成",
+  closed: "已結案",
+  cancelled: "已取消",
+};
 
 export interface ClaimedSocialDelivery {
   id: string;
@@ -127,10 +133,14 @@ function buildTrackingUrl(appBaseUrl: string, ticketId: string): string {
   return new URL(`/track/${encodeURIComponent(ticketId)}`, baseUrl).toString();
 }
 
-function renderDiscordMessage(ticket: TicketSocialDisplayData, trackingUrl: string): string {
+function renderDiscordMessage(
+  eventType: string,
+  ticket: TicketSocialDisplayData,
+  trackingUrl: string,
+): string {
   return [
     `報修單編號：#${ticket.ticketId.slice(0, 8)}`,
-    "狀態：待處理",
+    `狀態：${STATUS_LABELS[eventType] ?? "待處理"}`,
     `類別：${ticket.categoryName}`,
     `地點：${ticket.location}`,
     `更新時間：${new Intl.DateTimeFormat("zh-TW", {
@@ -184,7 +194,15 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
     if (!delivery) {
       return jsonResponse({ success: true, skipped: "already_claimed_or_sent" }, 200);
     }
-    if (delivery.eventType !== "report_submitted" && delivery.eventType !== "new_ticket") {
+    const supportedEvents = [
+      "new_ticket",
+      "report_submitted",
+      "in_progress",
+      "completed",
+      "closed",
+      "cancelled",
+    ];
+    if (!supportedEvents.includes(delivery.eventType)) {
       await dependencies.repository.markFailed(delivery.id, `Unsupported event: ${delivery.eventType}`, now(), {
         retryable: false,
         nextAttemptAt: null,
@@ -222,7 +240,11 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
     try {
       message = {
         webhookUrl: ticketData.webhookUrl,
-        content: renderDiscordMessage(ticketData, buildTrackingUrl(dependencies.appBaseUrl, ticketData.ticketId)),
+        content: renderDiscordMessage(
+          delivery.eventType,
+          ticketData,
+          buildTrackingUrl(dependencies.appBaseUrl, ticketData.ticketId),
+        ),
         allowedMentions: { parse: [] },
       };
     } catch (error) {
