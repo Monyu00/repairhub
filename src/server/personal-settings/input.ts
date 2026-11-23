@@ -29,6 +29,14 @@ export const notificationPreferencesSchema = z.object({
   newTicket: z.boolean(),
 });
 
+export const discordWebhookInputSchema = z.object({
+  webhookUrl: z.string().max(2048, "Discord Webhook URL 過長"),
+});
+
+export const socialWebhookSwitchSchema = z.object({
+  enabled: z.boolean(),
+});
+
 export const avatarInputSchema = z
   .object({
     imageDataUrl: z.string().min(1).max(MAX_AVATAR_DATA_URL_CHARS).optional(),
