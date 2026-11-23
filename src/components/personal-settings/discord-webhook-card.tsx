@@ -21,7 +21,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Switch } from "@/components/ui/switch";
-import { type MyProfile, bindDiscordWebhook, removeDiscordWebhook, updateDiscordWebhookEnabled } from "@/server/personal-settings/actions";
+import {
+  bindDiscordWebhook,
+  type MyProfile,
+  removeDiscordWebhook,
+  updateDiscordWebhookEnabled,
+} from "@/server/personal-settings/actions";
 
 interface DiscordWebhookCardProps {
   profile: MyProfile;
@@ -95,11 +100,13 @@ export function DiscordWebhookCard({ profile, onSaved }: DiscordWebhookCardProps
       <CardContent className="flex flex-col gap-4">
         <Field orientation="horizontal" data-disabled={!isBound}>
           <FieldContent>
-            <label className="font-medium text-sm" htmlFor="social-notification-switch">
+            <label className="text-sm font-medium" htmlFor="social-notification-switch">
               社交通知
             </label>
             <p className="text-muted-foreground text-xs" id="social-notification-switch-description">
-              {isBound ? (enabled ? "目前會傳送社交通知。" : "目前已綁定，但社交通知關閉。") : "請先綁定 Discord Webhook。"}
+              {!isBound && "請先綁定 Discord Webhook。"}
+              {isBound && enabled && "目前會傳送社交通知。"}
+              {isBound && !enabled && "目前已綁定，但社交通知關閉。"}
             </p>
           </FieldContent>
           <Switch
@@ -155,7 +162,9 @@ export function DiscordWebhookCard({ profile, onSaved }: DiscordWebhookCardProps
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>移除 Discord Webhook？</AlertDialogTitle>
-                  <AlertDialogDescription>移除後會同時關閉社交通知，Ticket 事件不再送到 Discord。</AlertDialogDescription>
+                  <AlertDialogDescription>
+                    移除後會同時關閉社交通知，Ticket 事件不再送到 Discord。
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>取消</AlertDialogCancel>

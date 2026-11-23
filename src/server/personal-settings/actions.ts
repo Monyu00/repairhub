@@ -5,8 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
 import { changePassword, createSupabaseAccountSecurityAdapter, verifyCurrentPassword } from "@/server/account/security";
 import { type AuthenticatedUser, getSession, requireAuth, safeAction } from "@/server/auth/session";
-import { bindSocialWebhook, removeSocialWebhook, setSocialWebhookEnabled } from "./social-webhook";
-import { createSupabaseSocialWebhookAdapter, readSocialWebhookStatus } from "./social-webhook-supabase";
 
 import type { NotificationPreferences } from "./input";
 import {
@@ -17,6 +15,8 @@ import {
   profileInputSchema,
   socialWebhookSwitchSchema,
 } from "./input";
+import { bindSocialWebhook, removeSocialWebhook, setSocialWebhookEnabled } from "./social-webhook";
+import { createSupabaseSocialWebhookAdapter, readSocialWebhookStatus } from "./social-webhook-supabase";
 
 export interface MyProfile {
   displayName: string | null;

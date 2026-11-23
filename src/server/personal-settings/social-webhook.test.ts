@@ -1,22 +1,18 @@
-import assert from "node:assert/strict";
-import test from "node:test";
-
 import {
   bindSocialWebhook,
   removeSocialWebhook,
-  setSocialWebhookEnabled,
   type SocialWebhookAdapter,
+  setSocialWebhookEnabled,
 } from "./social-webhook";
+import assert from "node:assert/strict";
+import test from "node:test";
 
 const FAKE_WEBHOOK_URL = "https://discord.com/api/webhooks/123/fake-token";
 const FAKE_FINGERPRINT = "a7d0e51dde9176ce4853b120c6711ccc99218932a4e0b42066ae715978daaaf9";
 
-function createAdapter(options: {
-  attemptError?: Error;
-  saveError?: Error;
-  switchError?: Error;
-  removeError?: Error;
-} = {}) {
+function createAdapter(
+  options: { attemptError?: Error; saveError?: Error; switchError?: Error; removeError?: Error } = {},
+) {
   const state = {
     attempts: 0,
     sentMessages: [] as string[],
@@ -111,7 +107,7 @@ test("rejects URLs outside the Discord HTTPS webhook allowlist without sending",
 
   for (const webhookUrl of invalidUrls) {
     const { adapter, state } = createAdapter();
-    const result = await bindSocialWebhook(adapter, async () => {}, { webhookUrl });
+    const result = await bindSocialWebhook(adapter, async () => undefined, { webhookUrl });
 
     assert.deepEqual(result, { success: false, error: "請輸入有效的 Discord Webhook URL" }, webhookUrl);
     assert.equal(state.attempts, 0);

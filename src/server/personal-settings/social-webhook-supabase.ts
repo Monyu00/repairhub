@@ -54,20 +54,11 @@ export function createSupabaseSocialWebhookAdapter(context: {
 }): SocialWebhookAdapter {
   const admin = context.admin as unknown as SupabaseClient<SocialDatabase>;
 
-  async function readSocialWebhookStatus(userId: string): Promise<{ enabled: boolean } | null> {
-    const { data, error } = await admin
-      .from("social_webhooks")
-      .select("enabled")
-      .eq("account_id", userId)
-      .maybeSingle();
-    if (error) throw error;
-    return data ? { enabled: data.enabled } : null;
-  }
-
   return {
     async recordAttempt() {
       if (!context.session) throw new Error("Session is required to record a social webhook attempt");
-      const { data, error } = await context.session.supabase.rpc("reserve_social_webhook_attempt");
+      const authenticated = context.session.supabase as unknown as SupabaseClient<SocialDatabase>;
+      const { data, error } = await authenticated.rpc("reserve_social_webhook_attempt");
       if (error) throw error;
       return { rateLimited: data !== true };
     },
@@ -108,11 +99,7 @@ export async function readSocialWebhookStatus(
   userId: string,
 ): Promise<{ enabled: boolean } | null> {
   const admin = context.admin as unknown as SupabaseClient<SocialDatabase>;
-  const { data, error } = await admin
-    .from("social_webhooks")
-    .select("enabled")
-    .eq("account_id", userId)
-    .maybeSingle();
+  const { data, error } = await admin.from("social_webhooks").select("enabled").eq("account_id", userId).maybeSingle();
   if (error) throw error;
   return data ? { enabled: data.enabled } : null;
 }
