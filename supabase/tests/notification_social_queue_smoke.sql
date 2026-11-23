@@ -18,11 +18,19 @@ DECLARE
   inactive_account_id UUID := gen_random_uuid();
   preference_disabled_account_id UUID := gen_random_uuid();
   switch_disabled_account_id UUID := gen_random_uuid();
+  admin_account_id UUID := gen_random_uuid();
+  admin_duplicate_account_id UUID := gen_random_uuid();
+  subscribed_technician_account_id UUID := gen_random_uuid();
+  unsubscribed_technician_account_id UUID := gen_random_uuid();
+  actor_account_id UUID := gen_random_uuid();
+  new_ticket_preference_disabled_account_id UUID := gen_random_uuid();
+  new_ticket_switch_disabled_account_id UUID := gen_random_uuid();
   eligible_ticket_id UUID := gen_random_uuid();
   inactive_ticket_id UUID := gen_random_uuid();
   preference_disabled_ticket_id UUID := gen_random_uuid();
   switch_disabled_ticket_id UUID := gen_random_uuid();
   unbound_ticket_id UUID := gen_random_uuid();
+  new_ticket_ticket_id UUID := gen_random_uuid();
   eligible_delivery_id UUID;
   social_delivery_count INTEGER;
   row_status TEXT;
@@ -41,7 +49,32 @@ BEGIN
     (eligible_account_id, 'Eligible@Example.com'),
     (inactive_account_id, 'Inactive@Example.com'),
     (preference_disabled_account_id, 'PreferenceDisabled@Example.com'),
-    (switch_disabled_account_id, 'SwitchDisabled@Example.com');
+    (switch_disabled_account_id, 'SwitchDisabled@Example.com'),
+    (admin_account_id, 'Admin@Example.com'),
+    (admin_duplicate_account_id, 'AdminDuplicate@Example.com'),
+    (subscribed_technician_account_id, 'SubscribedTechnician@Example.com'),
+    (unsubscribed_technician_account_id, 'UnsubscribedTechnician@Example.com'),
+    (actor_account_id, 'Actor@Example.com'),
+    (new_ticket_preference_disabled_account_id, 'NewTicketPreferenceDisabled@Example.com'),
+    (new_ticket_switch_disabled_account_id, 'NewTicketSwitchDisabled@Example.com');
+
+  UPDATE public.profiles
+  SET user_role = 'admin'::public.user_role
+  WHERE id IN (admin_account_id, admin_duplicate_account_id, actor_account_id);
+
+  UPDATE public.profiles
+  SET user_role = 'technician'::public.user_role
+  WHERE id IN (
+    subscribed_technician_account_id,
+    unsubscribed_technician_account_id
+  );
+
+  INSERT INTO public.technician_categories (technician_id, category_id)
+  VALUES (subscribed_technician_account_id, category_id);
+
+  UPDATE public.profiles
+  SET notification_preferences = jsonb_build_object('new_ticket', false)
+  WHERE id = new_ticket_preference_disabled_account_id;
 
   UPDATE public.profiles
   SET is_active = false
@@ -65,6 +98,48 @@ BEGIN
       switch_disabled_account_id,
       'https://discord.com/api/webhooks/4/fake-switch',
       'fingerprint-switch',
+      false
+    ),
+    (
+      admin_account_id,
+      'https://discord.com/api/webhooks/5/fake-admin',
+      'fingerprint-new-ticket-shared',
+      true
+    ),
+    (
+      admin_duplicate_account_id,
+      'https://discord.com/api/webhooks/6/fake-admin-duplicate',
+      'fingerprint-new-ticket-shared',
+      true
+    ),
+    (
+      subscribed_technician_account_id,
+      'https://discord.com/api/webhooks/7/fake-technician',
+      'fingerprint-new-ticket-technician',
+      true
+    ),
+    (
+      unsubscribed_technician_account_id,
+      'https://discord.com/api/webhooks/8/fake-unsubscribed',
+      'fingerprint-new-ticket-unsubscribed',
+      true
+    ),
+    (
+      actor_account_id,
+      'https://discord.com/api/webhooks/9/fake-actor',
+      'fingerprint-new-ticket-actor',
+      true
+    ),
+    (
+      new_ticket_preference_disabled_account_id,
+      'https://discord.com/api/webhooks/10/fake-preference',
+      'fingerprint-new-ticket-preference-disabled',
+      true
+    ),
+    (
+      new_ticket_switch_disabled_account_id,
+      'https://discord.com/api/webhooks/11/fake-switch',
+      'fingerprint-new-ticket-switch-disabled',
       false
     );
 
@@ -97,6 +172,29 @@ BEGIN
     ),
     (unbound_ticket_id, 'pending', category_id, space_id, 'Unbound social smoke', 'unbound@example.com');
 
+  INSERT INTO public.tickets (
+    id,
+    status,
+    category_id,
+    space_id,
+    description,
+    reporter_email
+  )
+  VALUES (
+    new_ticket_ticket_id,
+    'pending',
+    category_id,
+    space_id,
+    'New ticket social smoke',
+    'new-ticket-social-reporter@example.com'
+  );
+
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('sub', actor_account_id::text)::text,
+    true
+  );
+
   UPDATE public.tickets
   SET notification_ready_at = now()
   WHERE id IN (
@@ -105,7 +203,58 @@ BEGIN
     preference_disabled_ticket_id,
     switch_disabled_ticket_id,
     unbound_ticket_id
+    ,new_ticket_ticket_id
   );
+
+  SELECT count(*) INTO social_delivery_count
+  FROM public.notification_log
+  WHERE ticket_id = new_ticket_ticket_id
+    AND channel = 'social'
+    AND event_type = 'new_ticket';
+
+  IF social_delivery_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Admin and subscribed Technician new-ticket social Deliveries, found %.', social_delivery_count;
+  END IF;
+
+  SELECT count(*) INTO social_delivery_count
+  FROM public.notification_log
+  WHERE ticket_id = new_ticket_ticket_id
+    AND channel = 'social'
+    AND target_fingerprint = 'fingerprint-new-ticket-shared';
+
+  IF social_delivery_count <> 1 THEN
+    RAISE EXCEPTION 'Expected one shared social target, found %.', social_delivery_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = new_ticket_ticket_id
+      AND channel = 'social'
+      AND target_fingerprint IN (
+        'fingerprint-new-ticket-actor',
+        'fingerprint-new-ticket-unsubscribed',
+        'fingerprint-new-ticket-preference-disabled',
+        'fingerprint-new-ticket-switch-disabled'
+      )
+  ) THEN
+    RAISE EXCEPTION 'Expected actor, unsubscribed, preference-disabled, or switch-disabled targets to be skipped.';
+  END IF;
+
+  PERFORM public.enqueue_social_new_ticket_deliveries(
+    new_ticket_ticket_id,
+    actor_account_id
+  );
+
+  SELECT count(*) INTO social_delivery_count
+  FROM public.notification_log
+  WHERE ticket_id = new_ticket_ticket_id
+    AND channel = 'social'
+    AND event_type = 'new_ticket';
+
+  IF social_delivery_count <> 2 THEN
+    RAISE EXCEPTION 'Expected repeated new-ticket social intake to deduplicate, found % rows.', social_delivery_count;
+  END IF;
 
   SELECT count(*) INTO social_delivery_count
   FROM public.notification_log
@@ -226,6 +375,11 @@ BEGIN
   IF has_function_privilege('anon', 'public.enqueue_social_report_submitted_delivery(UUID, TEXT)', 'EXECUTE')
     OR has_function_privilege('authenticated', 'public.enqueue_social_report_submitted_delivery(UUID, TEXT)', 'EXECUTE') THEN
     RAISE EXCEPTION 'social enqueue helper must be internal.';
+  END IF;
+
+  IF has_function_privilege('anon', 'public.enqueue_social_new_ticket_deliveries(UUID, UUID)', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'public.enqueue_social_new_ticket_deliveries(UUID, UUID)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'social new-ticket helper must be internal.';
   END IF;
 END
 $notification_social_queue_smoke$;

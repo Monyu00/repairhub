@@ -184,7 +184,7 @@ export function createRequestHandler(dependencies: RequestHandlerDependencies) {
     if (!delivery) {
       return jsonResponse({ success: true, skipped: "already_claimed_or_sent" }, 200);
     }
-    if (delivery.eventType !== "report_submitted") {
+    if (delivery.eventType !== "report_submitted" && delivery.eventType !== "new_ticket") {
       await dependencies.repository.markFailed(delivery.id, `Unsupported event: ${delivery.eventType}`, now(), {
         retryable: false,
         nextAttemptAt: null,
