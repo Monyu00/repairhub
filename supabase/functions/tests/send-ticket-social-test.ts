@@ -166,6 +166,24 @@ test("accepts new_ticket social deliveries with the same concise format", async 
   assert.equal(messages[0]?.content.split("\n")[1], "狀態：待處理");
 });
 
+test("renders status-change events with their lifecycle label", async () => {
+  const { repository } = createRepository({
+    claim: createDelivery({ eventType: "in_progress" }),
+  });
+  const messages: DiscordMessage[] = [];
+  const handler = createTestHandler(repository, {
+    send(message) {
+      messages.push(message);
+      return Promise.resolve({ messageId: "discord-message-status" });
+    },
+  });
+
+  const response = await handler(request());
+
+  assert.equal(response.status, 200);
+  assert.equal(messages[0]?.content.split("\n")[1], "狀態：處理中");
+});
+
 test("marks a missing active target as a permanent failure without sending", async () => {
   const { repository, state } = createRepository({ targetFound: false });
   let senderCalls = 0;
