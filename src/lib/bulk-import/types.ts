@@ -1,5 +1,5 @@
 export type BulkImportEntity = "location" | "equipment" | "users";
-export type BulkImportTemplate = "location" | "buildings" | "spaces" | "equipment" | "users";
+export type BulkImportTemplate = "buildings" | "spaces" | "equipment" | "users";
 
 export type BulkImportStatus = "created" | "skipped" | "failed";
 

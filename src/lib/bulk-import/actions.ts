@@ -5,15 +5,12 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAdmin, safeAction } from "@/server/auth";
 
-import { readBulkImportTable, readLocationWorkbook, type SpreadsheetRows } from "./parser";
+import { readBulkImportTable, readLocationFile } from "./parser";
 import {
-  BUILDING_HEADERS,
-  BULK_IMPORT_MAX_ROWS,
   type BulkImportEntity,
   type BulkImportResponse,
   type BulkImportResultRow,
   EQUIPMENT_HEADERS,
-  SPACE_HEADERS,
   USER_HEADERS,
 } from "./types";
 import { parseIsoDate, parseRole } from "./validation";
@@ -65,26 +62,14 @@ interface PreparedSpaceData {
 
 async function importLocations(formData: FormData): Promise<BulkImportResponse> {
   const { supabase } = await requireAdmin();
-  const excelFile = formData.get("locationExcel");
-  const buildingCsv = formData.get("buildingCsv");
-  const spaceCsv = formData.get("spaceCsv");
-
-  let buildingRows: SpreadsheetRows;
-  let spaceRows: SpreadsheetRows;
-
-  if (excelFile instanceof File && excelFile.size > 0) {
-    const workbook = await readLocationWorkbook(excelFile);
-    buildingRows = workbook.buildings;
-    spaceRows = workbook.spaces;
-  } else if (buildingCsv instanceof File && spaceCsv instanceof File && buildingCsv.size > 0 && spaceCsv.size > 0) {
-    buildingRows = await readBulkImportTable(buildingCsv, "Buildings", BUILDING_HEADERS);
-    spaceRows = await readBulkImportTable(spaceCsv, "Spaces", SPACE_HEADERS);
-    if (buildingRows.length + spaceRows.length > BULK_IMPORT_MAX_ROWS) {
-      throw new Error(`資料列總數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
-    }
-  } else {
-    return { success: false, error: "請上傳地點 XLSX，或同時上傳 Building 與 Space CSV" };
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { success: false, error: "請選擇匯入檔案" };
   }
+
+  const locationData = await readLocationFile(file);
+  const buildingRows = locationData.buildings;
+  const spaceRows = locationData.spaces;
 
   const { data: existingBuildings } = await supabase.from("buildings").select("id,name,code,sort_order");
   const buildingMap = new Map<string, BuildingRecord>(
