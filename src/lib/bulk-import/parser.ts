@@ -23,8 +23,7 @@ export async function readBulkImportTable(file: File, sheetName: string, require
     throw new Error(`資料列數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
   }
 
-  const headers = Object.keys(rows[0].values);
-  const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header));
+  const missingHeaders = getMissingHeaders(Object.keys(rows[0].values), requiredHeaders);
   if (missingHeaders.length > 0) {
     throw new Error(`缺少欄位：${missingHeaders.join(", ")}`);
   }
@@ -43,8 +42,8 @@ export async function readLocationFile(file: File) {
     if (!buildings?.length && !spaces?.length) {
       throw new Error("找不到地點或空間資料");
     }
-    if (buildings) validateHeaders(buildings, BUILDING_HEADERS);
-    if (spaces) validateHeaders(spaces, SPACE_HEADERS);
+    if (buildings?.length) validateHeaders(buildings, BUILDING_HEADERS);
+    if (spaces?.length) validateHeaders(spaces, SPACE_HEADERS);
     if ((buildings?.length ?? 0) + (spaces?.length ?? 0) > BULK_IMPORT_MAX_ROWS) {
       throw new Error(`資料列總數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
     }
@@ -56,20 +55,23 @@ export async function readLocationFile(file: File) {
   if (rows.length === 0) {
     throw new Error("CSV 沒有資料列");
   }
+  if (rows.length > BULK_IMPORT_MAX_ROWS) {
+    throw new Error(`資料列總數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
+  }
 
   const headers = Object.keys(rows[0].values);
-  if (hasRequiredHeaders(headers, BUILDING_HEADERS)) {
+  if (getMissingHeaders(headers, BUILDING_HEADERS).length === 0) {
     return { buildings: rows, spaces: [] };
   }
-  if (hasRequiredHeaders(headers, SPACE_HEADERS)) {
+  if (getMissingHeaders(headers, SPACE_HEADERS).length === 0) {
     return { buildings: [], spaces: rows };
   }
 
   throw new Error("CSV 必須是地點（code,name）或空間（building_code,name,floor）欄位");
 }
 
-function hasRequiredHeaders(headers: readonly string[], requiredHeaders: readonly string[]) {
-  return requiredHeaders.every((header) => headers.includes(header));
+function getMissingHeaders(headers: readonly string[], requiredHeaders: readonly string[]) {
+  return requiredHeaders.filter((header) => !headers.includes(header));
 }
 
 function validateImportFile(file: File) {
@@ -141,8 +143,7 @@ function extractWorksheet(worksheet: ExcelJS.Worksheet): SpreadsheetRows {
 }
 
 function validateHeaders(rows: SpreadsheetRows, requiredHeaders: readonly string[]) {
-  const headers = Object.keys(rows[0].values);
-  const missingHeaders = requiredHeaders.filter((header) => !headers.includes(header));
+  const missingHeaders = getMissingHeaders(Object.keys(rows[0].values), requiredHeaders);
   if (missingHeaders.length > 0) {
     throw new Error(`缺少欄位：${missingHeaders.join(", ")}`);
   }

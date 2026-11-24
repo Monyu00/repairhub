@@ -49,6 +49,13 @@ const copy: Record<BulkImportEntity, { title: string; description: string }> = {
   },
 };
 
+const locationTemplates = [
+  { label: "地點 XLSX", template: "buildings", format: "xlsx" },
+  { label: "地點 CSV", template: "buildings", format: "csv" },
+  { label: "空間 XLSX", template: "spaces", format: "xlsx" },
+  { label: "空間 CSV", template: "spaces", format: "csv" },
+] as const;
+
 export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialogProps) {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -178,44 +185,18 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
               <FieldLabel>範本</FieldLabel>
               <div className="flex flex-wrap gap-2">
                 {isLocation ? (
-                  <>
+                  locationTemplates.map((template) => (
                     <Button
+                      key={template.label}
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => downloadBulkImportTemplate("buildings", "xlsx")}
+                      onClick={() => downloadBulkImportTemplate(template.template, template.format)}
                     >
                       <Download data-icon="inline-start" />
-                      地點 XLSX
+                      {template.label}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadBulkImportTemplate("buildings", "csv")}
-                    >
-                      <Download data-icon="inline-start" />
-                      地點 CSV
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadBulkImportTemplate("spaces", "xlsx")}
-                    >
-                      <Download data-icon="inline-start" />
-                      空間 XLSX
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadBulkImportTemplate("spaces", "csv")}
-                    >
-                      <Download data-icon="inline-start" />
-                      空間 CSV
-                    </Button>
-                  </>
+                  ))
                 ) : (
                   <>
                     <Button

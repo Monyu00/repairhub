@@ -67,9 +67,9 @@ async function importLocations(formData: FormData): Promise<BulkImportResponse> 
     return { success: false, error: "請選擇匯入檔案" };
   }
 
-  const locationRows = await readLocationFile(file);
-  const buildingRows = locationRows.buildings;
-  const spaceRows = locationRows.spaces;
+  const locationData = await readLocationFile(file);
+  const buildingRows = locationData.buildings;
+  const spaceRows = locationData.spaces;
 
   const { data: existingBuildings } = await supabase.from("buildings").select("id,name,code,sort_order");
   const buildingMap = new Map<string, BuildingRecord>(

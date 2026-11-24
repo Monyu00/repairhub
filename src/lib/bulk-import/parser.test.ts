@@ -1,6 +1,7 @@
 import * as ExcelJS from "exceljs";
 
 import { readBulkImportTable, readLocationFile } from "./parser";
+import { BULK_IMPORT_MAX_ROWS } from "./types";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -53,12 +54,38 @@ test("readLocationFile detects a building CSV by required headers", async () => 
   });
 });
 
+test("readLocationFile ignores an empty Buildings sheet when Spaces has rows", async () => {
+  const file = await createWorkbook({
+    Buildings: [["code", "name"]],
+    Spaces: [
+      ["building_code", "name", "floor"],
+      ["A", "101", "1"],
+    ],
+  });
+
+  const rows = await readLocationFile(file);
+
+  assert.deepEqual(rows, {
+    buildings: [],
+    spaces: [{ row: 2, values: { building_code: "A", name: "101", floor: "1" } }],
+  });
+});
+
+test("readLocationFile rejects a building CSV above the row limit", async () => {
+  const rows = Array.from({ length: BULK_IMPORT_MAX_ROWS + 1 }, (_, index) => `A${index},棟${index}`);
+  const file = new File([`\uFEFFcode,name\r\n${rows.join("\r\n")}\r\n`], "buildings.csv", { type: "text/csv" });
+
+  await assert.rejects(readLocationFile(file), /資料列總數不可超過 500 列/);
+});
+
 async function createWorkbook(sheets: Record<string, string[][]>) {
   const workbook = new ExcelJS.Workbook();
   for (const [name, rows] of Object.entries(sheets)) {
     const worksheet = workbook.addWorksheet(name);
     worksheet.addRow(rows[0]);
-    worksheet.addRow(rows[1]);
+    for (const row of rows.slice(1)) {
+      worksheet.addRow(row);
+    }
   }
   const buffer = await workbook.xlsx.writeBuffer();
   return new File([buffer], "locations.xlsx", {
