@@ -24,12 +24,19 @@ const headersByTemplate: Record<BulkImportTemplate, readonly string[]> = {
   users: USER_HEADERS,
 };
 
+const sheetNamesByTemplate: Record<BulkImportTemplate, string> = {
+  buildings: "Buildings",
+  spaces: "Spaces",
+  equipment: "Equipment",
+  users: "Users",
+};
+
 async function createWorkbook(template: BulkImportTemplate): Promise<File> {
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
   const filename = `${template}-import-template.xlsx`;
 
-  addSheet(workbook, template, headersByTemplate[template]);
+  addSheet(workbook, sheetNamesByTemplate[template], headersByTemplate[template]);
 
   const buffer = await workbook.xlsx.writeBuffer();
   return new File([buffer], filename, { type: xlsxMimeType });
