@@ -139,7 +139,7 @@ BEGIN
       'SocialStatusReporter@Example.com'
     );
 
-  PERFORM set_config('request.jwt.claims', '', true);
+  PERFORM set_config('request.jwt.claims', NULL, true);
 
   UPDATE public.tickets
   SET status = 'in_progress'
@@ -167,7 +167,7 @@ BEGIN
   SET status = 'in_progress'
   WHERE id = actor_excluded_ticket_id;
 
-  PERFORM set_config('request.jwt.claims', '', true);
+  PERFORM set_config('request.jwt.claims', NULL, true);
 
   UPDATE public.tickets
   SET status = 'in_progress'

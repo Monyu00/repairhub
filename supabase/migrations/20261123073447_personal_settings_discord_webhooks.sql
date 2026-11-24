@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.social_webhook_attempts (
 CREATE INDEX IF NOT EXISTS idx_social_webhook_attempts_account_window
   ON public.social_webhook_attempts (account_id, attempted_at);
 
+-- shortcut: 保留全部綁定嘗試以供稽核，rate limit 只讀 15 分鐘窗口；需要時再加清理作業。
+
 CREATE OR REPLACE FUNCTION public.handle_social_webhooks_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -44,7 +46,7 @@ DECLARE
   p_account_id UUID := auth.uid();
   recent_attempts INTEGER;
 BEGIN
-  IF account_id IS NULL THEN
+  IF p_account_id IS NULL THEN
     RETURN FALSE;
   END IF;
 

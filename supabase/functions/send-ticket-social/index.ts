@@ -42,14 +42,13 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
   return {
     async claimDelivery(deliveryId) {
       const { data, error } = await supabase
-        .rpc("claim_notification_delivery", { p_delivery_id: deliveryId })
+        .rpc("claim_social_notification_delivery", { p_delivery_id: deliveryId })
         .maybeSingle();
 
       if (error) throw error;
       if (!data) return null;
 
       const row = data as unknown as JsonRecord;
-      if (row.channel !== "social") return null;
       return {
         id: String(row.id),
         ticketId: String(row.ticket_id),
@@ -62,16 +61,13 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
     },
 
     async getTicketData(delivery) {
-      const { data: target, error: targetError } = await supabase
-        .from("social_webhooks")
-        .select("webhook_url")
-        .eq("target_fingerprint", delivery.targetFingerprint)
-        .eq("enabled", true)
-        .eq("profiles.is_active", true)
-        .maybeSingle();
+      const { data: webhookUrl, error: targetError } = await supabase.rpc("resolve_social_notification_target", {
+        p_target_fingerprint: delivery.targetFingerprint,
+        p_event_type: delivery.eventType,
+      });
 
       if (targetError) throw targetError;
-      if (!target) throw new MissingSocialTargetError();
+      if (typeof webhookUrl !== "string" || webhookUrl === "") throw new MissingSocialTargetError();
 
       const { data, error } = await supabase
         .from("tickets")
@@ -95,11 +91,11 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
             typeof space.floor === "number" ? ` (${space.floor}F)` : ""
           }`
         : "";
-      const location = [buildingName, spaceLabel].filter(Boolean).join(" ");
+      const location = [buildingName, spaceLabel].filter(Boolean).join(" - ");
 
       return {
         ticketId: String(ticket.id),
-        webhookUrl: String(target.webhook_url),
+        webhookUrl,
         categoryName,
         location,
         updatedAt: delivery.eventAt,

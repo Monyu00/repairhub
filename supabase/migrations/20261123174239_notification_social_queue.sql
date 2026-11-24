@@ -58,23 +58,13 @@ BEGIN
       RETURN;
     END IF;
   ELSIF p_channel = 'social' THEN
-    IF p_event_type <> 'report_submitted' THEN
-      RAISE EXCEPTION 'Unsupported social notification event type: %', p_event_type;
-    END IF;
-
     target_fingerprint := lower(btrim(coalesce(p_target_fingerprint, '')));
     IF target_fingerprint = '' THEN
       RETURN;
     END IF;
 
-    IF NOT EXISTS (
-      SELECT 1
-      FROM public.social_webhooks AS webhook
-      JOIN public.profiles AS profile ON profile.id = webhook.account_id
-      WHERE webhook.target_fingerprint = target_fingerprint
-        AND webhook.enabled IS TRUE
-        AND profile.is_active IS TRUE
-    ) THEN
+    -- Every Social shape is event plus the same target predicate.
+    IF public.resolve_social_notification_target(target_fingerprint, p_event_type) IS NULL THEN
       RETURN;
     END IF;
   ELSE
@@ -146,6 +136,35 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION public.enqueue_notification_delivery(UUID, TEXT, TEXT, TIMESTAMPTZ, TEXT, TEXT) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.enqueue_notification_delivery(UUID, TEXT, TEXT, TIMESTAMPTZ, TEXT, TEXT) FROM anon, authenticated;
+
+-- Generalizing this function adds defaults, so the 4-arg overload becomes ambiguous.
+DROP FUNCTION public.enqueue_notification_delivery(UUID, TEXT, TEXT, TIMESTAMPTZ);
+
+-- Mixed-case stored auth Emails must not turn a disabled preference back on.
+CREATE OR REPLACE FUNCTION public.notification_preference_enabled(
+  p_recipient_email TEXT,
+  p_event_key TEXT
+)
+RETURNS BOOLEAN
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT COALESCE(
+    (
+      SELECT (prefs.notification_preferences ->> p_event_key) IS DISTINCT FROM 'false'
+      FROM public.profiles AS prefs
+      JOIN auth.users AS auth_user ON auth_user.id = prefs.id
+      WHERE lower(btrim(auth_user.email)) = lower(btrim(p_recipient_email))
+      LIMIT 1
+    ),
+    TRUE
+  );
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.notification_preference_enabled(TEXT, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.notification_preference_enabled(TEXT, TEXT) FROM anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.enqueue_social_report_submitted_delivery(
   p_ticket_id UUID,
@@ -246,6 +265,35 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.claim_social_notification_delivery(UUID) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.claim_social_notification_delivery(UUID) FROM anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_social_notification_delivery(UUID) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.resolve_social_notification_target(
+  p_target_fingerprint TEXT,
+  p_event_type TEXT
+)
+RETURNS TEXT
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT webhook.webhook_url
+  FROM public.social_webhooks AS webhook
+  JOIN public.profiles AS profile ON profile.id = webhook.account_id
+  JOIN auth.users AS auth_user ON auth_user.id = profile.id
+  WHERE webhook.target_fingerprint = lower(btrim(p_target_fingerprint))
+    AND webhook.enabled IS TRUE
+    AND profile.is_active IS TRUE
+    AND public.notification_preference_enabled(
+      auth_user.email,
+      CASE WHEN p_event_type = 'new_ticket' THEN 'new_ticket' ELSE 'ticket_status' END
+    )
+  ORDER BY webhook.account_id
+  LIMIT 1;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.resolve_social_notification_target(TEXT, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.resolve_social_notification_target(TEXT, TEXT) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_social_notification_target(TEXT, TEXT) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.invoke_notification_delivery(p_delivery_id UUID)
 RETURNS BIGINT

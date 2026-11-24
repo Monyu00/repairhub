@@ -31,9 +31,12 @@ DECLARE
   switch_disabled_ticket_id UUID := gen_random_uuid();
   unbound_ticket_id UUID := gen_random_uuid();
   new_ticket_ticket_id UUID := gen_random_uuid();
+  actor_email_ticket_id UUID := gen_random_uuid();
   eligible_delivery_id UUID;
+  claimed_delivery_id UUID;
   social_delivery_count INTEGER;
   row_status TEXT;
+  resolved_webhook_url TEXT;
 BEGIN
   INSERT INTO public.buildings (id, name, code)
   VALUES (building_id, 'Social Queue Smoke Building', 'SQS-' || left(building_id::text, 8));
@@ -74,7 +77,7 @@ BEGIN
 
   UPDATE public.profiles
   SET notification_preferences = jsonb_build_object('new_ticket', false)
-  WHERE id = new_ticket_preference_disabled_account_id;
+  WHERE id IN (new_ticket_preference_disabled_account_id, admin_duplicate_account_id);
 
   UPDATE public.profiles
   SET is_active = false
@@ -187,6 +190,14 @@ BEGIN
     space_id,
     'New ticket social smoke',
     'new-ticket-social-reporter@example.com'
+  ),
+  (
+    actor_email_ticket_id,
+    'pending',
+    category_id,
+    space_id,
+    'Actor email fallback social smoke',
+    'Actor@Example.com'
   );
 
   PERFORM set_config(
@@ -256,6 +267,35 @@ BEGIN
     RAISE EXCEPTION 'Expected repeated new-ticket social intake to deduplicate, found % rows.', social_delivery_count;
   END IF;
 
+  PERFORM set_config('request.jwt.claims', NULL, true);
+
+  UPDATE public.tickets
+  SET notification_ready_at = now()
+  WHERE id = actor_email_ticket_id;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = actor_email_ticket_id
+      AND channel = 'social'
+      AND event_type = 'new_ticket'
+      AND target_fingerprint = 'fingerprint-new-ticket-actor'
+  ) THEN
+    RAISE EXCEPTION 'Expected reporter email fallback to exclude the actor without a JWT claim.';
+  END IF;
+
+  SELECT public.resolve_social_notification_target('fingerprint-new-ticket-shared', 'new_ticket')
+  INTO resolved_webhook_url;
+
+  IF resolved_webhook_url IS DISTINCT FROM 'https://discord.com/api/webhooks/5/fake-admin' THEN
+    RAISE EXCEPTION 'Expected the enabled Admin preference to resolve a shared target, found %.', resolved_webhook_url;
+  END IF;
+
+  IF public.resolve_social_notification_target('fingerprint-new-ticket-preference-disabled', 'new_ticket') IS NOT NULL
+    OR public.resolve_social_notification_target('fingerprint-new-ticket-switch-disabled', 'new_ticket') IS NOT NULL THEN
+    RAISE EXCEPTION 'Expected send-time preference and switch checks to reject a target.';
+  END IF;
+
   SELECT count(*) INTO social_delivery_count
   FROM public.notification_log
   WHERE ticket_id = eligible_ticket_id
@@ -321,11 +361,18 @@ BEGIN
     WHEN unique_violation THEN NULL;
   END;
 
-  UPDATE public.notification_log
-  SET status = 'sending', attempt_count = 1
-  WHERE id = eligible_delivery_id;
+  SELECT claim.id INTO claimed_delivery_id
+  FROM public.claim_social_notification_delivery(eligible_delivery_id) AS claim;
+
+  IF claimed_delivery_id IS DISTINCT FROM eligible_delivery_id THEN
+    RAISE EXCEPTION 'Expected the social claim RPC to claim the requested Delivery.';
+  END IF;
 
   DELETE FROM public.social_webhooks WHERE account_id = eligible_account_id;
+
+  IF public.resolve_social_notification_target('fingerprint-eligible', 'report_submitted') IS NOT NULL THEN
+    RAISE EXCEPTION 'Expected a removed target not to resolve at send time.';
+  END IF;
 
   UPDATE public.notification_log
   SET status = 'failed', next_attempt_at = NULL, last_error = 'No active social target'
@@ -380,6 +427,11 @@ BEGIN
   IF has_function_privilege('anon', 'public.enqueue_social_new_ticket_deliveries(UUID, UUID)', 'EXECUTE')
     OR has_function_privilege('authenticated', 'public.enqueue_social_new_ticket_deliveries(UUID, UUID)', 'EXECUTE') THEN
     RAISE EXCEPTION 'social new-ticket helper must be internal.';
+  END IF;
+
+  IF has_function_privilege('anon', 'public.resolve_social_notification_target(TEXT, TEXT)', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'public.resolve_social_notification_target(TEXT, TEXT)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'social target resolver must be service-only.';
   END IF;
 END
 $notification_social_queue_smoke$;

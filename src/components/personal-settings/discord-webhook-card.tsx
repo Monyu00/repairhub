@@ -100,9 +100,9 @@ export function DiscordWebhookCard({ profile, onSaved }: DiscordWebhookCardProps
       <CardContent className="flex flex-col gap-4">
         <Field orientation="horizontal" data-disabled={!isBound}>
           <FieldContent>
-            <label className="text-sm font-medium" htmlFor="social-notification-switch">
+            <FieldLabel className="text-sm font-medium" htmlFor="social-notification-switch">
               社交通知
-            </label>
+            </FieldLabel>
             <p className="text-muted-foreground text-xs" id="social-notification-switch-description">
               {!isBound && "請先綁定 Discord Webhook。"}
               {isBound && enabled && "目前會傳送社交通知。"}

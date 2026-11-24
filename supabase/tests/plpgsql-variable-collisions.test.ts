@@ -46,6 +46,17 @@ function readConflictTargets(body: string): string[] {
   );
 }
 
+// A variable can also collide with an INSERT column list, which used to hide
+// target_fingerprint behind v_target_fingerprint.
+function readInsertColumns(body: string): string[] {
+  return [...body.matchAll(/INSERT\s+INTO\s+[\w.]+\s*\(([\s\S]*?)\)/g)].flatMap((match) =>
+    match[1]
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0),
+  );
+}
+
 test("no plpgsql variable shadows an ON CONFLICT target column", () => {
   const latestDefinitions = new Map<string, FunctionDefinition>();
   for (const migration of readMigrations()) {
@@ -67,4 +78,31 @@ test("no plpgsql variable shadows an ON CONFLICT target column", () => {
   );
 
   assert.deepEqual(collisions, []);
+});
+
+test("no INSERT column uses the v_ variable prefix", () => {
+  const latestDefinitions = new Map<string, FunctionDefinition>();
+  for (const migration of readMigrations()) {
+    for (const definition of readFunctionDefinitions(
+      migration,
+      readFileSync(join(migrationsDirectory, migration), "utf8"),
+    )) {
+      latestDefinitions.set(definition.qualifiedName, definition);
+    }
+  }
+
+  const columns = [...latestDefinitions.values()].flatMap((definition) =>
+    readInsertColumns(definition.body).map((column) => ({
+      migration: definition.migration,
+      qualifiedName: definition.qualifiedName,
+      column,
+    })),
+  );
+
+  assert.deepEqual(
+    columns
+      .filter((entry) => entry.column.startsWith("v_"))
+      .map((entry) => `${entry.migration}: ${entry.qualifiedName} ${entry.column}`),
+    [],
+  );
 });

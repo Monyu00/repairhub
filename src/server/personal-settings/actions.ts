@@ -121,8 +121,8 @@ export async function updateDiscordWebhookEnabled(data: { enabled: boolean }): P
 
 export async function removeDiscordWebhook(): Promise<ProfileResult> {
   return safeAction(async () => {
-    await requireAuth();
-    const adapter = createSupabaseSocialWebhookAdapter({ admin: createAdminClient() });
+    const session = await requireAuth();
+    const adapter = createSupabaseSocialWebhookAdapter({ admin: createAdminClient(), session });
     return removeSocialWebhook(adapter);
   });
 }
