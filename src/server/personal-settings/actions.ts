@@ -4,10 +4,19 @@ import { removeStoredAvatar, uploadAvatar } from "@/lib/storage/avatar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/users/projection";
 import { changePassword, createSupabaseAccountSecurityAdapter, verifyCurrentPassword } from "@/server/account/security";
-import { type AuthenticatedUser, getSession, safeAction } from "@/server/auth/session";
+import { type AuthenticatedUser, getSession, requireAuth, safeAction } from "@/server/auth/session";
 
 import type { NotificationPreferences } from "./input";
-import { avatarInputSchema, canDeleteOwnAccount, notificationPreferencesSchema, profileInputSchema } from "./input";
+import {
+  avatarInputSchema,
+  canDeleteOwnAccount,
+  discordWebhookInputSchema,
+  notificationPreferencesSchema,
+  profileInputSchema,
+  socialWebhookSwitchSchema,
+} from "./input";
+import { bindSocialWebhook, removeSocialWebhook, setSocialWebhookEnabled } from "./social-webhook";
+import { createSupabaseSocialWebhookAdapter, readSocialWebhookStatus } from "./social-webhook-supabase";
 
 export interface MyProfile {
   displayName: string | null;
@@ -19,6 +28,7 @@ export interface MyProfile {
   isActive: boolean;
   mustChangePassword: boolean;
   preferences: NotificationPreferences;
+  socialWebhook: { enabled: boolean } | null;
 }
 
 export type ProfileResult = { success: boolean; error?: string };
@@ -42,6 +52,14 @@ export async function fetchMyProfile(): Promise<MyProfileResult> {
     return { profile: null };
   }
 
+  let socialWebhook: { enabled: boolean } | null;
+  try {
+    socialWebhook = await readSocialWebhookStatus({ admin: createAdminClient() }, session.userId);
+  } catch (error) {
+    console.error("Failed to load social webhook status:", error);
+    return { profile: null, loadError: "無法讀取個人資料，請稍後再試" };
+  }
+
   return {
     profile: {
       displayName: session.displayName,
@@ -53,8 +71,60 @@ export async function fetchMyProfile(): Promise<MyProfileResult> {
       isActive: session.isActive,
       mustChangePassword: session.mustChangePassword,
       preferences: session.notificationPreferences,
+      socialWebhook,
     },
   };
+}
+
+export async function bindDiscordWebhook(data: { webhookUrl: string }): Promise<ProfileResult> {
+  return safeAction(async () => {
+    const session = await requireAuth();
+    const parsed = discordWebhookInputSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: "請輸入有效的 Discord Webhook URL" };
+    }
+
+    const adapter = createSupabaseSocialWebhookAdapter({ admin: createAdminClient(), session });
+    return bindSocialWebhook(adapter, sendDiscordWebhookTest, parsed.data);
+  });
+}
+
+async function sendDiscordWebhookTest(webhookUrl: string): Promise<void> {
+  const response = await fetch(webhookUrl, {
+    body: JSON.stringify({
+      allowed_mentions: { parse: [] },
+      content: "RepairHub Discord Webhook 測試成功。",
+    }),
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+    redirect: "error",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Discord test message failed with status ${response.status}`);
+  }
+}
+
+export async function updateDiscordWebhookEnabled(data: { enabled: boolean }): Promise<ProfileResult> {
+  return safeAction(async () => {
+    const session = await requireAuth();
+    const parsed = socialWebhookSwitchSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: "社交通知開關格式不正確" };
+    }
+
+    const adapter = createSupabaseSocialWebhookAdapter({ admin: createAdminClient(), session });
+    return setSocialWebhookEnabled(adapter, parsed.data.enabled);
+  });
+}
+
+export async function removeDiscordWebhook(): Promise<ProfileResult> {
+  return safeAction(async () => {
+    const session = await requireAuth();
+    const adapter = createSupabaseSocialWebhookAdapter({ admin: createAdminClient(), session });
+    return removeSocialWebhook(adapter);
+  });
 }
 
 export async function updateMyProfile(data: {

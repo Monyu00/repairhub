@@ -8,6 +8,16 @@ Issue #89 加入 `new_ticket` 事件：Ticket 會在必要資料與報修照片�
 
 同一 readiness 點也會產生 `report_submitted` Submission Confirmation：以 `reporter_email` 為收件人，與 Reporter 狀態通知共用 `ticket_status` 偏好開關，讓匿名報修者也收到報修成功確認。
 
+## Discord 社交通知
+
+Issue #209 讓個人設定綁定一個自己的 Discord Webhook。Database 沿用同一份 `notification_log`，新增 `channel` 與 `target_fingerprint`：Email row 仍以 event + recipient Email 為單位，Social row 以 event + Discord Webhook target 為單位，因此多個 Account 綁定同一個 target 時同一事件只建立一筆 Social Delivery。
+
+綁定前會先 POST 一則測試訊息，只用 `service_role` 保存 URL、不可逆 SHA-256 fingerprint 與 default-off 的 Social Notification Switch；personal settings 只顯示是否綁定，不會回傳或記錄 URL。綁定嘗試由 `reserve_social_webhook_attempt` 以 15 分鐘最多 5 次把關。
+
+Sender 是獨立的 `send-ticket-social`，同樣只接受內部 service secret。它 claim Social Delivery，用 `resolve_social_notification_target` 解析 target 對應、active、enabled 且事件偏好啟用的 Account，再 POST Discord Webhook，訊息為純繁中文字（短編號、狀態、類別、地點、更新時間、追蹤連結）並固定 `allowed_mentions.parse = []`；Discord 429/5xx 與網路錯誤沿用既有持久重試，其他 4xx 為 terminal failure。
+
+收件規則沿用 In-app Notification：新 Ticket 送 active Admin 與訂閱該 Category 的 active Technician，狀態變更送 assigned Technician 與登入 Reporter，操作者皆排除；匿名報修者只走 Email，不會產生 Social Delivery。
+
 ## 必要 secrets
 
 在 Supabase Vault 建立下列兩個 secret，兩者都不得寫入 repo：
@@ -59,6 +69,7 @@ Wizard 會依下列順序處理：
 Wizard 最後會要求部署者建立一筆真實測試 Ticket，依序確認：
 
 - 符合 Category 的 active Technician 收到 `new_ticket`。
+- 已綁定且開啟 Social Notification Switch 的帳號在 Discord 收到對應 Social Notification，訊息不含 Reporter 聯絡資訊或完整描述。
 - Reporter 收到 `report_submitted`、`in_progress`、`completed` 與 `closed`。
 - Ledger 的每筆 delivery 都是 `sent`，且 `resend_message_id` 已寫回。
 - 重播已寄送的 delivery 不會再產生 Email。
@@ -77,3 +88,9 @@ npx --yes deno check --frozen-lockfile supabase/functions/send-ticket-email/inde
 SQL integration smoke check 位於 `supabase/tests/notification_foundation_smoke.sql`。它會建立暫時 fixture、執行檢查後 `ROLLBACK`；只可在 disposable DB 或已確認可安全交易的環境執行。
 Retry 行為的 SQL integration smoke check 位於 `supabase/tests/notification_retry_smoke.sql`，同樣會在交易內驗證 claim、attempt limit 與 cron scheduling 後 `ROLLBACK`。
 新 Ticket 收件人篩選的 SQL integration smoke check 位於 `supabase/tests/new_ticket_notification_smoke.sql`，會在交易內驗證 readiness gate、active/subscribed Technician 篩選與 delivery 去重後 `ROLLBACK`。
+社交通知的 Sandbox/DB smoke 位於 `supabase/tests/notification_social_queue_smoke.sql`、`supabase/tests/notification_social_ticket_status_smoke.sql`、`supabase/tests/social_webhook_binding_smoke.sql`；執行時需先套 #210/#211 migration，再於同一 transaction 後 `ROLLBACK`。Edge Function 測試：
+
+```bash
+npx --yes deno test --config supabase/functions/send-ticket-social/deno.json supabase/functions/tests/send-ticket-social-test.ts
+npx --yes deno check --config supabase/functions/send-ticket-social/deno.json supabase/functions/send-ticket-social/index.ts
+```

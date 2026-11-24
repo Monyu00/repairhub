@@ -99,7 +99,7 @@ The durable set of Deliveries created by Ticket lifecycle events.
 _Avoid_: Notification log, mail queue, trigger chain
 
 **Delivery**:
-A single queued Email send for one Ticket event and one recipient.
+A single queued send for one Ticket event, recipient, and channel.
 _Avoid_: Notification, message, attempt
 
 **In-app Notification** (站內通知):
@@ -111,8 +111,24 @@ The Delivery confirming to the Reporter that their Ticket was successfully creat
 _Avoid_: 報修成功信, receipt, acknowledgement
 
 **Notification Preference**:
-A per-account switch controlling whether one event type delivers Email to that account. Stored as a flat object on the account's profile; a missing event key defaults to enabled.
+A per-account switch controlling whether one event type is eligible for Delivery and In-app Notification. Stored as a flat object on the account's profile; a missing event key defaults to enabled.
 _Avoid_: Subscription, opt-out, notification setting, 通知訂閱
+
+**Social Notification** (社交通知):
+A Ticket event sent to a configured Discord Webhook as a private or group-scoped message; never a public social media post.
+_Avoid_: Social media notification, Discord notification, push
+
+**Discord Webhook**:
+A configured Discord endpoint bound to one Account and used as the target for Social Notifications.
+_Avoid_: Social account, Discord login, channel binding
+
+**Social Notification Target**:
+The private Discord destination identified by a Discord Webhook; multiple Accounts may bind the same Target.
+_Avoid_: Discord channel, Webhook URL, recipient account
+
+**Social Notification Switch**:
+The per-account channel switch that turns Social Notifications on only after a verified Discord Webhook exists.
+_Avoid_: Social preference, Discord preference, webhook setting
 
 ### Workflow
 

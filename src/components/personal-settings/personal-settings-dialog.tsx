@@ -11,6 +11,7 @@ import { fetchMyProfile, type MyProfile } from "@/server/personal-settings/actio
 import { AccountSecurityCard } from "./account-security-card";
 import { CurrentLoginInfoCard } from "./current-login-info-card";
 import { DeleteAccountCard } from "./delete-account-card";
+import { DiscordWebhookCard } from "./discord-webhook-card";
 import { NotificationPreferencesCard } from "./notification-preferences-card";
 import { PasskeyManagementCard } from "./passkey-management-card";
 import { PersonalProfileForm } from "./personal-profile-form";
@@ -85,7 +86,10 @@ export function PersonalSettingsDialog({ open, onOpenChange }: PersonalSettingsD
         </TabsContent>
 
         <TabsContent className="mt-0" value="notifications">
-          <NotificationPreferencesCard profile={profile} onSaved={handleSaved} />
+          <div className="flex flex-col gap-4">
+            <NotificationPreferencesCard profile={profile} onSaved={handleSaved} />
+            <DiscordWebhookCard profile={profile} onSaved={handleSaved} />
+          </div>
         </TabsContent>
 
         <TabsContent className="mt-0" value="security">

@@ -5,6 +5,7 @@ sequenceDiagram
   participant N as pg_net
   participant F as Edge Function
   participant R as Resend
+  participant D as Discord Webhook
 
   T->>L: ENQUEUE
   L-->>T: delivery_id
@@ -14,8 +15,13 @@ sequenceDiagram
   alt send ok
     F->>L: claim
     L-->>F: claimed
+    alt channel email
     F->>R: POST /emails
     R-->>F: 200 ok
+    else channel social
+    F->>D: POST webhook
+    D-->>F: 2xx ok
+    end
   else retry ≤ 5
     F->>L: last_error + next_attempt_at
   end
