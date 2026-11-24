@@ -1,6 +1,6 @@
 import * as ExcelJS from "exceljs";
 
-import { readBulkImportTable } from "./parser";
+import { readBulkImportTable, readLocationFile } from "./parser";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -25,3 +25,43 @@ test("readBulkImportTable formats Excel dates in the local calendar day", async 
 
   assert.equal(rows[0]?.values.purchase_date, "2026-01-31");
 });
+
+test("readLocationFile accepts a Spaces-only workbook", async () => {
+  const file = await createWorkbook({
+    Spaces: [
+      ["building_code", "name", "floor"],
+      ["A", "101", "1"],
+    ],
+  });
+
+  const rows = await readLocationFile(file);
+
+  assert.deepEqual(rows, {
+    buildings: [],
+    spaces: [{ row: 2, values: { building_code: "A", name: "101", floor: "1" } }],
+  });
+});
+
+test("readLocationFile detects a building CSV by required headers", async () => {
+  const file = new File(["\uFEFFcode,name\r\nA,A棟\r\n"], "buildings.csv", { type: "text/csv" });
+
+  const rows = await readLocationFile(file);
+
+  assert.deepEqual(rows, {
+    buildings: [{ row: 2, values: { code: "A", name: "A棟" } }],
+    spaces: [],
+  });
+});
+
+async function createWorkbook(sheets: Record<string, string[][]>) {
+  const workbook = new ExcelJS.Workbook();
+  for (const [name, rows] of Object.entries(sheets)) {
+    const worksheet = workbook.addWorksheet(name);
+    worksheet.addRow(rows[0]);
+    worksheet.addRow(rows[1]);
+  }
+  const buffer = await workbook.xlsx.writeBuffer();
+  return new File([buffer], "locations.xlsx", {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+}

@@ -17,7 +17,7 @@ export function downloadGeneratedFile(file: File): void {
 
 const xlsxMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 const csvMimeType = "text/csv;charset=utf-8;";
-const headersByTemplate: Record<Exclude<BulkImportTemplate, "location">, readonly string[]> = {
+const headersByTemplate: Record<BulkImportTemplate, readonly string[]> = {
   buildings: BUILDING_HEADERS,
   spaces: SPACE_HEADERS,
   equipment: EQUIPMENT_HEADERS,
@@ -29,19 +29,13 @@ async function createWorkbook(template: BulkImportTemplate): Promise<File> {
   const workbook = new ExcelJS.Workbook();
   const filename = `${template}-import-template.xlsx`;
 
-  if (template === "location") {
-    addSheet(workbook, "Buildings", BUILDING_HEADERS);
-    addSheet(workbook, "Spaces", SPACE_HEADERS);
-  } else {
-    addSheet(workbook, template, headersByTemplate[template]);
-  }
+  addSheet(workbook, template, headersByTemplate[template]);
 
   const buffer = await workbook.xlsx.writeBuffer();
   return new File([buffer], filename, { type: xlsxMimeType });
 }
 
 function createCsv(template: BulkImportTemplate): File {
-  if (template === "location") throw new Error("Location CSV templates require separate Building and Space files.");
   const headers = headersByTemplate[template];
   const csv = stringifyCsv(headers, []);
   const filename = `${template}-import-template.csv`;

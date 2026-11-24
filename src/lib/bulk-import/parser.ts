@@ -1,12 +1,12 @@
 import * as ExcelJS from "exceljs";
 
 import { parseCsv } from "./csv";
-import { BULK_IMPORT_MAX_FILE_SIZE, BULK_IMPORT_MAX_ROWS } from "./types";
+import { BUILDING_HEADERS, BULK_IMPORT_MAX_FILE_SIZE, BULK_IMPORT_MAX_ROWS, SPACE_HEADERS } from "./types";
 
 export type SpreadsheetRows = Array<{ row: number; values: Record<string, string> }>;
 
 export async function readBulkImportTable(file: File, sheetName: string, requiredHeaders: readonly string[]) {
-  validateFileSize(file);
+  validateImportFile(file);
 
   const tables = file.name.toLowerCase().endsWith(".xlsx")
     ? await readWorkbookTables(file, [sheetName])
@@ -32,31 +32,50 @@ export async function readBulkImportTable(file: File, sheetName: string, require
   return rows;
 }
 
-export async function readLocationWorkbook(file: File) {
-  validateFileSize(file);
+export async function readLocationFile(file: File) {
+  validateImportFile(file);
 
-  const tables = await readWorkbookTables(file, ["Buildings", "Spaces"]);
-  const buildings = tables.Buildings;
-  const spaces = tables.Spaces;
+  if (file.name.toLowerCase().endsWith(".xlsx")) {
+    const tables = await readWorkbookTables(file, ["Buildings", "Spaces"]);
+    const buildings = tables.Buildings;
+    const spaces = tables.Spaces;
 
-  if (!buildings || !spaces) {
-    throw new Error("地點工作簿必須包含 Buildings 與 Spaces 資料");
+    if (!buildings?.length && !spaces?.length) {
+      throw new Error("找不到地點或空間資料");
+    }
+    if (buildings) validateHeaders(buildings, BUILDING_HEADERS);
+    if (spaces) validateHeaders(spaces, SPACE_HEADERS);
+    if ((buildings?.length ?? 0) + (spaces?.length ?? 0) > BULK_IMPORT_MAX_ROWS) {
+      throw new Error(`資料列總數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
+    }
+
+    return { buildings: buildings ?? [], spaces: spaces ?? [] };
   }
 
-  if (buildings.length === 0 || spaces.length === 0) {
-    throw new Error("地點工作簿必須包含 Buildings 與 Spaces 資料");
-  }
-  if (buildings.length + spaces.length > BULK_IMPORT_MAX_ROWS) {
-    throw new Error(`資料列總數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
+  const rows = await readCsvTable(file);
+  if (rows.length === 0) {
+    throw new Error("CSV 沒有資料列");
   }
 
-  validateHeaders(buildings, ["code", "name"]);
-  validateHeaders(spaces, ["building_code", "name", "floor"]);
+  const headers = Object.keys(rows[0].values);
+  if (hasRequiredHeaders(headers, BUILDING_HEADERS)) {
+    return { buildings: rows, spaces: [] };
+  }
+  if (hasRequiredHeaders(headers, SPACE_HEADERS)) {
+    return { buildings: [], spaces: rows };
+  }
 
-  return { buildings, spaces };
+  throw new Error("CSV 必須是地點（code,name）或空間（building_code,name,floor）欄位");
 }
 
-function validateFileSize(file: File) {
+function hasRequiredHeaders(headers: readonly string[], requiredHeaders: readonly string[]) {
+  return requiredHeaders.every((header) => headers.includes(header));
+}
+
+function validateImportFile(file: File) {
+  if (!/\.(xlsx|csv)$/i.test(file.name)) {
+    throw new Error("只支援 XLSX 或 CSV 檔案");
+  }
   if (file.size === 0) {
     throw new Error("檔案是空的");
   }
@@ -85,17 +104,13 @@ async function readWorkbookTables(
   for (const sheetName of sheetNames) {
     const worksheet = workbook.getWorksheet(sheetName);
     if (!worksheet) continue;
-    tables[sheetName] = extractWorksheet(worksheet, sheetName);
-  }
-
-  if (Object.keys(tables).length === 0) {
-    throw new Error(`找不到工作表：${sheetNames.join("、")}`);
+    tables[sheetName] = extractWorksheet(worksheet);
   }
 
   return tables;
 }
 
-function extractWorksheet(worksheet: ExcelJS.Worksheet, sourceName: string): SpreadsheetRows {
+function extractWorksheet(worksheet: ExcelJS.Worksheet): SpreadsheetRows {
   const headerRow = worksheet.getRow(1);
   const headers = worksheet.rowCount > 0 ? headerRow.values : [];
   const headerMap = new Map<number, string>();
@@ -121,13 +136,6 @@ function extractWorksheet(worksheet: ExcelJS.Worksheet, sourceName: string): Spr
 
     if (hasValue) rows.push({ row: rowNumber, values });
   });
-
-  if (rows.length === 0) {
-    throw new Error(`工作表 ${sourceName} 沒有資料列`);
-  }
-  if (rows.length > BULK_IMPORT_MAX_ROWS) {
-    throw new Error(`資料列數不可超過 ${BULK_IMPORT_MAX_ROWS} 列`);
-  }
 
   return rows;
 }

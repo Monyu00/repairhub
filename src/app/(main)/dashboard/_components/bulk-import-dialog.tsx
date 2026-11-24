@@ -18,7 +18,6 @@ import {
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { bulkImportAction } from "@/lib/bulk-import/actions";
 import { stringifyCsv } from "@/lib/bulk-import/csv";
 import { downloadBulkImportTemplate, downloadGeneratedFile } from "@/lib/bulk-import/templates";
@@ -29,8 +28,6 @@ import {
   type BulkImportResultRow,
 } from "@/lib/bulk-import/types";
 
-type ImportFormat = "xlsx" | "csv";
-
 interface BulkImportDialogProps {
   entity: BulkImportEntity;
   open: boolean;
@@ -40,7 +37,7 @@ interface BulkImportDialogProps {
 const copy: Record<BulkImportEntity, { title: string; description: string }> = {
   location: {
     title: "批次匯入地點",
-    description: "XLSX 需包含 Buildings 與 Spaces 工作表；CSV 則需分別上傳兩個檔案。",
+    description: "上傳地點或空間檔案；XLSX 可同時包含 Buildings 與 Spaces 工作表。",
   },
   equipment: {
     title: "批次匯入設備",
@@ -53,10 +50,6 @@ const copy: Record<BulkImportEntity, { title: string; description: string }> = {
 };
 
 export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialogProps) {
-  const [format, setFormat] = useState<ImportFormat>("xlsx");
-  const [locationExcel, setLocationExcel] = useState<File | null>(null);
-  const [buildingCsv, setBuildingCsv] = useState<File | null>(null);
-  const [spaceCsv, setSpaceCsv] = useState<File | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BulkImportResponse | null>(null);
@@ -72,15 +65,10 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
   }, [result]);
 
   const isLocation = entity === "location";
-  const locationCanSubmit = format === "xlsx" ? Boolean(locationExcel) : Boolean(buildingCsv && spaceCsv);
-  const canSubmit = isLocation ? locationCanSubmit : Boolean(importFile);
+  const canSubmit = Boolean(importFile);
 
   useEffect(() => {
     if (!open) {
-      setFormat("xlsx");
-      setLocationExcel(null);
-      setBuildingCsv(null);
-      setSpaceCsv(null);
       setImportFile(null);
       setError(null);
       setResult(null);
@@ -92,13 +80,7 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
 
     const formData = new FormData();
     formData.set("entity", entity);
-    if (isLocation) {
-      if (format === "xlsx" && locationExcel) formData.set("locationExcel", locationExcel);
-      if (format === "csv") {
-        if (buildingCsv) formData.set("buildingCsv", buildingCsv);
-        if (spaceCsv) formData.set("spaceCsv", spaceCsv);
-      }
-    } else if (importFile) {
+    if (importFile) {
       formData.set("file", importFile);
     }
 
@@ -149,27 +131,6 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
     </Field>
   );
 
-  const renderImportFields = () => {
-    if (isLocation && format === "csv") {
-      return (
-        <>
-          {renderFileField("location-building-csv", "地點 CSV", ".csv", buildingCsv, setBuildingCsv)}
-          {renderFileField("location-space-csv", "空間 CSV", ".csv", spaceCsv, setSpaceCsv)}
-        </>
-      );
-    }
-    if (isLocation) {
-      return renderFileField("location-excel", "地點工作簿", ".xlsx", locationExcel, setLocationExcel);
-    }
-    return renderFileField(
-      "bulk-import-file",
-      "匯入檔案",
-      format === "xlsx" ? ".xlsx" : ".csv",
-      importFile,
-      setImportFile,
-    );
-  };
-
   return (
     <Dialog
       open={open}
@@ -211,39 +172,22 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
           </div>
         ) : (
           <FieldGroup className="gap-4">
-            <Field>
-              <FieldLabel>檔案格式</FieldLabel>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                value={format}
-                onValueChange={(value) => {
-                  if (value === "xlsx" || value === "csv") setFormat(value);
-                }}
-              >
-                <ToggleGroupItem value="xlsx">XLSX</ToggleGroupItem>
-                <ToggleGroupItem value="csv">CSV</ToggleGroupItem>
-              </ToggleGroup>
-            </Field>
-
-            {renderImportFields()}
+            {renderFileField("bulk-import-file", "匯入檔案", ".xlsx,.csv", importFile, setImportFile)}
 
             <Field>
               <FieldLabel>範本</FieldLabel>
               <div className="flex flex-wrap gap-2">
-                {isLocation && format === "xlsx" && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => downloadBulkImportTemplate("location", "xlsx")}
-                  >
-                    <Download data-icon="inline-start" />
-                    XLSX
-                  </Button>
-                )}
-                {isLocation && format === "csv" && (
+                {isLocation ? (
                   <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadBulkImportTemplate("buildings", "xlsx")}
+                    >
+                      <Download data-icon="inline-start" />
+                      地點 XLSX
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"
@@ -251,7 +195,16 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
                       onClick={() => downloadBulkImportTemplate("buildings", "csv")}
                     >
                       <Download data-icon="inline-start" />
-                      Building CSV
+                      地點 CSV
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadBulkImportTemplate("spaces", "xlsx")}
+                    >
+                      <Download data-icon="inline-start" />
+                      空間 XLSX
                     </Button>
                     <Button
                       type="button"
@@ -260,11 +213,10 @@ export function BulkImportDialog({ entity, open, onOpenChange }: BulkImportDialo
                       onClick={() => downloadBulkImportTemplate("spaces", "csv")}
                     >
                       <Download data-icon="inline-start" />
-                      Space CSV
+                      空間 CSV
                     </Button>
                   </>
-                )}
-                {!isLocation && (
+                ) : (
                   <>
                     <Button
                       type="button"
