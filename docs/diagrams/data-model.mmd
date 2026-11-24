@@ -14,6 +14,8 @@ erDiagram
   tickets ||--o{ notification_log : "派送帳務"
   tickets ||--o{ notifications : "站內通知"
   profiles ||--o{ notifications : "接收"
+  profiles ||--o{ social_webhooks : "綁定"
+  social_webhooks ||--o{ social_webhook_attempts : "綁定嘗試"
   profiles |o--o{ ticket_notes : "作者"
   profiles ||--o{ announcements : "發布"
 
@@ -87,7 +89,9 @@ erDiagram
     uuid id PK
     uuid ticket_id FK
     text event_type
-    text recipient_email
+    text recipient_email?
+    text channel
+    text target_fingerprint?
     text status
     int attempt_count
     timestamptz next_attempt_at
@@ -102,6 +106,16 @@ erDiagram
     text event_type
     bool is_read
   }
+  social_webhooks {
+    uuid account_id PK_FK
+    text target_fingerprint
+    bool enabled
+  }
+  social_webhook_attempts {
+    uuid id PK
+    uuid account_id FK
+    timestamptz attempted_at
+  }
   announcements {
     uuid id PK
     text title
@@ -112,7 +126,7 @@ erDiagram
   }
 ```
 
-權威來源：本檔列出全部 12 張表；`data-model.svg` 是領域總覽（8 實體，Diagram Design 的 ER 上限），
+權威來源：本檔列出全部 14 張表；`data-model.svg` 是領域總覽（8 實體，Diagram Design 的 ER 上限），
 `data-model-detail.svg` 是工單記事、通知帳務與公告的明細。
 
 未畫出的共用欄位：`created_at` / `updated_at`（各表皆有）、`tickets.reporter_name`、

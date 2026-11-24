@@ -14,12 +14,12 @@
 
 - **零阻力報修**：公開報修表與 QR Code 綁定地點／空間／設備，免登入也能在數十秒內完成通報；匿名寫入由 Cloudflare Turnstile 保護。
 - **地點與設備兩級管理**：地點（Building）與空間（Space）組成場域樹，設備（Equipment）可各自綁定 QR Code 並累積維修履歷。
-- **批次匯入**：管理員可用 XLSX／CSV 批次建立地點、設備與使用者；已存在記錄會略過，並逐列回報建立、略過與失敗結果。匯入或重設的使用者帳號以完整 Email 作為預設密碼，必須先改密碼才能使用管理後台。
+- **批次匯入**：管理員可用格式自由的 XLSX／CSV 批次建立地點、設備與使用者；已存在記錄會略過，並逐列回報建立、略過與失敗結果。匯入或重設的使用者帳號以完整 Email 作為預設密碼，必須先改密碼才能使用管理後台。
 - 新增與重設的密碼最少 8 碼。
 - **工單生命週期閉環**：接單、完工（須附照片與維修說明）、報修者確認或七日自動關單、未完成重開單（Reopen）。
-- **通知**：Email 通知報修者與已訂閱分類且未關閉偏好的技師；站內通知將新工單送到 Admin 與已訂閱分類的技師，狀態變更送到報修者與指派技師。偏好關閉會同時停用對應 Email 與站內通知；派送失敗只記錄錯誤與重試時間，不中斷工單寫入。
+- **通知**：Email 通知報修者與已訂閱分類且未關閉偏好的技師；站內通知將新工單送到 Admin 與已訂閱分類的技師，狀態變更送到報修者與指派技師；登入帳號可另綁 Discord Webhook 接收社交通知。偏好關閉會同時停用對應 Email 與站內通知；派送失敗只記錄錯誤與重試時間，不中斷工單寫入。
 - **管理後台**：待修佇列、工單詳情與時間軸、維修紀錄、QR Code 批次產生與匯出、Excel／PDF 報表、滿意度分析、公告與系統設定。
-- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、管理 Passkey、調整通知偏好與刪除帳號。
+- **個人設定**：側欄使用者選單可更新基本資料、修改密碼、管理 Passkey、調整通知偏好、綁定 Discord Webhook 與刪除帳號。
 - **響應式與主題**：手機現場操作、桌面管理中心兩種密度；淺色／深色模式與主題預設檔，全站使用語意化 CSS 變數。
 
 ## 技術棧
@@ -29,7 +29,7 @@
 | 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                   |
 | 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                |
 | 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault |
-| 背景工作   | Deno Edge Function `send-ticket-email`，透過 Resend 寄信                |
+| 背景工作   | Deno Edge Functions：`send-ticket-email` 走 Resend；`send-ticket-social` 走 Discord |
 | 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                        |
 | 工具鏈     | Biome、husky + lint-staged、tsx                                         |
 
@@ -50,11 +50,48 @@ npm run dev
 | -------------------------------------- | -------------------------------- |
 | `npm run dev`                          | 啟動開發伺服器                   |
 | `npm run build`                        | 產出正式版本（使用 `--webpack`） |
+| `npm run start`                        | 啟動正式版本                     |
 | `npm run lint` / `npm run check`       | Biome 檢查                       |
 | `npm run check:fix` / `npm run format` | 自動修正與排版                   |
 | `npm run generate:presets`             | 重新產生主題預設檔               |
 
-資料庫 migration 依時間排序放在 `supabase/migrations/`，套用方式與 Email 通知的正式環境佈建流程見 [docs/notifications.md](docs/notifications.md)。
+資料庫 migration 依時間排序放在 `supabase/migrations/`，套用方式與通知的正式環境佈建流程見 [docs/notifications.md](docs/notifications.md)。
+
+## 專案結構
+
+主要目錄如下，路由與領域邏輯採共置設計，不把所有功能集中到單一資料夾。
+
+```text
+.
+├── docs/
+│   ├── adr/                      # 架構決策記錄
+│   ├── agents/                   # Agent 協作與議題處理規範
+│   ├── diagrams/                 # 架構、資料模型與狀態機圖
+│   └── performance/              # 效能診斷與驗收紀錄
+├── scripts/
+├── src/
+│   ├── app/
+│   │   ├── (public)/             # 公開報修、查詢與登入
+│   │   ├── (external)/           # 密碼重設與信箱驗證流程
+│   │   ├── (main)/               # 登入後介面
+│   │   │   └── dashboard/
+│   │   │       └── (app)/        # 管理員與技師功能頁
+│   │   └── auth/                 # Auth callback
+│   ├── components/               # 跨頁面共用元件；ui/ 為本地 shadcn 元件
+│   ├── config/
+│   ├── hooks/
+│   ├── lib/                      # 共用工具、Supabase client、匯入邏輯
+│   ├── navigation/
+│   ├── scripts/
+│   ├── server/                   # Server Action 與領域邏輯
+│   ├── stores/
+│   └── styles/
+├── supabase/
+│   ├── functions/                # Deno Edge Functions
+│   ├── migrations/
+│   └── tests/
+└── ...
+```
 
 ## 環境變數
 
@@ -73,7 +110,7 @@ Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example
 | 變數                                                 | 用途                                                    |
 | ---------------------------------------------------- | ------------------------------------------------------- |
 | `REPAIRHUB_EDGE_FUNCTION_SECRET`                     | DB 呼叫 Edge Function 的內部密鑰，須與 Vault 值完全相同 |
-| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定                                         |
+| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定（Email 通知）                            |
 | `APP_BASE_URL`                                       | 郵件中的連結網域                                        |
 
 Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
@@ -113,9 +150,9 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 ![工單記事與通知](docs/diagrams/data-model-detail.svg)
 
-工單的附屬表：`ticket_notes` 同時承載維修記事與 `status_change` 流轉紀錄（對照上面的狀態機）、`notification_log` 是每封通知信的派送帳務（含重試次數與下次嘗試時間，對照通知派送流程）、`notifications` 是每個登入帳號的站內通知記錄、`announcements` 由人員發布。圖分兩張是因為 Diagram Design 的 ER 上限為 8 個實體。
+工單的附屬表：`ticket_notes` 同時承載維修記事與 `status_change` 流轉紀錄（對照上面的狀態機）、`notification_log` 是 Email 與 Social 派送的帳務（含重試次數與下次嘗試時間，對照通知派送流程）、`notifications` 是每個登入帳號的站內通知記錄、`social_webhooks` 保存 Discord Webhook 的服務端綁定與 target fingerprint、`social_webhook_attempts` 記錄綁定嘗試、`announcements` 由人員發布。圖分兩張是因為 Diagram Design 的 ER 上限為 8 個實體。
 
-Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)（列出全部 12 張表，含各表未畫進圖的欄位與 unique 條件）。實體定義以 `supabase/migrations/` 為準；各表共通的 `created_at` / `updated_at` 等稽核欄位未畫出。
+Mermaid 原始檔：[docs/diagrams/data-model.mmd](docs/diagrams/data-model.mmd)（列出全部 14 張表，含各表未畫進圖的欄位與 unique 條件）。實體定義以 `supabase/migrations/` 為準；各表共通的 `created_at` / `updated_at` 等稽核欄位未畫出。
 
 ## 工單狀態
 
@@ -131,7 +168,7 @@ Mermaid 原始檔：[docs/diagrams/ticket-status.mmd](docs/diagrams/ticket-statu
 
 Mermaid 原始檔：[docs/diagrams/notification-pipeline.mmd](docs/diagrams/notification-pipeline.mmd)。
 
-Email 派送鏈為 `enqueue_notification_delivery` → `notification_log` → `invoke_notification_delivery` → `pg_net` → Edge Function `claim_notification_delivery` → Resend。事件鍵（`ticket:<id>:<event>:<ts>`）與 `ON CONFLICT DO NOTHING` 保證同一事件不重複寄送；每筆 delivery 最多五次 claim，其間隔約五分鐘、十五分鐘、一小時與六小時，由 `pg_cron` 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending 項目。站內通知由同一組偏好與事件資料寫入 `notifications`，不經過 Email 派送鏈。詳情與 Vault 檢查見 [docs/notifications.md](docs/notifications.md)。
+共用派送鏈為 `enqueue_notification_delivery` → `notification_log` → `invoke_notification_delivery` → `pg_net`。`channel=email` 送 `send-ticket-email` → Resend；`channel=social` 送 `send-ticket-social` → Discord Webhook。事件鍵與 `ON CONFLICT DO NOTHING` 保證同一 Email 收件者或 Discord target 不重複寄送；每筆 delivery 最多五次 claim，其間隔約五分鐘、十五分鐘、一小時與六小時，由 `pg_cron` 每五分鐘接手 pending、已到期 failed 與逾時卡住的 sending 項目。站內通知由同一組偏好與事件資料寫入 `notifications`，不經過外部派送鏈。詳情、Discord 綁定與 Vault 檢查見 [docs/notifications.md](docs/notifications.md)。
 
 ## 開發規範
 
@@ -144,7 +181,7 @@ Email 派送鏈為 `enqueue_notification_delivery` → `notification_log` → `i
 
 ## 文件
 
-- [docs/notifications.md](docs/notifications.md)：Email 通知基礎、必要 secrets 與正式環境佈建
+- [docs/notifications.md](docs/notifications.md)：Email 與社交通知、必要 secrets 與正式環境佈建
 - [PRODUCT.md](PRODUCT.md)：產品定位、使用者與能力邊界
 - [GLOSSARY.md](GLOSSARY.md)：領域詞彙與禁用詞
 - [DESIGN.md](DESIGN.md)：設計系統 token
@@ -163,3 +200,4 @@ Email 派送鏈為 `enqueue_notification_delivery` → `notification_log` → `i
 - [0009-notification-preferences-on-profiles.md](docs/adr/0009-notification-preferences-on-profiles.md)：通知偏好存在個人檔案
 - [0010-in-app-notifications-share-email-subscription-data.md](docs/adr/0010-in-app-notifications-share-email-subscription-data.md)：站內通知共用 Email 的訂閱與偏好資料
 - [0011-supabase-auth-passkeys.md](docs/adr/0011-supabase-auth-passkeys.md)：Passkey 登入與個人設定管理
+- [0012-social-notifications-via-discord-webhooks.md](docs/adr/0012-social-notifications-via-discord-webhooks.md)：社交通知走帳號綁定的 Discord Webhook
