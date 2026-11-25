@@ -9,12 +9,13 @@ import { type EquipmentInfo, type EquipmentOption, ReportForm } from "./_compone
 interface ReportPageProps {
   searchParams: Promise<{
     location_id?: string;
+    space_id?: string;
     equipment_id?: string;
   }>;
 }
 
 export default async function ReportPage({ searchParams }: ReportPageProps) {
-  const { location_id, equipment_id } = await searchParams;
+  const { location_id, space_id, equipment_id } = await searchParams;
   const supabase = await createClient();
 
   const buildingsPromise = getLocationCatalog(supabase);
@@ -78,7 +79,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         buildings={buildings}
         categories={categories}
         equipmentList={allEquipmentData}
-        initialSpaceId={location_id}
+        initialSpaceId={space_id ?? location_id}
         initialEquipment={initialEquipment}
         userInfo={userInfo}
       />
