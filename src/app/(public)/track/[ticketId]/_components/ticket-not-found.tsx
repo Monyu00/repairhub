@@ -33,7 +33,7 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <WrenchIcon className="size-5" />
           </div>
-          <span className="font-bold font-heading text-foreground text-lg tracking-tight">RepairHub</span>
+          <span className="font-bold font-heading text-foreground text-lg tracking-tight">南臺維修通報</span>
         </div>
 
         <div className="space-y-6 rounded-xl border border-border bg-card p-8 text-center shadow-sm">
@@ -68,7 +68,7 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
         </div>
 
         <div className="mt-8 text-center text-muted-foreground text-xs">
-          © {new Date().getFullYear()} RepairHub. All rights reserved.
+          © {new Date().getFullYear()} 南臺校園維修通報系統. All rights reserved.
         </div>
       </div>
     </div>

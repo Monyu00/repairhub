@@ -82,7 +82,7 @@ function createTestHandler(
 ) {
   return createRequestHandler({
     expectedSecret: SERVICE_SECRET,
-    from: "RepairHub <no-reply@notify.monyu.dev>",
+    from: "南臺校園維修通報系統 <no-reply@notify.monyu.dev>",
     replyTo: "support@example.com",
     appBaseUrl: "https://repairhub.monyu.dev",
     repository,
@@ -138,7 +138,7 @@ test("sends the in-progress Email with stable content and idempotency", async ()
   assert.equal(body.message_id, "resend-message-1");
   assert.equal(messages.length, 1);
   assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已開始維修");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已開始維修");
   assert.equal(
     messages[0]?.idempotencyKey,
     "repairhub:ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
@@ -173,7 +173,7 @@ test("sends the new-ticket Email with a bounded description and no Reporter cont
   assert.equal(response.status, 200);
   assert.equal(messages.length, 1);
   assert.equal(messages[0]?.to, "technician@example.com");
-  assert.equal(messages[0]?.subject, "【RepairHub】新報修案件 #12345678：空調");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】新報修案件 #12345678：空調");
   assert.match(messages[0]?.html ?? "", /待處理/);
   assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
   assert.match(messages[0]?.html ?? "", /<strong>問題描述：<\/strong>三樓會議室冷氣無法啟動/);
@@ -205,7 +205,7 @@ test("sends the report-submitted Email confirming the Reporter's submission", as
   assert.equal(response.status, 200);
   assert.equal(messages.length, 1);
   assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【RepairHub】報修已收到 #12345678");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】報修已收到 #12345678");
   assert.match(messages[0]?.html ?? "", /您的報修已成功送出/);
   assert.match(messages[0]?.html ?? "", /待處理/);
   assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
@@ -269,7 +269,7 @@ test("sends the completed Email with confirmation and seven-day auto-close guida
 
   assert.equal(response.status, 200);
   assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已完工，請確認");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已完工，請確認");
   assert.match(messages[0]?.html ?? "", /確認修復結果/);
   assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
   assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
@@ -300,7 +300,7 @@ test("sends the closed Email after reporter confirmation or seven-day auto-close
 
   assert.equal(response.status, 200);
   assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已結案");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已結案");
   assert.match(messages[0]?.html ?? "", /案件已結案/);
   assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
   assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
@@ -331,7 +331,7 @@ test("sends the cancelled Email when an Admin cancels the Ticket", async () => {
   assert.equal(response.status, 200);
   assert.equal(messages.length, 1);
   assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【RepairHub】案件 #12345678 已取消");
+  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已取消");
   assert.match(messages[0]?.html ?? "", /案件已取消/);
   assert.match(messages[0]?.html ?? "", /已取消/);
   assert.match(messages[0]?.text ?? "", /案件已取消/);
@@ -623,7 +623,7 @@ test("renders accessible HTML and an equivalent plain-text alternative", () => {
 
   assert.match(rendered.html, /<html lang="zh-Hant-TW" dir="ltr">/);
   assert.match(rendered.html, /<div lang="zh-Hant-TW" dir="ltr"/);
-  assert.match(rendered.html, /<title>【RepairHub】案件 #12345678 已開始維修<\/title>/);
+  assert.match(rendered.html, /<title>【南臺校園維修通報系統】案件 #12345678 已開始維修<\/title>/);
   assert.equal((rendered.html.match(/<h1/g) ?? []).length, 1);
   assert.match(rendered.html, />查看報修單進度<\/a>/);
   assert.match(rendered.text, /報修單編號：#12345678/);

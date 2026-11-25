@@ -1,4 +1,4 @@
-# RepairHub
+# 南臺校園維修通報系統
 
 校園設施報修與維修追蹤平台：從報修到結案，全程看得見。
 
@@ -136,7 +136,7 @@ Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repai
 
 ## 系統架構
 
-![RepairHub 系統架構](docs/diagrams/architecture.svg)
+![南臺校園維修通報系統 系統架構](docs/diagrams/architecture.svg)
 
 Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.mmd)；圖表 HTML 來源：`docs/diagrams/architecture.html`。
 
@@ -144,7 +144,7 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 ## 資料模型
 
-![RepairHub 資料模型](docs/diagrams/data-model.svg)
+![南臺校園維修通報系統 資料模型](docs/diagrams/data-model.svg)
 
 工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工。
 

@@ -145,9 +145,9 @@ export async function exportReportToExcel(data: ReportData): Promise<void> {
       { header: "已完工件數", key: "已完工件數", width: 14 },
     ]);
 
-    // Filename: repairhub-report-{preset}-{YYYYMMDD}.xlsx
+    // Filename: 南臺校園維修通報系統-報表-{preset}-{YYYYMMDD}.xlsx
     const preset = data.filter.preset;
-    const filename = `repairhub-report-${preset}-${formatCompactDate(new Date())}.xlsx`;
+    const filename = `南臺校園維修通報系統-報表-${preset}-${formatCompactDate(new Date())}.xlsx`;
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -48,33 +48,33 @@ const TICKET_EMAIL_COPY: Record<
   }
 > = {
   new_ticket: {
-    subject: (shortId, categoryName) => `【RepairHub】新報修案件 #${shortId}：${categoryName}`,
+    subject: (shortId, categoryName) => `【南臺校園維修通報系統】新報修案件 #${shortId}：${categoryName}`,
     heading: "新報修案件需要處理",
     intro: "您好，有新的報修案件符合您訂閱的類別。",
   },
   report_submitted: {
-    subject: (shortId) => `【RepairHub】報修已收到 #${shortId}`,
+    subject: (shortId) => `【南臺校園維修通報系統】報修已收到 #${shortId}`,
     heading: "報修已成功送出",
     intro: "您好，您的報修已成功送出，我們會盡快安排人員處理。",
   },
   in_progress: {
-    subject: (shortId) => `【RepairHub】案件 #${shortId} 已開始維修`,
+    subject: (shortId) => `【南臺校園維修通報系統】案件 #${shortId} 已開始維修`,
     heading: "案件已開始維修",
     intro: "您好，您的報修案件已由維修人員開始處理。",
   },
   completed: {
-    subject: (shortId) => `【RepairHub】案件 #${shortId} 已完工，請確認`,
+    subject: (shortId) => `【南臺校園維修通報系統】案件 #${shortId} 已完工，請確認`,
     heading: "案件已完工，請確認修復結果",
     intro: "您好，您的報修案件已完工，請前往案件頁確認修復結果。",
     guidance: "若您在 7 天內未確認修復結果，系統將自動結案。",
   },
   closed: {
-    subject: (shortId) => `【RepairHub】案件 #${shortId} 已結案`,
+    subject: (shortId) => `【南臺校園維修通報系統】案件 #${shortId} 已結案`,
     heading: "案件已結案",
     intro: "您好，您的報修案件已完成並結案。",
   },
   cancelled: {
-    subject: (shortId) => `【RepairHub】案件 #${shortId} 已取消`,
+    subject: (shortId) => `【南臺校園維修通報系統】案件 #${shortId} 已取消`,
     heading: "案件已取消",
     intro: "您好，您的報修案件已取消，若仍需處理請重新報修。",
   },
@@ -166,7 +166,7 @@ export function renderTicketEmail(
   </body>
 </html>`;
 
-  const text = `RepairHub 報修通知
+  const text = `南臺校園維修通報系統 報修通知
 
 ${copy.heading}
 

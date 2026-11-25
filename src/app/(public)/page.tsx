@@ -15,7 +15,7 @@ import { PublicTicketList } from "./_components/public-ticket-list";
 import { TicketFilters } from "./_components/ticket-filters";
 
 export const metadata: Metadata = {
-  title: "校園報修服務平台 - RepairHub",
+  title: "校園報修服務平台 - 南臺校園維修通報系統",
   description: "公開透明的校園報修單進度查詢、線上通報與修繕管理服務。",
 };
 

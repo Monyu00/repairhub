@@ -11,7 +11,7 @@ import { fetchUsers } from "./_actions/user-actions";
 import { SettingsPage } from "./_components/settings-page";
 
 export const metadata: Metadata = {
-  title: "系統設定 - RepairHub",
+  title: "系統設定 - 南臺校園維修通報系統",
   description: "全校設施設備報修系統核心維護、地點管理與使用者權限設定。",
 };
 

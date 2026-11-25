@@ -9,7 +9,7 @@ import { QRCodeDashboard } from "./_components/qr-code-dashboard";
 import type { EquipmentOption } from "./_components/types";
 
 export const metadata: Metadata = {
-  title: "QR Code 產生 - RepairHub",
+  title: "QR Code 產生 - 南臺校園維修通報系統",
   description: "全校空間與設備報修 QR Code 批量產生、即時預覽與 PDF 下載。",
 };
 
