@@ -139,7 +139,7 @@ export function QRCard({ item }: QRCardProps) {
           <div className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Wrench className="size-3" />
           </div>
-          <span className="font-heading font-semibold text-xs tracking-tight">RepairHub 報修</span>
+          <span className="font-heading font-semibold text-xs tracking-tight">南臺維修通報</span>
         </div>
         <Badge variant={item.type === "space" ? "secondary" : "outline"}>
           {item.type === "space" ? "空間 QR" : "設備 QR"}

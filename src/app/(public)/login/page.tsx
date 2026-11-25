@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Wrench className="size-6" />
           </div>
-          <h1 className="font-bold text-2xl tracking-tight">登入 RepairHub 報修管理系統</h1>
+          <h1 className="font-bold text-2xl tracking-tight">登入南臺校園維修通報系統</h1>
           <p className="text-muted-foreground text-sm">請輸入您的帳號密碼登入</p>
         </div>
 

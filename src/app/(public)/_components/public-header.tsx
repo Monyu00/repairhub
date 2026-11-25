@@ -32,12 +32,9 @@ export function PublicHeader({ notifications, user }: PublicHeaderProps) {
           <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <Wrench className="size-5" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold font-heading text-foreground text-lg leading-tight tracking-tight">
-              RepairHub
-            </span>
-            <span className="hidden text-muted-foreground text-xs leading-none sm:inline">校園維修通報系統</span>
-          </div>
+          <span className="font-bold font-heading text-foreground text-lg leading-tight tracking-tight">
+            南臺維修通報
+          </span>
         </Link>
 
         {/* Right: Actions */}

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const shortId = id.slice(0, 8);
   return {
-    title: `報修單 #${shortId} 詳情 - RepairHub`,
+    title: `報修單 #${shortId} 詳情 - 南臺校園維修通報系統`,
     description: `檢視與管理報修單據 #${id} 之詳細內容、維修進度與狀態時間軸`,
   };
 }

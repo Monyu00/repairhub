@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RepairHub 系統架構</title>
+  <title>南臺校園維修通報系統 系統架構</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -60,11 +60,11 @@
 <body>
   <div class="frame">
     <p class="eyebrow">Architecture · Diagram Design</p>
-    <h1>RepairHub 系統架構</h1>
+    <h1>南臺校園維修通報系統 系統架構</h1>
 
     <div class="diagram-container">
       <svg viewBox="0 0 1120 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="architecture-title architecture-desc">
-        <title id="architecture-title">RepairHub 系統架構</title>
+        <title id="architecture-title">南臺校園維修通報系統 系統架構</title>
         <desc id="architecture-desc">Next.js 前台與儀表板讀寫 Supabase（Auth、Postgres、Storage）；新工單與狀態變更由資料庫觸發器寫入通知佇列，pg_net 喚醒 send-ticket-* Edge Functions，再由 Resend 或 Discord Webhook 派送。</desc>
         <defs>
           <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>

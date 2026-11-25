@@ -34,7 +34,7 @@ function renderPage1ToCanvas(data: ReportData): string {
   ctx.fillStyle = "#0f172a";
   ctx.font = `bold 38px ${FONT_FAMILY}`;
   ctx.textAlign = "left";
-  ctx.fillText("RepairHub 報修管理系統 — 統計分析報表", marginX, currentY);
+  ctx.fillText("南臺校園維修通報系統 — 統計分析報表", marginX, currentY);
 
   ctx.font = `20px ${FONT_FAMILY}`;
   ctx.fillStyle = "#64748b";
@@ -297,7 +297,7 @@ function renderPage1ToCanvas(data: ReportData): string {
   ctx.fillStyle = "#94a3b8";
   ctx.font = `14px ${FONT_FAMILY}`;
   ctx.textAlign = "center";
-  ctx.fillText("RepairHub 智慧校園修繕平台 — 第 1 頁，共 2 頁", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
+  ctx.fillText("南臺校園維修通報系統 — 第 1 頁，共 2 頁", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
 
   return canvas.toDataURL("image/png");
 }
@@ -326,7 +326,7 @@ function renderPage2ToCanvas(data: ReportData): string {
   ctx.fillStyle = "#0f172a";
   ctx.font = `bold 34px ${FONT_FAMILY}`;
   ctx.textAlign = "left";
-  ctx.fillText("RepairHub 報修管理系統 — 詳細分佈與績效分析", marginX, currentY);
+  ctx.fillText("南臺校園維修通報系統 — 詳細分佈與績效分析", marginX, currentY);
 
   ctx.font = `20px ${FONT_FAMILY}`;
   ctx.fillStyle = "#64748b";
@@ -538,7 +538,7 @@ function renderPage2ToCanvas(data: ReportData): string {
   ctx.fillStyle = "#94a3b8";
   ctx.font = `14px ${FONT_FAMILY}`;
   ctx.textAlign = "center";
-  ctx.fillText("RepairHub 智慧校園修繕平台 — 第 2 頁，共 2 頁", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
+  ctx.fillText("南臺校園維修通報系統 — 第 2 頁，共 2 頁", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
 
   return canvas.toDataURL("image/png");
 }
@@ -567,7 +567,7 @@ export async function exportReportToPDF(data: ReportData): Promise<void> {
     doc.addImage(page2Img, "PNG", 0, 0, 210, 297, undefined, "FAST");
 
     const preset = data.filter.preset;
-    const filename = `repairhub-report-${preset}-${formatCompactDate(new Date())}.pdf`;
+    const filename = `南臺校園維修通報系統-報表-${preset}-${formatCompactDate(new Date())}.pdf`;
 
     doc.save(filename);
 

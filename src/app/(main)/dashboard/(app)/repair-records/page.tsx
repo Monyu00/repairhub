@@ -8,7 +8,7 @@ import { RepairRecordsContent } from "./_components/repair-records-content";
 import type { TechnicianOption } from "./_components/repair-records-types";
 
 export const metadata: Metadata = {
-  title: "維修紀錄 - RepairHub",
+  title: "維修紀錄 - 南臺校園維修通報系統",
   description: "查看維修人員承接之維修紀錄，追蹤處理中、已完工與已結案單據。",
 };
 

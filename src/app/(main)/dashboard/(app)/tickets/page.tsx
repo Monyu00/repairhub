@@ -12,7 +12,7 @@ import { TicketsDataTable } from "./_components/tickets-data-table";
 import { TicketsLoadingSkeleton } from "./_components/tickets-loading-skeleton";
 
 export const metadata: Metadata = {
-  title: "報修單管理 - RepairHub",
+  title: "報修單管理 - 南臺校園維修通報系統",
   description: "全校報修單據管理列表，支援狀態、類別、地點與日期等多維度篩選。",
 };
 

@@ -55,7 +55,7 @@ bash scripts/setup-email-notifications.sh
 
 Wizard 會依下列順序處理：
 
-1. 建立 RepairHub 專用的 scoped Supabase access token，並驗證 `notify.monyu.dev` 的 SPF、DKIM 與 DMARC。
+1. 建立 南臺校園維修通報系統 專用的 scoped Supabase access token，並驗證 `notify.monyu.dev` 的 SPF、DKIM 與 DMARC。
 2. 建立限制在 `notify.monyu.dev` 的 Resend sending key，設定 Edge Function secrets 與 Supabase Vault。
 3. 先部署新版 `send-ticket-email`，再收斂既有 production 的 `pg_net` schema，最後套用 migration 與 retry cron。
 4. 以真實可收信地址完成五種通知、重播去重與暫時性失敗 retry 的 E2E。

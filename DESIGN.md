@@ -1,6 +1,6 @@
 ---
 
-name: RepairHub
+name: 南臺校園維修通報系統
 description: 現代化、透明高效的校園設施報修與資產履歷管理系統
 colors:
 primary: "oklch(0.205 0 0)"
@@ -144,13 +144,13 @@ padding: "0 8px"
 height: "32px"
 ---
 
-# Design System: RepairHub
+# Design System: 南臺校園維修通報系統
 
 ## Overview
 
 **Creative North Star: "The Transparent Ledger"**
 
-RepairHub（透明維修公約）是專為現代校園打造的設施報修、資產履歷與修繕調度管理系統。系統以「公共信任」、「透明閉環」與「精準可讀性」為核心美學基調，屏除花俏繁複的漸層裝飾，以純淨高對比的版面建構出如工程公約與精密手冊般的專業權威感。
+南臺校園維修通報系統（透明維修公約）是專為現代校園打造的設施報修、資產履歷與修繕調度管理系統。系統以「公共信任」、「透明閉環」與「精準可讀性」為核心美學基調，屏除花俏繁複的漸層裝飾，以純淨高對比的版面建構出如工程公約與精密手冊般的專業權威感。
 
 整體視覺風格呈現沉穩精準的現代工藝質感：介面以深沉碳墨（Carbon Ink）與極簡紙白（Paper White）形成堅實的閱讀基底，輔以高辨識度的信號赤紅（Signal Crimson）標註緊急與異常狀態。在空間布局上，系統兼顧雙軌操作實境——現場行動端（Reporter 與 Technician）講求 10 秒通報的零阻力直覺流程，而總務調度桌面端（Admin）則維持俐落、高資訊密度且結構緊密的儀表板節奏。
 
@@ -230,7 +230,7 @@ RepairHub（透明維修公約）是專為現代校園打造的設施報修、�
 
 ## Elevation & Depth
 
-RepairHub 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴模糊擴散的沉重陰影，而是透過背景色階差（`bg-card` vs `bg-muted/50`）以及精密的 1px 外框與環線（`ring-1 ring-foreground/10` 或 `border border-border`）建立乾淨的層級關係。
+南臺校園維修通報系統 採取「平面層疊 (Flat-Tonal Layering)」哲學，預設不依賴模糊擴散的沉重陰影，而是透過背景色階差（`bg-card` vs `bg-muted/50`）以及精密的 1px 外框與環線（`ring-1 ring-foreground/10` 或 `border border-border`）建立乾淨的層級關係。
 
 ### Shadow Vocabulary
 

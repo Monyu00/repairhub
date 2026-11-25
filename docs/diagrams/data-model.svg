@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="data-model-title data-model-desc" id="data-model-root">
-        <title id="data-model-title">RepairHub 資料模型</title>
+        <title id="data-model-title">南臺校園維修通報系統 資料模型</title>
         <desc id="data-model-desc">以工單為聚合根的領域模型：人員訂閱分類，地點包含空間與設備，工單連結分類、空間、設備並派生照片紀錄；標記問號的外來鍵可為空。</desc>
         <defs>
       <style>#data-model-root { --color-paper:   #f5f5f5;

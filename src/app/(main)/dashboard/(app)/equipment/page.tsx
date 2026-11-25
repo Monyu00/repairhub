@@ -9,7 +9,7 @@ import { fetchEquipmentList } from "./_actions/equipment-actions";
 import { EquipmentManagement } from "./_components/equipment-management";
 
 export const metadata: Metadata = {
-  title: "設備管理 - RepairHub",
+  title: "設備管理 - 南臺校園維修通報系統",
   description: "全校設施設備資產維護、保固追蹤與歷史維修單紀錄管理。",
 };
 

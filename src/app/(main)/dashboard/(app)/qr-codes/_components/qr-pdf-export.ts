@@ -35,7 +35,7 @@ export async function renderCardToCanvas(item: PrintableQRItem): Promise<string>
     "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang TC', 'Microsoft JhengHei', sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText("RepairHub 報修系統", 48, 64);
+  ctx.fillText("南臺校園維修通報系統", 48, 64);
 
   // Header Badge (空間 QR / 設備 QR)
   const badgeText = item.type === "space" ? "空間 QR" : "設備 QR";
@@ -126,7 +126,7 @@ export async function renderCardToCanvas(item: PrintableQRItem): Promise<string>
  */
 export async function exportQRCodesToPDF(
   items: PrintableQRItem[],
-  filenamePrefix = "RepairHub_QRCodes",
+  filenamePrefix = "南臺校園維修通報系統-QRCodes",
 ): Promise<void> {
   if (items.length === 0) {
     toast.error("請至少選取一個項目以產生 PDF");

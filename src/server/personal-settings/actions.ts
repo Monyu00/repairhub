@@ -93,7 +93,7 @@ async function sendDiscordWebhookTest(webhookUrl: string): Promise<void> {
   const response = await fetch(webhookUrl, {
     body: JSON.stringify({
       allowed_mentions: { parse: [] },
-      content: "RepairHub Discord Webhook 測試成功。",
+      content: "南臺校園維修通報系統 Discord Webhook 測試成功。",
     }),
     cache: "no-store",
     headers: { "Content-Type": "application/json" },

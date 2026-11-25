@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1120 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="architecture-title architecture-desc" id="architecture-root">
-        <title id="architecture-title">RepairHub 系統架構</title>
+        <title id="architecture-title">南臺校園維修通報系統 系統架構</title>
         <desc id="architecture-desc">Next.js 前台與儀表板讀寫 Supabase（Auth、Postgres、Storage）；新工單與狀態變更由資料庫觸發器寫入通知佇列，pg_net 喚醒 send-ticket-* Edge Functions，再由 Resend 或 Discord Webhook 派送。</desc>
         <defs>
       <style>#architecture-root { --color-paper:   #f5f5f5;

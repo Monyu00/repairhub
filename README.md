@@ -1,4 +1,4 @@
-# RepairHub
+# 南臺校園維修通報系統
 
 校園設施報修與維修追蹤平台：從報修到結案，全程看得見。
 
@@ -24,14 +24,14 @@
 
 ## 技術棧
 
-| 層級       | 使用技術                                                                |
-| ---------- | ----------------------------------------------------------------------- |
-| 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                   |
-| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                |
-| 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault |
+| 層級       | 使用技術                                                                            |
+| ---------- | ----------------------------------------------------------------------------------- |
+| 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                               |
+| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                            |
+| 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault             |
 | 背景工作   | Deno Edge Functions：`send-ticket-email` 走 Resend；`send-ticket-social` 走 Discord |
-| 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                        |
-| 工具鏈     | Biome、husky + lint-staged、tsx                                         |
+| 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                                    |
+| 工具鏈     | Biome、husky + lint-staged、tsx                                                     |
 
 本地元件放在 `src/components/ui/` 與 `src/components/calendar/`，任何客製化都在使用處進行，不修改這些目錄。
 
@@ -110,7 +110,7 @@ Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example
 | 變數                                                 | 用途                                                    |
 | ---------------------------------------------------- | ------------------------------------------------------- |
 | `REPAIRHUB_EDGE_FUNCTION_SECRET`                     | DB 呼叫 Edge Function 的內部密鑰，須與 Vault 值完全相同 |
-| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定（Email 通知）                            |
+| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定（Email 通知）                           |
 | `APP_BASE_URL`                                       | 郵件中的連結網域                                        |
 
 Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
@@ -136,7 +136,7 @@ Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repai
 
 ## 系統架構
 
-![RepairHub 系統架構](docs/diagrams/architecture.svg)
+![南臺校園維修通報系統 系統架構](docs/diagrams/architecture.svg)
 
 Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.mmd)；圖表 HTML 來源：`docs/diagrams/architecture.html`。
 
@@ -144,7 +144,7 @@ Mermaid 原始檔：[docs/diagrams/architecture.mmd](docs/diagrams/architecture.
 
 ## 資料模型
 
-![RepairHub 資料模型](docs/diagrams/data-model.svg)
+![南臺校園維修通報系統 資料模型](docs/diagrams/data-model.svg)
 
 工單（Ticket）是聚合根：地點（Building）與空間（Space）組成兩級場域，設備（Equipment）掛在空間下並可被工單引用；技師透過 `technician_categories` 訂閱分類，這份訂閱同時決定新工單通知的收件人。工單照片（ticket_photos）以 phase 區分報修與完工。
 

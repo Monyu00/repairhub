@@ -249,7 +249,7 @@ run_wizard() {
 
   TOTAL_STAGES=12
 
-  banner "RepairHub Email notification production setup"
+  banner "南臺校園維修通報系統 Email notification production setup"
 
   stage "前置：scoped Supabase token 與資料庫連線"
   say "此流程會設定 Resend、Supabase secrets/Vault、部署 migration 與 Edge Function，最後做真實寄信 E2E。"
@@ -258,7 +258,7 @@ run_wizard() {
   require_command git
   note "舊版線上 Edge Function 曾內嵌 Resend key；完成新版本 E2E 後必須撤銷舊 key。"
   open_url "https://supabase.com/dashboard/account/tokens"
-  step "建立一個只限 RepairHub 專案的 scoped access token。"
+  step "建立一個只限 南臺校園維修通報系統 專案的 scoped access token。"
   step "權限至少包含：Project Settings Read、API Keys Read、API Key Secrets Read、Database Read-write、Migrations Read-write、Edge Functions Read-write、Edge Function Secrets Read-write、Advisors Read。"
   if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
     ask_secret SUPABASE_ACCESS_TOKEN "Paste the scoped Supabase access token:"
@@ -268,7 +268,7 @@ run_wizard() {
     if ! confirm "仍要使用這個 token？"; then
       exit 1
     fi
-    SKIPPED+=("確認 Supabase access token 只限 RepairHub 專案與必要權限")
+    SKIPPED+=("確認 Supabase access token 只限 南臺校園維修通報系統 專案與必要權限")
   fi
   export SUPABASE_ACCESS_TOKEN
 
@@ -313,7 +313,7 @@ run_wizard() {
   note "舊 key 先保留到 E2E 成功；成功後再撤銷任何曾出現在舊 Edge Function 的 key。"
 
   stage "Supabase Edge Function secrets"
-  write_env RESEND_FROM "RepairHub <no-reply@notify.monyu.dev>"
+  write_env RESEND_FROM "南臺校園維修通報系統 <no-reply@notify.monyu.dev>"
   write_env APP_BASE_URL "https://repairhub.monyu.dev"
   ask RESEND_REPLY_TO "Paste the monitored Reply-To mailbox:"
   write_env RESEND_REPLY_TO "$RESEND_REPLY_TO"
@@ -362,14 +362,14 @@ BEGIN
     PERFORM vault.create_secret(
       decode('${url_b64}', 'base64')::text,
       'repairhub_project_url',
-      'RepairHub notification Edge Function URL'
+      '南臺校園維修通報系統 notification Edge Function URL'
     );
   ELSE
     PERFORM vault.update_secret(
       secret_id,
       decode('${url_b64}', 'base64')::text,
       'repairhub_project_url',
-      'RepairHub notification Edge Function URL'
+      '南臺校園維修通報系統 notification Edge Function URL'
     );
   END IF;
 
@@ -382,14 +382,14 @@ BEGIN
     PERFORM vault.create_secret(
       decode('${secret_b64}', 'base64')::text,
       'repairhub_edge_function_secret',
-      'RepairHub internal Edge Function secret'
+      '南臺校園維修通報系統 internal Edge Function secret'
     );
   ELSE
     PERFORM vault.update_secret(
       secret_id,
       decode('${secret_b64}', 'base64')::text,
       'repairhub_edge_function_secret',
-      'RepairHub internal Edge Function secret'
+      '南臺校園維修通報系統 internal Edge Function secret'
     );
   END IF;
 END

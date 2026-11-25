@@ -8,7 +8,7 @@ import { getSession } from "@/server/auth/session";
 import { AnnouncementsPage } from "./_components/announcements-page";
 
 export const metadata: Metadata = {
-  title: "公告管理 - RepairHub",
+  title: "公告管理 - 南臺校園維修通報系統",
   description: "發佈與管理全校設施設備營運公告、停機通知與修繕提醒。",
 };
 

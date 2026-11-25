@@ -8,7 +8,7 @@ import { fetchReportData } from "./_actions/report-actions";
 import { ReportsDashboard } from "./_components/reports-dashboard";
 
 export const metadata: Metadata = {
-  title: "統計報表 - RepairHub",
+  title: "統計報表 - 南臺校園維修通報系統",
   description: "全校修繕通報統計、空間分佈、分類佔比與處理時效報表儀表板。",
 };
 
