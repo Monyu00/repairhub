@@ -68,7 +68,7 @@ npm run dev
 │   ├── agents/                   # Agent 協作與議題處理規範
 │   ├── diagrams/                 # 架構、資料模型與狀態機圖
 │   └── performance/              # 效能診斷與驗收紀錄
-├── scripts/
+├── scripts/          # 本地腳本，未納入版本控制
 ├── src/
 │   ├── app/
 │   │   ├── (public)/             # 公開報修、查詢與登入
