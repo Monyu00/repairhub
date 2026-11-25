@@ -20,7 +20,7 @@
 .DS_Store
 *.pem
 *.sh
-!scripts/setup-email-notifications.sh
+/scripts
 
 # debug
 npm-debug.log*
