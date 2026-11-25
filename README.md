@@ -24,14 +24,14 @@
 
 ## 技術棧
 
-| 層級       | 使用技術                                                                |
-| ---------- | ----------------------------------------------------------------------- |
-| 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                   |
-| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                |
-| 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault |
+| 層級       | 使用技術                                                                            |
+| ---------- | ----------------------------------------------------------------------------------- |
+| 前端框架   | Next.js 16（App Router）、React 19、TypeScript strict                               |
+| 樣式與元件 | Tailwind CSS v4、shadcn/ui（`radix-nova`）、lucide-react                            |
+| 後端服務   | Supabase：Auth、Postgres（含 RLS）、Storage、`pg_net`、`pg_cron`、Vault             |
 | 背景工作   | Deno Edge Functions：`send-ticket-email` 走 Resend；`send-ticket-social` 走 Discord |
-| 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                        |
-| 工具鏈     | Biome、husky + lint-staged、tsx                                         |
+| 資料視覺   | TanStack Table、Recharts、ExcelJS、jsPDF、qrcode                                    |
+| 工具鏈     | Biome、husky + lint-staged、tsx                                                     |
 
 本地元件放在 `src/components/ui/` 與 `src/components/calendar/`，任何客製化都在使用處進行，不修改這些目錄。
 
@@ -110,7 +110,7 @@ Edge Function（`supabase/functions/.env`，已 gitignore，參考 [.env.example
 | 變數                                                 | 用途                                                    |
 | ---------------------------------------------------- | ------------------------------------------------------- |
 | `REPAIRHUB_EDGE_FUNCTION_SECRET`                     | DB 呼叫 Edge Function 的內部密鑰，須與 Vault 值完全相同 |
-| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定（Email 通知）                            |
+| `RESEND_API_KEY` / `RESEND_FROM` / `RESEND_REPLY_TO` | Resend 寄信設定（Email 通知）                           |
 | `APP_BASE_URL`                                       | 郵件中的連結網域                                        |
 
 Supabase Vault 另需兩個純文字 secret：`repairhub_project_url` 與 `repairhub_edge_function_secret`。兩者若以 bytea 寫入，`vault.decrypted_secrets` 會回報 `\x...` 轉義字串，導致 `net.http_post` 報 `invalid URL`、Edge Function 回 401，寫入時的 trigger 也會一併中斷；檢查與部署步驟見 [docs/notifications.md](docs/notifications.md)。
