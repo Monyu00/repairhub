@@ -152,7 +152,7 @@ export function QRSelectionPanel({
   const renderSpacesContent = () => {
     if (filteredSpacesByBuilding.length === 0) {
       return (
-        <div className="py-12 text-center text-muted-foreground text-sm">
+        <div className="text-muted-foreground py-12 text-center text-sm">
           <Layers className="mx-auto mb-2 size-8 opacity-40" />
           無符合條件的空間
         </div>
@@ -168,9 +168,9 @@ export function QRSelectionPanel({
           const isCollapsed = collapsedBuildings[building.id] ?? false;
 
           return (
-            <div key={building.id} className="overflow-hidden rounded-lg border border-border/70 bg-background/50">
+            <div key={building.id} className="border-border/70 bg-background/50 overflow-hidden rounded-lg border">
               {/* Building Group Header */}
-              <div className="flex items-center justify-between bg-muted/40 px-3 py-2">
+              <div className="bg-muted/40 flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-2.5">
                   <Checkbox
                     id={`building-${building.id}`}
@@ -181,9 +181,9 @@ export function QRSelectionPanel({
                   <button
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
-                    className="flex items-center gap-1.5 text-left font-medium text-foreground text-xs hover:text-primary"
+                    className="text-foreground hover:text-primary flex items-center gap-1.5 text-left text-xs font-medium"
                   >
-                    <Building2 className="size-3.5 text-muted-foreground" />
+                    <Building2 className="text-muted-foreground size-3.5" />
                     <span>{building.name}</span>
                     <span className="text-muted-foreground text-xs">({building.code})</span>
                   </button>
@@ -204,13 +204,13 @@ export function QRSelectionPanel({
 
               {/* Spaces Sub-list */}
               {!isCollapsed && (
-                <div className="divide-y divide-border/40 p-1">
+                <div className="divide-border/40 divide-y p-1">
                   {building.spaces.map((space) => {
                     const isChecked = selectedIds.includes(space.id);
                     return (
                       <div
                         key={space.id}
-                        className={`flex items-center justify-between rounded-md px-3 py-1.5 transition-colors hover:bg-muted/50 ${
+                        className={`hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-1.5 transition-colors ${
                           isChecked ? "bg-primary/5" : ""
                         }`}
                       >
@@ -222,12 +222,12 @@ export function QRSelectionPanel({
                           />
                           <Label
                             htmlFor={`space-${space.id}`}
-                            className="cursor-pointer select-none font-normal text-xs leading-none"
+                            className="cursor-pointer text-xs leading-none font-normal select-none"
                           >
                             {space.name}
                           </Label>
                         </div>
-                        <span className="font-mono text-foreground/80 text-xs">{space.floor}F</span>
+                        <span className="text-foreground/80 font-mono text-xs">{space.floor}F</span>
                       </div>
                     );
                   })}
@@ -243,7 +243,7 @@ export function QRSelectionPanel({
   const renderEquipmentContent = () => {
     if (filteredEquipmentByBuilding.length === 0) {
       return (
-        <div className="py-12 text-center text-muted-foreground text-sm">
+        <div className="text-muted-foreground py-12 text-center text-sm">
           <Package className="mx-auto mb-2 size-8 opacity-40" />
           無符合條件的設備
         </div>
@@ -259,9 +259,9 @@ export function QRSelectionPanel({
           const isCollapsed = collapsedBuildings[building.id] ?? false;
 
           return (
-            <div key={building.id} className="overflow-hidden rounded-lg border border-border/70 bg-background/50">
+            <div key={building.id} className="border-border/70 bg-background/50 overflow-hidden rounded-lg border">
               {/* Building Group Header */}
-              <div className="flex items-center justify-between bg-muted/40 px-3 py-2">
+              <div className="bg-muted/40 flex items-center justify-between px-3 py-2">
                 <div className="flex items-center gap-2.5">
                   <Checkbox
                     id={`eq-building-${building.id}`}
@@ -272,9 +272,9 @@ export function QRSelectionPanel({
                   <button
                     type="button"
                     onClick={() => toggleBuildingCollapse(building.id)}
-                    className="flex items-center gap-1.5 text-left font-medium text-foreground text-xs hover:text-primary"
+                    className="text-foreground hover:text-primary flex items-center gap-1.5 text-left text-xs font-medium"
                   >
-                    <Building2 className="size-3.5 text-muted-foreground" />
+                    <Building2 className="text-muted-foreground size-3.5" />
                     <span>{building.name}</span>
                   </button>
                 </div>
@@ -294,13 +294,13 @@ export function QRSelectionPanel({
 
               {/* Equipment Sub-list */}
               {!isCollapsed && (
-                <div className="divide-y divide-border/40 p-1">
+                <div className="divide-border/40 divide-y p-1">
                   {building.items.map((eq) => {
                     const isChecked = selectedIds.includes(eq.id);
                     return (
                       <div
                         key={eq.id}
-                        className={`flex items-center justify-between rounded-md px-3 py-1.5 transition-colors hover:bg-muted/50 ${
+                        className={`hover:bg-muted/50 flex items-center justify-between rounded-md px-3 py-1.5 transition-colors ${
                           isChecked ? "bg-primary/5" : ""
                         }`}
                       >
@@ -312,14 +312,14 @@ export function QRSelectionPanel({
                           />
                           <Label
                             htmlFor={`eq-${eq.id}`}
-                            className="cursor-pointer select-none truncate font-normal text-xs leading-none"
+                            className="cursor-pointer truncate text-xs leading-none font-normal select-none"
                           >
                             {eq.name}
                           </Label>
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5 text-right">
-                          <span className="max-w-[100px] truncate text-muted-foreground text-xs">{eq.spaceName}</span>
-                          <span className="font-mono text-foreground/80 text-xs">({eq.code})</span>
+                          <span className="text-muted-foreground max-w-[100px] truncate text-xs">{eq.spaceName}</span>
+                          <span className="text-foreground/80 font-mono text-xs">({eq.code})</span>
                         </div>
                       </div>
                     );
@@ -334,11 +334,11 @@ export function QRSelectionPanel({
   };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden border border-border bg-card shadow-xs">
+    <Card className="border-border bg-card flex h-full flex-col overflow-hidden border shadow-xs">
       {/* Search and Header Controls */}
-      <div className="space-y-3 border-border/80 border-b p-3.5 sm:p-4">
+      <div className="border-border/80 space-y-3 border-b p-3.5 sm:p-4">
         <div className="relative">
-          <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
           <Input
             type="text"
             placeholder={targetType === "spaces" ? "搜尋地點名稱、空間名稱或樓層..." : "搜尋設備名稱、編號或空間..."}
@@ -350,7 +350,7 @@ export function QRSelectionPanel({
             <button
               type="button"
               onClick={() => setSearchTerm("")}
-              className="absolute top-2.5 right-2.5 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground absolute top-2.5 right-2.5"
               aria-label="清除搜尋"
             >
               <X className="size-4" />
@@ -371,7 +371,7 @@ export function QRSelectionPanel({
                   onSelectAll(unique);
                 }
               }}
-              className="h-7 font-normal text-xs"
+              className="h-7 text-xs font-normal"
             >
               {allVisibleSelected ? (
                 <>
@@ -387,7 +387,7 @@ export function QRSelectionPanel({
             </Button>
 
             {selectedIds.length > 0 && (
-              <Button variant="ghost" size="xs" onClick={onClearAll} className="h-7 text-muted-foreground text-xs">
+              <Button variant="ghost" size="xs" onClick={onClearAll} className="text-muted-foreground h-7 text-xs">
                 全部清除
               </Button>
             )}
@@ -395,7 +395,7 @@ export function QRSelectionPanel({
 
           <div className="flex items-center gap-1.5">
             <Badge variant="secondary">
-              已選 <span className="mr-0.5 ml-1 font-semibold text-primary">{selectedIds.length}</span> 項
+              已選 <span className="text-primary mr-0.5 ml-1 font-semibold">{selectedIds.length}</span> 項
             </Badge>
           </div>
         </div>

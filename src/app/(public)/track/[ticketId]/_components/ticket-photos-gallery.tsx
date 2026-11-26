@@ -24,8 +24,8 @@ export function TicketPhotosGallery({ photos, phase, title }: TicketPhotosGaller
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <ImageIcon className="size-4 text-muted-foreground" />
-        <h2 className="font-semibold text-foreground text-sm">{title}</h2>
+        <ImageIcon className="text-muted-foreground size-4" />
+        <h2 className="text-foreground text-sm font-semibold">{title}</h2>
         <span className="text-muted-foreground text-xs">（{phasePhotos.length} 張）</span>
       </div>
 
@@ -37,7 +37,7 @@ export function TicketPhotosGallery({ photos, phase, title }: TicketPhotosGaller
               key={photo.id}
               type="button"
               onClick={() => setLightboxSrc(url)}
-              className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="border-border bg-muted focus-visible:ring-ring relative aspect-square overflow-hidden rounded-lg border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none"
               aria-label="點擊放大照片"
             >
               <Image src={url} alt="報修照片" fill className="object-cover" sizes="(max-width: 640px) 50vw, 33vw" />

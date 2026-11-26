@@ -96,8 +96,8 @@ export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelin
   return (
     <Card className="shadow-2xs">
       <CardHeader className="border-border/50 border-b pb-3">
-        <CardTitle className="flex items-center gap-2 font-semibold text-base">
-          <History className="size-4 text-primary" />
+        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+          <History className="text-primary size-4" />
           狀態變更時間軸
         </CardTitle>
       </CardHeader>
@@ -120,22 +120,22 @@ export function StatusTimeline({ createdAt, notes, reporterName }: StatusTimelin
                     >
                       <Icon className="size-3" />
                     </div>
-                    {!isLast && <div className="my-1 w-px flex-1 bg-border/70" />}
+                    {!isLast && <div className="bg-border/70 my-1 w-px flex-1" />}
                   </div>
 
                   {/* Content */}
                   <div className="min-w-0 flex-1 pb-4">
                     <div className="flex items-center gap-2">
-                      <p className={`font-semibold text-xs ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
+                      <p className={`text-xs font-semibold ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
                         {item.content}
                       </p>
                       {item.authorRole && (
-                        <span className="rounded bg-muted px-1.5 py-0.2 font-medium text-foreground text-xs">
+                        <span className="bg-muted py-0.2 text-foreground rounded px-1.5 text-xs font-medium">
                           {item.authorRole}
                         </span>
                       )}
                     </div>
-                    <p className="mt-0.5 text-muted-foreground text-xs">{formatTicketDate(item.createdAt)}</p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">{formatTicketDate(item.createdAt)}</p>
                   </div>
                 </div>
               );

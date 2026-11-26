@@ -80,7 +80,7 @@ export default async function Page({ searchParams }: PageProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">維修紀錄</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">維修紀錄</h1>
           <p className="text-muted-foreground text-sm">
             {isAdmin ? "檢視與追蹤全校各維修人員之接單及完工紀錄" : "檢視您承接的所有維修單據及處理進度"}
           </p>

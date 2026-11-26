@@ -93,14 +93,14 @@ export function AssignTechnicianDialog({ ticketId }: AssignTechnicianDialogProps
     if (isLoadingTechs) {
       return (
         <div className="flex items-center justify-center py-4">
-          <Loader2 className="size-5 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground text-xs">載入技師列表...</span>
+          <Loader2 className="text-muted-foreground size-5 animate-spin" />
+          <span className="text-muted-foreground ml-2 text-xs">載入技師列表...</span>
         </div>
       );
     }
 
     if (technicians.length === 0) {
-      return <p className="py-2 text-center text-muted-foreground text-xs">目前系統中無註冊的技師</p>;
+      return <p className="text-muted-foreground py-2 text-center text-xs">目前系統中無註冊的技師</p>;
     }
 
     return (
@@ -131,7 +131,7 @@ export function AssignTechnicianDialog({ ticketId }: AssignTechnicianDialogProps
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="size-5 text-primary" />
+                <UserPlus className="text-primary size-5" />
                 指派報修單據技師
               </DialogTitle>
               <DialogDescription>

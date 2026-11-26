@@ -114,11 +114,11 @@ export function SearchDialog() {
       <Button
         onClick={() => handleOpenChange(true)}
         variant="link"
-        className="px-0! font-normal text-muted-foreground hover:no-underline"
+        className="text-muted-foreground px-0! font-normal hover:no-underline"
       >
         <Search data-icon="inline-start" />
         Search
-        <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-xs">
+        <kbd className="bg-muted inline-flex h-5 items-center gap-1 rounded border px-1.5 text-xs font-medium select-none">
           <span className="text-xs">⌘</span>J
         </kbd>
       </Button>

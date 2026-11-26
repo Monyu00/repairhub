@@ -112,14 +112,14 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
     <>
       <div className="space-y-4">
         <div>
-          <h2 className="font-semibold text-foreground text-sm">維修驗收</h2>
-          <p className="mt-0.5 text-muted-foreground text-xs">技師已完成維修，請確認問題是否已解決。</p>
+          <h2 className="text-foreground text-sm font-semibold">維修驗收</h2>
+          <p className="text-muted-foreground mt-0.5 text-xs">技師已完成維修，請確認問題是否已解決。</p>
         </div>
 
         {/* 5-star Rating selector (Optional) */}
-        <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5">
+        <div className="border-border/60 bg-muted/30 space-y-2 rounded-lg border p-3.5">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-foreground text-xs">維修服務評分（選填）</span>
+            <span className="text-foreground text-xs font-medium">維修服務評分（選填）</span>
             <span className="text-muted-foreground text-xs transition-colors">
               {activeRating ? `${activeRating} 星 - ${RATING_LABELS[activeRating]}` : "點選星星評分"}
             </span>
@@ -135,7 +135,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                   onClick={() => setRating((prev) => (prev === star ? null : star))}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(null)}
-                  className="group rounded p-1 transition-transform hover:scale-110 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                  className="group focus-visible:ring-ring rounded p-1 transition-transform hover:scale-110 focus-visible:ring-1 focus-visible:outline-hidden"
                   aria-label={`${star} 星 - ${RATING_LABELS[star]}`}
                   aria-pressed={rating === star}
                 >
@@ -144,7 +144,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
                       "size-6 transition-colors",
                       isFilled
                         ? "fill-warning text-warning"
-                        : "fill-transparent text-muted-foreground/30 group-hover:text-warning-text",
+                        : "text-muted-foreground/30 group-hover:text-warning-text fill-transparent",
                     )}
                   />
                 </button>
@@ -154,7 +154,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
               <button
                 type="button"
                 onClick={() => setRating(null)}
-                className="ml-2 text-muted-foreground text-xs underline hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground ml-2 text-xs underline"
               >
                 清除
               </button>
@@ -185,8 +185,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
           {success ? (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <CheckCircle2Icon className="size-10 text-success-text" />
-              <p className="font-medium text-foreground">
+              <CheckCircle2Icon className="text-success-text size-10" />
+              <p className="text-foreground font-medium">
                 {isConfirm ? "已確認修復，報修單已結案" : "已回報問題，工單已退回維修中"}
               </p>
             </div>
@@ -194,11 +194,11 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
             <div className="space-y-4">
               {/* Rating reminder in confirmation dialog */}
               {isConfirm && (
-                <div className="flex items-center justify-between rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-xs">
+                <div className="border-border/60 bg-muted/40 flex items-center justify-between rounded-md border px-3 py-2 text-xs">
                   <span className="text-muted-foreground">服務評分</span>
                   {rating ? (
-                    <span className="flex items-center gap-1 font-medium text-foreground">
-                      <StarIcon className="size-3.5 fill-warning text-warning" />
+                    <span className="text-foreground flex items-center gap-1 font-medium">
+                      <StarIcon className="fill-warning text-warning size-3.5" />
                       {rating} 星（{RATING_LABELS[rating]}）
                     </span>
                   ) : (
@@ -209,8 +209,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
               {/* Email verification */}
               <div className="space-y-2">
-                <label htmlFor="reporter-email" className="font-medium text-foreground text-sm">
-                  <MailIcon className="mr-1.5 inline-block size-4 text-muted-foreground" />
+                <label htmlFor="reporter-email" className="text-foreground text-sm font-medium">
+                  <MailIcon className="text-muted-foreground mr-1.5 inline-block size-4" />
                   驗證身分
                 </label>
                 <Input
@@ -227,8 +227,8 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
               {/* Feedback for reopen only */}
               {!isConfirm && (
                 <div className="space-y-2">
-                  <label htmlFor="reopen-feedback" className="font-medium text-foreground text-sm">
-                    <MessageSquareWarningIcon className="mr-1.5 inline-block size-4 text-muted-foreground" />
+                  <label htmlFor="reopen-feedback" className="text-foreground text-sm font-medium">
+                    <MessageSquareWarningIcon className="text-muted-foreground mr-1.5 inline-block size-4" />
                     反饋說明
                   </label>
                   <Textarea
@@ -246,7 +246,7 @@ export function ReporterActions({ ticketId }: ReporterActionsProps) {
 
               {/* Error display */}
               {error && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-foreground text-sm">
+                <div className="border-destructive/30 bg-destructive/5 text-foreground rounded-lg border px-3 py-2 text-sm">
                   {error}
                 </div>
               )}

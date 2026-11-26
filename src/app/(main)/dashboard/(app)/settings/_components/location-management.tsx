@@ -98,13 +98,13 @@ function SortableSpaceRow({ space, isDisabled, onEdit, onDelete }: SortableSpace
   };
 
   return (
-    <TableRow ref={setNodeRef} style={style} className={cn(isDragging && "relative z-10 bg-muted opacity-60")}>
+    <TableRow ref={setNodeRef} style={style} className={cn(isDragging && "bg-muted relative z-10 opacity-60")}>
       <TableCell className="w-[120px] font-mono text-sm">
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="size-11 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing sm:size-8"
+            className="text-muted-foreground hover:text-foreground size-11 cursor-grab touch-none active:cursor-grabbing sm:size-8"
             {...attributes}
             {...listeners}
             disabled={isDisabled}
@@ -118,7 +118,7 @@ function SortableSpaceRow({ space, isDisabled, onEdit, onDelete }: SortableSpace
       </TableCell>
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+          <MapPin className="text-muted-foreground h-3.5 w-3.5" />
           <span>{space.name}</span>
         </div>
       </TableCell>
@@ -131,7 +131,7 @@ function SortableSpaceRow({ space, isDisabled, onEdit, onDelete }: SortableSpace
           <Button
             variant="ghost"
             size="icon"
-            className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive size-11 sm:size-8"
             onClick={onDelete}
             title="刪除空間"
           >
@@ -183,14 +183,14 @@ function SortableBuildingCard({
       <Collapsible
         open={isOpen}
         onOpenChange={onToggleOpen}
-        className="rounded-lg border border-border bg-card shadow-xs transition-colors"
+        className="border-border bg-card rounded-lg border shadow-xs transition-colors"
       >
         <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="size-11 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing sm:size-8"
+              className="text-muted-foreground hover:text-foreground size-11 cursor-grab touch-none active:cursor-grabbing sm:size-8"
               {...attributes}
               {...listeners}
               disabled={isSearching || isPending}
@@ -203,15 +203,15 @@ function SortableBuildingCard({
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="flex min-w-0 flex-1 items-center gap-3 text-left font-medium hover:text-primary focus-visible:outline-hidden"
+                className="hover:text-primary flex min-w-0 flex-1 items-center gap-3 text-left font-medium focus-visible:outline-hidden"
               >
                 {isOpen ? (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
                 ) : (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
                 )}
-                <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <span className="font-semibold text-base text-foreground">{building.name}</span>
+                <Building2 className="text-muted-foreground h-5 w-5 shrink-0" />
+                <span className="text-foreground text-base font-semibold">{building.name}</span>
                 <Badge variant="outline" className="font-mono uppercase">
                   {building.code}
                 </Badge>
@@ -238,7 +238,7 @@ function SortableBuildingCard({
             <Button
               variant="ghost"
               size="icon"
-              className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive size-11 sm:size-8"
               onClick={onDeleteBuilding}
               title="刪除地點"
             >
@@ -248,7 +248,7 @@ function SortableBuildingCard({
           </div>
         </div>
 
-        <CollapsibleContent className="border-t bg-muted/20 p-4 pt-2">
+        <CollapsibleContent className="bg-muted/20 border-t p-4 pt-2">
           {spaceCount === 0 ? (
             <Empty className="my-2 border border-dashed py-6">
               <EmptyHeader>
@@ -256,7 +256,7 @@ function SortableBuildingCard({
               </EmptyHeader>
             </Empty>
           ) : (
-            <div className="mt-2 rounded-md border bg-background">
+            <div className="bg-background mt-2 rounded-md border">
               <DndContext
                 id={`space-order-${building.id}`}
                 sensors={sensors}
@@ -582,7 +582,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-xl">校園地點與空間管理</CardTitle>
-          <CardDescription className="mt-1 text-muted-foreground text-sm">
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             維護全校地點與其所屬空間層級結構。可拖曳調整顯示順序，刪除前系統會自動檢查相關報修單與設備關聯。
           </CardDescription>
         </div>
@@ -606,10 +606,10 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
       <CardContent className="flex flex-col gap-4">
         {/* Search Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
+        <div className="bg-card/60 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 shadow-xs backdrop-blur-xs">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative w-full sm:w-64">
-              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
               <Input
                 type="search"
                 placeholder="搜尋地點名稱、代碼或空間..."
@@ -624,7 +624,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-11 gap-1 px-3 text-muted-foreground text-xs hover:text-foreground sm:h-8 sm:px-2"
+                className="text-muted-foreground hover:text-foreground h-11 gap-1 px-3 text-xs sm:h-8 sm:px-2"
                 onClick={() => handleSearchChange("")}
               >
                 <FilterX className="size-3.5" />
@@ -635,11 +635,11 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
 
           <div className="flex flex-wrap items-center gap-2">
             <div className="text-muted-foreground text-xs">
-              共 <span className="font-semibold text-foreground">{filteredBuildings.length}</span> 個地點
+              共 <span className="text-foreground font-semibold">{filteredBuildings.length}</span> 個地點
               {searchQuery && (
                 <span className="ml-1">
                   （含{" "}
-                  <span className="font-semibold text-foreground">
+                  <span className="text-foreground font-semibold">
                     {filteredBuildings.reduce((acc, b) => acc + (b.spaces?.length ?? 0), 0)}
                   </span>{" "}
                   個空間）
@@ -670,7 +670,7 @@ export function LocationManagement({ initialBuildings }: LocationManagementProps
         </div>
 
         {filteredBuildings.length === 0 ? (
-          <Empty className="border border-dashed bg-card/40 py-10">
+          <Empty className="bg-card/40 border border-dashed py-10">
             <EmptyHeader>
               <EmptyDescription>
                 {buildings.length === 0

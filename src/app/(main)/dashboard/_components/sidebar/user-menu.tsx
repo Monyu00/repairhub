@@ -49,7 +49,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-lg p-1 text-left transition-colors hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+          className="hover:bg-accent focus-visible:ring-ring flex items-center gap-2 rounded-lg p-1 text-left transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
         >
           <Avatar className="size-8 rounded-lg">
             <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
@@ -66,12 +66,12 @@ export function UserMenu({ user }: UserMenuProps) {
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{displayName}</span>
-              <span className="truncate text-muted-foreground text-xs">{email}</span>
+              <span className="text-muted-foreground truncate text-xs">{email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <div className="flex items-center gap-1.5 px-2 py-1.5 text-muted-foreground text-xs">
+        <div className="text-muted-foreground flex items-center gap-1.5 px-2 py-1.5 text-xs">
           <Shield className="size-3.5" />
           <span>身分：{roleLabel}</span>
         </div>
@@ -87,7 +87,7 @@ export function UserMenu({ user }: UserMenuProps) {
               await signOutAction();
             });
           }}
-          className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+          className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
         >
           <LogOut className="mr-2 size-4" />
           登出

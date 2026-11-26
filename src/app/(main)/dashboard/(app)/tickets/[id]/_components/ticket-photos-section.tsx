@@ -23,10 +23,10 @@ export function TicketPhotosSection({ photos, phase, title }: TicketPhotosSectio
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center gap-2 font-semibold text-foreground text-sm">
-        <ImageIcon className="size-4 text-primary" />
+      <div className="text-foreground flex items-center gap-2 text-sm font-semibold">
+        <ImageIcon className="text-primary size-4" />
         <span>{title}</span>
-        <span className="font-normal text-muted-foreground text-xs">（{phasePhotos.length} 張）</span>
+        <span className="text-muted-foreground text-xs font-normal">（{phasePhotos.length} 張）</span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {phasePhotos.map((photo) => {
@@ -36,7 +36,7 @@ export function TicketPhotosSection({ photos, phase, title }: TicketPhotosSectio
               key={photo.id}
               type="button"
               onClick={() => setLightboxSrc(url)}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group border-border bg-muted focus-visible:ring-ring relative aspect-square overflow-hidden rounded-lg border transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none"
               aria-label="點擊放大照片"
             >
               <Image

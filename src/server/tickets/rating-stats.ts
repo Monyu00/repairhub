@@ -41,7 +41,7 @@ export function calculateSatisfactionStats(
     // Technician stats tracking
     if (t.assigned_to) {
       const techRaw = Array.isArray(t.technician) ? t.technician[0] : t.technician;
-      const techName = techRaw?.display_name || `技師 (${t.assigned_to.slice(0, 8)})`;
+      const techName = techRaw?.display_name ?? `技師 (${t.assigned_to.slice(0, 8)})`;
 
       const curTech = techMap.get(t.assigned_to) ?? {
         displayName: techName,
@@ -69,7 +69,7 @@ export function calculateSatisfactionStats(
       starCounts[t.rating] = (starCounts[t.rating] ?? 0) + 1;
 
       // Month trend by created_at or rated_at
-      const dateStr = t.rated_at || t.created_at;
+      const dateStr = t.rated_at ?? t.created_at;
       const d = new Date(dateStr);
       const mKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 

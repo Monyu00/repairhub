@@ -26,29 +26,29 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
   const hasMultiple = announcements.length > 1;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 shadow-2xs transition-colors">
+    <div className="border-primary/20 bg-primary/5 overflow-hidden rounded-xl border p-4 shadow-2xs transition-colors">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="bg-primary/10 text-primary mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg">
             <Megaphone className="size-4" aria-hidden="true" />
           </div>
 
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-primary text-xs uppercase tracking-wider">系統公告</span>
+              <span className="text-primary text-xs font-semibold tracking-wider uppercase">系統公告</span>
               {currentAnnouncement.is_pinned && (
-                <Badge variant="default" className="gap-1 px-1.5 py-0 font-normal text-xs">
+                <Badge variant="default" className="gap-1 px-1.5 py-0 text-xs font-normal">
                   <Pin className="size-2.5" aria-hidden="true" />
                   置頂
                 </Badge>
               )}
-              <h2 className="font-semibold text-foreground text-sm">{currentAnnouncement.title}</h2>
+              <h2 className="text-foreground text-sm font-semibold">{currentAnnouncement.title}</h2>
               <span className="text-foreground/70 text-xs">({formatMonthDay(currentAnnouncement.published_at)})</span>
             </div>
 
             <div
               id="public-announcement-body"
-              className="whitespace-pre-wrap text-foreground/90 text-xs leading-relaxed"
+              className="text-foreground/90 text-xs leading-relaxed whitespace-pre-wrap"
             >
               {expanded ? (
                 currentAnnouncement.body
@@ -61,7 +61,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
 
         <div className="flex shrink-0 items-center gap-1.5 self-end sm:self-auto">
           {hasMultiple && (
-            <div className="mr-2 flex items-center gap-1 text-foreground/70 text-xs">
+            <div className="text-foreground/70 mr-2 flex items-center gap-1 text-xs">
               <span>
                 {activeItemIndex + 1} / {announcements.length}
               </span>
@@ -72,12 +72,12 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
                     type="button"
                     onClick={() => setActiveItemIndex(idx)}
                     aria-current={idx === activeItemIndex ? "true" : undefined}
-                    className="flex size-11 items-center justify-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary sm:size-6"
+                    className="focus-visible:ring-primary flex size-11 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-hidden sm:size-6"
                     aria-label={`切換至公告 ${idx + 1}`}
                   >
                     <span
                       className={`block h-1.5 rounded-full transition-colors ${
-                        idx === activeItemIndex ? "w-3.5 bg-primary" : "w-1.5 bg-primary/25 hover:bg-primary/40"
+                        idx === activeItemIndex ? "bg-primary w-3.5" : "bg-primary/25 hover:bg-primary/40 w-1.5"
                       }`}
                     />
                   </button>
@@ -93,7 +93,7 @@ export function PublicAnnouncementsBanner({ announcements }: PublicAnnouncements
             aria-expanded={expanded}
             aria-controls="public-announcement-body"
             onClick={() => setExpanded(!expanded)}
-            className="h-11 px-3 text-foreground/70 text-xs hover:text-foreground sm:h-7 sm:px-2"
+            className="text-foreground/70 hover:text-foreground h-11 px-3 text-xs sm:h-7 sm:px-2"
           >
             {expanded ? (
               <>

@@ -37,18 +37,18 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
             <UserCheck className="h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">技師處理績效與負載</CardTitle>
+            <CardTitle className="text-base font-semibold">技師處理績效與負載</CardTitle>
             <CardDescription className="text-xs">統計各維修工程人員之完成工單量與平均處理時效</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 pt-2 pb-4">
         {!hasData ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex h-64 items-center justify-center text-xs">
             此期間尚無技師派工紀錄
           </div>
         ) : (
@@ -62,7 +62,7 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  className="font-medium text-xs"
+                  className="text-xs font-medium"
                 />
                 <XAxis
                   type="number"
@@ -90,25 +90,25 @@ export function TechnicianPerformanceChart({ data }: TechnicianPerformanceChartP
             </ChartContainer>
 
             {/* Technician Summary Table/Badges */}
-            <div className="grid grid-cols-1 gap-2 border-border/40 border-t pt-2 sm:grid-cols-2 lg:border-t-0 lg:pt-0">
+            <div className="border-border/40 grid grid-cols-1 gap-2 border-t pt-2 sm:grid-cols-2 lg:border-t-0 lg:pt-0">
               {data.map((tech) => (
                 <div
                   key={tech.technicianId}
-                  className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/30 p-2.5 text-xs"
+                  className="border-border/40 bg-muted/30 flex items-center justify-between rounded-lg border p-2.5 text-xs"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
+                    <div className="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full font-bold">
                       {tech.displayName.slice(0, 1).toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-semibold text-foreground">{tech.displayName}</div>
+                      <div className="text-foreground font-semibold">{tech.displayName}</div>
                       <div className="text-muted-foreground text-xs">
                         已完成: {tech.completedCount} 件 | 進行中: {tech.inProgressCount} 件
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold text-foreground tabular-nums">
+                    <div className="text-foreground font-semibold tabular-nums">
                       {tech.avgDaysToResolve > 0 ? `${tech.avgDaysToResolve} 天` : "—"}
                     </div>
                     <div className="text-muted-foreground text-xs">平均修復</div>

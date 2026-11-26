@@ -62,7 +62,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-success-text ">
+          <DialogTitle className="text-success-text flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5" />
             使用者帳號建立成功
           </DialogTitle>
@@ -70,24 +70,24 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
         </DialogHeader>
 
         <div className="space-y-4 py-3">
-          <div className="space-y-3 rounded-lg border bg-muted/40 p-4">
+          <div className="bg-muted/40 space-y-3 rounded-lg border p-4">
             <div>
-              <div className="mb-1 font-medium text-muted-foreground text-xs">登入帳號 (Email)</div>
-              <div className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 font-mono text-sm">
-                <span className="select-all truncate">{email}</span>
+              <div className="text-muted-foreground mb-1 text-xs font-medium">登入帳號 (Email)</div>
+              <div className="bg-background flex items-center justify-between gap-2 rounded-md border px-3 py-2 font-mono text-sm">
+                <span className="truncate select-all">{email}</span>
                 <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyEmail} title="複製 Email">
-                  {copiedEmail ? <Check className="h-3.5 w-3.5 text-success-text" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedEmail ? <Check className="text-success-text h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 </Button>
               </div>
             </div>
 
             <div>
-              <div className="mb-1 font-medium text-muted-foreground text-xs">初始登入密碼</div>
-              <div className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 font-mono font-semibold text-primary text-sm">
-                <span className="select-all truncate">{password}</span>
+              <div className="text-muted-foreground mb-1 text-xs font-medium">初始登入密碼</div>
+              <div className="bg-background text-primary flex items-center justify-between gap-2 rounded-md border px-3 py-2 font-mono text-sm font-semibold">
+                <span className="truncate select-all">{password}</span>
                 <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyPassword} title="複製密碼">
                   {copiedPassword ? (
-                    <Check className="h-3.5 w-3.5 text-success-text" />
+                    <Check className="text-success-text h-3.5 w-3.5" />
                   ) : (
                     <Copy className="h-3.5 w-3.5" />
                   )}
@@ -96,7 +96,7 @@ export function UserCreateSuccessDialog({ open, onOpenChange, email, password }:
             </div>
           </div>
 
-          <div className="flex items-start gap-2.5 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
+          <div className="border-warning/20 bg-warning/10 text-warning-text flex items-start gap-2.5 rounded-md border p-3 text-xs">
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               <strong>重要提示：</strong>

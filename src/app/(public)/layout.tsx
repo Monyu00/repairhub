@@ -21,18 +21,18 @@ export default async function PublicLayout({ children }: { children: ReactNode }
     : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="bg-background flex min-h-screen flex-col">
       <PublicHeader notifications={notifications} user={user} />
       <main id="main-content" tabIndex={-1} className="flex-1 scroll-mt-14">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:font-medium focus:text-foreground focus:text-sm focus:shadow-md focus:ring-2 focus:ring-ring focus:outline-hidden"
+          className="focus:bg-background focus:text-foreground focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-md focus:ring-2 focus:outline-hidden"
         >
           跳到主要內容
         </a>
         {children}
       </main>
-      <footer className="border-border border-t bg-card/50 py-6 text-center text-muted-foreground text-xs">
+      <footer className="border-border bg-card/50 text-muted-foreground border-t py-6 text-center text-xs">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p>{APP_CONFIG.copyright}</p>
         </div>

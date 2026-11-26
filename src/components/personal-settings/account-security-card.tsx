@@ -60,7 +60,7 @@ export function AccountSecurityCard({ mustChangePassword }: AccountSecurityCardP
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <KeyRound className="size-4 text-primary" />
+          <KeyRound className="text-primary size-4" />
           帳號安全
         </CardTitle>
         <CardDescription>變更密碼時需要先驗證目前密碼，其他裝置的登入狀態不受影響。</CardDescription>
@@ -71,7 +71,7 @@ export function AccountSecurityCard({ mustChangePassword }: AccountSecurityCardP
             <AlertTitle>帳號需要變更密碼</AlertTitle>
             <AlertDescription>
               此帳號必須先變更密碼，請前往{" "}
-              <Link className="font-medium underline underline-offset-4 hover:text-primary" href="/change-password">
+              <Link className="hover:text-primary font-medium underline underline-offset-4" href="/change-password">
                 變更密碼
               </Link>{" "}
               頁面完成。

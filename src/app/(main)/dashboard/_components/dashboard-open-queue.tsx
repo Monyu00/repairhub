@@ -30,7 +30,7 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
       </CardHeader>
       <CardContent className="p-0">
         {tickets.length === 0 ? (
-          <Empty className="border border-dashed bg-muted/30 py-8">
+          <Empty className="bg-muted/30 border border-dashed py-8">
             <EmptyMedia variant="icon">
               <Inbox />
             </EmptyMedia>
@@ -45,20 +45,20 @@ export function DashboardOpenQueue({ tickets }: DashboardOpenQueueProps) {
                 <Link
                   href={`/dashboard/tickets/${ticket.id}`}
                   prefetch={false}
-                  className="group flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="group border-border/60 bg-muted/20 hover:bg-muted/40 focus-visible:ring-ring/50 flex items-start justify-between gap-3 rounded-lg border p-3 transition-colors focus-visible:ring-3 focus-visible:outline-none"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <TicketStatusBadge status={ticket.status} />
-                      <span className="truncate font-medium text-foreground text-sm group-hover:text-primary">
+                      <span className="text-foreground group-hover:text-primary truncate text-sm font-medium">
                         {ticket.category.name}
                       </span>
                     </div>
-                    <p className="mt-1 line-clamp-1 text-muted-foreground text-xs">
+                    <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
                       {formatTicketLocation(ticket)} · {ticket.description}
                     </p>
                   </div>
-                  <time dateTime={ticket.createdAt} className="shrink-0 font-mono text-muted-foreground text-xs">
+                  <time dateTime={ticket.createdAt} className="text-muted-foreground shrink-0 font-mono text-xs">
                     {formatShortDateTime(ticket.createdAt)}
                   </time>
                 </Link>

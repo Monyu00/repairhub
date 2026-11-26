@@ -107,7 +107,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-primary" />
+              <UserPlus className="text-primary h-5 w-5" />
               新增系統使用者
             </DialogTitle>
             <DialogDescription>直接建立使用者帳號與個人檔案。建立完成後將顯示帳號密碼供您複製分享。</DialogDescription>
@@ -138,7 +138,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-primary text-xs hover:text-primary/80"
+                  className="text-primary hover:text-primary/80 h-7 text-xs"
                   onClick={handleGeneratePassword}
                   disabled={isPending}
                 >
@@ -161,7 +161,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
                 >
@@ -230,7 +230,7 @@ export function UserCreateDialog({ open, onOpenChange, onCreated }: UserCreateDi
             </div>
 
             {error && (
-              <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+              <div role="alert" className="bg-destructive/10 text-destructive rounded-md p-3 text-xs font-medium">
                 {error}
               </div>
             )}

@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { flexRender, type SortingState, useTable } from "@tanstack/react-table";
+import { flexRender, useTable } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronLeftIcon, ChevronRightIcon, ClipboardX, ListFilter, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { getTicketColumns, ticketTableFeatures } from "./ticket-columns";
 import { TicketFilterBar } from "./ticket-filter-bar";
 import { TicketMobileCard } from "./ticket-mobile-card";
 import type { FilterOptions, TicketRow } from "./ticket-types";
-import { parseTicketSortParam, toggleTicketSortParam } from "./ticket-url-state";
+import { toggleTicketSortParam } from "./ticket-url-state";
 
 interface TicketsDataTableProps {
   tickets: TicketRow[];
@@ -92,9 +92,9 @@ export function TicketsDataTable({
 
       {/* Main Content Area */}
       {tickets.length === 0 ? (
-        <Empty className="my-8 border border-dashed bg-card/40 py-12">
+        <Empty className="bg-card/40 my-8 border border-dashed py-12">
           <EmptyMedia variant="icon">
-            <ClipboardX className="size-6 text-muted-foreground" />
+            <ClipboardX className="text-muted-foreground size-6" />
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>目前無符合條件的報修單</EmptyTitle>
@@ -106,21 +106,21 @@ export function TicketsDataTable({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden overflow-hidden rounded-xl border bg-card/70 shadow-2xs backdrop-blur-xs md:block">
+          <div className="bg-card/70 hidden overflow-hidden rounded-xl border shadow-2xs backdrop-blur-xs md:block">
             <Table>
               <TableHeader className="bg-muted/40">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="h-10 font-semibold text-xs">
+                      <TableHead key={header.id} className="h-10 text-xs font-semibold">
                         {header.isPlaceholder ? null : header.column.id === "createdAt" ? (
                           <Link
                             href={createSortUrl(toggleTicketSortParam(currentSort))}
                             aria-label="切換通報時間排序"
-                            className="text-foreground hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                            className="text-foreground focus-visible:ring-ring hover:underline hover:underline-offset-4 focus-visible:ring-2"
                           >
                             通報時間
-                            <ArrowUpDown className="size-3 inline ml-0.5" />
+                            <ArrowUpDown className="ml-0.5 inline size-3" />
                           </Link>
                         ) : (
                           flexRender(header.column.columnDef.header, header.getContext())
@@ -132,7 +132,7 @@ export function TicketsDataTable({
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="relative cursor-pointer transition-colors hover:bg-muted/60">
+                  <TableRow key={row.id} className="hover:bg-muted/60 relative cursor-pointer transition-colors">
                     {row.getVisibleCells().map((cell, cellIndex) => (
                       <TableCell key={cell.id} className="py-3 text-xs">
                         {cellIndex === 0 && (
@@ -167,9 +167,9 @@ export function TicketsDataTable({
           {/* Pagination & Count Info */}
           <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
             <div className="text-muted-foreground text-xs">
-              顯示第 <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> 到{" "}
-              <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, totalCount)}</span> 筆，共{" "}
-              <span className="font-medium text-foreground">{totalCount}</span> 筆報修單
+              顯示第 <span className="text-foreground font-medium">{(currentPage - 1) * pageSize + 1}</span> 到{" "}
+              <span className="text-foreground font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> 筆，共{" "}
+              <span className="text-foreground font-medium">{totalCount}</span> 筆報修單
             </div>
 
             {totalPages > 1 && (
@@ -197,7 +197,7 @@ export function TicketsDataTable({
                       )}
                     </Button>
                   </PaginationItem>
-                  <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
+                  <PaginationItem className="text-muted-foreground px-3 text-xs font-medium">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>
@@ -243,7 +243,7 @@ export function TicketsDataTable({
           <span>全校報修單據</span>
         </TabsTrigger>
         <TabsTrigger value="pending" className="gap-1.5 px-3 text-xs">
-          <Zap className="size-3.5 fill-warning/20 text-warning" />
+          <Zap className="fill-warning/20 text-warning size-3.5" />
           <span>待處理接單 (即時)</span>
         </TabsTrigger>
       </TabsList>

@@ -285,12 +285,12 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <ArrowUpDown className="ml-1 h-3.5 w-3.5 text-muted-foreground/60" />;
+      return <ArrowUpDown className="text-muted-foreground/60 ml-1 h-3.5 w-3.5" />;
     }
     return sortDirection === "asc" ? (
-      <ArrowUp className="ml-1 h-3.5 w-3.5 text-foreground" />
+      <ArrowUp className="text-foreground ml-1 h-3.5 w-3.5" />
     ) : (
-      <ArrowDown className="ml-1 h-3.5 w-3.5 text-foreground" />
+      <ArrowDown className="text-foreground ml-1 h-3.5 w-3.5" />
     );
   };
 
@@ -420,44 +420,44 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">帳號總數</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-muted-foreground text-sm font-medium">帳號總數</CardTitle>
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">{stats.total}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-muted-foreground text-xs">已註冊使用者的帳號總和</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">系統管理者</CardTitle>
-            <ShieldCheck aria-hidden="true" className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-muted-foreground text-sm font-medium">系統管理者</CardTitle>
+            <ShieldCheck aria-hidden="true" className="text-destructive h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-destructive">{stats.adminCount}</div>
+            <div className="text-destructive text-2xl font-bold">{stats.adminCount}</div>
             <p className="text-muted-foreground text-xs">擁有完整設定與派單權限</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">維修技師</CardTitle>
-            <Wrench aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-muted-foreground text-sm font-medium">維修技師</CardTitle>
+            <Wrench aria-hidden="true" className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-muted-foreground ">{stats.techCount}</div>
+            <div className="text-muted-foreground text-2xl font-bold">{stats.techCount}</div>
             <p className="text-muted-foreground text-xs">可被指派工單並進行維修簽核</p>
           </CardContent>
         </Card>
 
         <Card className="shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="font-medium text-muted-foreground text-sm">一般使用者</CardTitle>
-            <UserCheck aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-muted-foreground text-sm font-medium">一般使用者</CardTitle>
+            <UserCheck aria-hidden="true" className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl text-foreground">{stats.userCount}</div>
+            <div className="text-foreground text-2xl font-bold">{stats.userCount}</div>
             <p className="text-muted-foreground text-xs">可進行問題通報與進度查詢</p>
           </CardContent>
         </Card>
@@ -467,7 +467,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
       <Card className="shadow-xs">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="font-semibold text-lg">使用者與權限管理</CardTitle>
+            <CardTitle className="text-lg font-semibold">使用者與權限管理</CardTitle>
             <CardDescription className="text-sm">
               管理系統帳號、指派權限角色、設定技師負責類別與帳號啟用狀態。
             </CardDescription>
@@ -489,7 +489,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
           {/* Filters Bar: 搜尋框 + 狀態篩選 + 角色篩選 對齊設計 */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
               <Input
                 placeholder="搜尋姓名、Email、部門或電話..."
                 aria-label="搜尋姓名、Email、部門或電話"
@@ -547,7 +547,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="h-9 px-2.5 text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground h-9 px-2.5"
                   title="重設篩選條件"
                 >
                   <RotateCcw className="mr-1 h-3.5 w-3.5" />
@@ -559,7 +559,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
           {/* Batch Selection Action Bar (when items are selected) */}
           {selectedIds.size > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-2 text-sm">
+            <div className="border-primary/20 bg-primary/5 flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3.5 py-2 text-sm">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">已選取 {selectedIds.size} 位使用者</Badge>
                 <span className="text-muted-foreground text-xs">（跨頁選取）</span>
@@ -569,7 +569,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs text-success-text hover:bg-success/10 dark:hover:bg-success/15"
+                  className="text-success-text hover:bg-success/10 dark:hover:bg-success/15 h-8 text-xs"
                   onClick={() => handleBatchToggleClick(true)}
                 >
                   <Power className="mr-1.5 h-3.5 w-3.5" />
@@ -589,7 +589,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-muted-foreground text-xs hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground h-8 text-xs"
                   onClick={handleClearSelection}
                 >
                   <X className="mr-1 h-3.5 w-3.5" />
@@ -614,7 +614,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   <TableHead aria-sort={getAriaSort("name")}>
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      className="text-foreground hover:text-primary inline-flex cursor-pointer items-center font-medium transition-colors"
                       onClick={() => handleSort("name")}
                     >
                       使用者姓名 / Email
@@ -624,7 +624,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   <TableHead aria-sort={getAriaSort("status")}>
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      className="text-foreground hover:text-primary inline-flex cursor-pointer items-center font-medium transition-colors"
                       onClick={() => handleSort("status")}
                     >
                       狀態
@@ -634,7 +634,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   <TableHead aria-sort={getAriaSort("role")}>
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      className="text-foreground hover:text-primary inline-flex cursor-pointer items-center font-medium transition-colors"
                       onClick={() => handleSort("role")}
                     >
                       權限角色
@@ -645,7 +645,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   <TableHead className="hidden md:table-cell" aria-sort={getAriaSort("createdAt")}>
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      className="text-foreground hover:text-primary inline-flex cursor-pointer items-center font-medium transition-colors"
                       onClick={() => handleSort("createdAt")}
                     >
                       建立日期
@@ -655,7 +655,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                   <TableHead className="hidden sm:table-cell" aria-sort={getAriaSort("lastSignInAt")}>
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center font-medium text-foreground transition-colors hover:text-primary"
+                      className="text-foreground hover:text-primary inline-flex cursor-pointer items-center font-medium transition-colors"
                       onClick={() => handleSort("lastSignInAt")}
                     >
                       最後登入
@@ -668,7 +668,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
               <TableBody>
                 {paginatedUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="text-muted-foreground h-32 text-center">
                       {searchQuery || roleFilter !== "all" || statusFilter !== "active"
                         ? "找不到符合篩選條件的使用者"
                         : "目前系統中無使用者資料"}
@@ -699,20 +699,20 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                         <TableCell>
                           <button
                             type="button"
-                            className="group flex cursor-pointer flex-col rounded-xs text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            className="group focus-visible:ring-ring flex cursor-pointer flex-col rounded-xs text-left focus:outline-none focus-visible:ring-1"
                             onClick={() => handleViewProfile(user)}
                           >
                             <div className="flex items-center gap-1.5">
-                              <span className="font-medium text-foreground transition-colors group-hover:text-primary">
+                              <span className="text-foreground group-hover:text-primary font-medium transition-colors">
                                 {user.displayName ?? "（未設定姓名）"}
                               </span>
                               {user.department && (
-                                <span className="rounded bg-muted px-1.5 py-0.2 text-muted-foreground text-xs">
+                                <span className="bg-muted py-0.2 text-muted-foreground rounded px-1.5 text-xs">
                                   {user.department}
                                 </span>
                               )}
                             </div>
-                            <span className="font-mono text-muted-foreground text-xs">{user.email}</span>
+                            <span className="text-muted-foreground font-mono text-xs">{user.email}</span>
                           </button>
                         </TableCell>
                         <TableCell>
@@ -728,7 +728,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                         <TableCell className="hidden lg:table-cell">
                           {!isTech && <span className="text-muted-foreground text-xs">—</span>}
                           {isTech && subscribedCategories.length === 0 && (
-                            <span className="text-warning-text text-xs italic ">未設定類別</span>
+                            <span className="text-warning-text text-xs italic">未設定類別</span>
                           )}
                           {isTech && subscribedCategories.length > 0 && (
                             <div className="flex max-w-[240px] flex-wrap gap-1">
@@ -741,13 +741,13 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                           )}
                         </TableCell>
                         <TableCell
-                          className="hidden text-muted-foreground text-xs md:table-cell"
+                          className="text-muted-foreground hidden text-xs md:table-cell"
                           suppressHydrationWarning
                         >
                           {user.createdAt ? formatTicketDate(user.createdAt) : "未曾登入"}
                         </TableCell>
                         <TableCell
-                          className="hidden text-muted-foreground text-xs sm:table-cell"
+                          className="text-muted-foreground hidden text-xs sm:table-cell"
                           suppressHydrationWarning
                         >
                           {user.lastSignInAt ? formatTicketDate(user.lastSignInAt) : "未曾登入"}
@@ -763,21 +763,21 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem onClick={() => handleViewProfile(user)}>
-                                <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+                                <Eye className="text-muted-foreground mr-2 h-4 w-4" />
                                 查看詳細檔案
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleEditClick(user)}>
-                                <Edit2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                                <Edit2 className="text-muted-foreground mr-2 h-4 w-4" />
                                 編輯基本資料
                               </DropdownMenuItem>
                               {isTech && (
                                 <DropdownMenuItem onClick={() => handleCategoryClick(user)}>
-                                  <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  <Tag className="text-muted-foreground mr-2 h-4 w-4" />
                                   設定負責類別
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={() => handleResetPasswordClick(user)}>
-                                <KeyRound className="mr-2 h-4 w-4 text-muted-foreground" />
+                                <KeyRound className="text-muted-foreground mr-2 h-4 w-4" />
                                 重設登入密碼
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -786,7 +786,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
                                 className={
                                   user.isActive
                                     ? "text-destructive focus:text-destructive"
-                                    : "text-success-text focus:text-success-text "
+                                    : "text-success-text focus:text-success-text"
                                 }
                               >
                                 {user.isActive ? (
@@ -814,7 +814,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
 
           {/* Bottom Pagination & Page Size Toolbar */}
           <div className="flex flex-col items-center justify-between gap-4 py-2 sm:flex-row">
-            <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
               <span>
                 顯示第 <strong className="text-foreground">{filteredUsers.length === 0 ? 0 : startIndex + 1}</strong> 至{" "}
                 <strong className="text-foreground">{Math.min(startIndex + pageSize, filteredUsers.length)}</strong>{" "}
@@ -870,7 +870,7 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
               </Button>
 
               <div className="flex items-center px-2 text-xs">
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   第 {safeCurrentPage} / {totalPages} 頁
                 </span>
               </div>
@@ -983,12 +983,12 @@ export function UserManagement({ initialUsers, categories, initialTechnicianCate
             <AlertDialogDescription>
               {confirmToggleUser?.isActive ? (
                 <>
-                  您即將停用帳號 <strong className="font-mono text-foreground">{confirmToggleUser?.email}</strong>
+                  您即將停用帳號 <strong className="text-foreground font-mono">{confirmToggleUser?.email}</strong>
                   。停用後該使用者將無法登入系統，但既有報修單與歷史紀錄將予以完整保留。
                 </>
               ) : (
                 <>
-                  您即將重新啟用帳號 <strong className="font-mono text-foreground">{confirmToggleUser?.email}</strong>
+                  您即將重新啟用帳號 <strong className="text-foreground font-mono">{confirmToggleUser?.email}</strong>
                   。啟用後該使用者將可立即恢復登入並存取系統功能。
                 </>
               )}

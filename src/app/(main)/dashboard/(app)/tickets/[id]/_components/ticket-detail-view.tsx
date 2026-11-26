@@ -37,7 +37,7 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
       {/* Top Header & Actions */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="-ml-2 h-8 gap-1 text-muted-foreground text-xs">
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground -ml-2 h-8 gap-1 text-xs">
             <Link href={returnTo}>
               <ArrowLeft className="size-3.5" />
               返回單據列表
@@ -45,12 +45,12 @@ export function TicketDetailView({ detail, userId, userRole, returnTo = "/dashbo
           </Button>
         </div>
 
-        <div className="flex flex-col gap-3 border-border border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-border flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="flex items-center gap-2 font-bold text-2xl text-foreground tracking-tight">
+              <h1 className="text-foreground flex items-center gap-2 text-2xl font-bold tracking-tight">
                 <span>報修單詳情</span>
-                <span className="font-mono font-normal text-base text-muted-foreground">#{ticket.id.slice(0, 8)}</span>
+                <span className="text-muted-foreground font-mono text-base font-normal">#{ticket.id.slice(0, 8)}</span>
               </h1>
               <TicketStatusBadge status={ticket.status} />
             </div>

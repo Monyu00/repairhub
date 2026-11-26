@@ -29,11 +29,11 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-4">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
-            <Star className="h-4 w-4 fill-primary" />
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
+            <Star className="fill-primary h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">完工評分與滿意度分析</CardTitle>
+            <CardTitle className="text-base font-semibold">完工評分與滿意度分析</CardTitle>
             <CardDescription className="text-xs">
               通報人於結案時主動提供之 1-5 星滿意度統計、評分分佈與技師滿意度表現
             </CardDescription>
@@ -45,13 +45,13 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
         {/* KPI Row */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {/* Average Rating */}
-          <div className="flex flex-col justify-between rounded-xl border border-border/60 bg-muted/20 p-4">
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
+          <div className="border-border/60 bg-muted/20 flex flex-col justify-between rounded-xl border p-4">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <span>整體平均滿意度</span>
-              <Star className="size-4 fill-primary text-primary" />
+              <Star className="fill-primary text-primary size-4" />
             </div>
             <div className="my-2 flex items-baseline gap-2">
-              <span className="font-bold text-3xl text-foreground tabular-nums tracking-tight">
+              <span className="text-foreground text-3xl font-bold tracking-tight tabular-nums">
                 {avgRating > 0 ? avgRating.toFixed(1) : "—"}
               </span>
               <span className="text-muted-foreground text-xs">/ 5.0</span>
@@ -64,22 +64,22 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                     "size-3.5",
                     s <= Math.round(avgRating)
                       ? "fill-primary text-primary"
-                      : "fill-transparent text-muted-foreground/30",
+                      : "text-muted-foreground/30 fill-transparent",
                   )}
                 />
               ))}
-              <span className="ml-1.5 text-muted-foreground text-xs">（共 {totalRated} 筆評價）</span>
+              <span className="text-muted-foreground ml-1.5 text-xs">（共 {totalRated} 筆評價）</span>
             </div>
           </div>
 
           {/* Response Rate */}
-          <div className="flex flex-col justify-between rounded-xl border border-border/60 bg-muted/20 p-4">
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
+          <div className="border-border/60 bg-muted/20 flex flex-col justify-between rounded-xl border p-4">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <span>評分回應率</span>
-              <TrendingUp className="size-4 text-primary" />
+              <TrendingUp className="text-primary size-4" />
             </div>
             <div className="my-2 flex items-baseline gap-2">
-              <span className="font-bold text-3xl text-foreground tabular-nums tracking-tight">{responseRate}%</span>
+              <span className="text-foreground text-3xl font-bold tracking-tight tabular-nums">{responseRate}%</span>
             </div>
             <p className="text-muted-foreground text-xs">
               已結案 {totalClosed} 件中，{totalRated} 件通報人完成評分
@@ -87,19 +87,19 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
           </div>
 
           {/* Top Technician highlight */}
-          <div className="flex flex-col justify-between rounded-xl border border-border/60 bg-muted/20 p-4">
-            <div className="flex items-center justify-between text-muted-foreground text-xs">
+          <div className="border-border/60 bg-muted/20 flex flex-col justify-between rounded-xl border p-4">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <span>最佳滿意度技師</span>
-              <Award className="size-4 text-primary" />
+              <Award className="text-primary size-4" />
             </div>
             <div className="my-2">
               {technicianRankings.length > 0 && technicianRankings[0].ratedCount > 0 ? (
                 <>
-                  <div className="truncate font-bold text-foreground text-lg">{technicianRankings[0].displayName}</div>
-                  <div className="flex items-center gap-1.5 font-medium text-foreground text-xs">
-                    <Star className="size-3.5 fill-primary text-primary" />
+                  <div className="text-foreground truncate text-lg font-bold">{technicianRankings[0].displayName}</div>
+                  <div className="text-foreground flex items-center gap-1.5 text-xs font-medium">
+                    <Star className="fill-primary text-primary size-3.5" />
                     <span>{technicianRankings[0].avgRating.toFixed(1)} 分</span>
-                    <span className="font-normal text-muted-foreground">
+                    <span className="text-muted-foreground font-normal">
                       （{technicianRankings[0].ratedCount} 筆評分）
                     </span>
                   </div>
@@ -124,10 +124,10 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Rating Distribution */}
-            <div className="space-y-3 rounded-xl border border-border/60 bg-card p-4">
-              <div className="flex items-center justify-between border-border/40 border-b pb-2">
-                <span className="flex items-center gap-1.5 font-semibold text-foreground text-xs">
-                  <BarChart2 className="size-3.5 text-primary" />
+            <div className="border-border/60 bg-card space-y-3 rounded-xl border p-4">
+              <div className="border-border/40 flex items-center justify-between border-b pb-2">
+                <span className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
+                  <BarChart2 className="text-primary size-3.5" />
                   星等評價分佈
                 </span>
                 <span className="text-muted-foreground text-xs">共 {totalRated} 筆有效評分</span>
@@ -136,19 +136,19 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
               <div className="space-y-2.5 pt-1">
                 {distribution.map((d) => (
                   <div key={d.star} className="flex items-center gap-3 text-xs">
-                    <div className="flex w-14 shrink-0 items-center gap-1 font-medium text-foreground">
+                    <div className="text-foreground flex w-14 shrink-0 items-center gap-1 font-medium">
                       <span>{d.star} 星</span>
-                      <Star className="size-3 fill-primary text-primary" />
+                      <Star className="fill-primary text-primary size-3" />
                     </div>
                     <div className="flex-1">
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                         <div
-                          className="h-full rounded-full bg-primary transition-width duration-300"
+                          className="bg-primary transition-width h-full rounded-full duration-300"
                           style={{ width: `${d.percentage}%` }}
                         />
                       </div>
                     </div>
-                    <div className="w-16 shrink-0 text-right text-muted-foreground text-xs tabular-nums">
+                    <div className="text-muted-foreground w-16 shrink-0 text-right text-xs tabular-nums">
                       {d.count} 件 ({d.percentage}%)
                     </div>
                   </div>
@@ -157,17 +157,17 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
             </div>
 
             {/* Monthly Trend Chart */}
-            <div className="space-y-3 rounded-xl border border-border/60 bg-card p-4">
-              <div className="flex items-center justify-between border-border/40 border-b pb-2">
-                <span className="flex items-center gap-1.5 font-semibold text-foreground text-xs">
-                  <TrendingUp className="size-3.5 text-primary" />
+            <div className="border-border/60 bg-card space-y-3 rounded-xl border p-4">
+              <div className="border-border/40 flex items-center justify-between border-b pb-2">
+                <span className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
+                  <TrendingUp className="text-primary size-3.5" />
                   各月份滿意度趨勢
                 </span>
                 <span className="text-muted-foreground text-xs">平均分數走勢</span>
               </div>
 
               {monthlyTrends.length === 0 ? (
-                <div className="flex h-36 items-center justify-center text-muted-foreground text-xs">
+                <div className="text-muted-foreground flex h-36 items-center justify-center text-xs">
                   尚無足夠月份趨勢資料
                 </div>
               ) : (
@@ -208,10 +208,10 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
 
         {/* Technician Rankings Table */}
         {technicianRankings.length > 0 && (
-          <div className="space-y-3 rounded-xl border border-border/60 bg-card p-4">
-            <div className="flex items-center justify-between border-border/40 border-b pb-2">
-              <span className="flex items-center gap-1.5 font-semibold text-foreground text-xs">
-                <Users className="size-3.5 text-primary" />
+          <div className="border-border/60 bg-card space-y-3 rounded-xl border p-4">
+            <div className="border-border/40 flex items-center justify-between border-b pb-2">
+              <span className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
+                <Users className="text-primary size-3.5" />
                 維修工程人員滿意度排行榜
               </span>
               <span className="text-muted-foreground text-xs">依滿意度與評分量綜合排行</span>
@@ -233,17 +233,17 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                     <div className="flex items-center gap-2.5">
                       <div
                         className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-full font-bold text-xs",
+                          "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
                           index < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                         )}
                       >
                         {index + 1}
                       </div>
                       <div className="space-y-0.5">
-                        <span className="block max-w-[120px] truncate font-semibold text-foreground">
+                        <span className="text-foreground block max-w-[120px] truncate font-semibold">
                           {tech.displayName}
                         </span>
-                        <span className="block text-foreground/80 text-xs">
+                        <span className="text-foreground/80 block text-xs">
                           總完工: {tech.completedCount} 件 | 已評: {tech.ratedCount} 筆
                         </span>
                       </div>
@@ -252,8 +252,8 @@ export function SatisfactionAnalyticsCard({ data }: SatisfactionAnalyticsCardPro
                     <div className="shrink-0 text-right">
                       {tech.ratedCount > 0 ? (
                         <div className="flex items-center gap-1">
-                          <Star className="size-3.5 fill-primary text-primary" />
-                          <span className="font-bold text-foreground text-sm tabular-nums">
+                          <Star className="fill-primary text-primary size-3.5" />
+                          <span className="text-foreground text-sm font-bold tabular-nums">
                             {tech.avgRating.toFixed(1)}
                           </span>
                         </div>

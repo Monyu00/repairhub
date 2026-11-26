@@ -33,19 +33,19 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
   };
 
   return (
-    <Card className="group relative cursor-pointer shadow-2xs transition-colors hover:border-primary/40 focus-within:border-primary/40">
+    <Card className="group hover:border-primary/40 focus-within:border-primary/40 relative cursor-pointer shadow-2xs transition-colors">
       <Link
         href={`/dashboard/tickets/${ticket.id}`}
         aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
-        className="absolute inset-0 z-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        className="focus-visible:ring-ring absolute inset-0 z-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-inset"
       />
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
-            <span className="font-mono font-semibold text-muted-foreground text-xs transition-colors group-hover:text-primary">
+            <span className="text-muted-foreground group-hover:text-primary font-mono text-xs font-semibold transition-colors">
               #{ticket.id.slice(0, 8)}
             </span>
-            <span className="block font-medium text-foreground text-xs">{ticket.category.name}</span>
+            <span className="text-foreground block text-xs font-medium">{ticket.category.name}</span>
           </div>
 
           <div className="relative z-10 flex shrink-0 items-center gap-2">
@@ -64,15 +64,15 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
         </div>
 
         <div className="space-y-1 text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-foreground">
-            <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
+          <div className="text-foreground flex items-center gap-1.5 font-medium">
+            <MapPin className="text-muted-foreground size-3.5 shrink-0" />
             <span>{formatTicketLocation(ticket, { includeFloor: true })}</span>
           </div>
 
-          <p className="line-clamp-2 pl-5 text-muted-foreground leading-relaxed">{ticket.description}</p>
+          <p className="text-muted-foreground line-clamp-2 pl-5 leading-relaxed">{ticket.description}</p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-border/40 border-t pt-2 text-muted-foreground text-xs">
+        <div className="border-border/40 text-muted-foreground flex flex-wrap items-center justify-between gap-2 border-t pt-2 text-xs">
           <div className="flex items-center gap-1">
             <Calendar className="size-3 shrink-0" />
             <span>{formattedDate}</span>
@@ -81,7 +81,7 @@ export function PendingTicketCard({ ticket, canViewReporter, onClaim }: PendingT
           {canViewReporter ? (
             <div className="flex flex-wrap items-center gap-2">
               {ticket.reporterName && (
-                <span className="flex items-center gap-1 font-medium text-foreground">
+                <span className="text-foreground flex items-center gap-1 font-medium">
                   <User className="size-3" />
                   <span className="max-w-[100px] truncate">{ticket.reporterName}</span>
                 </span>

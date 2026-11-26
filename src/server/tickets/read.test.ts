@@ -1,5 +1,3 @@
-import type { Database } from "@/lib/supabase/database.types";
-
 import {
   getMyTickets,
   getPublicTickets,

@@ -145,7 +145,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
       {/* Header & Action Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
             {targetType === "spaces" ? "空間 QR Code 產生" : "設備 QR Code 產生"}
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -193,7 +193,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
             <Card className="flex h-full min-h-[480px] items-center justify-center border-dashed p-8">
               <Empty>
                 <EmptyMedia>
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                  <div className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-xl">
                     <QrCode className="size-6" />
                   </div>
                 </EmptyMedia>
@@ -214,7 +214,7 @@ export function QRCodeDashboard({ buildings, equipment, defaultTab }: QRCodeDash
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h2 className="font-semibold text-foreground text-sm">預覽輸出卡片</h2>
+                  <h2 className="text-foreground text-sm font-semibold">預覽輸出卡片</h2>
                   <Badge variant="secondary" className="font-mono">
                     已選 {printableItems.length} 張{hiddenPreviewCount > 0 ? `、僅預覽前 ${QR_PREVIEW_LIMIT} 張` : ""}
                   </Badge>

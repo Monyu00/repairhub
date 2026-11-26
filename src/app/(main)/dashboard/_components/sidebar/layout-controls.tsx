@@ -77,12 +77,12 @@ export function LayoutControls() {
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="font-medium text-sm leading-none">偏好設定</h4>
+            <h4 className="text-sm leading-none font-medium">偏好設定</h4>
             <p className="text-muted-foreground text-xs">自訂您的後台版面配置。</p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
-              <Label className="font-medium text-xs">主題預設</Label>
+              <Label className="text-xs font-medium">主題預設</Label>
               <Select value={themePreset} onValueChange={onThemePresetChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
                   <SelectValue placeholder="選擇主題" />
@@ -106,7 +106,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">字型</Label>
+              <Label className="text-xs font-medium">字型</Label>
               <Select value={font} onValueChange={onFontChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
                   <SelectValue placeholder="選擇字型" />
@@ -124,7 +124,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">主題模式</Label>
+              <Label className="text-xs font-medium">主題模式</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -146,7 +146,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">頁面版面</Label>
+              <Label className="text-xs font-medium">頁面版面</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -165,7 +165,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">導覽列行為</Label>
+              <Label className="text-xs font-medium">導覽列行為</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -184,7 +184,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">側邊欄樣式</Label>
+              <Label className="text-xs font-medium">側邊欄樣式</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}
@@ -206,7 +206,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">側邊欄收合模式</Label>
+              <Label className="text-xs font-medium">側邊欄收合模式</Label>
               <ToggleGroup
                 size="sm"
                 spacing={0}

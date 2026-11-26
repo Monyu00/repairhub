@@ -105,7 +105,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 border-warning/30 text-warning-text text-xs hover:bg-warning/10 "
+          className="border-warning/30 text-warning-text hover:bg-warning/10 gap-1.5 text-xs"
           onClick={() => setReturnOpen(true)}
         >
           <RotateCcw className="size-3.5" />
@@ -118,7 +118,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
         <Button
           variant="destructive"
           size="sm"
-          className="gap-1.5 bg-destructive! text-destructive-foreground! text-xs shadow-xs hover:bg-destructive/90!"
+          className="bg-destructive! text-destructive-foreground! hover:bg-destructive/90! gap-1.5 text-xs shadow-xs"
           onClick={() => setCancelOpen(true)}
         >
           <Ban className="size-3.5" />
@@ -131,7 +131,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
         <DialogContent className="sm:max-w-md">
           <form onSubmit={handleCancelSubmit}>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-destructive">
+              <DialogTitle className="text-destructive flex items-center gap-2">
                 <Ban className="size-5" />
                 取消報修單據
               </DialogTitle>
@@ -174,7 +174,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
       <AlertDialog open={returnOpen} onOpenChange={setReturnOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-warning-text ">
+            <AlertDialogTitle className="text-warning-text flex items-center gap-2">
               <AlertTriangle className="size-5" />
               確認將單據退回待處理？
             </AlertDialogTitle>
@@ -190,7 +190,7 @@ export function AdminActions({ ticketId, capabilities }: AdminActionsProps) {
                 void handleReturnToPending();
               }}
               disabled={isReturning}
-              className="gap-1.5 bg-warning text-warning-foreground hover:bg-warning/80"
+              className="bg-warning text-warning-foreground hover:bg-warning/80 gap-1.5"
             >
               {isReturning && <Loader2 className="size-3.5 animate-spin" />}
               <span>確認退回</span>

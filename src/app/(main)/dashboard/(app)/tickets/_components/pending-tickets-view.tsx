@@ -134,18 +134,18 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
-        <Loader2 className="size-6 animate-spin text-primary" />
-        <span className="font-medium text-sm">載入待處理案件中...</span>
+      <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-16">
+        <Loader2 className="text-primary size-6 animate-spin" />
+        <span className="text-sm font-medium">載入待處理案件中...</span>
       </div>
     );
   }
 
   if (subscribedCategoryIds.length === 0) {
     return (
-      <Empty className="my-8 border border-dashed bg-card/40 py-12">
+      <Empty className="bg-card/40 my-8 border border-dashed py-12">
         <EmptyMedia variant="icon">
-          <ClipboardCheck className="size-6 text-muted-foreground" />
+          <ClipboardCheck className="text-muted-foreground size-6" />
         </EmptyMedia>
         <EmptyHeader>
           <EmptyTitle>未訂閱任何報修類別</EmptyTitle>
@@ -159,9 +159,9 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   if (tickets.length === 0) {
     return (
-      <Empty className="my-8 border border-dashed bg-card/40 py-12">
+      <Empty className="bg-card/40 my-8 border border-dashed py-12">
         <EmptyMedia variant="icon">
-          <ClipboardCheck className="size-6 text-muted-foreground" />
+          <ClipboardCheck className="text-muted-foreground size-6" />
         </EmptyMedia>
         <EmptyHeader>
           <EmptyTitle>目前無待處理案件</EmptyTitle>
@@ -173,9 +173,9 @@ export function PendingTicketsView({ userId, canViewReporter }: PendingTicketsVi
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between px-1 text-muted-foreground text-xs">
+      <div className="text-muted-foreground flex items-center justify-between px-1 text-xs">
         <span>
-          共 <strong className="font-semibold text-foreground">{tickets.length}</strong> 筆待處理案件 (即時連線中)
+          共 <strong className="text-foreground font-semibold">{tickets.length}</strong> 筆待處理案件 (即時連線中)
         </span>
       </div>
       <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

@@ -62,9 +62,9 @@ export function NotificationPreferencesCard({ profile, onSaved }: NotificationPr
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {options.map((option) => (
-          <div className="flex items-start justify-between gap-4 rounded-lg border border-border p-3" key={option.key}>
+          <div className="border-border flex items-start justify-between gap-4 rounded-lg border p-3" key={option.key}>
             <div className="space-y-1">
-              <label className="font-medium text-sm" htmlFor={`pref-${option.key}`}>
+              <label className="text-sm font-medium" htmlFor={`pref-${option.key}`}>
                 {option.label}
               </label>
               <p className="text-muted-foreground text-xs" id={`pref-${option.key}-description`}>

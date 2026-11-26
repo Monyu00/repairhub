@@ -60,6 +60,7 @@ CLI 偵測器掃描了 `src/app/(main)/dashboard` 全部檔案，共回報 **65 
 | `design-system-font-size` — 字級偏離 DESIGN.md 字型階梯 | 65   | 20+ 個元件檔案 |
 
 高頻違規字級：
+
 - `text-[11px]` — 32 處
 - `text-[10px]` — 33 處
 

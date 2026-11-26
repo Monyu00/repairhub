@@ -63,7 +63,7 @@ export function DeleteAccountCard({ email, disabled = false }: DeleteAccountCard
   return (
     <Card className="border-destructive/40">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-destructive">
+        <CardTitle className="text-destructive flex items-center gap-2">
           <ShieldAlert className="size-4" />
           刪除帳號
         </CardTitle>
@@ -92,7 +92,7 @@ export function DeleteAccountCard({ email, disabled = false }: DeleteAccountCard
       >
         <DialogContent className="sm:max-w-[520px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
+            <DialogTitle className="text-destructive flex items-center gap-2">
               <ShieldAlert className="size-4" />
               刪除帳號
             </DialogTitle>
@@ -130,7 +130,7 @@ export function DeleteAccountCard({ email, disabled = false }: DeleteAccountCard
 
             <Field>
               <FieldLabel htmlFor="delete-account-confirm-email">
-                輸入你的電子郵件以確認：<span className="font-normal text-muted-foreground">{email}</span>
+                輸入你的電子郵件以確認：<span className="text-muted-foreground font-normal">{email}</span>
               </FieldLabel>
               <Input
                 id="delete-account-confirm-email"

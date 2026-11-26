@@ -21,10 +21,12 @@ Sender 是獨立的 `send-ticket-social`，同樣只接受內部 service secret�
 ## 必要 secrets
 
 在 Supabase Vault 建立下列兩個 secret，兩者都不得寫入 repo：
+
 - `repairhub_project_url`：專案 API URL，例如 `https://<project-ref>.supabase.co`
 - `repairhub_edge_function_secret`：DB 呼叫 Edge Function 的隨機內部 secret
 
 Edge Function secrets：
+
 - `REPAIRHUB_EDGE_FUNCTION_SECRET`：必須與 Vault 的 `repairhub_edge_function_secret` 完全相同
 - `RESEND_API_KEY`
 - `RESEND_FROM`

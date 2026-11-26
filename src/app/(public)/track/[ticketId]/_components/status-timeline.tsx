@@ -68,7 +68,7 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-semibold text-foreground text-sm">狀態時間軸</h2>
+      <h2 className="text-foreground text-sm font-semibold">狀態時間軸</h2>
       <div className="relative space-y-0">
         {allItems.map((item, index) => {
           const isLast = index === allItems.length - 1;
@@ -89,15 +89,15 @@ export function StatusTimeline({ createdAt, events }: StatusTimelineProps) {
                 >
                   <Icon className="size-3.5" />
                 </div>
-                {!isLast && <div className="my-1 w-px flex-1 bg-border" />}
+                {!isLast && <div className="bg-border my-1 w-px flex-1" />}
               </div>
 
               {/* Content */}
               <div className={`min-w-0 pb-4 ${isLast ? "" : ""}`}>
-                <p className={`font-medium text-sm ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-sm font-medium ${isNewest ? "text-foreground" : "text-muted-foreground"}`}>
                   {item.content}
                 </p>
-                <p className="mt-0.5 text-muted-foreground text-xs">{formatTicketDate(item.createdAt)}</p>
+                <p className="text-muted-foreground mt-0.5 text-xs">{formatTicketDate(item.createdAt)}</p>
               </div>
             </div>
           );

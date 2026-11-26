@@ -25,13 +25,13 @@ export function CompletionSummarySection({ notes, photos }: CompletionSummarySec
   return (
     <Card className="shadow-2xs">
       <CardHeader className="border-border/50 border-b pb-3">
-        <CardTitle className="flex items-center gap-2 font-semibold text-base">
-          <FileTextIcon className="size-4 text-primary" />
+        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+          <FileTextIcon className="text-primary size-4" />
           完工說明與備註
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
-        {summary && <p className="whitespace-pre-wrap text-foreground text-sm leading-relaxed">{summary}</p>}
+        {summary && <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">{summary}</p>}
         <TicketPhotosSection photos={photos} phase="closure" title="維修完工照片" />
       </CardContent>
     </Card>

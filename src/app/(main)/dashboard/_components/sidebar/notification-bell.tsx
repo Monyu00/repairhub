@@ -79,7 +79,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
             {result.unreadCount > 0 ? (
               <span
                 aria-hidden="true"
-                className="absolute -top-1 -right-1 flex size-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 font-medium text-destructive-foreground text-[10px]"
+                className="bg-destructive text-destructive-foreground absolute -top-1 -right-1 flex size-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium"
               >
                 {badge}
               </span>
@@ -100,7 +100,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
             </DropdownMenuLabel>
           ) : null}
           {result.notifications.length === 0 ? (
-            <DropdownMenuLabel className="font-normal text-muted-foreground">目前沒有通知</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-muted-foreground font-normal">目前沒有通知</DropdownMenuLabel>
           ) : (
             result.notifications.map((notification) => (
               <DropdownMenuItem
@@ -119,7 +119,7 @@ export function NotificationBell({ result }: NotificationBellProps) {
                   />
                   <span className="min-w-0 flex-1 font-medium">{NOTIFICATION_LABELS[notification.eventType]}</span>
                 </span>
-                <span className="mt-0.5 block font-mono text-muted-foreground text-xs">
+                <span className="text-muted-foreground mt-0.5 block font-mono text-xs">
                   {formatShortDateTime(notification.createdAt)}
                 </span>
               </DropdownMenuItem>

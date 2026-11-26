@@ -27,17 +27,17 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+      <div className="border-border bg-card flex flex-col gap-4 rounded-xl border p-6 shadow-xs sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold font-heading text-2xl text-foreground tracking-tight">管理後台</h1>
+            <h1 className="font-heading text-foreground text-2xl font-bold tracking-tight">管理後台</h1>
             <Badge variant="secondary" className="gap-1">
-              <ShieldCheck className="size-3.5 text-primary" />
+              <ShieldCheck className="text-primary size-3.5" />
               {roleName}
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm">
-            歡迎回來，<span className="font-medium text-foreground">{session.displayName ?? session.email}</span>
+            歡迎回來，<span className="text-foreground font-medium">{session.displayName ?? session.email}</span>
             。以下是目前修繕營運概況。
           </p>
         </div>

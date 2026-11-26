@@ -45,7 +45,7 @@ export function DeleteAnnouncementDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>確認刪除此公告？</AlertDialogTitle>
           <AlertDialogDescription>
-            您即將刪除公告「<span className="font-semibold text-foreground">{announcement?.title}</span>
+            您即將刪除公告「<span className="text-foreground font-semibold">{announcement?.title}</span>
             」。刪除後無法復原，前台與後台將立即不再顯示此內容。
           </AlertDialogDescription>
         </AlertDialogHeader>

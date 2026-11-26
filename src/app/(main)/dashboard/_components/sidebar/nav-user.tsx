@@ -46,7 +46,7 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={avatar || undefined} alt={name} />
@@ -54,7 +54,7 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{name}</span>
-                <span className="truncate text-muted-foreground text-xs">{email}</span>
+                <span className="text-muted-foreground truncate text-xs">{email}</span>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -72,12 +72,12 @@ export function NavUser() {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{name}</span>
-                  <span className="truncate text-muted-foreground text-xs">{email}</span>
+                  <span className="text-muted-foreground truncate text-xs">{email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <div className="flex items-center gap-1.5 px-2 py-1.5 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex items-center gap-1.5 px-2 py-1.5 text-xs">
               <Shield className="size-3.5" />
               <span>身分：{roleLabel}</span>
             </div>
@@ -93,7 +93,7 @@ export function NavUser() {
                   await signOutAction();
                 });
               }}
-              className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
             >
               <LogOut className="mr-2 size-4" />
               登出

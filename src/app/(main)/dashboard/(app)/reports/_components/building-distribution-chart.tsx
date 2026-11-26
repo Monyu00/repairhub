@@ -26,7 +26,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
     data.forEach((item, index) => {
       config[item.buildingId] = {
         label: item.buildingName,
-        color: item.fill || `var(--chart-${(index % 5) + 1})`,
+        color: item.fill ?? `var(--chart-${(index % 5) + 1})`,
       };
     });
     return config;
@@ -36,18 +36,18 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
             <Building2 className="h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">建築物工單分佈</CardTitle>
+            <CardTitle className="text-base font-semibold">建築物工單分佈</CardTitle>
             <CardDescription className="text-xs">各校區建築設施之通報數量與比率</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 pt-2 pb-4">
         {!hasData ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex h-64 items-center justify-center text-xs">
             此期間無相關工單數據
           </div>
         ) : (
@@ -62,7 +62,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                       formatter={(value, name) => (
                         <div className="flex min-w-24 items-center justify-between gap-2 text-xs">
                           <span className="text-muted-foreground">{name}</span>
-                          <span className="font-medium text-foreground">{value} 件</span>
+                          <span className="text-foreground font-medium">{value} 件</span>
                         </div>
                       )}
                     />
@@ -79,7 +79,7 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                   strokeWidth={2}
                 >
                   {data.map((entry, index) => (
-                    <Cell key={entry.buildingId} fill={entry.fill || `var(--chart-${(index % 5) + 1})`} />
+                    <Cell key={entry.buildingId} fill={entry.fill ?? `var(--chart-${(index % 5) + 1})`} />
                   ))}
                 </Pie>
               </PieChart>
@@ -92,11 +92,11 @@ export function BuildingDistributionChart({ data }: BuildingDistributionChartPro
                   <div className="flex items-center gap-2 truncate">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                      style={{ backgroundColor: item.fill || "var(--primary)" }}
+                      style={{ backgroundColor: item.fill ?? "var(--primary)" }}
                     />
-                    <span className="truncate text-muted-foreground">{item.buildingName}</span>
+                    <span className="text-muted-foreground truncate">{item.buildingName}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 font-medium text-foreground tabular-nums">
+                  <div className="text-foreground flex items-center gap-1.5 font-medium tabular-nums">
                     <span>{item.count} 件</span>
                     <span className="text-muted-foreground text-xs">({item.percentage}%)</span>
                   </div>

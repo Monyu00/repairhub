@@ -78,7 +78,7 @@ export function DashboardQuickLinks({ role }: { role: UserRole }) {
 
   return (
     <div>
-      <h2 className="mb-3 font-semibold text-foreground text-sm">快速導航</h2>
+      <h2 className="text-foreground mb-3 text-sm font-semibold">快速導航</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visibleLinks.map((item) => {
           const Icon = item.icon;
@@ -87,14 +87,14 @@ export function DashboardQuickLinks({ role }: { role: UserRole }) {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group border-border bg-card hover:border-primary/40 hover:bg-muted/40 focus-visible:ring-ring/50 flex items-center gap-3 rounded-xl border p-3 transition-colors focus-visible:ring-3 focus-visible:outline-none"
             >
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              <div className="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors">
                 <Icon className="size-4" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-foreground text-sm group-hover:text-primary">{item.title}</p>
-                <p className="truncate text-muted-foreground text-xs">{item.description}</p>
+                <p className="text-foreground group-hover:text-primary text-sm font-medium">{item.title}</p>
+                <p className="text-muted-foreground truncate text-xs">{item.description}</p>
               </div>
             </Link>
           );

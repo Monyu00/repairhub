@@ -186,21 +186,21 @@ export function ReportForm({
           variant="ghost"
           size="icon-sm"
           onClick={() => router.back()}
-          className="mt-0.5 -ml-1 shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground mt-0.5 -ml-1 shrink-0 transition-colors"
           aria-label="返回上一頁"
         >
           <ArrowLeftIcon className="size-4" />
         </Button>
         <div>
-          <h1 className="font-semibold text-foreground text-xl tracking-tight sm:text-2xl">線上設施報修系統</h1>
-          <p className="mt-1 text-muted-foreground text-sm">請填寫以下報修資訊，我們將儘速安排專業人員處理。</p>
+          <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">線上設施報修系統</h1>
+          <p className="text-muted-foreground mt-1 text-sm">請填寫以下報修資訊，我們將儘速安排專業人員處理。</p>
         </div>
       </div>
 
       <form ref={formRef} action={formAction} className="space-y-6">
         {state.error && (
-          <div className="flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-foreground text-sm">
-            <AlertCircleIcon className="size-4 shrink-0 text-destructive" />
+          <div className="border-destructive/30 bg-destructive/10 text-foreground flex items-center gap-2.5 rounded-lg border p-3.5 text-sm">
+            <AlertCircleIcon className="text-destructive size-4 shrink-0" />
             <span>{state.error}</span>
           </div>
         )}
@@ -360,8 +360,8 @@ export function ReportForm({
         </Field>
 
         {/* Reporter Contact Info */}
-        <div className="space-y-4 border-border border-t pt-4">
-          <div className="font-medium text-muted-foreground text-xs uppercase tracking-wider">通報人聯絡資訊</div>
+        <div className="border-border space-y-4 border-t pt-4">
+          <div className="text-muted-foreground text-xs font-medium tracking-wider uppercase">通報人聯絡資訊</div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field data-invalid={!!state.fieldErrors?.reporter_name}>
@@ -430,7 +430,7 @@ export function ReportForm({
         <TurnstileWidget ref={turnstileRef} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
         <input type="hidden" name="cf-turnstile-response" value={captchaToken ?? ""} />
 
-        <Button type="submit" disabled={isPending || !captchaToken} className="h-11 w-full font-medium text-base">
+        <Button type="submit" disabled={isPending || !captchaToken} className="h-11 w-full text-base font-medium">
           {isPending ? (
             <>
               <Spinner className="mr-2 size-4" />

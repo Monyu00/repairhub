@@ -61,13 +61,13 @@ export function ForgotPasswordForm() {
   if (submittedEmail) {
     return (
       <div className="space-y-4 text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-success/10 text-success-text dark:bg-success/20 ">
+        <div className="bg-success/10 text-success-text dark:bg-success/20 mx-auto flex size-12 items-center justify-center rounded-full">
           <CheckCircle2 className="size-6" />
         </div>
         <div className="space-y-1">
-          <h3 className="font-semibold text-base">重設信件已寄出</h3>
+          <h3 className="text-base font-semibold">重設信件已寄出</h3>
           <p className="text-muted-foreground text-sm">
-            我們已將密碼重設連結發送至 <span className="font-medium text-foreground">{submittedEmail}</span>
+            我們已將密碼重設連結發送至 <span className="text-foreground font-medium">{submittedEmail}</span>
             ，請前往您的信箱查看並點擊連結重設密碼。
           </p>
         </div>

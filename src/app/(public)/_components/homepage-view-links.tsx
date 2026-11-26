@@ -21,13 +21,13 @@ export function HomepageViewLinks({ activeTab, isLoggedIn, myTicketsCount }: Hom
   return (
     <nav
       aria-label="報修單檢視"
-      className="inline-flex h-12 w-full items-center rounded-lg bg-muted/70 p-0.5 sm:h-10 sm:w-fit sm:p-1"
+      className="bg-muted/70 inline-flex h-12 w-full items-center rounded-lg p-0.5 sm:h-10 sm:w-fit sm:p-1"
     >
       <Button
         asChild
         variant={activeTab === "all" ? "outline" : "ghost"}
         size="sm"
-        className="h-11 flex-1 gap-2 px-3 font-medium text-xs sm:h-8 sm:flex-none sm:px-4"
+        className="h-11 flex-1 gap-2 px-3 text-xs font-medium sm:h-8 sm:flex-none sm:px-4"
       >
         <Link href="/" aria-current={activeTab === "all" ? "page" : undefined}>
           <ClipboardList data-icon="inline-start" />
@@ -38,7 +38,7 @@ export function HomepageViewLinks({ activeTab, isLoggedIn, myTicketsCount }: Hom
         asChild
         variant={activeTab === "my-tickets" ? "outline" : "ghost"}
         size="sm"
-        className="h-11 flex-1 gap-2 px-3 font-medium text-xs sm:h-8 sm:flex-none sm:px-4"
+        className="h-11 flex-1 gap-2 px-3 text-xs font-medium sm:h-8 sm:flex-none sm:px-4"
       >
         <Link href="/?tab=my-tickets" aria-current={activeTab === "my-tickets" ? "page" : undefined}>
           <UserCheck data-icon="inline-start" />

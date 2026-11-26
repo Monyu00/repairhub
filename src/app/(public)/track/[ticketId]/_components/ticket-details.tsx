@@ -17,12 +17,12 @@ interface DetailRowProps {
 function DetailRow({ icon: Icon, label, value }: DetailRowProps) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
-        <Icon className="size-4 text-muted-foreground" />
+      <div className="bg-muted mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md">
+        <Icon className="text-muted-foreground size-4" />
       </div>
       <div className="min-w-0">
-        <p className="mb-0.5 text-muted-foreground text-xs">{label}</p>
-        <p className="break-words font-medium text-foreground text-sm">{value}</p>
+        <p className="text-muted-foreground mb-0.5 text-xs">{label}</p>
+        <p className="text-foreground text-sm font-medium break-words">{value}</p>
       </div>
     </div>
   );
@@ -33,7 +33,7 @@ export function TicketDetails({ ticket }: TicketDetailsProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="font-semibold text-foreground text-sm">報修資訊</h2>
+      <h2 className="text-foreground text-sm font-semibold">報修資訊</h2>
       <div className="space-y-3">
         <DetailRow icon={TagIcon} label="報修類別" value={category.name} />
         <Separator />

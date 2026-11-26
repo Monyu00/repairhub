@@ -49,17 +49,17 @@ export function DashboardSummaryCards({ summary, isAdmin }: DashboardSummaryCard
         return (
           <Card key={card.title} className="p-4">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-2">
-              <CardTitle className="font-medium text-muted-foreground text-sm">{card.title}</CardTitle>
-              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+              <CardTitle className="text-muted-foreground text-sm font-medium">{card.title}</CardTitle>
+              <div className="bg-primary/10 text-primary rounded-lg p-2">
                 <Icon className="size-4" aria-hidden="true" />
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
+              <div className="text-foreground text-2xl font-bold tracking-tight tabular-nums">
                 {card.value}
-                <span className="ml-1 font-normal text-muted-foreground text-xs">{card.unit}</span>
+                <span className="text-muted-foreground ml-1 text-xs font-normal">{card.unit}</span>
               </div>
-              <p className="mt-1 text-muted-foreground text-xs">{card.description}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{card.description}</p>
             </CardContent>
           </Card>
         );

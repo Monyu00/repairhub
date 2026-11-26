@@ -189,10 +189,10 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
             </div>
 
             {/* Pin switch */}
-            <div className="flex h-12 items-center justify-between rounded-md border border-input px-3">
+            <div className="border-input flex h-12 items-center justify-between rounded-md border px-3">
               <Label htmlFor="announcement-pin" className="flex-1 cursor-pointer space-y-0.5">
-                <span className="block font-medium text-sm">置頂顯示</span>
-                <span className="block font-normal text-muted-foreground text-xs">置頂公告將排在列表最前端</span>
+                <span className="block text-sm font-medium">置頂顯示</span>
+                <span className="text-muted-foreground block text-xs font-normal">置頂公告將排在列表最前端</span>
               </Label>
               <Switch id="announcement-pin" checked={isPinned} onCheckedChange={setIsPinned} disabled={isPending} />
             </div>
@@ -206,7 +206,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 text-muted-foreground text-xs hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs"
                     onClick={() => setExpiresAt("")}
                     disabled={isPending}
                   >
@@ -242,7 +242,7 @@ export function AnnouncementDialog({ open, onOpenChange, announcement, onSubmit 
             </div>
 
             {error && (
-              <p role="alert" aria-live="polite" className="font-medium text-destructive text-sm">
+              <p role="alert" aria-live="polite" className="text-destructive text-sm font-medium">
                 {error}
               </p>
             )}

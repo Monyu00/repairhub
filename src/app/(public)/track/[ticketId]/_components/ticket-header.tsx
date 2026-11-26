@@ -15,16 +15,16 @@ export function TicketHeader({ ticketId, status, createdAt }: TicketHeaderProps)
     <div className="space-y-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mb-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">工單編號</p>
-          <p className="break-all font-mono font-semibold text-foreground text-sm">{ticketId}</p>
+          <p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">工單編號</p>
+          <p className="text-foreground font-mono text-sm font-semibold break-all">{ticketId}</p>
         </div>
         <TicketStatusBadge
           status={status}
-          className="h-auto self-start px-3 py-1 font-semibold text-xs sm:self-center"
+          className="h-auto self-start px-3 py-1 text-xs font-semibold sm:self-center"
         />
       </div>
 
-      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
         <CalendarIcon className="size-3.5 shrink-0" />
         <span>提交時間：{formatTicketDate(createdAt)}</span>
       </div>

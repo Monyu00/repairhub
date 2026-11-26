@@ -38,13 +38,13 @@ export function RepairRecordTableRow({ record, isAdmin, href }: RepairRecordTabl
   const formattedDate = formatTicketDate(record.createdAt);
 
   return (
-    <TableRow className="relative cursor-pointer transition-colors hover:bg-muted/60 focus-within:bg-muted/70">
-      <TableCell className="py-3 font-medium font-mono text-xs">
+    <TableRow className="hover:bg-muted/60 focus-within:bg-muted/70 relative cursor-pointer transition-colors">
+      <TableCell className="py-3 font-mono text-xs font-medium">
         <Link href={href} className="absolute inset-0 z-0" aria-hidden="true" tabIndex={-1} />
         <Link
           href={href}
           aria-label={`查看報修單 ${record.id.slice(0, 8)}`}
-          className="relative z-10 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring relative z-10 rounded-sm outline-none focus-visible:ring-2"
         >
           #{record.id.slice(0, 8)}
         </Link>
@@ -52,18 +52,18 @@ export function RepairRecordTableRow({ record, isAdmin, href }: RepairRecordTabl
       <TableCell className="py-3">
         <TicketStatusBadge status={record.status} />
       </TableCell>
-      <TableCell className="py-3 font-medium text-xs">{record.category.name}</TableCell>
+      <TableCell className="py-3 text-xs font-medium">{record.category.name}</TableCell>
       <TableCell className="py-3 text-xs">
         <span>{formatTicketLocation(record, { includeFloor: true })}</span>
       </TableCell>
       <TableCell className="py-3 text-xs">
-        <p className="line-clamp-2 text-muted-foreground">{record.description}</p>
+        <p className="text-muted-foreground line-clamp-2">{record.description}</p>
       </TableCell>
       {isAdmin && (
         <TableCell className="py-3 text-xs">
           {record.technicianName ? (
-            <span className="inline-flex items-center gap-1 font-medium text-foreground">
-              <Wrench className="size-3 text-primary" />
+            <span className="text-foreground inline-flex items-center gap-1 font-medium">
+              <Wrench className="text-primary size-3" />
               <span>{record.technicianName}</span>
             </span>
           ) : (
@@ -74,16 +74,16 @@ export function RepairRecordTableRow({ record, isAdmin, href }: RepairRecordTabl
       <TableCell className="py-3 text-xs">
         {record.reporterName ? (
           <div className="space-y-0.5">
-            <span className="block truncate font-medium text-foreground">{record.reporterName}</span>
+            <span className="text-foreground block truncate font-medium">{record.reporterName}</span>
             {record.reporterDepartment && (
-              <span className="block truncate text-muted-foreground text-xs">{record.reporterDepartment}</span>
+              <span className="text-muted-foreground block truncate text-xs">{record.reporterDepartment}</span>
             )}
           </div>
         ) : (
           <span className="text-muted-foreground">-</span>
         )}
       </TableCell>
-      <TableCell className="whitespace-nowrap py-3 text-muted-foreground text-xs">{formattedDate}</TableCell>
+      <TableCell className="text-muted-foreground py-3 text-xs whitespace-nowrap">{formattedDate}</TableCell>
     </TableRow>
   );
 }
@@ -175,11 +175,11 @@ export function RepairRecordsContent({
   return (
     <div className="space-y-4">
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
+      <div className="bg-card/60 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 shadow-xs backdrop-blur-xs">
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Input */}
           <div className="relative w-full sm:w-56 md:w-64">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
             <Input
               type="search"
               placeholder="搜尋單號、描述、通報人..."
@@ -237,7 +237,7 @@ export function RepairRecordsContent({
               size="sm"
               onClick={handleResetFilters}
               disabled={isPending}
-              className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-11 gap-1 px-2 text-xs sm:h-8"
             >
               <FilterX className="size-3.5" />
               <span>清除篩選</span>
@@ -246,15 +246,15 @@ export function RepairRecordsContent({
         </div>
 
         <div className="text-muted-foreground text-xs">
-          共 <span className="font-semibold text-foreground">{totalCount}</span> 筆維修紀錄
+          共 <span className="text-foreground font-semibold">{totalCount}</span> 筆維修紀錄
         </div>
       </div>
 
       {/* Main Content */}
       {records.length === 0 ? (
-        <Empty className="my-8 border border-dashed bg-card/40 py-12">
+        <Empty className="bg-card/40 my-8 border border-dashed py-12">
           <EmptyMedia variant="icon">
-            <ClipboardX className="size-6 text-muted-foreground" />
+            <ClipboardX className="text-muted-foreground size-6" />
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>目前無維修紀錄</EmptyTitle>
@@ -264,18 +264,18 @@ export function RepairRecordsContent({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden overflow-hidden rounded-xl border bg-card/70 shadow-2xs backdrop-blur-xs md:block">
+          <div className="bg-card/70 hidden overflow-hidden rounded-xl border shadow-2xs backdrop-blur-xs md:block">
             <Table>
               <TableHeader className="bg-muted/40">
                 <TableRow>
-                  <TableHead className="h-10 w-[110px] font-semibold text-xs">單據編號</TableHead>
-                  <TableHead className="h-10 w-[100px] font-semibold text-xs">狀態</TableHead>
-                  <TableHead className="h-10 w-[120px] font-semibold text-xs">類別</TableHead>
-                  <TableHead className="h-10 font-semibold text-xs">地點</TableHead>
-                  <TableHead className="h-10 min-w-[200px] font-semibold text-xs">報修描述</TableHead>
-                  {isAdmin && <TableHead className="h-10 w-[130px] font-semibold text-xs">負責技師</TableHead>}
-                  <TableHead className="h-10 w-[130px] font-semibold text-xs">報修人</TableHead>
-                  <TableHead className="h-10 w-[140px] font-semibold text-xs">通報時間</TableHead>
+                  <TableHead className="h-10 w-[110px] text-xs font-semibold">單據編號</TableHead>
+                  <TableHead className="h-10 w-[100px] text-xs font-semibold">狀態</TableHead>
+                  <TableHead className="h-10 w-[120px] text-xs font-semibold">類別</TableHead>
+                  <TableHead className="h-10 text-xs font-semibold">地點</TableHead>
+                  <TableHead className="h-10 min-w-[200px] text-xs font-semibold">報修描述</TableHead>
+                  {isAdmin && <TableHead className="h-10 w-[130px] text-xs font-semibold">負責技師</TableHead>}
+                  <TableHead className="h-10 w-[130px] text-xs font-semibold">報修人</TableHead>
+                  <TableHead className="h-10 w-[140px] text-xs font-semibold">通報時間</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -306,9 +306,9 @@ export function RepairRecordsContent({
           {/* Pagination & Count */}
           <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
             <div className="text-muted-foreground text-xs">
-              顯示第 <span className="font-medium text-foreground">{(currentPage - 1) * pageSize + 1}</span> 到{" "}
-              <span className="font-medium text-foreground">{Math.min(currentPage * pageSize, totalCount)}</span> 筆，共{" "}
-              <span className="font-medium text-foreground">{totalCount}</span> 筆紀錄
+              顯示第 <span className="text-foreground font-medium">{(currentPage - 1) * pageSize + 1}</span> 到{" "}
+              <span className="text-foreground font-medium">{Math.min(currentPage * pageSize, totalCount)}</span> 筆，共{" "}
+              <span className="text-foreground font-medium">{totalCount}</span> 筆紀錄
             </div>
 
             {totalPages > 1 && (
@@ -328,7 +328,7 @@ export function RepairRecordsContent({
                       <span className="hidden sm:block">上一頁</span>
                     </Button>
                   </PaginationItem>
-                  <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
+                  <PaginationItem className="text-muted-foreground px-3 text-xs font-medium">
                     頁次 {currentPage} / {totalPages}
                   </PaginationItem>
                   <PaginationItem>

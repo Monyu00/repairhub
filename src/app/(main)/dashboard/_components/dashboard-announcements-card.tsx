@@ -25,7 +25,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
       <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <div className="flex items-center gap-2">
-            <Megaphone className="size-4 text-muted-foreground" />
+            <Megaphone className="text-muted-foreground size-4" />
             <CardTitle className="text-base">系統公告</CardTitle>
           </div>
           {isAdmin && (
@@ -35,7 +35,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
           )}
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+          <div className="text-muted-foreground flex flex-col items-center justify-center py-6 text-center">
             <p className="text-sm">目前尚無內部公告</p>
             {isAdmin && (
               <Button asChild variant="link" size="sm" className="mt-1 text-xs">
@@ -52,7 +52,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
     <Card className="border-border shadow-2xs">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <div className="bg-primary/10 text-primary flex size-7 items-center justify-center rounded-md">
             <Megaphone className="size-3.5" aria-hidden="true" />
           </div>
           <div>
@@ -61,7 +61,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
           </div>
         </div>
         {isAdmin && (
-          <Button asChild variant="ghost" size="sm" className="h-7 text-muted-foreground text-xs hover:text-foreground">
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground h-7 text-xs">
             <Link href="/dashboard/announcements">前往管理</Link>
           </Button>
         )}
@@ -75,13 +75,13 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
           return (
             <div
               key={item.id}
-              className="group rounded-lg border border-border/60 bg-muted/20 p-3 transition-colors hover:bg-muted/40"
+              className="group border-border/60 bg-muted/20 hover:bg-muted/40 rounded-lg border p-3 transition-colors"
             >
               <button
                 type="button"
                 aria-expanded={isExpanded}
                 aria-controls={`announcement-body-${item.id}`}
-                className="flex w-full cursor-pointer items-start justify-between gap-3 rounded-md text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                className="focus-visible:ring-ring flex w-full cursor-pointer items-start justify-between gap-3 rounded-md text-left focus-visible:ring-2 focus-visible:outline-hidden"
                 onClick={() => setExpandedId(isExpanded ? null : item.id)}
               >
                 <div className="min-w-0 flex-1 space-y-1">
@@ -92,7 +92,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                         置頂
                       </Badge>
                     )}
-                    <span className="font-semibold text-foreground text-sm transition-colors group-hover:text-primary">
+                    <span className="text-foreground group-hover:text-primary text-sm font-semibold transition-colors">
                       {item.title}
                     </span>
                     {isEdited && (
@@ -102,7 +102,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
                     )}
                   </div>
                   {!isExpanded && (
-                    <p className="line-clamp-1 text-muted-foreground text-xs leading-relaxed">{item.body}</p>
+                    <p className="text-muted-foreground line-clamp-1 text-xs leading-relaxed">{item.body}</p>
                   )}
                 </div>
 
@@ -121,7 +121,7 @@ export function DashboardAnnouncementsCard({ announcements, isAdmin }: Dashboard
               {isExpanded && (
                 <div
                   id={`announcement-body-${item.id}`}
-                  className="mt-3 whitespace-pre-wrap border-border/40 border-t pt-2 text-foreground text-xs leading-relaxed"
+                  className="border-border/40 text-foreground mt-3 border-t pt-2 text-xs leading-relaxed whitespace-pre-wrap"
                 >
                   {item.body}
                 </div>

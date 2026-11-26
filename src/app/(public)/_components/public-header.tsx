@@ -25,14 +25,14 @@ export function PublicHeader({ notifications, user }: PublicHeaderProps) {
   const displayName = user?.displayName ?? (user?.email ? user.email.split("@")[0] : "");
 
   return (
-    <header className="sticky top-0 z-40 w-full border-border border-b bg-background/80 backdrop-blur-md">
+    <header className="border-border bg-background/80 sticky top-0 z-40 w-full border-b backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-90">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+          <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg shadow-xs">
             <Wrench className="size-5" />
           </div>
-          <span className="font-bold font-heading text-foreground text-lg leading-tight tracking-tight">
+          <span className="font-heading text-foreground text-lg leading-tight font-bold tracking-tight">
             南臺維修通報
           </span>
         </Link>

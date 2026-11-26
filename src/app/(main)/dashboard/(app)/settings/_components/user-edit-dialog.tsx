@@ -83,11 +83,11 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
+              <User className="text-primary h-5 w-5" />
               編輯使用者資訊與權限
             </DialogTitle>
             <DialogDescription>
-              變更 <span className="font-medium font-mono text-foreground">{user.email}</span> 的個人資料與系統角色。
+              變更 <span className="text-foreground font-mono font-medium">{user.email}</span> 的個人資料與系統角色。
             </DialogDescription>
           </DialogHeader>
 
@@ -157,7 +157,7 @@ export function UserEditDialog({ open, onOpenChange, user, onSubmit }: UserEditD
             </div>
 
             {error && (
-              <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+              <div role="alert" className="bg-destructive/10 text-destructive rounded-md p-3 text-xs font-medium">
                 {error}
               </div>
             )}

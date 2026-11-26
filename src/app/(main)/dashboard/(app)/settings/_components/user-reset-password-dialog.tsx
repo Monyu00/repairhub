@@ -98,23 +98,23 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
         {isSuccess ? (
           <div>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-success-text ">
+              <DialogTitle className="text-success-text flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5" />
                 密碼重設成功
               </DialogTitle>
               <DialogDescription>
-                已成功變更 <span className="font-medium font-mono text-foreground">{user.email}</span> 的登入密碼。
+                已成功變更 <span className="text-foreground font-mono font-medium">{user.email}</span> 的登入密碼。
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="rounded-lg border bg-muted/40 p-4">
-                <div className="mb-1 font-medium text-muted-foreground text-xs">新的登入密碼</div>
-                <div className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 font-mono font-semibold text-primary text-sm">
-                  <span className="select-all truncate">{savedPassword}</span>
+              <div className="bg-muted/40 rounded-lg border p-4">
+                <div className="text-muted-foreground mb-1 text-xs font-medium">新的登入密碼</div>
+                <div className="bg-background text-primary flex items-center justify-between gap-2 rounded-md border px-3 py-2 font-mono text-sm font-semibold">
+                  <span className="truncate select-all">{savedPassword}</span>
                   <Button type="button" variant="ghost" size="icon-xs" onClick={handleCopyPassword} title="複製密碼">
                     {copiedPassword ? (
-                      <Check className="h-3.5 w-3.5 text-success-text" />
+                      <Check className="text-success-text h-3.5 w-3.5" />
                     ) : (
                       <Copy className="h-3.5 w-3.5" />
                     )}
@@ -122,7 +122,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
+              <div className="border-warning/20 bg-warning/10 text-warning-text flex items-start gap-2.5 rounded-md border p-3 text-xs">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>請複製並提供新密碼給該使用者，關閉後將無法再次檢視此明文密碼。</span>
               </div>
@@ -138,11 +138,11 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <KeyRound className="h-5 w-5 text-primary" />
+                <KeyRound className="text-primary h-5 w-5" />
                 重設使用者密碼
               </DialogTitle>
               <DialogDescription>
-                為 <span className="font-medium font-mono text-foreground">{user.email}</span> 設定新的登入密碼。
+                為 <span className="text-foreground font-mono font-medium">{user.email}</span> 設定新的登入密碼。
               </DialogDescription>
             </DialogHeader>
 
@@ -156,7 +156,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-7 text-primary text-xs hover:text-primary/80"
+                    className="text-primary hover:text-primary/80 h-7 text-xs"
                     onClick={handleGeneratePassword}
                     disabled={isPending}
                   >
@@ -179,7 +179,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
                     type="button"
                     variant="ghost"
                     size="icon-xs"
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground absolute top-2 right-2"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
                   >
@@ -189,7 +189,7 @@ export function UserResetPasswordDialog({ open, onOpenChange, user }: UserResetP
               </div>
 
               {error && (
-                <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+                <div role="alert" className="bg-destructive/10 text-destructive rounded-md p-3 text-xs font-medium">
                   {error}
                 </div>
               )}

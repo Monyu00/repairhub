@@ -87,7 +87,7 @@ export default async function Page({ searchParams }: PageProps) {
       {/* Page Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">報修單管理</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">報修單管理</h1>
           <p className="text-muted-foreground text-sm">檢視並管理全校設施設備通報單據</p>
         </div>
       </div>

@@ -60,12 +60,12 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
   if (!userEmail) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-border border-dashed bg-card/40 p-8 text-center">
-        <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <div className="border-border bg-card/40 flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center">
+        <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-full">
           <Lock className="size-6" />
         </div>
-        <h3 className="font-semibold text-base text-foreground">請先登入以檢視個人報修紀錄</h3>
-        <p className="mt-1 max-w-sm text-muted-foreground text-xs">
+        <h3 className="text-foreground text-base font-semibold">請先登入以檢視個人報修紀錄</h3>
+        <p className="text-muted-foreground mt-1 max-w-sm text-xs">
           使用您的校園帳號登入後，即可追蹤所有由您發起的報修單進度與進行完工驗收。
         </p>
         <Button asChild size="sm" className="mt-4 gap-1.5">
@@ -77,12 +77,12 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
   if (tickets.length === 0) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-border border-dashed bg-card/40 p-8 text-center">
-        <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <div className="border-border bg-card/40 flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center">
+        <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-full">
           <Inbox className="size-6" />
         </div>
-        <h3 className="font-semibold text-base text-foreground">您目前尚無報修紀錄</h3>
-        <p className="mt-1 max-w-sm text-muted-foreground text-xs">若有校園設備損壞或需修繕項目，歡迎立即通報。</p>
+        <h3 className="text-foreground text-base font-semibold">您目前尚無報修紀錄</h3>
+        <p className="text-muted-foreground mt-1 max-w-sm text-xs">若有校園設備損壞或需修繕項目，歡迎立即通報。</p>
         <Button asChild size="sm" className="mt-4 gap-1.5">
           <Link href="/report">
             <Plus className="size-4" />
@@ -142,13 +142,13 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
           return (
             <Card
               key={ticket.id}
-              className="relative border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs"
+              className="border-border hover:border-primary/40 relative border shadow-2xs transition-colors transition-shadow hover:shadow-xs"
             >
               <CardContent className="flex flex-col gap-3 p-4 sm:p-5">
                 {/* Header row */}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono font-semibold text-muted-foreground text-xs">
+                    <span className="text-muted-foreground font-mono text-xs font-semibold">
                       #{ticket.id.slice(0, 8)}
                     </span>
                     <Badge variant="secondary" className="px-2 py-0.5 text-xs">
@@ -159,7 +159,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
                   <Link
                     href={`/track/${ticket.id}`}
-                    className="inline-flex items-center gap-1 text-muted-foreground text-xs transition-colors after:absolute after:inset-0 after:z-0 after:content-[''] hover:text-primary"
+                    className="text-muted-foreground hover:text-primary inline-flex items-center gap-1 text-xs transition-colors after:absolute after:inset-0 after:z-0 after:content-['']"
                   >
                     <span>案件詳情</span>
                     <ExternalLink className="size-3" />
@@ -167,10 +167,10 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                 </div>
 
                 {/* Description */}
-                <p className="line-clamp-2 text-foreground text-sm leading-relaxed">{ticket.description}</p>
+                <p className="text-foreground line-clamp-2 text-sm leading-relaxed">{ticket.description}</p>
 
                 {/* Details bar */}
-                <div className="flex flex-wrap items-center justify-between gap-y-2 border-border/50 border-t pt-2 text-muted-foreground text-xs">
+                <div className="border-border/50 text-muted-foreground flex flex-wrap items-center justify-between gap-y-2 border-t pt-2 text-xs">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="size-3.5 shrink-0" />
@@ -188,7 +188,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-destructive text-xs hover:bg-destructive/10"
+                        className="text-destructive hover:bg-destructive/10 h-7 text-xs"
                         onClick={() => openDialog("reopen", ticket.id)}
                       >
                         <RotateCcw className="mr-1 size-3" />
@@ -196,7 +196,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
                       </Button>
                       <Button
                         size="sm"
-                        className="h-7 bg-success text-success-foreground text-xs hover:bg-success/80"
+                        className="bg-success text-success-foreground hover:bg-success/80 h-7 text-xs"
                         onClick={() => openDialog("confirm", ticket.id)}
                       >
                         <CheckCircle2 className="mr-1 size-3" />
@@ -236,7 +236,7 @@ export function MyTicketList({ tickets, userEmail, currentPage, totalPages, tota
 
           {activeDialog?.type === "reopen" && (
             <div className="space-y-2 py-2">
-              <label htmlFor="feedback-text" className="font-medium text-foreground text-xs">
+              <label htmlFor="feedback-text" className="text-foreground text-xs font-medium">
                 問題反饋說明 <span className="text-destructive">*</span>
               </label>
               <Textarea

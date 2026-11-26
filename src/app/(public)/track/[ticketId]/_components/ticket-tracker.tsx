@@ -32,13 +32,13 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
   return (
     <div className="px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-xl space-y-4">
-        <h1 className="text-xl font-semibold text-foreground tracking-tight">報修單追蹤</h1>
+        <h1 className="text-foreground text-xl font-semibold tracking-tight">報修單追蹤</h1>
 
         {/* Search Bar */}
         <TicketSearch currentTicketId={ticket.id} />
 
         {/* Main Card */}
-        <Card className="divide-y divide-border border border-border bg-card shadow-sm">
+        <Card className="divide-border border-border bg-card divide-y border shadow-sm">
           {/* Header section */}
           <div className="p-5 sm:p-6">
             <TicketHeader ticketId={ticket.id} status={ticket.status} createdAt={ticket.createdAt} />
@@ -85,20 +85,20 @@ export function TicketTracker({ detail }: TicketTrackerProps) {
           {/* Rating display on closed ticket */}
           {ticket.status === "closed" && rating != null && (
             <div className="p-5 sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/20 bg-warning/5 p-3.5">
+              <div className="border-warning/20 bg-warning/5 flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3.5">
                 <div className="space-y-1">
-                  <span className="font-semibold text-foreground text-xs">通報人完工服務評分</span>
+                  <span className="text-foreground text-xs font-semibold">通報人完工服務評分</span>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <StarIcon
                         key={s}
                         className={cn(
                           "size-4",
-                          s <= rating ? "fill-warning text-warning" : "fill-transparent text-muted-foreground/30",
+                          s <= rating ? "fill-warning text-warning" : "text-muted-foreground/30 fill-transparent",
                         )}
                       />
                     ))}
-                    <span className="ml-1.5 font-bold text-foreground text-xs">{rating} / 5</span>
+                    <span className="text-foreground ml-1.5 text-xs font-bold">{rating} / 5</span>
                   </div>
                 </div>
                 {ticket.ratedAt && (

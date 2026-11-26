@@ -15,21 +15,21 @@ export function CurrentLoginInfoCard({ profile }: CurrentLoginInfoCardProps) {
       </CardHeader>
       <CardContent>
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
-          <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
+          <div className="border-border bg-muted/20 flex flex-wrap items-center justify-between gap-1 rounded-lg border p-3">
             <dt className="text-muted-foreground">電子郵件</dt>
-            <dd className="font-medium break-all text-foreground">{profile.email}</dd>
+            <dd className="text-foreground font-medium break-all">{profile.email}</dd>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
+          <div className="border-border bg-muted/20 flex flex-wrap items-center justify-between gap-1 rounded-lg border p-3">
             <dt className="text-muted-foreground">角色</dt>
-            <dd className="font-medium text-foreground">{getUserRoleLabel(profile.role)}</dd>
+            <dd className="text-foreground font-medium">{getUserRoleLabel(profile.role)}</dd>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
+          <div className="border-border bg-muted/20 flex flex-wrap items-center justify-between gap-1 rounded-lg border p-3">
             <dt className="text-muted-foreground">帳號是否啟用</dt>
-            <dd className="font-medium text-foreground">{profile.isActive ? "已啟用" : "已停用"}</dd>
+            <dd className="text-foreground font-medium">{profile.isActive ? "已啟用" : "已停用"}</dd>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-1 rounded-lg border border-border bg-muted/20 p-3">
+          <div className="border-border bg-muted/20 flex flex-wrap items-center justify-between gap-1 rounded-lg border p-3">
             <dt className="text-muted-foreground">是否需變更密碼</dt>
-            <dd className="font-medium text-foreground">{profile.mustChangePassword ? "是" : "否"}</dd>
+            <dd className="text-foreground font-medium">{profile.mustChangePassword ? "是" : "否"}</dd>
           </div>
         </dl>
       </CardContent>

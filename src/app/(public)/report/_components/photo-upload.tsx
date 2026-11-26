@@ -79,13 +79,13 @@ export function PhotoUpload({
         {photos.map((photo, i) => (
           <div
             key={photo.slice(-32)}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
+            className="group border-border bg-muted relative aspect-square overflow-hidden rounded-lg border"
           >
             <Image src={photo} alt={`預覽圖片 ${i + 1}`} fill className="object-cover" />
             <button
               type="button"
               onClick={() => handleRemove(i)}
-              className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-background/80 text-foreground shadow-xs transition-colors hover:bg-destructive hover:text-destructive-foreground"
+              className="bg-background/80 text-foreground hover:bg-destructive hover:text-destructive-foreground absolute top-1 right-1 flex size-11 items-center justify-center rounded-full shadow-xs transition-colors sm:size-6"
               aria-label="移除圖片"
             >
               <XIcon className="size-3.5" />
@@ -98,14 +98,14 @@ export function PhotoUpload({
             type="button"
             disabled={loading}
             onClick={() => fileInputRef.current?.click()}
-            className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-input border-dashed bg-muted/40 p-3 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="border-input bg-muted/40 text-muted-foreground hover:border-primary/50 hover:bg-muted/70 focus-visible:ring-ring flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
-              <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="border-primary size-5 animate-spin rounded-full border-2 border-t-transparent" />
             ) : (
               <>
-                <UploadIcon className="size-5 text-muted-foreground" />
-                <span className="font-medium text-xs">上傳照片</span>
+                <UploadIcon className="text-muted-foreground size-5" />
+                <span className="text-xs font-medium">上傳照片</span>
                 <span className="text-muted-foreground text-xs">
                   ({photos.length}/{maxPhotos})
                 </span>

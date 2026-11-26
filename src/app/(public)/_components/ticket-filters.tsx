@@ -250,7 +250,7 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs">
+    <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-xs">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <form onSubmit={handleSearchSubmit} className="flex min-w-0 flex-1 items-center gap-2">
           <InputGroup className="h-11 min-w-0 flex-1 sm:h-9">
@@ -316,7 +316,7 @@ export function TicketFilters({ buildings, categories }: TicketFiltersProps) {
               variant="ghost"
               size="sm"
               onClick={handleReset}
-              className="h-9 px-2.5 text-muted-foreground text-xs hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-9 px-2.5 text-xs"
             >
               <RotateCcw data-icon="inline-start" />
               重置

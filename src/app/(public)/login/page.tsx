@@ -18,21 +18,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <div className="px-4 py-8 sm:py-12">
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-2 text-center">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <div className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-xl shadow-sm">
             <Wrench className="size-6" />
           </div>
-          <h1 className="font-bold text-2xl tracking-tight">登入南臺校園維修通報系統</h1>
+          <h1 className="text-2xl font-bold tracking-tight">登入南臺校園維修通報系統</h1>
           <p className="text-muted-foreground text-sm">請輸入您的帳號密碼登入</p>
         </div>
 
         {error === "auth-callback-failed" && (
-          <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-foreground text-sm">
-            <AlertCircle className="size-4 shrink-0 text-destructive" />
+          <div className="border-destructive/20 bg-destructive/10 text-foreground flex items-center gap-2 rounded-lg border p-3 text-sm">
+            <AlertCircle className="text-destructive size-4 shrink-0" />
             <span>登入驗證失敗或已過期，請重新嘗試。</span>
           </div>
         )}
 
-        <div className="rounded-xl border bg-card p-6 shadow-xs sm:p-8">
+        <div className="bg-card rounded-xl border p-6 shadow-xs sm:p-8">
           <LoginForm redirectTo={redirectTo} />
         </div>
       </div>

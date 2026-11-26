@@ -56,13 +56,13 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
           <div className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-muted-foreground" />
-            <SheetTitle className="font-bold text-lg">歷史維修紀錄</SheetTitle>
+            <ClipboardList className="text-muted-foreground h-5 w-5" />
+            <SheetTitle className="text-lg font-bold">歷史維修紀錄</SheetTitle>
           </div>
           {equipment && (
             <SheetDescription asChild>
-              <div className="pt-1 text-muted-foreground text-xs">
-                設備：<span className="font-semibold text-foreground">{equipment.name}</span>
+              <div className="text-muted-foreground pt-1 text-xs">
+                設備：<span className="text-foreground font-semibold">{equipment.name}</span>
                 <Badge variant="outline" className="ml-2 font-mono">
                   {equipment.code}
                 </Badge>
@@ -76,16 +76,16 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
 
         <div className="mt-6 space-y-4 px-1">
           {isLoading && (
-            <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground text-sm">
+            <div className="text-muted-foreground flex h-40 flex-col items-center justify-center gap-2 text-sm">
               <Loader2 className="h-5 w-5 animate-spin" />
               載入歷史紀錄中...
             </div>
           )}
           {!isLoading && error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{error}</div>
+            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-xs">{error}</div>
           )}
           {isReady && tickets.length === 0 && (
-            <Empty className="border border-dashed bg-card/40 py-10">
+            <Empty className="bg-card/40 border border-dashed py-10">
               <EmptyMedia variant="icon">
                 <ClipboardList />
               </EmptyMedia>
@@ -97,26 +97,26 @@ export function EquipmentHistorySheet({ open, onOpenChange, equipment }: Equipme
           )}
           {isReady && tickets.length > 0 && (
             <div className="space-y-3">
-              <div className="font-medium text-muted-foreground text-xs">共 {tickets.length} 筆維修通報</div>
+              <div className="text-muted-foreground text-xs font-medium">共 {tickets.length} 筆維修通報</div>
               {tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="space-y-2 rounded-lg border bg-card p-3.5 text-xs shadow-xs transition-colors hover:border-primary/40"
+                  className="bg-card hover:border-primary/40 space-y-2 rounded-lg border p-3.5 text-xs shadow-xs transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <TicketStatusBadge status={ticket.status} />
-                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
                       <Calendar className="h-3 w-3" />
                       <span>{formatDateOnly(ticket.created_at)}</span>
                     </div>
                   </div>
 
-                  <p className="line-clamp-3 whitespace-pre-wrap font-normal text-foreground text-sm">
+                  <p className="text-foreground line-clamp-3 text-sm font-normal whitespace-pre-wrap">
                     {ticket.description}
                   </p>
 
                   {ticket.reporter_email && (
-                    <div className="flex items-center gap-1 border-border/40 border-t pt-1 text-muted-foreground text-xs">
+                    <div className="border-border/40 text-muted-foreground flex items-center gap-1 border-t pt-1 text-xs">
                       <User className="h-3 w-3" />
                       <span>報修人：{ticket.reporter_email}</span>
                     </div>

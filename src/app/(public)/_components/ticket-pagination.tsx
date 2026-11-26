@@ -81,12 +81,12 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
 
   return (
     <div className="flex flex-col items-center justify-between gap-4 py-3 sm:flex-row">
-      <div className="flex flex-wrap items-center justify-center gap-3 text-muted-foreground text-xs sm:justify-start">
+      <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-3 text-xs sm:justify-start">
         <span>
-          顯示第 <strong className="font-medium text-foreground">{startRecord}</strong> 至{" "}
-          <strong className="font-medium text-foreground">{endRecord}</strong> 筆，共{" "}
-          <strong className="font-medium text-foreground">{totalCount}</strong> 筆
-          <span className="ml-1 text-foreground/70">
+          顯示第 <strong className="text-foreground font-medium">{startRecord}</strong> 至{" "}
+          <strong className="text-foreground font-medium">{endRecord}</strong> 筆，共{" "}
+          <strong className="text-foreground font-medium">{totalCount}</strong> 筆
+          <span className="text-foreground/70 ml-1">
             （第 {currentPage} / {safeTotalPages} 頁）
           </span>
         </span>
@@ -139,7 +139,7 @@ export function TicketPagination({ currentPage, totalPages, totalCount, pageSize
             if (p === "ellipsis") {
               const ellipsisKey = idx < 3 ? "ellipsis-start" : "ellipsis-end";
               return (
-                <span key={ellipsisKey} className="px-1.5 text-muted-foreground text-xs">
+                <span key={ellipsisKey} className="text-muted-foreground px-1.5 text-xs">
                   …
                 </span>
               );

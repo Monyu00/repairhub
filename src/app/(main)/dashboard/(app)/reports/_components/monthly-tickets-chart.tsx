@@ -51,18 +51,18 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
             <BarChart3 className="h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">每月工單數量趨勢</CardTitle>
+            <CardTitle className="text-base font-semibold">每月工單數量趨勢</CardTitle>
             <CardDescription className="text-xs">統計各月份通報工單總數與處理狀況</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 pt-2 pb-4">
         {!hasData ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex h-64 items-center justify-center text-xs">
             此期間無相關工單數據
           </div>
         ) : (
@@ -87,7 +87,7 @@ export function MonthlyTicketsChart({ data }: MonthlyTicketsChartProps) {
                       return (
                         <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
                           <span className="text-muted-foreground">{label}</span>
-                          <span className="font-medium text-foreground tabular-nums">
+                          <span className="text-foreground font-medium tabular-nums">
                             {value}
                             {item.dataKey === "total" ? ` (${item.payload.completionRate}%)` : ""}
                           </span>

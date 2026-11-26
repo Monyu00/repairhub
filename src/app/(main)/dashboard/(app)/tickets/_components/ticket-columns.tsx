@@ -25,7 +25,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
           <Link
             href={`/dashboard/tickets/${row.original.id}`}
             aria-label={`查看報修單 ${id.slice(0, 8)}`}
-            className="font-mono font-semibold text-primary text-xs relative z-10 focus-visible:ring-2 focus-visible:ring-ring"
+            className="text-primary focus-visible:ring-ring relative z-10 font-mono text-xs font-semibold focus-visible:ring-2"
           >
             #{id.slice(0, 8)}
           </Link>
@@ -46,8 +46,8 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
         const building = row.original.building;
         const space = row.original.space;
         return (
-          <div className="flex flex-col text-xs min-w-0">
-            <span className="font-medium text-foreground">
+          <div className="flex min-w-0 flex-col text-xs">
+            <span className="text-foreground font-medium">
               {building.name} ({building.code})
             </span>
             {space && (
@@ -63,7 +63,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
       accessorKey: "category",
       header: "類別",
       cell: ({ row }) => {
-        return <span className="font-medium text-foreground text-xs">{row.original.category.name}</span>;
+        return <span className="text-foreground text-xs font-medium">{row.original.category.name}</span>;
       },
     },
     {
@@ -71,7 +71,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
       header: "故障描述",
       cell: ({ row }) => {
         return (
-          <span className="line-clamp-1 max-w-[240px] text-muted-foreground text-xs">{row.original.description}</span>
+          <span className="text-muted-foreground line-clamp-1 max-w-[240px] text-xs">{row.original.description}</span>
         );
       },
     },
@@ -87,22 +87,22 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
         const email = row.original.reporterEmail;
         const phone = row.original.reporterPhone;
         return (
-          <div className="flex flex-col gap-0.5 text-xs min-w-0">
+          <div className="flex min-w-0 flex-col gap-0.5 text-xs">
             {(name || dept) && (
-              <span className="flex items-center gap-1 font-medium text-foreground">
-                <User className="size-3 text-muted-foreground" />
+              <span className="text-foreground flex items-center gap-1 font-medium">
+                <User className="text-muted-foreground size-3" />
                 {name || dept}
-                {name && dept && <span className="font-normal text-muted-foreground">（{dept}）</span>}
+                {name && dept && <span className="text-muted-foreground font-normal">（{dept}）</span>}
               </span>
             )}
             {email && (
-              <span className="flex items-center gap-1 text-muted-foreground">
+              <span className="text-muted-foreground flex items-center gap-1">
                 <Mail className="size-3" />
                 {email}
               </span>
             )}
             {phone && (
-              <span className="flex items-center gap-1 text-muted-foreground">
+              <span className="text-muted-foreground flex items-center gap-1">
                 <Phone className="size-3" />
                 {phone}
               </span>
@@ -122,7 +122,7 @@ export function getTicketColumns(canViewReporter: boolean): ColumnDef<typeof tic
     cell: ({ row }) => {
       const dateStr = row.getValue("createdAt") as string;
       const formattedDate = formatTicketDate(dateStr);
-      return <span className="whitespace-nowrap text-muted-foreground text-xs">{formattedDate}</span>;
+      return <span className="text-muted-foreground text-xs whitespace-nowrap">{formattedDate}</span>;
     },
   });
 

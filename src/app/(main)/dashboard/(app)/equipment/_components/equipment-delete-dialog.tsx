@@ -79,13 +79,13 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
               </p>
 
               {isChecking && (
-                <div className="flex items-center gap-2 pt-1 text-muted-foreground text-xs">
+                <div className="text-muted-foreground flex items-center gap-2 pt-1 text-xs">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   檢查報修紀錄中...
                 </div>
               )}
               {!isChecking && ticketCount > 0 && (
-                <div className="flex items-start gap-2 rounded-md border border-warning/20 bg-warning/10 p-3 text-warning-text text-xs ">
+                <div className="border-warning/20 bg-warning/10 text-warning-text flex items-start gap-2 rounded-md border p-3 text-xs">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <div>
                     <span className="font-semibold">警告：</span>此設備已有 {ticketCount} 筆歷史報修單引用。
@@ -98,7 +98,7 @@ export function EquipmentDeleteDialog({ open, onOpenChange, equipment, onSuccess
         </AlertDialogHeader>
 
         {errorMessage && (
-          <div className="rounded-md bg-destructive/10 p-3 text-destructive text-xs">{errorMessage}</div>
+          <div className="bg-destructive/10 text-destructive rounded-md p-3 text-xs">{errorMessage}</div>
         )}
 
         <AlertDialogFooter>

@@ -193,7 +193,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
         );
       default:
         return (
-          <Badge variant="secondary" className="shrink-0 text-muted-foreground">
+          <Badge variant="secondary" className="text-muted-foreground shrink-0">
             一般公告
           </Badge>
         );
@@ -205,7 +205,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
       {/* Page Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">公告管理</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">公告管理</h1>
           <p className="text-muted-foreground text-sm">
             發佈全校修繕營運通知、重要停機提醒，並可自訂可見對象與置頂排程。
           </p>
@@ -229,7 +229,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1">
               <Search
-                className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2"
                 aria-hidden="true"
               />
               <Input
@@ -242,12 +242,12 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex rounded-lg border border-border bg-muted/30 p-1">
+              <div className="border-border bg-muted/30 flex rounded-lg border p-1">
                 <button
                   type="button"
                   aria-pressed={statusFilter === "all"}
                   onClick={() => setStatusFilter("all")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`focus-visible:ring-ring rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-hidden ${
                     statusFilter === "all"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -259,7 +259,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                   type="button"
                   aria-pressed={statusFilter === "active"}
                   onClick={() => setStatusFilter("active")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`focus-visible:ring-ring rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-hidden ${
                     statusFilter === "active"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -271,7 +271,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                   type="button"
                   aria-pressed={statusFilter === "pinned"}
                   onClick={() => setStatusFilter("pinned")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`focus-visible:ring-ring rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-hidden ${
                     statusFilter === "pinned"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -283,7 +283,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                   type="button"
                   aria-pressed={statusFilter === "expired"}
                   onClick={() => setStatusFilter("expired")}
-                  className={`rounded-md px-2.5 py-1 font-medium text-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`focus-visible:ring-ring rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-hidden ${
                     statusFilter === "expired"
                       ? "bg-background text-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -297,7 +297,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 aria-label="公告分類篩選"
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                className="border-border bg-background text-foreground focus-visible:ring-ring h-8 rounded-lg border px-2.5 text-xs focus-visible:ring-2 focus-visible:outline-hidden"
               >
                 <option value="all">所有分類</option>
                 <option value="general">一般公告</option>
@@ -310,7 +310,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                 value={audienceFilter}
                 onChange={(e) => setAudienceFilter(e.target.value)}
                 aria-label="公告受眾篩選"
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-foreground text-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                className="border-border bg-background text-foreground focus-visible:ring-ring h-8 rounded-lg border px-2.5 text-xs focus-visible:ring-2 focus-visible:outline-hidden"
               >
                 <option value="all">所有受眾</option>
                 <option value="internal">僅內部</option>
@@ -346,7 +346,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
               <TableBody>
                 {filteredAnnouncements.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground text-sm">
+                    <TableCell colSpan={7} className="text-muted-foreground h-32 text-center text-sm">
                       <Empty>
                         <EmptyHeader>
                           <EmptyDescription>查無符合條件的公告</EmptyDescription>
@@ -363,7 +363,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                       <TableRow key={item.id} className={isExp ? "bg-muted/20 opacity-60" : ""}>
                         <TableCell className="text-center">
                           {item.is_pinned ? (
-                            <Pin className="inline size-4 text-primary" aria-hidden="true" />
+                            <Pin className="text-primary inline size-4" aria-hidden="true" />
                           ) : (
                             <span className="text-muted-foreground/30">-</span>
                           )}
@@ -373,7 +373,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               {renderCategoryBadge(item.category)}
-                              <span className="font-semibold text-foreground">{item.title}</span>
+                              <span className="text-foreground font-semibold">{item.title}</span>
                               {isExp && (
                                 <Badge variant="secondary" className="text-muted-foreground">
                                   已到期
@@ -385,19 +385,19 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                                 </Badge>
                               )}
                             </div>
-                            <p className="line-clamp-2 text-muted-foreground text-xs leading-relaxed">{item.body}</p>
+                            <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{item.body}</p>
                           </div>
                         </TableCell>
 
                         <TableCell>{renderAudienceBadge(item.audience)}</TableCell>
 
-                        <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                           {formatTicketDate(item.published_at)}
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                           {item.expires_at ? (
-                            <span className={isExp ? "font-medium text-destructive/80" : ""}>
+                            <span className={isExp ? "text-destructive/80 font-medium" : ""}>
                               {formatTicketDate(item.expires_at)}
                             </span>
                           ) : (
@@ -405,7 +405,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                           )}
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                           {item.author?.display_name || "系統人員"}
                         </TableCell>
 
@@ -421,7 +421,7 @@ export function AnnouncementsPage({ initialAnnouncements }: AnnouncementsPagePro
                               aria-label="編輯公告"
                               title="編輯"
                             >
-                              <Edit2 className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                              <Edit2 className="text-muted-foreground size-3.5" aria-hidden="true" />
                             </Button>
                             <Button
                               variant="ghost"

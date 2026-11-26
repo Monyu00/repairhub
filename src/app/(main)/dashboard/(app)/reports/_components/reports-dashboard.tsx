@@ -35,7 +35,7 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">統計報表與分析</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">統計報表與分析</h1>
           <p className="text-muted-foreground text-sm">全校報修趨勢、空間分佈、分類佔比與維修績效深度分析</p>
         </div>
         <div className="flex items-center gap-2">
@@ -52,13 +52,13 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
         <Card className="p-4 shadow-xs">
           <CardContent className="flex items-center justify-between p-0">
             <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-xs">期間工單總數</p>
-              <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
-                {kpi.totalTickets} <span className="font-normal text-muted-foreground text-xs">件</span>
+              <p className="text-muted-foreground text-xs font-medium">期間工單總數</p>
+              <div className="text-foreground text-2xl font-bold tracking-tight tabular-nums">
+                {kpi.totalTickets} <span className="text-muted-foreground text-xs font-normal">件</span>
               </div>
               <p className="text-muted-foreground text-xs">{kpi.activePeriodLabel}</p>
             </div>
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
               <FileSpreadsheet className="h-5 w-5" />
             </div>
           </CardContent>
@@ -68,15 +68,15 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
         <Card className="p-4 shadow-xs">
           <CardContent className="flex items-center justify-between p-0">
             <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-xs">已完成/結案率</p>
-              <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
+              <p className="text-muted-foreground text-xs font-medium">已完成/結案率</p>
+              <div className="text-foreground text-2xl font-bold tracking-tight tabular-nums">
                 {kpi.completionRate}%
               </div>
-              <p className="flex items-center gap-0.5 text-muted-foreground text-xs">
+              <p className="text-muted-foreground flex items-center gap-0.5 text-xs">
                 <CheckCircle2 className="inline h-3 w-3" />共 {kpi.completedOrClosedCount} 件結案
               </p>
             </div>
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
               <TrendingUp className="h-5 w-5" />
             </div>
           </CardContent>
@@ -86,13 +86,13 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
         <Card className="p-4 shadow-xs">
           <CardContent className="flex items-center justify-between p-0">
             <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-xs">平均修復時間</p>
-              <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
-                {kpi.overallAvgDaysToResolve} <span className="font-normal text-muted-foreground text-xs">天</span>
+              <p className="text-muted-foreground text-xs font-medium">平均修復時間</p>
+              <div className="text-foreground text-2xl font-bold tracking-tight tabular-nums">
+                {kpi.overallAvgDaysToResolve} <span className="text-muted-foreground text-xs font-normal">天</span>
               </div>
               <p className="text-muted-foreground text-xs">通報至完工平均耗時</p>
             </div>
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
               <Clock className="h-5 w-5" />
             </div>
           </CardContent>
@@ -102,16 +102,16 @@ export function ReportsDashboard({ initialData }: ReportsDashboardProps) {
         <Card className="p-4 shadow-xs">
           <CardContent className="flex items-center justify-between p-0">
             <div className="space-y-1">
-              <p className="font-medium text-muted-foreground text-xs">待處理與進行中</p>
-              <div className="font-bold text-2xl text-foreground tabular-nums tracking-tight">
+              <p className="text-muted-foreground text-xs font-medium">待處理與進行中</p>
+              <div className="text-foreground text-2xl font-bold tracking-tight tabular-nums">
                 {kpi.pendingCount + kpi.inProgressCount}{" "}
-                <span className="font-normal text-muted-foreground text-xs">件</span>
+                <span className="text-muted-foreground text-xs font-normal">件</span>
               </div>
               <p className="text-muted-foreground text-xs">
                 待處理 {kpi.pendingCount} | 進行中 {kpi.inProgressCount}
               </p>
             </div>
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
               <Hourglass className="h-5 w-5" />
             </div>
           </CardContent>

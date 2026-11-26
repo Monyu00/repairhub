@@ -58,18 +58,18 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
   return (
     <Card className="shadow-2xs">
       <CardHeader className="border-border/50 border-b pb-3">
-        <CardTitle className="flex items-center justify-between font-semibold text-base">
+        <CardTitle className="flex items-center justify-between text-base font-semibold">
           <span className="flex items-center gap-2">
-            <MessageSquareText className="size-4 text-primary" />
+            <MessageSquareText className="text-primary size-4" />
             維修進度備註
           </span>
-          <span className="font-normal text-muted-foreground text-xs">({progressNotes.length} 則)</span>
+          <span className="text-muted-foreground text-xs font-normal">({progressNotes.length} 則)</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
         {/* Notes List */}
         {progressNotes.length === 0 ? (
-          <p className="rounded bg-muted/20 p-3 text-center text-muted-foreground text-xs italic">目前無進度備註記錄</p>
+          <p className="bg-muted/20 text-muted-foreground rounded p-3 text-center text-xs italic">目前無進度備註記錄</p>
         ) : (
           <div className="space-y-3">
             {progressNotes.map((note) => {
@@ -78,15 +78,15 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
               const roleLabel = getRoleLabel(note.authorRole);
 
               return (
-                <div key={note.id} className="space-y-1 rounded-lg border border-border/40 bg-muted/40 p-3">
-                  <div className="flex items-center justify-between text-muted-foreground text-xs">
-                    <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                <div key={note.id} className="border-border/40 bg-muted/40 space-y-1 rounded-lg border p-3">
+                  <div className="text-muted-foreground flex items-center justify-between text-xs">
+                    <span className="text-foreground flex items-center gap-1.5 font-semibold">
                       {note.authorName && <span>{note.authorName}</span>}
-                      <span className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground text-xs">{roleLabel}</span>
+                      <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">{roleLabel}</span>
                     </span>
                     <span>{formattedDate}</span>
                   </div>
-                  <p className="whitespace-pre-wrap pt-1 text-foreground text-xs leading-relaxed sm:text-sm">
+                  <p className="text-foreground pt-1 text-xs leading-relaxed whitespace-pre-wrap sm:text-sm">
                     {note.content}
                   </p>
                 </div>
@@ -97,13 +97,13 @@ export function TicketNotesSection({ ticketId, notes, canAddNote }: TicketNotesS
 
         {/* Add Note Form (Technician / Admin) */}
         {canAddNote && (
-          <form onSubmit={handleAddNote} className="space-y-3 border-border/40 border-t pt-3">
+          <form onSubmit={handleAddNote} className="border-border/40 space-y-3 border-t pt-3">
             <div className="space-y-1.5">
               <label
                 htmlFor="progress-note-input"
-                className="flex items-center gap-1.5 font-medium text-foreground text-xs"
+                className="text-foreground flex items-center gap-1.5 text-xs font-medium"
               >
-                <MessageSquarePlus className="size-3.5 text-primary" />
+                <MessageSquarePlus className="text-primary size-3.5" />
                 新增備註
               </label>
               <Textarea

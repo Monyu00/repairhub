@@ -26,25 +26,25 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 px-4 py-6 sm:py-12">
+    <div className="bg-muted/30 min-h-screen px-4 py-6 sm:py-12">
       <div className="mx-auto max-w-xl">
         {/* Brand Header */}
         <div className="mb-6 flex items-center justify-center gap-2">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+          <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg shadow-xs">
             <WrenchIcon className="size-5" />
           </div>
-          <span className="font-bold font-heading text-foreground text-lg tracking-tight">南臺維修通報</span>
+          <span className="font-heading text-foreground text-lg font-bold tracking-tight">南臺維修通報</span>
         </div>
 
-        <div className="space-y-6 rounded-xl border border-border bg-card p-8 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-muted">
-            <SearchIcon className="size-8 text-muted-foreground" />
+        <div className="border-border bg-card space-y-6 rounded-xl border p-8 text-center shadow-sm">
+          <div className="bg-muted mx-auto flex size-16 items-center justify-center rounded-full">
+            <SearchIcon className="text-muted-foreground size-8" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="font-bold text-foreground text-xl">找不到此報修單</h1>
+            <h1 className="text-foreground text-xl font-bold">找不到此報修單</h1>
             <p className="text-muted-foreground text-sm">
-              工單編號 <span className="font-medium font-mono text-foreground">{ticketId}</span>{" "}
+              工單編號 <span className="text-foreground font-mono font-medium">{ticketId}</span>{" "}
               不存在，請確認編號是否正確。
             </p>
           </div>
@@ -67,7 +67,7 @@ export function TicketNotFound({ ticketId }: TicketNotFoundProps) {
           </Button>
         </div>
 
-        <div className="mt-8 text-center text-muted-foreground text-xs">
+        <div className="text-muted-foreground mt-8 text-center text-xs">
           © {new Date().getFullYear()} 南臺校園維修通報系統. All rights reserved.
         </div>
       </div>

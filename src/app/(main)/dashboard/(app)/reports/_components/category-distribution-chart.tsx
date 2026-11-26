@@ -43,18 +43,18 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
             <Tags className="h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">維修分類分佈</CardTitle>
+            <CardTitle className="text-base font-semibold">維修分類分佈</CardTitle>
             <CardDescription className="text-xs">各項維修項目類別之工單佔比分析</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 pt-2 pb-4">
         {!hasData ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex h-64 items-center justify-center text-xs">
             此期間無相關工單數據
           </div>
         ) : (
@@ -62,12 +62,12 @@ export function CategoryDistributionChart({ data }: CategoryDistributionChartPro
             {chartData.map((item) => (
               <div key={item.categoryId} className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="min-w-0 truncate text-muted-foreground">{item.categoryName}</span>
-                  <span className="shrink-0 font-medium text-foreground tabular-nums">
+                  <span className="text-muted-foreground min-w-0 truncate">{item.categoryName}</span>
+                  <span className="text-foreground shrink-0 font-medium tabular-nums">
                     {item.count} 件 ({item.percentage}%)
                   </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                   <div
                     className="h-full rounded-full"
                     style={{

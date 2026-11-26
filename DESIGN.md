@@ -155,6 +155,7 @@ height: "32px"
 整體視覺風格呈現沉穩精準的現代工藝質感：介面以深沉碳墨（Carbon Ink）與極簡紙白（Paper White）形成堅實的閱讀基底，輔以高辨識度的信號赤紅（Signal Crimson）標註緊急與異常狀態。在空間布局上，系統兼顧雙軌操作實境——現場行動端（Reporter 與 Technician）講求 10 秒通報的零阻力直覺流程，而總務調度桌面端（Admin）則維持俐落、高資訊密度且結構緊密的儀表板節奏。
 
 **Key Characteristics:**
+
 - **極簡透明 (Radical Transparency)**：全域工單狀態流轉與歷史進程清晰呈現在高對比排版中，杜絕資訊黑盒。
 - **精密手感 (Precise & Tactile Feedback)**：全域組件維持緊湊高度（32px）、細緻點擊下壓微動效（1px 物理下沉）與清晰輪廓聚焦環。
 - **語意 Token 統一 (Semantic-First Architecture)**：嚴格依循 shadcn `radix-nova` 語意變數，保證深淺色模式與主題預設檔（Default / Tangerine / Soft Pop / Brutalist）無縫切換。

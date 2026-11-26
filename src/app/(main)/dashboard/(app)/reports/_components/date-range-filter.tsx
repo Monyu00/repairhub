@@ -82,10 +82,10 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs backdrop-blur-xs sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border/50 bg-card/60 flex flex-col gap-3 rounded-xl border p-3 shadow-xs backdrop-blur-xs sm:flex-row sm:items-center sm:justify-between">
       {/* Preset Buttons */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 flex items-center gap-1 font-medium text-muted-foreground text-xs">
+        <span className="text-muted-foreground mr-1 flex items-center gap-1 text-xs font-medium">
           <CalendarIcon className="h-3.5 w-3.5" />
           時間區間：
         </span>
@@ -97,7 +97,7 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
               type="button"
               variant={isActive ? "default" : "outline"}
               size="sm"
-              className="h-8 font-normal text-xs transition-colors"
+              className="h-8 text-xs font-normal transition-colors"
               disabled={isPending}
               onClick={() => handlePresetChange(opt.id)}
             >
@@ -156,7 +156,7 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-8 w-8"
             aria-label="重設篩選"
             onClick={handleReset}
             title="重設篩選"
@@ -165,7 +165,7 @@ export function DateRangeFilter({ currentFilter }: DateRangeFilterProps) {
           </Button>
         )}
         {hasInvalidRange && (
-          <p id="report-range-error" role="alert" className="w-full text-destructive text-xs">
+          <p id="report-range-error" role="alert" className="text-destructive w-full text-xs">
             結束日期不得早於開始日期。
           </p>
         )}

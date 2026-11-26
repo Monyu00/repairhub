@@ -26,18 +26,18 @@ export function AvgResolutionChart({ data }: AvgResolutionChartProps) {
     <Card className="flex flex-col">
       <CardHeader className="items-start pb-2">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+          <div className="bg-primary/10 text-primary rounded-lg p-2">
             <Clock className="h-4 w-4" />
           </div>
           <div>
-            <CardTitle className="font-semibold text-base">平均維修處理時效趨勢</CardTitle>
+            <CardTitle className="text-base font-semibold">平均維修處理時效趨勢</CardTitle>
             <CardDescription className="text-xs">每月已完成工單從通報至結案之平均天數</CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 pt-2 pb-4">
         {!hasData ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground text-xs">
+          <div className="text-muted-foreground flex h-64 items-center justify-center text-xs">
             此期間無已結案工單數據
           </div>
         ) : (
@@ -73,7 +73,7 @@ export function AvgResolutionChart({ data }: AvgResolutionChartProps) {
                     formatter={(value) => (
                       <div className="flex min-w-28 items-center justify-between gap-2 text-xs">
                         <span className="text-muted-foreground">{chartConfig.avgDays.label}</span>
-                        <span className="font-medium text-foreground">{value} 天</span>
+                        <span className="text-foreground font-medium">{value} 天</span>
                       </div>
                     )}
                   />

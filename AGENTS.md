@@ -110,6 +110,7 @@ The repository uses a single-context domain documentation layout. See `docs/agen
 Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
 
 Core workflow:
+
 1. `agent-browser open <url>` - Navigate to page
 2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
 3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
@@ -120,6 +121,7 @@ Core workflow:
 ## ponytail
 
 Follow Ponytail principles for ALL coding tasks:
+
 - Level: Full (default)
 - The ladder: YAGNI -> stdlib -> native platform -> installed deps -> one-line -> minimum working code
 - Stop at first rung that holds: reuse existing utils/types before adding new ones

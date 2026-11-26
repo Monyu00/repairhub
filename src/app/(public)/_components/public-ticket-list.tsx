@@ -25,12 +25,12 @@ interface PublicTicketListProps {
 export function PublicTicketList({ tickets, currentPage, totalPages, totalCount, pageSize }: PublicTicketListProps) {
   if (tickets.length === 0) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-border border-dashed bg-card/40 p-8 text-center">
-        <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <div className="border-border bg-card/40 flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed p-8 text-center">
+        <div className="bg-muted text-muted-foreground mb-3 flex size-12 items-center justify-center rounded-full">
           <Inbox className="size-6" />
         </div>
-        <h3 className="font-semibold text-base text-foreground">目前尚無符合條件的報修案件</h3>
-        <p className="mt-1 max-w-sm text-muted-foreground text-xs">
+        <h3 className="text-foreground text-base font-semibold">目前尚無符合條件的報修案件</h3>
+        <p className="text-muted-foreground mt-1 max-w-sm text-xs">
           您可以嘗試清除或變更篩選條件，或直接提出新的報修申請。
         </p>
         <Button asChild size="sm" className="mt-4 gap-1.5">
@@ -46,7 +46,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
   return (
     <div className="space-y-4">
       {/* Desktop Table View */}
-      <div className="hidden overflow-hidden rounded-xl border border-border bg-card shadow-xs md:block">
+      <div className="border-border bg-card hidden overflow-hidden rounded-xl border shadow-xs md:block">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 text-xs hover:bg-transparent">
@@ -69,27 +69,27 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
               return (
                 <TableRow
                   key={ticket.id}
-                  className="group relative cursor-pointer transition-colors focus-within:bg-muted/40 hover:bg-muted/40"
+                  className="group focus-within:bg-muted/40 hover:bg-muted/40 relative cursor-pointer transition-colors"
                 >
-                  <TableCell className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
+                  <TableCell className="text-muted-foreground group-hover:text-primary font-mono text-xs font-semibold">
                     <Link
                       href={`/track/${ticket.id}`}
                       prefetch={false}
                       aria-label={`查看報修單 ${ticket.id.slice(0, 8)}`}
-                      className="rounded-sm outline-none relative z-10 hover:underline hover:underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring"
+                      className="focus-visible:ring-ring relative z-10 rounded-sm outline-none hover:underline hover:underline-offset-4 focus-visible:ring-2"
                     >
                       #{ticket.id.slice(0, 8)}
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="px-2 py-0.5 font-normal text-xs">
+                    <Badge variant="secondary" className="px-2 py-0.5 text-xs font-normal">
                       {ticket.category.name}
                     </Badge>
                   </TableCell>
-                  <TableCell className="truncate font-medium text-foreground text-xs">
+                  <TableCell className="text-foreground truncate text-xs font-medium">
                     {formatTicketLocation(ticket)}
                   </TableCell>
-                  <TableCell className="line-clamp-1 max-w-[320px] text-muted-foreground text-xs">
+                  <TableCell className="text-muted-foreground line-clamp-1 max-w-[320px] text-xs">
                     {ticket.description}
                   </TableCell>
                   <TableCell>
@@ -97,11 +97,11 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     <div className="flex items-center gap-1.5 truncate">
-                      <User className="size-3 shrink-0 text-muted-foreground/60" />
-                      <span>{ticket.technicianName || "待指派"}</span>
+                      <User className="text-muted-foreground/60 size-3 shrink-0" />
+                      <span>{ticket.technicianName ?? "待指派"}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-muted-foreground text-xs">{formattedDate}</TableCell>
+                  <TableCell className="text-muted-foreground text-right text-xs">{formattedDate}</TableCell>
                   <TableCell className="p-2 text-right">
                     <Link
                       href={`/track/${ticket.id}`}
@@ -112,7 +112,7 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                     />
                     <ChevronRight
                       aria-hidden="true"
-                      className="relative z-10 ml-auto text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="text-muted-foreground/60 group-hover:text-primary relative z-10 ml-auto transition-transform group-hover:translate-x-0.5"
                     />
                   </TableCell>
                 </TableRow>
@@ -129,15 +129,15 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
 
           return (
             <Link key={ticket.id} href={`/track/${ticket.id}`} prefetch={false} className="group block">
-              <Card className="border border-border shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-xs">
+              <Card className="border-border hover:border-primary/40 border shadow-2xs transition-colors transition-shadow hover:shadow-xs">
                 <CardContent className="space-y-2.5 p-4">
                   {/* Top: ID, Category & Status */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-semibold text-muted-foreground text-xs group-hover:text-primary">
+                      <span className="text-muted-foreground group-hover:text-primary font-mono text-xs font-semibold">
                         #{ticket.id.slice(0, 8)}
                       </span>
-                      <Badge variant="secondary" className="px-1.5 py-0 font-normal text-xs">
+                      <Badge variant="secondary" className="px-1.5 py-0 text-xs font-normal">
                         {ticket.category.name}
                       </Badge>
                     </div>
@@ -145,17 +145,17 @@ export function PublicTicketList({ tickets, currentPage, totalPages, totalCount,
                   </div>
 
                   {/* Middle: Description */}
-                  <p className="line-clamp-2 text-foreground text-xs leading-relaxed">{ticket.description}</p>
+                  <p className="text-foreground line-clamp-2 text-xs leading-relaxed">{ticket.description}</p>
 
                   {/* Bottom: Location & Date & Tech */}
-                  <div className="flex flex-wrap items-center justify-between gap-y-1 border-border/50 border-t pt-1 text-muted-foreground text-xs">
+                  <div className="border-border/50 text-muted-foreground flex flex-wrap items-center justify-between gap-y-1 border-t pt-1 text-xs">
                     <div className="flex max-w-[200px] items-center gap-1 truncate">
-                      <MapPin className="size-3 shrink-0 text-muted-foreground/70" />
+                      <MapPin className="text-muted-foreground/70 size-3 shrink-0" />
                       <span className="truncate">{formatTicketLocation(ticket)}</span>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-1">
-                      <Calendar className="size-3 text-muted-foreground/70" />
+                      <Calendar className="text-muted-foreground/70 size-3" />
                       <span>{formattedDate}</span>
                     </div>
                   </div>

@@ -85,14 +85,14 @@ export function PhotoUpload({
         {photos.map((src, index) => (
           <div
             key={src.slice(-32)}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
+            className="group border-border bg-muted relative aspect-square overflow-hidden rounded-lg border"
           >
             <Image src={src} alt={`完工照片預覽 #${index + 1}`} fill className="object-cover" />
             {!disabled && (
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
-                className="absolute top-1 right-1 flex size-11 sm:size-6 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+                className="absolute top-1 right-1 flex size-11 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 sm:size-6"
                 aria-label="移除照片"
               >
                 <X className="size-3.5" />
@@ -107,14 +107,14 @@ export function PhotoUpload({
             disabled={isUploadDisabled}
             onClick={() => fileInputRef.current?.click()}
             aria-label={loading ? "照片上傳中" : "上傳照片"}
-            className="flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-border border-dashed bg-muted/30 p-2 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="border-border bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-muted/60 focus-visible:ring-ring flex aspect-square flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
-              <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="border-primary size-5 animate-spin rounded-full border-2 border-t-transparent" />
             ) : (
               <>
-                <ImagePlus className="size-5 text-muted-foreground/80" />
-                <span className="font-medium text-xs">上傳照片</span>
+                <ImagePlus className="text-muted-foreground/80 size-5" />
+                <span className="text-xs font-medium">上傳照片</span>
                 <span className="text-muted-foreground/70 text-xs">
                   ({photos.length}/{maxPhotos})
                 </span>
@@ -136,7 +136,7 @@ export function PhotoUpload({
       />
 
       {error && (
-        <p role="alert" className="font-medium text-destructive text-xs">
+        <p role="alert" className="text-destructive text-xs font-medium">
           {error}
         </p>
       )}

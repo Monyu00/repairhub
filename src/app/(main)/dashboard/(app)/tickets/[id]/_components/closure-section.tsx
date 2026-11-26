@@ -50,9 +50,9 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
   };
 
   return (
-    <Card className="border-success/30 bg-success/5 shadow-2xs dark:bg-success/10">
+    <Card className="border-success/30 bg-success/5 dark:bg-success/10 shadow-2xs">
       <CardHeader className="border-success/20 border-b pb-3">
-        <CardTitle className="flex items-center gap-2 font-semibold text-base text-success-text ">
+        <CardTitle className="text-success-text flex items-center gap-2 text-base font-semibold">
           <CheckCircle2 className="size-4" />
           維修完工與提交結案
         </CardTitle>
@@ -61,13 +61,13 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Photo Upload Area */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between font-semibold text-foreground text-xs">
+            <div className="text-foreground flex items-center justify-between text-xs font-semibold">
               <span className="flex items-center gap-1.5">
-                <Upload className="size-3.5 text-success-text " />
+                <Upload className="text-success-text size-3.5" />
                 完工照片上傳
                 <span className="text-destructive">*</span>
               </span>
-              <span className="font-normal font-normal text-muted-foreground text-xs">(至少 1 張，至多 3 張)</span>
+              <span className="text-muted-foreground text-xs font-normal font-normal">(至少 1 張，至多 3 張)</span>
             </div>
 
             <PhotoUpload
@@ -83,7 +83,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
 
           {/* Closure Summary */}
           <div className="space-y-1.5">
-            <label htmlFor="closure-summary" className="font-semibold text-foreground text-xs">
+            <label htmlFor="closure-summary" className="text-foreground text-xs font-semibold">
               完工說明與備註 (選填)
             </label>
             <Textarea
@@ -92,13 +92,13 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               rows={3}
-              className="resize-none bg-background text-xs sm:text-sm"
+              className="bg-background resize-none text-xs sm:text-sm"
               disabled={isSubmitting}
             />
           </div>
 
           {errorMsg && (
-            <p role="alert" className="font-semibold text-destructive text-xs">
+            <p role="alert" className="text-destructive text-xs font-semibold">
               {errorMsg}
             </p>
           )}
@@ -107,7 +107,7 @@ export function ClosureSection({ ticketId }: ClosureSectionProps) {
             <Button
               type="submit"
               variant="default"
-              className="gap-2 bg-success font-medium text-success-foreground shadow-xs hover:bg-success/80"
+              className="bg-success text-success-foreground hover:bg-success/80 gap-2 font-medium shadow-xs"
               disabled={isSubmitting}
             >
               {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}

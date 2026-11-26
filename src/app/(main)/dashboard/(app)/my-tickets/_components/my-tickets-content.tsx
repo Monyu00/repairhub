@@ -25,7 +25,7 @@ export function MyTicketsContent({ tickets }: MyTicketsContentProps) {
       {/* Page Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">我的報修紀錄</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">我的報修紀錄</h1>
           <p className="text-muted-foreground text-sm">共 {tickets.length} 筆報修案件</p>
         </div>
         <Button asChild size="sm" className="mt-2 sm:mt-0">
@@ -51,19 +51,19 @@ function TicketCard({ ticket }: { ticket: TicketRecord }) {
 
   return (
     <Link href={`/track/${ticket.id}`} className="group block">
-      <Card className="shadow-2xs transition-colors transition-shadow hover:border-primary/40 hover:shadow-sm">
+      <Card className="hover:border-primary/40 shadow-2xs transition-colors transition-shadow hover:shadow-sm">
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: info */}
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono font-semibold text-muted-foreground text-xs transition-colors group-hover:text-primary">
+              <span className="text-muted-foreground group-hover:text-primary font-mono text-xs font-semibold transition-colors">
                 #{ticket.id.slice(0, 8)}
               </span>
-              <span className="rounded bg-muted px-1.5 py-0.5 font-medium text-xs">{ticket.category.name}</span>
+              <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">{ticket.category.name}</span>
               <TicketStatusBadge status={ticket.status} />
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs">
+            <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
               <span className="inline-flex items-center gap-1">
                 <MapPin className="size-3.5 shrink-0" />
                 {formatTicketLocation(ticket, { includeFloor: true })}
@@ -77,7 +77,7 @@ function TicketCard({ ticket }: { ticket: TicketRecord }) {
 
           {/* Right: action hint */}
           <div className="flex items-center self-end sm:self-center">
-            <ExternalLink className="size-4 text-muted-foreground/50 transition-colors group-hover:text-primary" />
+            <ExternalLink className="text-muted-foreground/50 group-hover:text-primary size-4 transition-colors" />
           </div>
         </CardContent>
       </Card>
@@ -89,13 +89,13 @@ function EmptyState() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-bold text-2xl text-foreground tracking-tight">我的報修紀錄</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">我的報修紀錄</h1>
         <p className="text-muted-foreground text-sm">查看您提交過的所有報修案件</p>
       </div>
 
-      <Empty className="my-8 border border-dashed bg-card/40 py-12">
+      <Empty className="bg-card/40 my-8 border border-dashed py-12">
         <EmptyMedia variant="icon">
-          <ClipboardList className="size-6 text-muted-foreground" />
+          <ClipboardList className="text-muted-foreground size-6" />
         </EmptyMedia>
         <EmptyHeader>
           <EmptyTitle>目前尚無報修案件紀錄</EmptyTitle>

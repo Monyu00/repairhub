@@ -100,11 +100,11 @@ export function TechnicianCategoryDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-muted-foreground " />
+              <Wrench className="text-muted-foreground h-5 w-5" />
               設定技師負責報修類別
             </DialogTitle>
             <DialogDescription>
-              維護技師 <span className="font-medium text-foreground">{user.displayName ?? user.email}</span>{" "}
+              維護技師 <span className="text-foreground font-medium">{user.displayName ?? user.email}</span>{" "}
               擅長與負責的專業類別。接單系統將依據此設定進行排單。
             </DialogDescription>
           </DialogHeader>
@@ -113,14 +113,14 @@ export function TechnicianCategoryDialog({
             {/* Quick Actions Header */}
             <div className="flex items-center justify-between border-b pb-2">
               <div className="text-muted-foreground text-xs">
-                已選擇 <span className="font-semibold text-foreground">{selectedCategoryIds.length}</span> /{" "}
+                已選擇 <span className="text-foreground font-semibold">{selectedCategoryIds.length}</span> /{" "}
                 {activeCategories.length} 個類別
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-muted-foreground text-xs hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-7 px-2 text-xs"
                 onClick={handleToggleAll}
                 disabled={isLoading || isPending || activeCategories.length === 0}
               >
@@ -131,7 +131,7 @@ export function TechnicianCategoryDialog({
                   </>
                 ) : (
                   <>
-                    <CheckSquare className="mr-1.5 h-3.5 w-3.5 text-primary" />
+                    <CheckSquare className="text-primary mr-1.5 h-3.5 w-3.5" />
                     全選類別
                   </>
                 )}
@@ -140,15 +140,15 @@ export function TechnicianCategoryDialog({
 
             {/* Loading */}
             {isLoading && (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+              <div className="text-muted-foreground flex items-center justify-center py-8">
+                <Loader2 className="text-primary mr-2 h-5 w-5 animate-spin" />
                 <span className="text-sm">載入中...</span>
               </div>
             )}
 
             {/* Empty Categories */}
             {!isLoading && activeCategories.length === 0 && (
-              <div className="py-6 text-center text-muted-foreground text-sm">目前系統無啟用的報修類別</div>
+              <div className="text-muted-foreground py-6 text-center text-sm">目前系統無啟用的報修類別</div>
             )}
 
             {/* Category List */}
@@ -174,7 +174,7 @@ export function TechnicianCategoryDialog({
                         htmlFor={checkboxId}
                         className="flex flex-1 cursor-pointer items-center justify-between font-normal"
                       >
-                        <span className="font-medium text-foreground text-sm">{cat.name}</span>
+                        <span className="text-foreground text-sm font-medium">{cat.name}</span>
                         {isChecked && <Badge variant="secondary">已負責</Badge>}
                       </Label>
                     </div>
@@ -184,7 +184,7 @@ export function TechnicianCategoryDialog({
             )}
 
             {error && (
-              <div role="alert" className="rounded-md bg-destructive/10 p-3 font-medium text-destructive text-xs">
+              <div role="alert" className="bg-destructive/10 text-destructive rounded-md p-3 text-xs font-medium">
                 {error}
               </div>
             )}

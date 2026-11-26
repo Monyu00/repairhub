@@ -142,7 +142,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-bold text-2xl text-foreground tracking-tight">設備資產管理</h1>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">設備資產管理</h1>
           <p className="text-muted-foreground text-sm">管理全校設備資產、追蹤保固期限與查看歷史維修紀錄</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -164,11 +164,11 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
           <CardDescription>依地點與保固狀態快速檢索設備資料</CardDescription>
 
           {/* Filter Toolbar */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card/60 p-3.5 shadow-xs backdrop-blur-xs">
+          <div className="bg-card/60 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 shadow-xs backdrop-blur-xs">
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Search Input */}
               <div className="relative w-full sm:w-56 md:w-64">
-                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
                 <Input
                   type="search"
                   placeholder="搜尋設備名稱或代碼..."
@@ -226,7 +226,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-11 sm:h-8 gap-1 px-2 text-muted-foreground text-xs hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground h-11 gap-1 px-2 text-xs sm:h-8"
                   onClick={() => {
                     setSearchQuery("");
                     setBuildingFilter("all");
@@ -241,14 +241,14 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
             </div>
 
             <div className="text-muted-foreground text-xs">
-              共 <span className="font-semibold text-foreground">{filteredEquipment.length}</span> 筆設備
+              共 <span className="text-foreground font-semibold">{filteredEquipment.length}</span> 筆設備
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {filteredEquipment.length === 0 ? (
-            <Empty className="border border-dashed bg-card/40 py-10">
+            <Empty className="bg-card/40 border border-dashed py-10">
               <EmptyMedia variant="icon">
                 <HardDrive />
               </EmptyMedia>
@@ -263,7 +263,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
             </Empty>
           ) : (
             <>
-              <div className="overflow-hidden rounded-md border bg-background">
+              <div className="bg-background overflow-hidden rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
@@ -281,7 +281,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            <HardDrive className="size-4 shrink-0 text-muted-foreground" />
+                            <HardDrive className="text-muted-foreground size-4 shrink-0" />
                             <span>{item.name}</span>
                           </div>
                         </TableCell>
@@ -291,20 +291,20 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
-                            <span className="font-normal text-foreground">{item.space.building.name}</span>
+                          <div className="text-muted-foreground flex items-center gap-1.5">
+                            <MapPin className="text-muted-foreground size-3.5 shrink-0" />
+                            <span className="text-foreground font-normal">{item.space.building.name}</span>
                             <span>/</span>
                             <span>{item.space.name}</span>
-                            <span className="font-mono text-muted-foreground text-xs">
+                            <span className="text-muted-foreground font-mono text-xs">
                               ({item.space.floor > 0 ? `${item.space.floor}F` : `B${Math.abs(item.space.floor)}`})
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground font-mono text-xs">
                           {item.purchase_date ?? "-"}
                         </TableCell>
-                        <TableCell className="font-mono text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground font-mono text-xs">
                           {item.warranty_expiry ?? "-"}
                         </TableCell>
                         <TableCell>
@@ -315,7 +315,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="size-8 text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground size-8"
                               onClick={() => handleHistoryOpen(item)}
                               title="查看維修歷史"
                             >
@@ -325,7 +325,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="size-8 text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground size-8"
                               onClick={() => handleEditOpen(item)}
                               title="編輯設備"
                             >
@@ -335,7 +335,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="text-destructive hover:bg-destructive/10 hover:text-destructive size-8"
                               onClick={() => handleDeleteOpen(item)}
                               title="刪除設備"
                             >
@@ -353,11 +353,11 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
               {/* Pagination & Count Info */}
               <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
                 <div className="text-muted-foreground text-xs">
-                  顯示第 <span className="font-medium text-foreground">{(safeCurrentPage - 1) * PAGE_SIZE + 1}</span> 到{" "}
-                  <span className="font-medium text-foreground">
+                  顯示第 <span className="text-foreground font-medium">{(safeCurrentPage - 1) * PAGE_SIZE + 1}</span> 到{" "}
+                  <span className="text-foreground font-medium">
                     {Math.min(safeCurrentPage * PAGE_SIZE, filteredEquipment.length)}
                   </span>{" "}
-                  筆，共 <span className="font-medium text-foreground">{filteredEquipment.length}</span> 筆設備
+                  筆，共 <span className="text-foreground font-medium">{filteredEquipment.length}</span> 筆設備
                 </div>
 
                 {totalPages > 1 && (
@@ -372,7 +372,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                           className={safeCurrentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
-                      <PaginationItem className="px-3 font-medium text-muted-foreground text-xs">
+                      <PaginationItem className="text-muted-foreground px-3 text-xs font-medium">
                         頁次 {safeCurrentPage} / {totalPages}
                       </PaginationItem>
                       <PaginationItem>

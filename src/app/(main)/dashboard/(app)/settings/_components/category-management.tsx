@@ -81,7 +81,7 @@ function SortableCategoryRow({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+            className="text-muted-foreground hover:text-foreground h-7 w-7 cursor-grab touch-none active:cursor-grabbing"
             {...attributes}
             {...listeners}
             disabled={isPending}
@@ -90,10 +90,10 @@ function SortableCategoryRow({
             <GripVertical className="h-4 w-4" />
             <span className="sr-only">拖拉調整順序</span>
           </Button>
-          <span className="w-4 text-muted-foreground">{index + 1}</span>
+          <span className="text-muted-foreground w-4">{index + 1}</span>
         </div>
       </TableCell>
-      <TableCell className="font-medium text-foreground">{category.name}</TableCell>
+      <TableCell className="text-foreground font-medium">{category.name}</TableCell>
       <TableCell className="w-[120px]">
         {category.is_active ? (
           <Badge variant="success">啟用中</Badge>
@@ -126,7 +126,7 @@ function SortableCategoryRow({
         <Button
           variant="ghost"
           size="icon"
-          className="size-11 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-8"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive size-11 sm:size-8"
           onClick={() => onDeleteOpen(category)}
           disabled={isPending}
           title="刪除類別"
@@ -263,7 +263,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="text-xl">報修類別列表</CardTitle>
-          <CardDescription className="mt-1 text-muted-foreground text-sm">
+          <CardDescription className="text-muted-foreground mt-1 text-sm">
             管理前端報修表單顯示的故障類別項目，可按住左側圖示拖拉調整顯示順序或設定啟用狀態。
           </CardDescription>
         </div>
@@ -274,7 +274,7 @@ export function CategoryManagement({ initialCategories }: CategoryManagementProp
       </CardHeader>
       <CardContent>
         {categories.length === 0 ? (
-          <Empty className="border border-dashed bg-card/40 py-10">
+          <Empty className="bg-card/40 border border-dashed py-10">
             <EmptyHeader>
               <EmptyDescription>目前尚未建立任何報修類別。</EmptyDescription>
             </EmptyHeader>
