@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAdmin, requireAuth, safeAction } from "@/server/auth";
 import { actorFromAuthUser, transitionTicket } from "@/server/tickets/lifecycle";
+import { addProgressNote as addTicketProgressNote } from "@/server/tickets/progress-note";
 
 /**
  * Adds a progress note to the ticket without changing its status.
@@ -13,41 +14,15 @@ export async function addProgressNote(
   content: string,
 ): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
-    if (!content.trim()) {
-      return { success: false, error: "備註內容不可為空白" };
-    }
-
     const user = await requireAuth();
-    const { supabase, userId, role } = user;
-
-    // Check ticket and permission
-    const { data: ticket, error: ticketError } = await supabase
-      .from("tickets")
-      .select("id, status, assigned_to")
-      .eq("id", ticketId)
-      .single();
-
-    if (ticketError || !ticket) {
-      return { success: false, error: "找不到該單據" };
-    }
-
-    const isAssignedTech = ticket.assigned_to === userId;
-    const isAdmin = role === "admin";
-
-    if (!isAssignedTech && !isAdmin) {
-      return { success: false, error: "無權限為此單據新增進度備註" };
-    }
-
-    const { error: insertError } = await supabase.from("ticket_notes").insert({
-      ticket_id: ticketId,
-      author_id: userId,
-      content: content.trim(),
-      type: "note",
+    const result = await addTicketProgressNote(user.supabase, {
+      ticketId,
+      content,
+      viewer: { role: user.role, userId: user.userId },
     });
 
-    if (insertError) {
-      console.error("Failed to insert progress note:", insertError);
-      return { success: false, error: "新增備註失敗，請稍後再試" };
+    if (!result.success) {
+      return result;
     }
 
     revalidatePath(`/dashboard/tickets/${ticketId}`);

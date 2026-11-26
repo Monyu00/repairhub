@@ -14,8 +14,23 @@ export interface TicketDetailViewer {
   userId: string | null;
 }
 
+export type TicketProgressNoteFacts = Pick<TicketDetail["ticket"], "assignedTo">;
+
 function capability(enabled: boolean, disabledReason: string): TicketDetailActionCapability {
   return { enabled, disabledReason: enabled ? null : disabledReason };
+}
+
+function isAssignedTechnician(ticket: { assignedTo: string | null }, viewer: TicketDetailViewer): boolean {
+  return viewer.role === "technician" && viewer.userId !== null && ticket.assignedTo === viewer.userId;
+}
+
+export function getProgressNoteCapability(
+  ticket: TicketProgressNoteFacts,
+  viewer: TicketDetailViewer,
+): TicketDetailActionCapability {
+  const isAssignedTech = isAssignedTechnician(ticket, viewer);
+
+  return capability(viewer.role === "admin" || isAssignedTech, "無權限為此單據新增進度備註");
 }
 
 export function getTicketDetailCapabilities(
@@ -23,8 +38,8 @@ export function getTicketDetailCapabilities(
   viewer: TicketDetailViewer,
 ): TicketDetailCapabilities {
   const { status } = detail.ticket;
-  const { role, userId } = viewer;
-  const isAssignedTech = role === "technician" && userId !== null && detail.ticket.assignedTo === userId;
+  const { role } = viewer;
+  const isAssignedTech = isAssignedTechnician(detail.ticket, viewer);
 
   const claimReason = (() => {
     if (role === "technician") {
@@ -56,6 +71,6 @@ export function getTicketDetailCapabilities(
     returnToPending: capability(role === "admin" && status === "in_progress", "僅維修中的單據可退回待處理"),
     claim: capability(role === "technician" && status === "pending", claimReason),
     closure: capability((role === "admin" || isAssignedTech) && status === "in_progress", closureReason),
-    progressNote: capability(role === "admin" || isAssignedTech, "無權限為此單據新增進度備註"),
+    progressNote: getProgressNoteCapability(detail.ticket, viewer),
   };
 }

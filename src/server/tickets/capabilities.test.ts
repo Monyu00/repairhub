@@ -1,4 +1,4 @@
-import { getTicketDetailCapabilities } from "./capabilities";
+import { getProgressNoteCapability, getTicketDetailCapabilities } from "./capabilities";
 import type { TicketDetail } from "./detail";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -189,5 +189,24 @@ test("Capabilities derive from role, assignment, and every Ticket status", () =>
       getTicketDetailCapabilities(detail, viewers.unassignedTechnician),
       expected.unassignedTechnician[status],
     );
+  }
+});
+
+test("Progress Note policy matches the Ticket Detail capability", () => {
+  const viewers = [
+    { role: "admin" as const, userId: "admin-1" },
+    { role: "technician" as const, userId: "technician-1" },
+    { role: "technician" as const, userId: "technician-2" },
+  ];
+
+  for (const status of statuses) {
+    for (const viewer of viewers) {
+      const facts = { status, assignedTo: "technician-1" };
+
+      assert.deepEqual(
+        getProgressNoteCapability(facts, viewer),
+        getTicketDetailCapabilities(createDetail(status, "technician-1"), viewer).progressNote,
+      );
+    }
   }
 });
