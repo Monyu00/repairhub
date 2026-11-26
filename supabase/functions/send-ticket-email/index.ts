@@ -2,14 +2,14 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import { createRequestHandler } from "../_shared/delivery/execution.ts";
 import {
-  createRequestHandler,
+  createEmailChannel,
   type EmailMessage,
+  type EmailRepository,
   EmailSendError,
-  type NotificationRepository,
-  type RequestHandlerDependencies,
   type TicketEmailDisplayData,
-} from "./handler.ts";
+} from "./channel.ts";
 import { ticketStatusLabel } from "./templates.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -41,7 +41,7 @@ function readServiceKey(): string {
   }
 }
 
-function createRepository(supabaseUrl: string, serviceKey: string): NotificationRepository {
+function createRepository(supabaseUrl: string, serviceKey: string): EmailRepository {
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -192,13 +192,15 @@ async function sendWithResend(message: EmailMessage): Promise<{ messageId: strin
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceKey = readServiceKey();
 
-const dependencies: RequestHandlerDependencies = {
+const dependencies = {
   expectedSecret: Deno.env.get("REPAIRHUB_EDGE_FUNCTION_SECRET") ?? "",
-  from: Deno.env.get("RESEND_FROM") ?? "",
-  replyTo: Deno.env.get("RESEND_REPLY_TO") ?? "",
   appBaseUrl: Deno.env.get("APP_BASE_URL") ?? "",
   repository: createRepository(supabaseUrl, serviceKey),
   sender: { send: sendWithResend },
+  channel: createEmailChannel({
+    from: Deno.env.get("RESEND_FROM") ?? "",
+    replyTo: Deno.env.get("RESEND_REPLY_TO") ?? "",
+  }),
 };
 
 Deno.serve(createRequestHandler(dependencies));

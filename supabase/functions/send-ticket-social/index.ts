@@ -2,15 +2,16 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+import { createRequestHandler } from "../_shared/delivery/execution.ts";
 import {
-  createRequestHandler,
+  type DiscordMessage,
   DiscordSendError,
   type DiscordSender,
   MissingSocialTargetError,
-  type NotificationRepository,
-  type RequestHandlerDependencies,
+  socialChannel,
+  type SocialRepository,
   type TicketSocialDisplayData,
-} from "./handler.ts";
+} from "./channel.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -34,7 +35,7 @@ function readServiceKey(): string {
   }
 }
 
-function createRepository(supabaseUrl: string, serviceKey: string): NotificationRepository {
+function createRepository(supabaseUrl: string, serviceKey: string): SocialRepository {
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -135,9 +136,7 @@ function createRepository(supabaseUrl: string, serviceKey: string): Notification
   };
 }
 
-async function sendToDiscord(message: { webhookUrl: string; content: string; allowedMentions: { parse: [] } }): Promise<{
-  messageId: string;
-}> {
+async function sendToDiscord(message: DiscordMessage): Promise<{ messageId: string }> {
   let response: Response;
   try {
     response = await fetch(message.webhookUrl, {
@@ -165,11 +164,12 @@ async function sendToDiscord(message: { webhookUrl: string; content: string; all
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceKey = readServiceKey();
 
-const dependencies: RequestHandlerDependencies = {
+const dependencies = {
   expectedSecret: Deno.env.get("REPAIRHUB_EDGE_FUNCTION_SECRET") ?? "",
   appBaseUrl: Deno.env.get("APP_BASE_URL") ?? "",
   repository: createRepository(supabaseUrl, serviceKey),
   sender: { send: sendToDiscord } satisfies DiscordSender,
+  channel: socialChannel,
 };
 
 Deno.serve(createRequestHandler(dependencies));

@@ -1,25 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { TicketNotificationEvent } from "../_shared/delivery/events.ts";
 import {
-  createRequestHandler,
-  type DiscordMessage,
-  DiscordSendError,
+  type ClaimedSocialDelivery,
   MissingSocialTargetError,
-  type NotificationRepository,
-  type RequestHandlerDependencies,
-  SERVICE_SECRET_HEADER,
-} from "../send-ticket-social/handler.ts";
+  socialChannel,
+  type TicketSocialDisplayData,
+} from "../send-ticket-social/channel.ts";
 
-const SERVICE_SECRET = "test-service-secret";
-const FIXED_NOW = new Date("2026-11-23T08:30:00.000Z");
+const TICKET_ID = "12345678-1234-1234-1234-123456789abc";
+const TRACKING_URL = `https://repairhub.monyu.dev/track/${TICKET_ID}`;
 
-function createDelivery(overrides: Record<string, unknown> = {}) {
+function createDelivery(overrides: Partial<ClaimedSocialDelivery> = {}): ClaimedSocialDelivery {
   return {
     id: "delivery-1",
-    ticketId: "12345678-1234-1234-1234-123456789abc",
+    ticketId: TICKET_ID,
     eventType: "report_submitted",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:report_submitted",
+    eventKey: `ticket:${TICKET_ID}:report_submitted`,
     targetFingerprint: "target-fingerprint",
     eventAt: "2026-11-23T08:30:00.000Z",
     attemptCount: 1,
@@ -27,221 +25,65 @@ function createDelivery(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createRepository(
-  options: { ticketFound?: boolean; targetFound?: boolean; claim?: Record<string, unknown> } = {},
-) {
-  const state = {
-    claim: (options.claim ?? createDelivery()) as object | null,
-    ticketFound: options.ticketFound ?? true,
-    targetFound: options.targetFound ?? true,
-    sent: [] as Array<{ deliveryId: string; messageId: string }>,
-    failed: [] as Array<{
-      deliveryId: string;
-      error: string;
-      retryable: boolean;
-      nextAttemptAt: Date | null;
-    }>,
-  };
-
-  const repository: NotificationRepository = {
-    claimDelivery() {
-      return Promise.resolve(state.claim as never);
-    },
-    getTicketData(delivery) {
-      if (!state.targetFound) return Promise.reject(new MissingSocialTargetError());
-      if (!state.ticketFound) return Promise.resolve(null);
-
-      return Promise.resolve({
-        ticketId: delivery.ticketId,
-        webhookUrl: "https://discord.com/api/webhooks/123/fake-token",
-        categoryName: "空調",
-        location: "行政大樓 3F 301",
-        updatedAt: delivery.eventAt,
-      });
-    },
-    markSent(deliveryId, messageId) {
-      state.sent.push({ deliveryId, messageId });
-      return Promise.resolve();
-    },
-    markFailed(deliveryId, error, _failedAt, options) {
-      state.failed.push({
-        deliveryId,
-        error,
-        retryable: options.retryable,
-        nextAttemptAt: options.nextAttemptAt,
-      });
-      return Promise.resolve();
-    },
-  };
-
-  return { repository, state };
-}
-
-function createTestHandler(
-  repository: NotificationRepository,
-  sender: RequestHandlerDependencies["sender"],
-  overrides: Partial<RequestHandlerDependencies> = {},
-) {
-  return createRequestHandler({
-    expectedSecret: SERVICE_SECRET,
-    appBaseUrl: "https://repairhub.monyu.dev",
-    repository,
-    sender,
-    now: () => FIXED_NOW,
-    sleep: () => Promise.resolve(),
-    random: () => 0.25,
+function createTicketData(overrides: Partial<TicketSocialDisplayData> = {}): TicketSocialDisplayData {
+  return {
+    ticketId: TICKET_ID,
+    webhookUrl: "https://discord.com/api/webhooks/123/fake-token",
+    categoryName: "空調",
+    location: "行政大樓 3F 301",
+    updatedAt: "2026-11-23T08:30:00.000Z",
     ...overrides,
-  });
+  };
 }
 
-function request(deliveryId = "delivery-1", secret = SERVICE_SECRET) {
-  return new Request("https://repairhub.monyu.dev/functions/v1/send-ticket-social", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      [SERVICE_SECRET_HEADER]: secret,
-    },
-    body: JSON.stringify({ delivery_id: deliveryId }),
-  });
+function buildMessage(eventType: TicketNotificationEvent = "report_submitted") {
+  return socialChannel.buildMessage(
+    createDelivery({ eventType }),
+    createTicketData(),
+    TRACKING_URL,
+    eventType,
+  );
 }
 
-const successfulSender = (): Promise<{ messageId: string }> => Promise.resolve({ messageId: "discord-message-success" });
+test("posts concise zh-TW plain text with mentions disabled and no Reporter contact", () => {
+  const message = buildMessage();
 
-test("requires the internal service secret", async () => {
-  const { repository } = createRepository();
-  const handler = createTestHandler(repository, { send: successfulSender });
-
-  const unauthorized = await handler(request("delivery-1", "wrong-secret"));
-  assert.equal(unauthorized.status, 401);
-});
-
-test("claims the social delivery and posts concise zh-TW plain text with mentions disabled", async () => {
-  const { repository, state } = createRepository();
-  const messages: DiscordMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "discord-message-1" });
-    },
-  });
-
-  const response = await handler(request());
-  const body = (await response.json()) as Record<string, unknown>;
-
-  assert.equal(response.status, 200);
-  assert.equal(body.success, true);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.webhookUrl, "https://discord.com/api/webhooks/123/fake-token");
-  assert.deepEqual(messages[0]?.allowedMentions, { parse: [] });
+  assert.equal(message.webhookUrl, "https://discord.com/api/webhooks/123/fake-token");
+  assert.deepEqual(message.allowedMentions, { parse: [] });
   assert.equal(
-    messages[0]?.content,
+    message.content,
     [
       "報修單編號：#12345678",
       "狀態：待處理",
       "類別：空調",
       "地點：行政大樓 3F 301",
       "更新時間：2026/11/23 16:30",
-      "追蹤連結：https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
+      `追蹤連結：${TRACKING_URL}`,
     ].join("\n"),
   );
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "discord-message-1" }]);
 });
 
-test("accepts new_ticket social deliveries with the same concise format", async () => {
-  const { repository } = createRepository({
-    claim: createDelivery({ eventType: "new_ticket" }),
-  });
-  const messages: DiscordMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "discord-message-new-ticket" });
-    },
-  });
+test("renders every Ticket lifecycle label", () => {
+  const cases = [
+    ["new_ticket", "待處理"],
+    ["report_submitted", "待處理"],
+    ["in_progress", "處理中"],
+    ["completed", "已完成"],
+    ["closed", "已結案"],
+    ["cancelled", "已取消"],
+  ] as const;
 
-  const response = await handler(request());
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.content.split("\n")[1], "狀態：待處理");
+  for (const [eventType, label] of cases) {
+    assert.equal(buildMessage(eventType).content.split("\n")[1], `狀態：${label}`);
+  }
 });
 
-test("renders status-change events with their lifecycle label", async () => {
-  const { repository } = createRepository({
-    claim: createDelivery({ eventType: "in_progress" }),
+test("maps a missing active target to a permanent channel failure", () => {
+  assert.deepEqual(socialChannel.readFailure(new MissingSocialTargetError()), {
+    status: 422,
+    error: "Missing social target",
+    logError: "No active social target",
   });
-  const messages: DiscordMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "discord-message-status" });
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 200);
-  assert.equal(messages[0]?.content.split("\n")[1], "狀態：處理中");
-});
-
-test("marks a missing active target as a permanent failure without sending", async () => {
-  const { repository, state } = createRepository({ targetFound: false });
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.resolve({ messageId: "unexpected" });
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 422);
-  assert.equal(senderCalls, 0);
-  assert.deepEqual(state.failed, [{
-    deliveryId: "delivery-1",
-    error: "No active social target",
-    retryable: false,
-    nextAttemptAt: null,
-  }]);
-});
-
-test("retries network errors, 429, and 5xx; does not retry other 4xx", async () => {
-  const { repository } = createRepository();
-  const outcomes = [
-    new DiscordSendError("network unavailable", { retryable: true }),
-    new DiscordSendError("rate limited", { retryable: true }),
-    new DiscordSendError("webhook removed", { retryable: false }),
-  ];
-  const handler = createTestHandler(repository, {
-    send() {
-      const outcome = outcomes.shift();
-      if (outcome instanceof Error) return Promise.reject(outcome);
-      return Promise.resolve({ messageId: "unexpected" });
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 502);
-  assert.equal(outcomes.length, 0);
-});
-
-test("completes a successful social delivery after a retryable failure", async () => {
-  const { repository, state } = createRepository();
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      if (senderCalls === 1) {
-        return Promise.reject(new DiscordSendError("rate limited", { retryable: true }));
-      }
-      return Promise.resolve({ messageId: "discord-message-after-retry" });
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 200);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "discord-message-after-retry" }]);
+  assert.equal(socialChannel.readFailure(new Error("database unavailable")), null);
+  assert.equal(socialChannel.validateTarget(createDelivery()), null);
 });

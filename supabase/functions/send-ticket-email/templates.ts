@@ -1,3 +1,5 @@
+import type { TicketNotificationEvent } from "../_shared/delivery/events.ts";
+
 export interface TicketEmailData {
   ticketId: string;
   statusLabel: string;
@@ -7,17 +9,6 @@ export interface TicketEmailData {
   updatedAt: string;
   trackingUrl: string;
 }
-
-export const TICKET_NOTIFICATION_EVENTS = [
-  "new_ticket",
-  "report_submitted",
-  "in_progress",
-  "completed",
-  "closed",
-  "cancelled",
-] as const;
-
-export type TicketNotificationEvent = (typeof TICKET_NOTIFICATION_EVENTS)[number];
 
 export function ticketStatusLabel(eventType: string): string {
   switch (eventType) {
