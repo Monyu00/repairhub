@@ -81,6 +81,7 @@ Wizard 最後會要求部署者建立一筆真實測試 Ticket，依序確認：
 ## 驗證
 
 ```bash
+npx --yes deno test supabase/functions/tests/delivery-execution-test.ts
 npx --yes deno test supabase/functions/tests/send-ticket-email-test.ts
 npx --yes deno check --frozen-lockfile supabase/functions/send-ticket-email/index.ts
 ```

@@ -1,26 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { TicketNotificationEvent } from "../_shared/delivery/events.ts";
 import {
-  type ClaimedDelivery,
-  createRequestHandler,
-  type EmailMessage,
-  EmailSendError,
-  type NotificationRepository,
-  type RequestHandlerDependencies,
-  SERVICE_SECRET_HEADER,
-} from "../send-ticket-email/handler.ts";
+  type ClaimedEmailDelivery,
+  createEmailChannel,
+  type TicketEmailDisplayData,
+} from "../send-ticket-email/channel.ts";
 import { renderTicketEmail, ticketStatusLabel } from "../send-ticket-email/templates.ts";
 
-const SERVICE_SECRET = "test-service-secret";
-const FIXED_NOW = new Date("2026-10-23T08:30:00.000Z");
+const TICKET_ID = "12345678-1234-1234-1234-123456789abc";
+const TRACKING_URL = `https://repairhub.monyu.dev/track/${TICKET_ID}`;
 
-function createDelivery(overrides: Partial<ClaimedDelivery> = {}): ClaimedDelivery {
+function createDelivery(overrides: Partial<ClaimedEmailDelivery> = {}): ClaimedEmailDelivery {
   return {
     id: "delivery-1",
-    ticketId: "12345678-1234-1234-1234-123456789abc",
+    ticketId: TICKET_ID,
     eventType: "in_progress",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
+    eventKey: `ticket:${TICKET_ID}:in_progress:1761208200`,
     recipientEmail: "reporter@example.com",
     eventAt: "2026-10-23T08:30:00.000Z",
     attemptCount: 1,
@@ -28,598 +25,116 @@ function createDelivery(overrides: Partial<ClaimedDelivery> = {}): ClaimedDelive
   };
 }
 
-function createRepository() {
-  const state = {
-    claim: createDelivery() as ClaimedDelivery | null,
-    ticketFound: true,
-    sent: [] as Array<{ deliveryId: string; messageId: string }>,
-    failed: [] as Array<{
-      deliveryId: string;
-      error: string;
-      retryable: boolean;
-      nextAttemptAt: Date | null;
-    }>,
+function createTicketData(overrides: Partial<TicketEmailDisplayData> = {}): TicketEmailDisplayData {
+  return {
+    ticketId: TICKET_ID,
+    statusLabel: "維修中",
+    categoryName: "空調",
+    description: "三樓會議室冷氣無法啟動，需要儘速檢查。",
+    location: "行政大樓 3F 301",
+    updatedAt: "2026-10-23T08:30:00.000Z",
+    ...overrides,
   };
-
-  const repository: NotificationRepository = {
-    claimDelivery() {
-      return Promise.resolve(state.claim);
-    },
-    getTicketData(delivery) {
-      if (!state.ticketFound) return Promise.resolve(null);
-
-      return Promise.resolve({
-        ticketId: delivery.ticketId,
-        statusLabel: ticketStatusLabel(delivery.eventType),
-        categoryName: "空調",
-        location: "行政大樓 3F 301",
-        updatedAt: delivery.eventAt,
-        description: "三樓會議室冷氣無法啟動，需要儘速檢查。",
-      });
-    },
-    markSent(deliveryId, messageId) {
-      state.sent.push({ deliveryId, messageId });
-      return Promise.resolve();
-    },
-    markFailed(deliveryId, error, _failedAt, options) {
-      state.failed.push({
-        deliveryId,
-        error,
-        retryable: options.retryable,
-        nextAttemptAt: options.nextAttemptAt,
-      });
-      return Promise.resolve();
-    },
-  };
-
-  return { repository, state };
 }
 
-function createTestHandler(
-  repository: NotificationRepository,
-  sender: RequestHandlerDependencies["sender"],
-  overrides: Partial<RequestHandlerDependencies> = {},
+function buildMessage(
+  eventType: TicketNotificationEvent = "in_progress",
+  deliveryOverrides: Partial<ClaimedEmailDelivery> = {},
+  ticketOverrides: Partial<TicketEmailDisplayData> = {},
 ) {
-  return createRequestHandler({
-    expectedSecret: SERVICE_SECRET,
+  const channel = createEmailChannel({
     from: "南臺校園維修通報系統 <no-reply@notify.monyu.dev>",
     replyTo: "support@example.com",
-    appBaseUrl: "https://repairhub.monyu.dev",
-    repository,
-    sender,
-    now: () => FIXED_NOW,
-    sleep: async () => {},
-    random: () => 0,
-    ...overrides,
   });
-}
-
-function request(deliveryId = "delivery-1", secret = SERVICE_SECRET): Request {
-  return new Request("https://example.test/functions/v1/send-ticket-email", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      [SERVICE_SECRET_HEADER]: secret,
-    },
-    body: JSON.stringify({ delivery_id: deliveryId }),
-  });
-}
-
-test("rejects a missing or invalid service secret without claiming or sending", async () => {
-  const { repository } = createRepository();
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.resolve({ messageId: "unexpected" });
-    },
-  });
-
-  const response = await handler(request("delivery-1", "wrong-secret"));
-
-  assert.equal(response.status, 401);
-  assert.equal(senderCalls, 0);
-});
-
-test("sends the in-progress Email with stable content and idempotency", async () => {
-  const { repository, state } = createRepository();
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-1" });
-    },
-  });
-
-  const response = await handler(request());
-  const body = (await response.json()) as Record<string, unknown>;
-
-  assert.equal(response.status, 200);
-  assert.equal(body.message_id, "resend-message-1");
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已開始維修");
-  assert.equal(
-    messages[0]?.idempotencyKey,
-    "repairhub:ticket:12345678-1234-1234-1234-123456789abc:in_progress:1761208200",
+  return channel.buildMessage(
+    createDelivery({ eventType, ...deliveryOverrides }),
+    createTicketData({ statusLabel: ticketStatusLabel(eventType), ...ticketOverrides }),
+    TRACKING_URL,
+    eventType,
   );
-  assert.match(messages[0]?.html ?? "", /#12345678/);
-  assert.match(messages[0]?.html ?? "", /維修中/);
-  assert.match(messages[0]?.html ?? "", /空調/);
-  assert.match(messages[0]?.html ?? "", /行政大樓 3F 301/);
-  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
-  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-1", messageId: "resend-message-1" }]);
+}
+
+test("validates the Email recipient before Ticket data is read", () => {
+  const channel = createEmailChannel({ from: "from@example.com", replyTo: "reply@example.com" });
+
+  assert.equal(channel.validateTarget(createDelivery()), null);
+  assert.deepEqual(channel.validateTarget(createDelivery({ recipientEmail: "not-an-email" })), {
+    status: 422,
+    error: "Invalid recipient Email",
+  });
 });
 
-test("sends the new-ticket Email with a bounded description and no Reporter contact", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-new-ticket",
-    eventType: "new_ticket",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:new_ticket:1761208200",
+test("renders the in-progress Email with sender, tracking URL, and stable idempotency", () => {
+  const message = buildMessage();
+
+  assert.equal(message.from, "南臺校園維修通報系統 <no-reply@notify.monyu.dev>");
+  assert.equal(message.replyTo, "support@example.com");
+  assert.equal(message.to, "reporter@example.com");
+  assert.equal(message.subject, "【南臺校園維修通報系統】案件 #12345678 已開始維修");
+  assert.equal(message.idempotencyKey, `repairhub:ticket:${TICKET_ID}:in_progress:1761208200`);
+  assert.match(message.html, /#12345678/);
+  assert.match(message.html, /維修中/);
+  assert.match(message.html, /空調/);
+  assert.match(message.html, /行政大樓 3F 301/);
+  assert.match(message.html, /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
+  assert.match(message.text, /查看報修單進度：https:\/\//);
+});
+
+test("bounds the new-ticket description and excludes Reporter contact details", () => {
+  const message = buildMessage("new_ticket", {
+    eventKey: `ticket:${TICKET_ID}:new_ticket:1761208200`,
     recipientEmail: "technician@example.com",
   });
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-new-ticket" });
-    },
-  });
 
-  const response = await handler(request("delivery-new-ticket"));
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.to, "technician@example.com");
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】新報修案件 #12345678：空調");
-  assert.match(messages[0]?.html ?? "", /待處理/);
-  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
-  assert.match(messages[0]?.html ?? "", /<strong>問題描述：<\/strong>三樓會議室冷氣無法啟動/);
-  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
-  assert.doesNotMatch(messages[0]?.html ?? "", /reporter@example\.com/);
-  assert.doesNotMatch(messages[0]?.html ?? "", /reporter-phone/);
-  assert.match(messages[0]?.text ?? "", /問題描述：三樓會議室冷氣無法啟動/);
-  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-new-ticket", messageId: "resend-message-new-ticket" }]);
+  assert.equal(message.to, "technician@example.com");
+  assert.equal(message.subject, "【南臺校園維修通報系統】新報修案件 #12345678：空調");
+  assert.match(message.html, /待處理/);
+  assert.match(message.html, /<strong>問題描述：<\/strong>三樓會議室冷氣無法啟動/);
+  assert.doesNotMatch(message.html, /reporter@example\.com/);
+  assert.doesNotMatch(message.html, /reporter-phone/);
+  assert.match(message.text, /問題描述：三樓會議室冷氣無法啟動/);
+  assert.equal(message.idempotencyKey, `repairhub:ticket:${TICKET_ID}:new_ticket:1761208200`);
 });
 
-test("sends the report-submitted Email confirming the Reporter's submission", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-report-submitted",
-    eventType: "report_submitted",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:report_submitted",
-  });
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-report-submitted" });
-    },
+test("renders submission confirmation with the Reporter idempotency key", () => {
+  const message = buildMessage("report_submitted", {
+    eventKey: `ticket:${TICKET_ID}:report_submitted`,
   });
 
-  const response = await handler(request("delivery-report-submitted"));
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】報修已收到 #12345678");
-  assert.match(messages[0]?.html ?? "", /您的報修已成功送出/);
-  assert.match(messages[0]?.html ?? "", /待處理/);
-  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
-  assert.match(messages[0]?.html ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
-  assert.match(messages[0]?.text ?? "", /您的報修已成功送出，我們會盡快安排人員處理。/);
-  assert.match(messages[0]?.text ?? "", /查看報修單進度：https:\/\//);
-  assert.equal(
-    messages[0]?.idempotencyKey,
-    "repairhub:ticket:12345678-1234-1234-1234-123456789abc:report_submitted",
-  );
-  assert.deepEqual(state.sent, [
-    { deliveryId: "delivery-report-submitted", messageId: "resend-message-report-submitted" },
-  ]);
+  assert.equal(message.subject, "【南臺校園維修通報系統】報修已收到 #12345678");
+  assert.match(message.html, /您的報修已成功送出/);
+  assert.match(message.text, /您的報修已成功送出，我們會盡快安排人員處理。/);
+  assert.equal(message.idempotencyKey, `repairhub:ticket:${TICKET_ID}:report_submitted`);
 });
 
-test("does not send a new-ticket Email to an invalid recipient", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-invalid-recipient",
-    eventType: "new_ticket",
-    recipientEmail: "not-an-email",
-  });
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.resolve({ messageId: "unexpected" });
-    },
-  });
+test("keeps completion, closure, and cancellation Email copy unchanged", () => {
+  const cases = [
+    ["completed", "【南臺校園維修通報系統】案件 #12345678 已完工，請確認", /7 天內未確認/],
+    ["closed", "【南臺校園維修通報系統】案件 #12345678 已結案", /案件已結案/],
+    ["cancelled", "【南臺校園維修通報系統】案件 #12345678 已取消", /案件已取消/],
+  ] as const;
 
-  const response = await handler(request("delivery-invalid-recipient"));
-
-  assert.equal(response.status, 422);
-  assert.equal(senderCalls, 0);
-  assert.deepEqual(state.failed, [
-    {
-      deliveryId: "delivery-invalid-recipient",
-      error: "Invalid recipient Email",
-      retryable: false,
-      nextAttemptAt: null,
-    },
-  ]);
-});
-
-test("sends the completed Email with confirmation and seven-day auto-close guidance", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-completed",
-    eventType: "completed",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761208200",
-  });
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-completed" });
-    },
-  });
-
-  const response = await handler(request("delivery-completed"));
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已完工，請確認");
-  assert.match(messages[0]?.html ?? "", /確認修復結果/);
-  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
-  assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
-  assert.match(messages[0]?.html ?? "", /<strong>更新時間：<\/strong>2026\/10\/23\s16:30/);
-  assert.match(messages[0]?.text ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
-  assert.match(messages[0]?.text ?? "", /7 天內未確認/);
-  assert.match(messages[0]?.text ?? "", /自動結案/);
-  assert.match(messages[0]?.html ?? "", /已完工/);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-completed", messageId: "resend-message-completed" }]);
-});
-
-test("sends the closed Email after reporter confirmation or seven-day auto-close", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-closed",
-    eventType: "closed",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:closed:1761208200",
-  });
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-closed" });
-    },
-  });
-
-  const response = await handler(request("delivery-closed"));
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已結案");
-  assert.match(messages[0]?.html ?? "", /案件已結案/);
-  assert.match(messages[0]?.html ?? "", /<strong>報修類別：<\/strong>空調/);
-  assert.match(messages[0]?.html ?? "", /<strong>地點：<\/strong>行政大樓 3F 301/);
-  assert.match(messages[0]?.html ?? "", /<strong>更新時間：<\/strong>2026\/10\/23\s16:30/);
-  assert.match(messages[0]?.text ?? "", /https:\/\/repairhub\.monyu\.dev\/track\/12345678-1234-1234-1234-123456789abc/);
-  assert.match(messages[0]?.text ?? "", /已結案/);
-  assert.match(messages[0]?.html ?? "", /已結案/);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-closed", messageId: "resend-message-closed" }]);
-});
-
-test("sends the cancelled Email when an Admin cancels the Ticket", async () => {
-  const { repository, state } = createRepository();
-  state.claim = createDelivery({
-    id: "delivery-cancelled",
-    eventType: "cancelled",
-    eventKey: "ticket:12345678-1234-1234-1234-123456789abc:cancelled:1761208200",
-  });
-  const messages: EmailMessage[] = [];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: "resend-message-cancelled" });
-    },
-  });
-
-  const response = await handler(request("delivery-cancelled"));
-
-  assert.equal(response.status, 200);
-  assert.equal(messages.length, 1);
-  assert.equal(messages[0]?.to, "reporter@example.com");
-  assert.equal(messages[0]?.subject, "【南臺校園維修通報系統】案件 #12345678 已取消");
-  assert.match(messages[0]?.html ?? "", /案件已取消/);
-  assert.match(messages[0]?.html ?? "", /已取消/);
-  assert.match(messages[0]?.text ?? "", /案件已取消/);
-  assert.match(messages[0]?.text ?? "", /已取消/);
-  assert.deepEqual(state.sent, [{ deliveryId: "delivery-cancelled", messageId: "resend-message-cancelled" }]);
-});
-
-test("allows a reopened Ticket to complete again with a new stable event key", async () => {
-  const deliveries = [
-    createDelivery({
-      id: "delivery-first-completion",
-      eventType: "completed",
-      eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761208200",
-      eventAt: "2026-10-23T08:30:00.000Z",
-    }),
-    createDelivery({
-      id: "delivery-second-completion",
-      eventType: "completed",
-      eventKey: "ticket:12345678-1234-1234-1234-123456789abc:completed:1761211800",
-      eventAt: "2026-10-23T09:30:00.000Z",
-    }),
-  ];
-  let claimIndex = 0;
-  const messages: EmailMessage[] = [];
-  const repository: NotificationRepository = {
-    claimDelivery() {
-      const delivery = deliveries[claimIndex] ?? null;
-      claimIndex++;
-      return Promise.resolve(delivery);
-    },
-    getTicketData(delivery) {
-      return Promise.resolve({
-        ticketId: delivery.ticketId,
-        statusLabel: "已完工",
-        categoryName: "空調",
-        description: "冷氣無法啟動",
-        location: "行政大樓 3F 301",
-        updatedAt: delivery.eventAt,
-      });
-    },
-    markSent() {
-      return Promise.resolve();
-    },
-    markFailed() {
-      return Promise.resolve();
-    },
-  };
-  const handler = createTestHandler(repository, {
-    send(message) {
-      messages.push(message);
-      return Promise.resolve({ messageId: `resend-message-${messages.length}` });
-    },
-  });
-
-  const firstResponse = await handler(request("delivery-first-completion"));
-  const secondResponse = await handler(request("delivery-second-completion"));
-
-  assert.equal(firstResponse.status, 200);
-  assert.equal(secondResponse.status, 200);
-  assert.equal(messages.length, 2);
-  assert.equal(new Set(messages.map((message) => message.idempotencyKey)).size, 2);
-});
-
-test("does not send twice when the delivery was already claimed", async () => {
-  const { repository, state } = createRepository();
-  state.claim = null;
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.resolve({ messageId: "unexpected" });
-    },
-  });
-
-  const response = await handler(request());
-  const body = (await response.json()) as Record<string, unknown>;
-
-  assert.equal(response.status, 200);
-  assert.equal(body.skipped, "already_claimed_or_sent");
-  assert.equal(senderCalls, 0);
-});
-
-test("does not send twice when concurrent invocations claim the same new-ticket delivery", async () => {
-  let claimed = false;
-  let senderCalls = 0;
-  const repository: NotificationRepository = {
-    claimDelivery: async () => {
-      await Promise.resolve();
-      if (claimed) return Promise.resolve(null);
-      claimed = true;
-      return Promise.resolve(
-        createDelivery({
-          eventType: "new_ticket",
-          eventKey: "ticket:12345678-1234-1234-1234-123456789abc:new_ticket",
-        }),
-      );
-    },
-    getTicketData(delivery) {
-      return Promise.resolve({
-        ticketId: delivery.ticketId,
-        statusLabel: "維修中",
-        categoryName: "空調",
-        description: "冷氣無法啟動",
-        location: "行政大樓 3F 301",
-        updatedAt: delivery.eventAt,
-      });
-    },
-    markSent() {
-      return Promise.resolve();
-    },
-    markFailed() {
-      return Promise.resolve();
-    },
-  };
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.resolve({ messageId: "resend-message-concurrent" });
-    },
-  });
-
-  const [firstResponse, secondResponse] = await Promise.all([handler(request()), handler(request())]);
-
-  assert.equal(firstResponse.status, 200);
-  assert.equal(secondResponse.status, 200);
-  assert.equal(senderCalls, 1);
-});
-
-test("retries network errors, 429, and 5xx with the same idempotency key", async () => {
-  const { repository } = createRepository();
-  const keys: string[] = [];
-  const outcomes = [
-    new EmailSendError("network unavailable", { retryable: true }),
-    new EmailSendError("rate limited", { retryable: true }),
-    { messageId: "resend-message-after-retry" },
-  ];
-  const handler = createTestHandler(repository, {
-    send(message) {
-      keys.push(message.idempotencyKey);
-      const outcome = outcomes.shift();
-      if (outcome instanceof Error) return Promise.reject(outcome);
-      return Promise.resolve(outcome as { messageId: string });
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 200);
-  assert.equal(keys.length, 3);
-  assert.equal(new Set(keys).size, 1);
-});
-
-test("does not retry permanent 4xx responses", async () => {
-  const { repository, state } = createRepository();
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.reject(new EmailSendError("invalid recipient", { retryable: false }));
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 502);
-  assert.equal(senderCalls, 1);
-  assert.deepEqual(state.failed, [
-    { deliveryId: "delivery-1", error: "invalid recipient", retryable: false, nextAttemptAt: null },
-  ]);
-});
-
-test("stops after three transient failures and keeps the diagnostic error", async () => {
-  const { repository, state } = createRepository();
-  let senderCalls = 0;
-  const handler = createTestHandler(repository, {
-    send() {
-      senderCalls++;
-      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
-    },
-  });
-
-  const response = await handler(request());
-
-  assert.equal(response.status, 502);
-  assert.equal(senderCalls, 3);
-  assert.deepEqual(state.failed, [
-    {
-      deliveryId: "delivery-1",
-      error: "upstream unavailable",
-      retryable: true,
-      nextAttemptAt: new Date("2026-10-23T08:35:00.000Z"),
-    },
-  ]);
-});
-
-test("schedules the next persistent retry after a transient delivery failure", async () => {
-  const { repository, state } = createRepository();
-  const handler = createTestHandler(repository, {
-    send() {
-      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
-    },
-  });
-
-  await handler(request());
-
-  assert.deepEqual(state.failed, [
-    {
-      deliveryId: "delivery-1",
-      error: "upstream unavailable",
-      retryable: true,
-      nextAttemptAt: new Date("2026-10-23T08:35:00.000Z"),
-    },
-  ]);
-});
-
-test("does not schedule a persistent retry for permanent failures", async () => {
-  const { repository, state } = createRepository();
-  const handler = createTestHandler(repository, {
-    send() {
-      return Promise.reject(new EmailSendError("invalid recipient", { retryable: false }));
-    },
-  });
-
-  await handler(request());
-
-  assert.deepEqual(state.failed, [
-    {
-      deliveryId: "delivery-1",
-      error: "invalid recipient",
-      retryable: false,
-      nextAttemptAt: null,
-    },
-  ]);
-});
-
-test("uses the persistent retry backoff and stops at the fifth attempt", async () => {
-  const expectedDelays = [5, 15, 60, 360];
-  const failures: Array<Date | null> = [];
-  const repository: NotificationRepository = {
-    claimDelivery() {
-      return Promise.resolve(createDelivery({ id: "delivery-backoff" }));
-    },
-    getTicketData() {
-      return Promise.resolve({
-        ticketId: "12345678-1234-1234-1234-123456789abc",
-        statusLabel: "維修中",
-        categoryName: "空調",
-        description: "冷氣無法啟動",
-        location: "行政大樓 3F 301",
-        updatedAt: "2026-10-23T08:30:00.000Z",
-      });
-    },
-    markSent() {
-      return Promise.resolve();
-    },
-    markFailed(_deliveryId, _error, _failedAt, options) {
-      failures.push(options.nextAttemptAt);
-      return Promise.resolve();
-    },
-  };
-  const handler = createTestHandler(repository, {
-    send() {
-      return Promise.reject(new EmailSendError("upstream unavailable", { retryable: true }));
-    },
-  });
-
-  for (const [index, attemptCount] of [1, 2, 3, 4, 5].entries()) {
-    repository.claimDelivery = () => Promise.resolve(createDelivery({ id: "delivery-backoff", attemptCount }));
-    await handler(request("delivery-backoff"));
-
-    const expected = index < 4 ? new Date(FIXED_NOW.getTime() + expectedDelays[index] * 60_000) : null;
-    assert.deepEqual(failures[index], expected);
+  for (const [eventType, subject, copy] of cases) {
+    const message = buildMessage(eventType);
+    assert.equal(message.subject, subject);
+    assert.match(message.text, copy);
+    assert.match(message.html, copy);
   }
 });
 
+test("uses a new idempotency key when a reopened Ticket completes again", () => {
+  const first = buildMessage("completed", {
+    eventKey: `ticket:${TICKET_ID}:completed:1761208200`,
+  });
+  const second = buildMessage("completed", {
+    eventKey: `ticket:${TICKET_ID}:completed:1761211800`,
+  });
+
+  assert.notEqual(first.idempotencyKey, second.idempotencyKey);
+});
+
 test("renders accessible HTML and an equivalent plain-text alternative", () => {
-  const rendered = renderTicketEmail(
-    {
-      ticketId: "12345678-1234-1234-1234-123456789abc",
-      statusLabel: "維修中",
-      categoryName: "空調",
-      description: "冷氣無法啟動",
-      location: "行政大樓 3F 301",
-      updatedAt: "2026-10-23T08:30:00.000Z",
-      trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
-    },
-    "in_progress",
-  );
+  const rendered = renderTicketEmail({ ...createTicketData(), trackingUrl: TRACKING_URL }, "in_progress");
 
   assert.match(rendered.html, /<html lang="zh-Hant-TW" dir="ltr">/);
   assert.match(rendered.html, /<div lang="zh-Hant-TW" dir="ltr"/);
@@ -632,15 +147,7 @@ test("renders accessible HTML and an equivalent plain-text alternative", () => {
 
 test("caps the new-ticket description summary at 160 characters", () => {
   const rendered = renderTicketEmail(
-    {
-      ticketId: "12345678-1234-1234-1234-123456789abc",
-      statusLabel: "待處理",
-      categoryName: "空調",
-      description: "冷".repeat(200),
-      location: "行政大樓 3F 301",
-      updatedAt: "2026-10-23T08:30:00.000Z",
-      trackingUrl: "https://repairhub.monyu.dev/track/12345678-1234-1234-1234-123456789abc",
-    },
+    { ...createTicketData({ description: "冷".repeat(200) }), trackingUrl: TRACKING_URL },
     "new_ticket",
   );
 
