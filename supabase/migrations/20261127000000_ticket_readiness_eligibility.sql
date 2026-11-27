@@ -20,24 +20,15 @@ AS $$
     candidate.account_id,
     candidate.account_email,
     candidate.user_role,
-    btrim(candidate.account_email) <> ''
-      AND candidate.account_id IS DISTINCT FROM p_actor_id
-      AND lower(btrim(candidate.account_email)) IS DISTINCT FROM lower(btrim(ticket.reporter_email))
-      AND public.notification_preference_enabled(candidate.account_email, 'new_ticket'),
+    candidate.account_not_actor
+      AND candidate.account_not_reporter
+      AND candidate.account_pref_enabled
+      AND btrim(candidate.account_email) <> '',
     candidate.user_role = 'technician'::public.user_role
       AND btrim(candidate.account_email) <> ''
       AND public.notification_preference_enabled(candidate.account_email, 'new_ticket'),
-    candidate.target_fingerprint IS NOT NULL
-      AND candidate.account_id IS DISTINCT FROM p_actor_id
-      AND lower(btrim(candidate.account_email)) IS DISTINCT FROM lower(btrim(ticket.reporter_email))
-      AND public.notification_preference_enabled(candidate.account_email, 'new_ticket'),
-    CASE
-      WHEN candidate.target_fingerprint IS NOT NULL
-        AND candidate.account_id IS DISTINCT FROM p_actor_id
-        AND lower(btrim(candidate.account_email)) IS DISTINCT FROM lower(btrim(ticket.reporter_email))
-        AND public.notification_preference_enabled(candidate.account_email, 'new_ticket')
-      THEN candidate.target_fingerprint
-    END
+    candidate.social_target IS NOT NULL,
+    candidate.social_target
   FROM public.tickets AS ticket
   JOIN public.profiles AS candidate_profile ON TRUE
   JOIN auth.users AS candidate_auth_user ON candidate_auth_user.id = candidate_profile.id
@@ -46,13 +37,29 @@ AS $$
     ON subscription.technician_id = candidate_profile.id
     AND subscription.category_id = ticket.category_id
   CROSS JOIN LATERAL (
-    VALUES (
+    SELECT
       candidate_profile.id,
       candidate_auth_user.email,
       candidate_profile.user_role,
-      CASE WHEN webhook.enabled IS TRUE THEN webhook.target_fingerprint END
+      candidate_profile.id IS DISTINCT FROM p_actor_id,
+      lower(btrim(candidate_auth_user.email)) IS DISTINCT FROM lower(btrim(ticket.reporter_email)),
+      public.notification_preference_enabled(candidate_auth_user.email, 'new_ticket'),
+      CASE
+        WHEN candidate_profile.id IS DISTINCT FROM p_actor_id
+          AND lower(btrim(candidate_auth_user.email)) IS DISTINCT FROM lower(btrim(ticket.reporter_email))
+          AND public.notification_preference_enabled(candidate_auth_user.email, 'new_ticket')
+          AND webhook.enabled IS TRUE
+        THEN webhook.target_fingerprint
+      END
+    ) AS candidate(
+      account_id,
+      account_email,
+      user_role,
+      account_not_actor,
+      account_not_reporter,
+      account_pref_enabled,
+      social_target
     )
-  ) AS candidate(account_id, account_email, user_role, target_fingerprint)
   WHERE ticket.id = p_ticket_id
     AND candidate_profile.is_active IS TRUE
     AND (
@@ -69,7 +76,6 @@ REVOKE EXECUTE ON FUNCTION public.resolve_ticket_new_ticket_eligibility(UUID, UU
 GRANT EXECUTE ON FUNCTION public.resolve_ticket_new_ticket_eligibility(UUID, UUID) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.resolve_ticket_submission_confirmation_eligibility(
-  p_ticket_id UUID,
   p_reporter_email TEXT
 )
 RETURNS TABLE (
@@ -107,6 +113,7 @@ AS $$
     LEFT JOIN public.social_webhooks AS reporter_webhook
       ON reporter_webhook.account_id = reporter_profile.id
     WHERE reporter_profile.is_active IS TRUE
+      -- Submission Confirmation Social preserves main's exact auth Email match; mixed-case stored Emails do not match.
       AND reporter_auth_user.email = lower(btrim(p_reporter_email))
     LIMIT 1
   ) AS candidate(account_id, account_email, target_fingerprint)
@@ -115,9 +122,9 @@ AS $$
     AND public.notification_preference_enabled(p_reporter_email, 'ticket_status');
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(UUID, TEXT) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(UUID, TEXT) FROM anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(UUID, TEXT) TO service_role;
+REVOKE EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(TEXT) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_ticket_submission_confirmation_eligibility(TEXT) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.enqueue_ticket_ready_notification()
 RETURNS TRIGGER
@@ -129,7 +136,7 @@ DECLARE
   actor_id UUID;
   eligible_recipient RECORD;
   submission_recipient RECORD;
-  target_fingerprint TEXT;
+  target_fingerprints TEXT[] := ARRAY[]::TEXT[];
 BEGIN
   IF OLD.notification_ready_at IS NOT NULL OR NEW.notification_ready_at IS NULL THEN
     RETURN NEW;
@@ -174,26 +181,24 @@ BEGIN
         END;
       END IF;
 
-    END LOOP;
+      IF eligible_recipient.eligible_for_social
+        AND NOT (eligible_recipient.target_fingerprint = ANY (target_fingerprints)) THEN
+        BEGIN
+          target_fingerprints := target_fingerprints || eligible_recipient.target_fingerprint;
 
-    FOR target_fingerprint IN
-      SELECT DISTINCT resolution.target_fingerprint
-      FROM public.resolve_ticket_new_ticket_eligibility(NEW.id, actor_id) AS resolution
-      WHERE resolution.eligible_for_social
-      ORDER BY resolution.target_fingerprint
-    LOOP
-      BEGIN
-        PERFORM public.enqueue_notification_delivery(
-          NEW.id,
-          'new_ticket',
-          NULL,
-          NULL,
-          'social',
-          target_fingerprint
-        );
-      EXCEPTION WHEN others THEN
-        RAISE WARNING 'Social notification could not be queued for ticket %: %', NEW.id, SQLERRM;
-      END;
+          PERFORM public.enqueue_notification_delivery(
+            NEW.id,
+            'new_ticket',
+            NULL,
+            NULL,
+            'social',
+            eligible_recipient.target_fingerprint
+          );
+        EXCEPTION WHEN others THEN
+          RAISE WARNING 'Social notification could not be queued for ticket %: %', NEW.id, SQLERRM;
+        END;
+      END IF;
+
     END LOOP;
   EXCEPTION WHEN others THEN
     RAISE WARNING 'New-ticket eligibility could not be resolved for ticket %: %', NEW.id, SQLERRM;
@@ -203,7 +208,6 @@ BEGIN
     FOR submission_recipient IN
       SELECT *
       FROM public.resolve_ticket_submission_confirmation_eligibility(
-        NEW.id,
         NEW.reporter_email
       )
     LOOP

@@ -191,7 +191,6 @@ BEGIN
   )
   INTO eligibility_count, row_count
   FROM public.resolve_ticket_submission_confirmation_eligibility(
-    staff_ticket_id,
     'anonymous-reporter@example.com'
   );
 
@@ -343,16 +342,15 @@ BEGIN
 
   SELECT count(*) INTO row_count
   FROM public.resolve_ticket_submission_confirmation_eligibility(
-    reporter_ticket_id,
     'REPORTER.READY@example.com'
   )
-  WHERE account_id = reporter_id
+  WHERE account_id IS NULL
     AND eligible_for_email
-    AND eligible_for_social
-    AND target_fingerprint = 'readiness-reporter-target';
+    AND NOT eligible_for_social
+    AND target_fingerprint IS NULL;
 
   IF row_count <> 1 THEN
-    RAISE EXCEPTION 'Expected mixed-case Reporter Submission Confirmation eligibility.';
+    RAISE EXCEPTION 'Expected mixed-case Reporter email eligibility without a Social match.';
   END IF;
 
   SELECT count(*) INTO row_count
@@ -360,19 +358,13 @@ BEGIN
   WHERE ticket_id = reporter_ticket_id
     AND event_type = 'report_submitted';
 
-  IF row_count <> 2 THEN
-    RAISE EXCEPTION 'Expected Reporter email and social confirmations, found %.', row_count;
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected only the Reporter email confirmation, found %.', row_count;
   END IF;
 
   UPDATE public.tickets
   SET notification_ready_at = now()
   WHERE id = disabled_reporter_ticket_id;
-
-  SELECT count(*) INTO row_count
-  FROM public.resolve_ticket_submission_confirmation_eligibility(
-    disabled_reporter_ticket_id,
-    'REPORTER.DISABLED@example.com'
-  );
 
   SELECT count(*) INTO row_count
   FROM public.notification_log
@@ -430,12 +422,12 @@ BEGIN
 
   IF has_function_privilege(
     'anon',
-    'public.resolve_ticket_submission_confirmation_eligibility(UUID, TEXT)',
+    'public.resolve_ticket_submission_confirmation_eligibility(TEXT)',
     'EXECUTE'
   )
     OR has_function_privilege(
       'authenticated',
-      'public.resolve_ticket_submission_confirmation_eligibility(UUID, TEXT)',
+      'public.resolve_ticket_submission_confirmation_eligibility(TEXT)',
       'EXECUTE'
     ) THEN
     RAISE EXCEPTION 'Submission Confirmation eligibility must not be public.';

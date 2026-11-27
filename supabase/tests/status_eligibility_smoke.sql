@@ -13,6 +13,8 @@ DECLARE
   technician_id UUID := gen_random_uuid();
   inactive_technician_id UUID := gen_random_uuid();
   disabled_technician_id UUID := gen_random_uuid();
+  disabled_webhook_reporter_id UUID := gen_random_uuid();
+  disabled_webhook_technician_id UUID := gen_random_uuid();
   reporter_actor_id UUID := gen_random_uuid();
   all_channel_ticket_id UUID := gen_random_uuid();
   anonymous_ticket_id UUID := gen_random_uuid();
@@ -24,6 +26,11 @@ DECLARE
   reopen_suppression_ticket_id UUID := gen_random_uuid();
   combined_ticket_id UUID := gen_random_uuid();
   repeated_ticket_id UUID := gen_random_uuid();
+  completed_ticket_id UUID := gen_random_uuid();
+  closed_ticket_id UUID := gen_random_uuid();
+  pending_ticket_id UUID := gen_random_uuid();
+  cancelled_ticket_id UUID := gen_random_uuid();
+  disabled_webhook_ticket_id UUID := gen_random_uuid();
   eligibility_count INTEGER;
   row_count INTEGER;
   event_keys TEXT[];
@@ -47,6 +54,8 @@ BEGIN
     (technician_id, 'Technician.Status@Example.com'),
     (inactive_technician_id, 'Inactive.Technician@Example.com'),
     (disabled_technician_id, 'Disabled.Technician@Example.com'),
+    (disabled_webhook_reporter_id, 'Disabled.Webhook.Reporter@Example.com'),
+    (disabled_webhook_technician_id, 'Disabled.Webhook.Technician@Example.com'),
     (reporter_actor_id, 'Reporter.Actor@Example.com');
 
   UPDATE public.profiles
@@ -55,6 +64,7 @@ BEGIN
     technician_id,
     inactive_technician_id,
     disabled_technician_id,
+    disabled_webhook_technician_id,
     reporter_actor_id
   );
 
@@ -94,6 +104,18 @@ BEGIN
       'https://discord.com/api/webhooks/7/status-reporter-actor',
       'status-reporter-actor-target',
       true
+    ),
+    (
+      disabled_webhook_reporter_id,
+      'https://discord.com/api/webhooks/8/status-disabled-webhook-reporter',
+      'status-disabled-webhook-reporter-target',
+      false
+    ),
+    (
+      disabled_webhook_technician_id,
+      'https://discord.com/api/webhooks/9/status-disabled-webhook-technician',
+      'status-disabled-webhook-technician-target',
+      false
     );
 
   INSERT INTO public.tickets (
@@ -195,6 +217,51 @@ BEGIN
       space_id,
       'Repeated In Progress fixture',
       'REPORTER.STATUS@example.com'
+    ),
+    (
+      completed_ticket_id,
+      'in_progress',
+      technician_id,
+      category_id,
+      space_id,
+      'Completed status fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
+      closed_ticket_id,
+      'completed',
+      technician_id,
+      category_id,
+      space_id,
+      'Closed status fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
+      pending_ticket_id,
+      'in_progress',
+      technician_id,
+      category_id,
+      space_id,
+      'Pending status fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
+      cancelled_ticket_id,
+      'pending',
+      technician_id,
+      category_id,
+      space_id,
+      'Cancelled status fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
+      disabled_webhook_ticket_id,
+      'pending',
+      disabled_webhook_technician_id,
+      category_id,
+      space_id,
+      'Disabled webhook status fixture',
+      'DISABLED.WEBHOOK.REPORTER@example.com'
     );
 
   SELECT count(*) INTO row_count
@@ -613,6 +680,172 @@ BEGIN
 
   IF row_count <> 2 THEN
     RAISE EXCEPTION 'Expected repeated In Progress In-app notifications, found %.', row_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'completed'
+  WHERE id = completed_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = completed_ticket_id
+    AND event_type = 'completed'
+    AND recipient_id IN (reporter_id, technician_id);
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician In-app Completed rows, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = completed_ticket_id
+    AND event_type = 'completed'
+    AND channel = 'email';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected only the Reporter Completed Email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = completed_ticket_id
+    AND event_type = 'completed'
+    AND channel = 'social';
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician Completed Social rows, found %.', row_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'closed'
+  WHERE id = closed_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = closed_ticket_id
+    AND event_type = 'closed'
+    AND recipient_id IN (reporter_id, technician_id);
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician In-app Closed rows, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = closed_ticket_id
+    AND event_type = 'closed'
+    AND channel = 'email';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected only the Reporter Closed Email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = closed_ticket_id
+    AND event_type = 'closed'
+    AND channel = 'social';
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician Closed Social rows, found %.', row_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'pending'
+  WHERE id = pending_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = pending_ticket_id
+    AND event_type = 'pending'
+    AND recipient_id = technician_id;
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected only the Technician In-app Pending row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = pending_ticket_id
+    AND event_type = 'pending'
+    AND recipient_id = reporter_id;
+
+  IF row_count <> 0 THEN
+    RAISE EXCEPTION 'Expected no Reporter In-app Pending row, found %.', row_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = pending_ticket_id
+      AND event_type = 'pending'
+  ) THEN
+    RAISE EXCEPTION 'Expected no Pending Deliveries.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'cancelled'
+  WHERE id = cancelled_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = cancelled_ticket_id
+    AND event_type = 'cancelled'
+    AND recipient_id IN (reporter_id, technician_id);
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician In-app Cancelled rows, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = cancelled_ticket_id
+    AND event_type = 'cancelled'
+    AND channel = 'email';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected only the Reporter Cancelled Email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = cancelled_ticket_id
+    AND event_type = 'cancelled'
+    AND channel = 'social';
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected Reporter and Technician Cancelled Social rows, found %.', row_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'in_progress'
+  WHERE id = disabled_webhook_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = disabled_webhook_ticket_id
+    AND recipient_id IN (disabled_webhook_reporter_id, disabled_webhook_technician_id);
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected In-app rows despite disabled webhooks, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = disabled_webhook_ticket_id
+    AND channel = 'email';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected the Reporter Email despite disabled webhooks, found %.', row_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = disabled_webhook_ticket_id
+      AND channel = 'social'
+  ) THEN
+    RAISE EXCEPTION 'Expected disabled webhooks to suppress Social Deliveries.';
   END IF;
 
   IF has_function_privilege('anon', 'public.resolve_ticket_status_eligibility(UUID, UUID)', 'EXECUTE')

@@ -105,6 +105,7 @@ DECLARE
   event_type TEXT;
   reporter_notified BOOLEAN;
   technician_notified BOOLEAN;
+  social_notified BOOLEAN;
   assignment_changed BOOLEAN;
   eligible_recipient RECORD;
   target_fingerprints TEXT[] := ARRAY[]::TEXT[];
@@ -141,6 +142,8 @@ BEGIN
     ELSE
       RETURN NEW;
     END IF;
+
+    social_notified := event_type IS DISTINCT FROM 'pending';
 
     FOR eligible_recipient IN
       SELECT *
@@ -187,6 +190,7 @@ BEGIN
       END IF;
 
       IF eligible_recipient.eligible_for_social
+        AND social_notified
         AND NOT (eligible_recipient.target_fingerprint = ANY (target_fingerprints)) THEN
         target_fingerprints := target_fingerprints || eligible_recipient.target_fingerprint;
 
