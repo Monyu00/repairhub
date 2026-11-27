@@ -93,6 +93,9 @@ AS $$
     candidate.target_fingerprint IS NOT NULL,
     candidate.target_fingerprint
   FROM (
+    SELECT btrim(p_reporter_email)
+  ) AS reporter(reporter_email)
+  LEFT JOIN (
     SELECT
       reporter_profile.id,
       reporter_auth_user.email,
@@ -107,6 +110,7 @@ AS $$
       AND reporter_auth_user.email = lower(btrim(p_reporter_email))
     LIMIT 1
   ) AS candidate(account_id, account_email, target_fingerprint)
+    ON TRUE
   WHERE btrim(p_reporter_email) <> ''
     AND public.notification_preference_enabled(p_reporter_email, 'ticket_status');
 $$;
