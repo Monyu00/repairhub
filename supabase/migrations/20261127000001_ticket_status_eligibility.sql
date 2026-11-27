@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION public.resolve_ticket_status_eligibility(
 )
 RETURNS TABLE (
   recipient_id UUID,
+  recipient_kind TEXT,
   account_email TEXT,
   recipient_email TEXT,
   eligible_for_in_app BOOLEAN,
@@ -17,63 +18,28 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
   SELECT
-    (
-      SELECT profile.id
-      FROM public.profiles AS profile
-      JOIN auth.users AS auth_user ON auth_user.id = profile.id
-      WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-      LIMIT 1
-    ) AS account_id,
-    (
-      SELECT auth_user.email
-      FROM public.profiles AS profile
-      JOIN auth.users AS auth_user ON auth_user.id = profile.id
-      WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-      LIMIT 1
-    ) AS account_email,
+    reporter.account_id,
+    'reporter'::TEXT,
+    reporter.account_email,
     btrim(ticket.reporter_email),
-    (
-      SELECT profile.is_active
-      FROM public.profiles AS profile
-      JOIN auth.users AS auth_user ON auth_user.id = profile.id
-      WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-      LIMIT 1
-    ) IS TRUE
-      AND btrim((
-        SELECT auth_user.email
-        FROM public.profiles AS profile
-        JOIN auth.users AS auth_user ON auth_user.id = profile.id
-        WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-        LIMIT 1
-      )) <> ''
-      AND (
-        SELECT profile.id
-        FROM public.profiles AS profile
-        JOIN auth.users AS auth_user ON auth_user.id = profile.id
-        WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-        LIMIT 1
-      ) IS DISTINCT FROM p_actor_id
+    reporter.account_id IS NOT NULL
+      AND btrim(reporter.account_email) <> ''
+      AND reporter.account_id IS DISTINCT FROM p_actor_id
       AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status'),
     btrim(ticket.reporter_email) <> ''
       AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status'),
     reporter.target_fingerprint IS NOT NULL
-      AND (
-        SELECT profile.id
-        FROM public.profiles AS profile
-        JOIN auth.users AS auth_user ON auth_user.id = profile.id
-        WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
-        LIMIT 1
-      ) IS DISTINCT FROM p_actor_id
+      AND reporter.account_id IS DISTINCT FROM p_actor_id
       AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status'),
     reporter.target_fingerprint
   FROM public.tickets AS ticket
-  CROSS JOIN LATERAL (
+  LEFT JOIN LATERAL (
     SELECT
-      profile.id,
-      auth_user.email,
+      profile.id AS account_id,
+      auth_user.email AS account_email,
       CASE
         WHEN profile.is_active IS TRUE
-          AND auth_user.email = lower(btrim(ticket.reporter_email))
+          AND lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
           AND webhook.enabled IS TRUE
           AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status')
         THEN webhook.target_fingerprint
@@ -90,6 +56,7 @@ AS $$
 
   SELECT
     technician.account_id,
+    'technician'::TEXT,
     technician.account_email,
     technician.account_email,
     btrim(technician.account_email) <> ''
@@ -136,25 +103,41 @@ AS $$
 DECLARE
   actor_id UUID;
   event_type TEXT;
+  reporter_notified BOOLEAN;
+  technician_notified BOOLEAN;
+  assignment_changed BOOLEAN;
   eligible_recipient RECORD;
   target_fingerprints TEXT[] := ARRAY[]::TEXT[];
 BEGIN
   actor_id := auth.uid();
+  assignment_changed := OLD.assigned_to IS DISTINCT FROM NEW.assigned_to;
 
   BEGIN
     IF OLD.status = 'pending'::public.ticket_status AND NEW.status = 'in_progress'::public.ticket_status THEN
       event_type := 'in_progress';
+      reporter_notified := TRUE;
+      technician_notified := FALSE;
     ELSIF OLD.status = 'in_progress'::public.ticket_status AND NEW.status = 'completed'::public.ticket_status THEN
       event_type := 'completed';
+      reporter_notified := TRUE;
+      technician_notified := TRUE;
     ELSIF OLD.status = 'completed'::public.ticket_status AND NEW.status = 'closed'::public.ticket_status THEN
       event_type := 'closed';
+      reporter_notified := TRUE;
+      technician_notified := TRUE;
     ELSIF OLD.status = 'in_progress'::public.ticket_status AND NEW.status = 'pending'::public.ticket_status THEN
       event_type := 'pending';
+      reporter_notified := FALSE;
+      technician_notified := TRUE;
     ELSIF OLD.status = 'completed'::public.ticket_status AND NEW.status = 'in_progress'::public.ticket_status THEN
       event_type := 'in_progress';
+      reporter_notified := FALSE;
+      technician_notified := TRUE;
     ELSIF OLD.status IN ('pending'::public.ticket_status, 'in_progress'::public.ticket_status)
       AND NEW.status = 'cancelled'::public.ticket_status THEN
       event_type := 'cancelled';
+      reporter_notified := TRUE;
+      technician_notified := TRUE;
     ELSE
       RETURN NEW;
     END IF;
@@ -163,8 +146,9 @@ BEGIN
       SELECT *
       FROM public.resolve_ticket_status_eligibility(NEW.id, actor_id)
     LOOP
-      IF eligible_recipient.eligible_for_in_app
-        AND OLD.assigned_to IS NOT DISTINCT FROM NEW.assigned_to THEN
+      IF eligible_recipient.recipient_kind = 'reporter'::TEXT
+        AND eligible_recipient.eligible_for_in_app
+        AND reporter_notified THEN
         INSERT INTO public.notifications (
           recipient_id,
           ticket_id,
@@ -177,7 +161,23 @@ BEGIN
         );
       END IF;
 
-      IF eligible_recipient.eligible_for_email THEN
+      IF eligible_recipient.recipient_kind = 'technician'::TEXT
+        AND eligible_recipient.eligible_for_in_app
+        AND technician_notified
+        AND NOT (assignment_changed AND NEW.assigned_to IS NOT NULL) THEN
+        INSERT INTO public.notifications (
+          recipient_id,
+          ticket_id,
+          event_type
+        )
+        VALUES (
+          eligible_recipient.recipient_id,
+          NEW.id,
+          event_type
+        );
+      END IF;
+
+      IF eligible_recipient.eligible_for_email AND reporter_notified THEN
         PERFORM public.enqueue_notification_delivery(
           NEW.id,
           event_type,
@@ -262,13 +262,10 @@ DROP TRIGGER IF EXISTS ticket_notification_on_status_change ON public.tickets;
 DROP TRIGGER IF EXISTS in_app_ticket_events_on_update ON public.tickets;
 
 CREATE TRIGGER ticket_event_eligibility_on_update
-  AFTER UPDATE OF status, assigned_to
+  AFTER UPDATE OF status
   ON public.tickets
   FOR EACH ROW
-  WHEN (
-    OLD.status IS DISTINCT FROM NEW.status
-    OR OLD.assigned_to IS DISTINCT FROM NEW.assigned_to
-  )
+  WHEN (OLD.status IS DISTINCT FROM NEW.status)
   EXECUTE FUNCTION public.enqueue_ticket_status_notification();
 
 CREATE TRIGGER in_app_ticket_events_on_update

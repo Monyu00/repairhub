@@ -171,16 +171,20 @@ BEGIN
     FOR EACH ROW
     EXECUTE FUNCTION public.fail_notification_log_insert();
 
-  UPDATE public.tickets
-  SET status = 'in_progress'
-  WHERE id = ledger_failure_ticket_id;
+  BEGIN
+    UPDATE public.tickets
+    SET status = 'in_progress'
+    WHERE id = ledger_failure_ticket_id;
+  EXCEPTION WHEN others THEN
+    NULL;
+  END;
 
   SELECT status INTO ticket_status
   FROM public.tickets
   WHERE id = ledger_failure_ticket_id;
 
-  IF ticket_status <> 'in_progress' THEN
-    RAISE EXCEPTION 'Expected a ledger failure not to block the Ticket write, found %.', ticket_status;
+  IF ticket_status <> 'pending' THEN
+    RAISE EXCEPTION 'Expected a ledger failure to block the Ticket write, found %.', ticket_status;
   END IF;
 
   SELECT count(*) INTO delivery_count

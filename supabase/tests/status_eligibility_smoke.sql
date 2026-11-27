@@ -15,12 +15,16 @@ DECLARE
   disabled_technician_id UUID := gen_random_uuid();
   reporter_actor_id UUID := gen_random_uuid();
   all_channel_ticket_id UUID := gen_random_uuid();
+  anonymous_ticket_id UUID := gen_random_uuid();
   actor_ticket_id UUID := gen_random_uuid();
   reporter_actor_ticket_id UUID := gen_random_uuid();
   inactive_ticket_id UUID := gen_random_uuid();
   disabled_ticket_id UUID := gen_random_uuid();
   mismatched_ticket_id UUID := gen_random_uuid();
+  reopen_suppression_ticket_id UUID := gen_random_uuid();
+  combined_ticket_id UUID := gen_random_uuid();
   repeated_ticket_id UUID := gen_random_uuid();
+  eligibility_count INTEGER;
   row_count INTEGER;
   event_keys TEXT[];
 BEGIN
@@ -112,6 +116,15 @@ BEGIN
       'REPORTER.STATUS@example.com'
     ),
     (
+      anonymous_ticket_id,
+      'pending',
+      technician_id,
+      category_id,
+      space_id,
+      'Anonymous Reporter status fixture',
+      'anonymous-status@example.com'
+    ),
+    (
       actor_ticket_id,
       'pending',
       actor_id,
@@ -157,6 +170,24 @@ BEGIN
       'different.reporter@example.com'
     ),
     (
+      reopen_suppression_ticket_id,
+      'completed',
+      technician_id,
+      category_id,
+      space_id,
+      'Reopen email suppression fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
+      combined_ticket_id,
+      'pending',
+      NULL,
+      category_id,
+      space_id,
+      'Combined assignment and status fixture',
+      'REPORTER.STATUS@example.com'
+    ),
+    (
       repeated_ticket_id,
       'completed',
       technician_id,
@@ -171,6 +202,28 @@ BEGIN
 
   IF row_count <> 2 THEN
     RAISE EXCEPTION 'Expected Reporter and assigned Technician eligibility rows, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO eligibility_count
+  FROM public.resolve_ticket_status_eligibility(anonymous_ticket_id, actor_id);
+
+  IF eligibility_count <> 2 THEN
+    RAISE EXCEPTION 'Expected an anonymous Reporter row and Technician row, found %.', eligibility_count;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.resolve_ticket_status_eligibility(anonymous_ticket_id, actor_id)
+    WHERE recipient_id IS NULL
+      AND recipient_kind = 'reporter'
+      AND account_email IS NULL
+      AND recipient_email = 'anonymous-status@example.com'
+      AND NOT eligible_for_in_app
+      AND eligible_for_email
+      AND NOT eligible_for_social
+      AND target_fingerprint IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Expected an anonymous Reporter status email row with NULL account fields.';
   END IF;
 
   IF NOT EXISTS (
@@ -328,12 +381,23 @@ BEGIN
     RAISE EXCEPTION 'Expected the inactive Reporter Email to remain eligible, found %.', row_count;
   END IF;
 
-  IF EXISTS (
-    SELECT 1
-    FROM public.notifications
-    WHERE ticket_id = inactive_ticket_id
-  ) THEN
-    RAISE EXCEPTION 'Expected no In-app rows for inactive accounts.';
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = inactive_ticket_id
+    AND recipient_id = inactive_reporter_id
+    AND event_type = 'in_progress';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected the inactive Reporter In-app status row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = inactive_ticket_id
+    AND recipient_id = inactive_technician_id;
+
+  IF row_count <> 0 THEN
+    RAISE EXCEPTION 'Expected no In-app row for the inactive Technician, found %.', row_count;
   END IF;
 
   IF EXISTS (
@@ -343,6 +407,127 @@ BEGIN
       AND channel = 'social'
   ) THEN
     RAISE EXCEPTION 'Expected no Social rows for inactive accounts.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'in_progress'
+  WHERE id = anonymous_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = anonymous_ticket_id
+    AND channel = 'email'
+    AND recipient_email = 'anonymous-status@example.com';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected the anonymous Reporter status email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = anonymous_ticket_id;
+
+  IF row_count <> 0 THEN
+    RAISE EXCEPTION 'Expected no In-app rows for an anonymous Reporter, found %.', row_count;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM public.notification_log
+    WHERE ticket_id = anonymous_ticket_id
+      AND channel = 'social'
+  ) THEN
+    RAISE EXCEPTION 'Expected no Social rows for an anonymous Reporter.';
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'in_progress'
+  WHERE id = reopen_suppression_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = reopen_suppression_ticket_id
+    AND channel = 'email'
+    AND event_type = 'in_progress';
+
+  IF row_count <> 0 THEN
+    RAISE EXCEPTION 'Expected completed-to-in_progress to suppress Reporter email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = reopen_suppression_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'in_progress';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected completed-to-in_progress Technician In-app row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = reopen_suppression_ticket_id
+    AND channel = 'social'
+    AND event_type = 'in_progress'
+    AND target_fingerprint IN ('status-reporter-target', 'status-technician-target');
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected completed-to-in_progress Social rows, found %.', row_count;
+  END IF;
+
+  UPDATE public.tickets
+  SET status = 'in_progress', assigned_to = technician_id
+  WHERE id = combined_ticket_id;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = combined_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'assigned';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected combined assignment to create the assigned In-app row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = combined_ticket_id
+    AND recipient_id = reporter_id
+    AND event_type = 'in_progress';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected combined status to keep the Reporter In-app row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notifications
+  WHERE ticket_id = combined_ticket_id
+    AND recipient_id = technician_id
+    AND event_type = 'in_progress';
+
+  IF row_count <> 0 THEN
+    RAISE EXCEPTION 'Expected combined assignment to suppress the Technician status In-app row, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = combined_ticket_id
+    AND channel = 'email'
+    AND recipient_email = 'reporter.status@example.com';
+
+  IF row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected combined status to keep the Reporter email, found %.', row_count;
+  END IF;
+
+  SELECT count(*) INTO row_count
+  FROM public.notification_log
+  WHERE ticket_id = combined_ticket_id
+    AND channel = 'social'
+    AND event_type = 'in_progress'
+    AND target_fingerprint IN ('status-reporter-target', 'status-technician-target');
+
+  IF row_count <> 2 THEN
+    RAISE EXCEPTION 'Expected combined status to keep both Social rows, found %.', row_count;
   END IF;
 
   UPDATE public.tickets
@@ -399,6 +584,10 @@ BEGIN
 
   UPDATE public.tickets
   SET status = 'in_progress', updated_at = clock_timestamp()
+  WHERE id = repeated_ticket_id;
+
+  UPDATE public.tickets
+  SET status = 'completed', updated_at = clock_timestamp()
   WHERE id = repeated_ticket_id;
 
   UPDATE public.tickets
