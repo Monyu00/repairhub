@@ -7,6 +7,8 @@ import { rollbackTicketPhotos, storeTicketPhotos } from "@/lib/storage/ticket-ph
 import type { Database } from "@/lib/supabase/database.types";
 import type { AuthenticatedUser } from "@/server/auth";
 
+import { getTicketTransitionCapability } from "./capabilities";
+
 export type TicketStatus = Database["public"]["Enums"]["ticket_status"];
 
 export type TicketTransitionType =
@@ -21,6 +23,7 @@ export type TicketTransitionType =
 export type ActorContext =
   | { type: "admin"; userId: string; displayName?: string }
   | { type: "technician"; userId: string; displayName?: string }
+  | { type: "user"; userId: string; displayName?: string }
   | { type: "reporter"; email: string }
   | { type: "system" };
 
@@ -33,7 +36,7 @@ export function actorFromAuthUser(user: AuthenticatedUser): ActorContext {
     };
   }
   return {
-    type: "technician",
+    type: user.role === "technician" ? "technician" : "user",
     userId: user.userId,
     displayName: user.displayName ?? undefined,
   };
@@ -78,6 +81,17 @@ export type TransitionResult =
       error: string;
       code: TransitionErrorCode;
     };
+
+function viewerFromActor(actor: ActorContext) {
+  return actor.type === "admin" || actor.type === "technician"
+    ? { role: actor.type, userId: actor.userId }
+    : { role: null, userId: null };
+}
+
+function staffUserId(actor: ActorContext): string {
+  if ("userId" in actor) return actor.userId;
+  throw new Error("Staff capability allowed an actor without a user ID");
+}
 
 export type CreateTicketFieldKey =
   | "building_id"
@@ -324,25 +338,22 @@ export async function transitionTicket(
   // 2. State transition dispatch and verification
   switch (transition) {
     case "claim": {
-      if (actor.type !== "technician") {
+      const decision = getTicketTransitionCapability(
+        { status: currentStatus, assignedTo: ticket.assigned_to },
+        viewerFromActor(actor),
+        "claim",
+      );
+      if (!decision.enabled) {
         return {
           success: false,
-          error: "僅技師身分可進行接單",
-          code: "UNAUTHORIZED",
-        };
-      }
-
-      if (currentStatus !== "pending") {
-        return {
-          success: false,
-          error: "此案件已被接單或不再處於待處理狀態",
-          code: "INVALID_PREVIOUS_STATUS",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
       const { data: success, error: rpcError } = await supabase.rpc("claim_ticket", {
         p_ticket_id: ticketId,
-        p_technician_id: actor.userId,
+        p_technician_id: staffUserId(actor),
       });
 
       if (rpcError || !success) {
@@ -364,17 +375,22 @@ export async function transitionTicket(
           ticketId,
           previousStatus: currentStatus,
           newStatus: "in_progress",
-          assignedTo: actor.userId,
+          assignedTo: staffUserId(actor),
         },
       };
     }
 
     case "assign": {
-      if (actor.type !== "admin") {
+      const decision = getTicketTransitionCapability(
+        { status: currentStatus, assignedTo: ticket.assigned_to },
+        viewerFromActor(actor),
+        "assign",
+      );
+      if (decision.errorCode === "UNAUTHORIZED") {
         return {
           success: false,
-          error: "僅管理者可執行指派技師",
-          code: "UNAUTHORIZED",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -386,11 +402,11 @@ export async function transitionTicket(
         };
       }
 
-      if (currentStatus !== "pending") {
+      if (!decision.enabled) {
         return {
           success: false,
-          error: "該單據已被接單或不再處於待處理狀態",
-          code: "INVALID_PREVIOUS_STATUS",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -430,7 +446,7 @@ export async function transitionTicket(
 
       await supabase.from("ticket_notes").insert({
         ticket_id: ticketId,
-        author_id: actor.userId,
+        author_id: staffUserId(actor),
         content: `管理者已指派此單據給 ${techName}`,
         type: "status_change",
       });
@@ -697,19 +713,16 @@ export async function transitionTicket(
     }
 
     case "return_to_pending": {
-      if (actor.type !== "admin") {
+      const decision = getTicketTransitionCapability(
+        { status: currentStatus, assignedTo: ticket.assigned_to },
+        viewerFromActor(actor),
+        "returnToPending",
+      );
+      if (!decision.enabled) {
         return {
           success: false,
-          error: "僅管理者可執行退回待處理",
-          code: "UNAUTHORIZED",
-        };
-      }
-
-      if (currentStatus !== "in_progress") {
-        return {
-          success: false,
-          error: "僅維修中的單據可退回待處理",
-          code: "INVALID_PREVIOUS_STATUS",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -733,7 +746,7 @@ export async function transitionTicket(
 
       await supabase.from("ticket_notes").insert({
         ticket_id: ticketId,
-        author_id: actor.userId,
+        author_id: staffUserId(actor),
         content: "管理者已將此單據退回待處理狀態（清除指派技師）",
         type: "status_change",
       });
@@ -752,11 +765,16 @@ export async function transitionTicket(
     }
 
     case "cancel": {
-      if (actor.type !== "admin") {
+      const decision = getTicketTransitionCapability(
+        { status: currentStatus, assignedTo: ticket.assigned_to },
+        viewerFromActor(actor),
+        "cancel",
+      );
+      if (decision.errorCode === "UNAUTHORIZED") {
         return {
           success: false,
-          error: "僅管理者可取消報修單據",
-          code: "UNAUTHORIZED",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -768,11 +786,11 @@ export async function transitionTicket(
         };
       }
 
-      if (currentStatus !== "pending" && currentStatus !== "in_progress") {
+      if (!decision.enabled) {
         return {
           success: false,
-          error: "僅待處理或維修中的單據可被取消",
-          code: "INVALID_PREVIOUS_STATUS",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -789,7 +807,7 @@ export async function transitionTicket(
 
       await supabase.from("ticket_notes").insert({
         ticket_id: ticketId,
-        author_id: actor.userId,
+        author_id: staffUserId(actor),
         content: `管理者已取消此單據，原因：${options.reason.trim()}`,
         type: "status_change",
       });
