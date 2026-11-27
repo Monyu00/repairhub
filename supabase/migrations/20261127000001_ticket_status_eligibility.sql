@@ -29,6 +29,7 @@ AS $$
     btrim(ticket.reporter_email) <> ''
       AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status'),
     reporter.target_fingerprint IS NOT NULL
+      AND btrim(ticket.reporter_email) <> ''
       AND reporter.account_id IS DISTINCT FROM p_actor_id
       AND public.notification_preference_enabled(ticket.reporter_email, 'ticket_status'),
     reporter.target_fingerprint
