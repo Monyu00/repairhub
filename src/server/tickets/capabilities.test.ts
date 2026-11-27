@@ -292,6 +292,57 @@ test("Admin transition capabilities share Ticket Detail policy and preserve tran
   }
 });
 
+test("Completion capability shares Ticket Detail policy and preserves error precedence", () => {
+  const viewers = [
+    { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
+    {
+      viewer: { role: "technician" as const, userId: "technician-1" },
+      detailKey: "assignedTechnician" as const,
+    },
+    {
+      viewer: { role: "technician" as const, userId: "technician-2" },
+      detailKey: "unassignedTechnician" as const,
+    },
+    { viewer: { role: null, userId: "user-1" }, detailKey: null },
+    { viewer: { role: null, userId: null }, detailKey: null },
+  ];
+
+  for (const status of statuses) {
+    const detail = createDetail(status, "technician-1");
+
+    for (const { viewer, detailKey } of viewers) {
+      const decision = getTicketTransitionCapability(detail.ticket, viewer, "closure");
+      let expectedError: string | null = "僅指派技師或管理者可進行結案";
+      let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
+      if (viewer.role) {
+        if (status !== "in_progress") {
+          expectedError = closureOnlyStatusReason;
+          expectedCode = "INVALID_PREVIOUS_STATUS";
+        } else if (viewer.role === "admin" || viewer.userId === "technician-1") {
+          expectedError = null;
+          expectedCode = null;
+        } else {
+          expectedError = "僅負責該單據的技師或管理者可進行結案";
+        }
+      }
+
+      if (detailKey) {
+        assert.deepEqual(
+          { enabled: decision.enabled, disabledReason: decision.disabledReason },
+          expected[detailKey][status].closure,
+        );
+      } else {
+        assert.deepEqual(
+          { enabled: decision.enabled, disabledReason: decision.disabledReason },
+          { enabled: false, disabledReason: "僅指派技師或管理者可進行結案" },
+        );
+      }
+      assert.equal(decision.transitionError, expectedError);
+      assert.equal(decision.errorCode, expectedCode);
+    }
+  }
+});
+
 test("Progress Note policy matches the Ticket Detail capability", () => {
   const viewers = [
     { role: "admin" as const, userId: "admin-1" },

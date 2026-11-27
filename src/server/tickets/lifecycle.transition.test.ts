@@ -222,3 +222,182 @@ test("Admin lifecycle outcomes match shared capabilities for every actor and Tic
     }
   }
 });
+
+test("Completion lifecycle preserves capability errors before photo validation", async () => {
+  const statuses = ["pending", "in_progress", "completed", "closed", "cancelled"] as const;
+  const cases = [
+    {
+      actor: { type: "admin", userId: "admin-1" },
+      viewer: { role: "admin", userId: "admin-1" },
+    },
+    {
+      actor: { type: "technician", userId: "technician-1" },
+      viewer: { role: "technician", userId: "technician-1" },
+    },
+    {
+      actor: { type: "technician", userId: "technician-2" },
+      viewer: { role: "technician", userId: "technician-2" },
+    },
+    {
+      actor: { type: "system" },
+      viewer: { role: null, userId: null },
+    },
+    {
+      actor: { type: "user", userId: "user-1" },
+      viewer: { role: null, userId: "user-1" },
+    },
+  ] as const;
+
+  for (const status of statuses) {
+    for (const { actor, viewer } of cases) {
+      const supabase = {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: "ticket-1",
+                  status,
+                  assigned_to: "technician-1",
+                  reporter_email: "reporter@example.com",
+                },
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      } as unknown as SupabaseClient<Database>;
+      const decision = getTicketTransitionCapability({ status, assignedTo: "technician-1" }, viewer, "closure");
+
+      const result = await transitionTicket(supabase, {
+        ticketId: "ticket-1",
+        actor,
+        transition: "submit_closure",
+        photosBase64: [],
+        skipRevalidation: true,
+      });
+
+      assert.equal(result.success, false);
+      if (decision.enabled) {
+        assert.deepEqual(result, {
+          success: false,
+          error: "結案需至少上傳 1 張完工證明照片",
+          code: "VALIDATION_FAILED",
+        });
+      } else if (!result.success) {
+        assert.equal(result.error, decision.transitionError);
+        assert.equal(result.code, decision.errorCode);
+      }
+    }
+  }
+});
+
+test("Permitted completion stores photos and preserves the mutation and note contract", async () => {
+  const state = {
+    uploads: [] as Array<{ bucket: string; path: string }>,
+    photoInserts: [] as Array<Record<string, unknown>>,
+    ticketUpdates: [] as Array<{ payload: Record<string, unknown>; filters: Array<[string, string]> }>,
+    noteInserts: [] as Array<Record<string, unknown>>,
+  };
+  const supabase = {
+    from: (table: string) => {
+      if (table === "tickets") {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: {
+                  id: "ticket-1",
+                  status: "in_progress",
+                  assigned_to: "technician-1",
+                  reporter_email: "reporter@example.com",
+                },
+                error: null,
+              }),
+            }),
+          }),
+          update: (payload: Record<string, unknown>) => ({
+            eq: (idColumn: string, id: string) => ({
+              eq: async (statusColumn: string, status: string) => {
+                state.ticketUpdates.push({
+                  payload,
+                  filters: [
+                    [idColumn, id],
+                    [statusColumn, status],
+                  ],
+                });
+                return { error: null };
+              },
+            }),
+          }),
+        };
+      }
+      if (table === "ticket_photos") {
+        return {
+          insert: async (payload: Record<string, unknown>) => {
+            state.photoInserts.push(payload);
+            return { error: null };
+          },
+        };
+      }
+      if (table === "ticket_notes") {
+        return {
+          insert: async (payload: Record<string, unknown>) => {
+            state.noteInserts.push(payload);
+            return { error: null };
+          },
+        };
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    },
+    storage: {
+      from: (bucket: string) => ({
+        upload: async (path: string) => {
+          state.uploads.push({ bucket, path });
+          return { error: null };
+        },
+      }),
+    },
+  } as unknown as SupabaseClient<Database>;
+  const result = await transitionTicket(supabase, {
+    ticketId: "ticket-1",
+    actor: { type: "technician", userId: "technician-1" },
+    transition: "submit_closure",
+    summary: "  已更換燈管  ",
+    photosBase64: ["aGk="],
+    skipRevalidation: true,
+  });
+
+  assert.deepEqual(result, {
+    success: true,
+    data: {
+      ticketId: "ticket-1",
+      previousStatus: "in_progress",
+      newStatus: "completed",
+      assignedTo: "technician-1",
+    },
+  });
+  assert.equal(state.uploads.length, 1);
+  assert.equal(state.uploads[0].bucket, "ticket-photos");
+  assert.match(state.uploads[0].path, /^closure\/ticket-1\//);
+  assert.deepEqual(state.photoInserts, [
+    { ticket_id: "ticket-1", storage_path: state.uploads[0].path, phase: "closure" },
+  ]);
+  assert.deepEqual(state.ticketUpdates, [
+    {
+      payload: { status: "completed" },
+      filters: [
+        ["id", "ticket-1"],
+        ["status", "in_progress"],
+      ],
+    },
+  ]);
+  assert.deepEqual(state.noteInserts, [
+    {
+      ticket_id: "ticket-1",
+      author_id: "technician-1",
+      content: "已提交完工結案：已更換燈管",
+      type: "status_change",
+    },
+  ]);
+});

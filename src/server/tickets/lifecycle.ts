@@ -465,27 +465,16 @@ export async function transitionTicket(
     }
 
     case "submit_closure": {
-      if (actor.type !== "technician" && actor.type !== "admin") {
+      const decision = getTicketTransitionCapability(
+        { status: currentStatus, assignedTo: ticket.assigned_to },
+        viewerFromActor(actor),
+        "closure",
+      );
+      if (!decision.enabled) {
         return {
           success: false,
-          error: "僅指派技師或管理者可進行結案",
-          code: "UNAUTHORIZED",
-        };
-      }
-
-      if (currentStatus !== "in_progress") {
-        return {
-          success: false,
-          error: "僅維修中的單據可進行結案作業",
-          code: "INVALID_PREVIOUS_STATUS",
-        };
-      }
-
-      if (actor.type === "technician" && ticket.assigned_to !== actor.userId) {
-        return {
-          success: false,
-          error: "僅負責該單據的技師或管理者可進行結案",
-          code: "UNAUTHORIZED",
+          error: decision.transitionError,
+          code: decision.errorCode,
         };
       }
 
@@ -542,7 +531,7 @@ export async function transitionTicket(
 
       await supabase.from("ticket_notes").insert({
         ticket_id: ticketId,
-        author_id: actor.userId,
+        author_id: staffUserId(actor),
         content: closureNoteContent,
         type: "status_change",
       });

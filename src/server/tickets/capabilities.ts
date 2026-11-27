@@ -79,7 +79,7 @@ export function getProgressNoteCapability(
 export function getTicketTransitionCapability(
   ticket: TicketTransitionFacts,
   viewer: TicketDetailViewer,
-  transition: "assign" | "cancel" | "returnToPending" | "claim",
+  transition: "assign" | "cancel" | "returnToPending" | "claim" | "closure",
 ): TicketTransitionDecision {
   const { status } = ticket;
   const { role } = viewer;
@@ -124,6 +124,31 @@ export function getTicketTransitionCapability(
         "僅管理者可取消報修單據",
         "僅待處理或維修中的單據可被取消",
       );
+    case "closure": {
+      const isAssignedTech = isAssignedTechnician(ticket, viewer);
+      const closureReason = (() => {
+        if (!role) return "僅指派技師或管理者可進行結案";
+        if (status !== "in_progress") return "僅維修中的單據可進行結案作業";
+        if (role === "technician" && !isAssignedTech) return "僅指派技師或管理者可進行結案";
+        return "僅維修中的單據可進行結案作業";
+      })();
+      const decision = transitionCapability(
+        closureReason,
+        role === "admin" || role === "technician",
+        status === "in_progress",
+        "僅指派技師或管理者可進行結案",
+        "僅維修中的單據可進行結案作業",
+      );
+      if (decision.enabled && role === "technician" && !isAssignedTech) {
+        return {
+          enabled: false,
+          disabledReason: closureReason,
+          transitionError: "僅負責該單據的技師或管理者可進行結案",
+          errorCode: "UNAUTHORIZED",
+        };
+      }
+      return decision;
+    }
     case "returnToPending":
       return transitionCapability(
         "僅維修中的單據可退回待處理",
@@ -139,23 +164,12 @@ export function getTicketDetailCapabilities(
   detail: TicketDetail,
   viewer: TicketDetailViewer,
 ): TicketDetailCapabilities {
-  const { status } = detail.ticket;
-  const { role } = viewer;
-  const isAssignedTech = isAssignedTechnician(detail.ticket, viewer);
-
-  const closureReason = (() => {
-    if (!role) return "僅指派技師或管理者可進行結案";
-    if (status !== "in_progress") return "僅維修中的單據可進行結案作業";
-    if (role === "technician" && !isAssignedTech) return "僅指派技師或管理者可進行結案";
-    return "僅維修中的單據可進行結案作業";
-  })();
-
   return {
     assign: detailCapability(getTicketTransitionCapability(detail.ticket, viewer, "assign")),
     cancel: detailCapability(getTicketTransitionCapability(detail.ticket, viewer, "cancel")),
     returnToPending: detailCapability(getTicketTransitionCapability(detail.ticket, viewer, "returnToPending")),
     claim: detailCapability(getTicketTransitionCapability(detail.ticket, viewer, "claim")),
-    closure: capability((role === "admin" || isAssignedTech) && status === "in_progress", closureReason),
+    closure: detailCapability(getTicketTransitionCapability(detail.ticket, viewer, "closure")),
     progressNote: getProgressNoteCapability(detail.ticket, viewer),
   };
 }
