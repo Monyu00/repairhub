@@ -183,6 +183,22 @@ BEGIN
     RAISE EXCEPTION 'Expected five active eligible staff, found % in-app of %.', row_count, eligibility_count;
   END IF;
 
+  SELECT count(*), count(*) FILTER (
+    WHERE account_id IS NULL
+      AND eligible_for_email
+      AND NOT eligible_for_social
+      AND target_fingerprint IS NULL
+  )
+  INTO eligibility_count, row_count
+  FROM public.resolve_ticket_submission_confirmation_eligibility(
+    staff_ticket_id,
+    'anonymous-reporter@example.com'
+  );
+
+  IF eligibility_count <> 1 OR row_count <> 1 THEN
+    RAISE EXCEPTION 'Expected one anonymous Reporter confirmation with no account eligibility, found % of %.', row_count, eligibility_count;
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM public.resolve_ticket_new_ticket_eligibility(staff_ticket_id, NULL)
