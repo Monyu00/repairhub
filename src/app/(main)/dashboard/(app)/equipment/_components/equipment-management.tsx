@@ -6,6 +6,7 @@ import { Edit2, FileUp, FilterX, HardDrive, History, MapPin, Plus, Search, Trash
 import { toast } from "sonner";
 
 import { BulkImportDialog } from "@/app/(main)/dashboard/_components/bulk-import-dialog";
+import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +19,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { LocationCatalogBuilding } from "@/lib/locations";
+import type { TicketStatus } from "@/server/tickets/lifecycle";
 
 import {
   createEquipment,
@@ -31,7 +33,6 @@ import {
 import { EquipmentDeleteDialog } from "./equipment-delete-dialog";
 import { EquipmentDialog } from "./equipment-dialog";
 import { EquipmentHistorySheet } from "./equipment-history-sheet";
-import { getWarrantyStatus, WarrantyStatusBadge } from "./warranty-status-badge";
 
 const PAGE_SIZE = 10;
 
@@ -44,7 +45,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [buildingFilter, setBuildingFilter] = useState("all");
-  const [warrantyFilter, setWarrantyFilter] = useState("all");
+  const [repairStatusFilter, setRepairStatusFilter] = useState<TicketStatus | "normal" | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Dialog / Sheet states
@@ -76,15 +77,15 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
         if (bId !== buildingFilter) return false;
       }
 
-      // 3. Warranty Status Filter
-      if (warrantyFilter !== "all") {
-        const status = getWarrantyStatus(item.warranty_expiry);
-        if (status !== warrantyFilter) return false;
+      // 3. Current Repair Status Filter
+      if (repairStatusFilter !== "all") {
+        const status = item.current_repair_status;
+        if (repairStatusFilter === "normal" ? status !== null : status !== repairStatusFilter) return false;
       }
 
       return true;
     });
-  }, [initialEquipment, searchQuery, buildingFilter, warrantyFilter]);
+  }, [initialEquipment, searchQuery, buildingFilter, repairStatusFilter]);
 
   const totalPages = Math.ceil(filteredEquipment.length / PAGE_SIZE) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -161,7 +162,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
       <Card className="border-border/60 shadow-xs">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">設備資產列表</CardTitle>
-          <CardDescription>依地點與保固狀態快速檢索設備資料</CardDescription>
+          <CardDescription>依地點與目前維修狀態快速檢索設備資料</CardDescription>
 
           {/* Filter Toolbar */}
           <div className="bg-card/60 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 shadow-xs backdrop-blur-xs">
@@ -203,26 +204,28 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                 </SelectContent>
               </Select>
 
-              {/* Warranty Status Filter */}
+              {/* Current Repair Status Filter */}
               <Select
-                value={warrantyFilter}
+                value={repairStatusFilter}
                 onValueChange={(val) => {
-                  setWarrantyFilter(val);
+                  setRepairStatusFilter(val as TicketStatus | "normal" | "all");
                   setCurrentPage(1);
                 }}
               >
                 <SelectTrigger size="sm" className="h-8 min-w-32 text-xs">
-                  <SelectValue placeholder="保固狀態" />
+                  <SelectValue placeholder="目前維修狀態" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">所有保固狀態</SelectItem>
-                  <SelectItem value="active">保固中</SelectItem>
-                  <SelectItem value="expired">已過期</SelectItem>
-                  <SelectItem value="none">未設定</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="all">所有維修狀態</SelectItem>
+                    <SelectItem value="pending">待處理</SelectItem>
+                    <SelectItem value="in_progress">維修中</SelectItem>
+                    <SelectItem value="normal">正常</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
 
-              {(searchQuery || buildingFilter !== "all" || warrantyFilter !== "all") && (
+              {(searchQuery || buildingFilter !== "all" || repairStatusFilter !== "all") && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -230,7 +233,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                   onClick={() => {
                     setSearchQuery("");
                     setBuildingFilter("all");
-                    setWarrantyFilter("all");
+                    setRepairStatusFilter("all");
                     setCurrentPage(1);
                   }}
                 >
@@ -272,7 +275,7 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                       <TableHead>所在位置</TableHead>
                       <TableHead className="w-[120px]">購入日期</TableHead>
                       <TableHead className="w-[120px]">保固到期</TableHead>
-                      <TableHead className="w-[100px]">保固狀態</TableHead>
+                      <TableHead className="w-[120px]">目前維修狀態</TableHead>
                       <TableHead className="w-[140px] text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -308,7 +311,14 @@ export function EquipmentManagement({ initialEquipment, buildings }: EquipmentMa
                           {item.warranty_expiry ?? "-"}
                         </TableCell>
                         <TableCell>
-                          <WarrantyStatusBadge warrantyExpiry={item.warranty_expiry} />
+                          {item.current_repair_status ? (
+                            <TicketStatusBadge status={item.current_repair_status} />
+                          ) : (
+                            <Badge variant="success" className="gap-1">
+                              <span className="bg-success size-1.5 shrink-0 rounded-full" />
+                              <span>正常</span>
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">

@@ -29,6 +29,7 @@ export interface EquipmentRow {
   created_at: string;
   updated_at: string;
   space: EquipmentSpaceInfo;
+  current_repair_status: TicketStatus | null;
 }
 
 export interface EquipmentFormData {
@@ -64,6 +65,7 @@ export async function fetchEquipmentList(): Promise<{
       warranty_expiry,
       created_at,
       updated_at,
+      tickets!left(status),
       space:spaces(
         id,
         name,
@@ -80,6 +82,7 @@ export async function fetchEquipmentList(): Promise<{
     const { data: rawEquipment, error: fetchError } = await supabase
       .from("equipment")
       .select(selectString)
+      .or("status.in.(pending,in_progress)", { referencedTable: "tickets" })
       .order("created_at", { ascending: false });
 
     if (fetchError) {
@@ -92,6 +95,7 @@ export async function fetchEquipmentList(): Promise<{
       const item = (raw ?? {}) as RawEquipment;
       const spaceRaw = Array.isArray(item.space) ? item.space[0] : item.space;
       const spaceData = (spaceRaw ?? {}) as Record<string, unknown>;
+      const activeTickets = (Array.isArray(item.tickets) ? item.tickets : []) as Array<{ status: TicketStatus }>;
 
       let buildingData = { id: "", name: "未知地點", code: "" };
       if (spaceData.building) {
@@ -110,6 +114,11 @@ export async function fetchEquipmentList(): Promise<{
         warranty_expiry: item.warranty_expiry ? String(item.warranty_expiry) : null,
         created_at: String(item.created_at ?? ""),
         updated_at: String(item.updated_at ?? ""),
+        current_repair_status: activeTickets.some((ticket) => ticket.status === "in_progress")
+          ? "in_progress"
+          : activeTickets.some((ticket) => ticket.status === "pending")
+            ? "pending"
+            : null,
         space: {
           id: String(spaceData.id ?? ""),
           name: String(spaceData.name ?? "未知空間"),
