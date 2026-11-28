@@ -79,7 +79,7 @@ export function getProgressNoteCapability(
 export function getTicketTransitionCapability(
   ticket: TicketTransitionFacts,
   viewer: TicketDetailViewer,
-  transition: "assign" | "cancel" | "returnToPending" | "claim" | "closure",
+  transition: Exclude<TicketDetailActionName, "progressNote">,
 ): TicketTransitionDecision {
   const { status } = ticket;
   const { role } = viewer;

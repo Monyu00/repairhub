@@ -1,11 +1,42 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/supabase/database.types";
+import type { AuthenticatedUser } from "@/server/auth";
 
 import { getTicketTransitionCapability } from "./capabilities";
-import { type TransitionTicketOptions, transitionTicket } from "./lifecycle";
+import { actorFromAuthUser, type TransitionTicketOptions, transitionTicket } from "./lifecycle";
 import assert from "node:assert/strict";
 import test from "node:test";
+
+const statuses = ["pending", "in_progress", "completed", "closed", "cancelled"] as const;
+const transitionCases = [
+  {
+    actor: { type: "admin", userId: "admin-1" },
+    viewer: { role: "admin", userId: "admin-1" },
+  },
+  {
+    actor: { type: "technician", userId: "technician-1" },
+    viewer: { role: "technician", userId: "technician-1" },
+  },
+  {
+    actor: { type: "technician", userId: "technician-2" },
+    viewer: { role: "technician", userId: "technician-2" },
+  },
+  {
+    actor: { type: "system" },
+    viewer: { role: null, userId: null },
+  },
+  {
+    actor: { type: "user", userId: "user-1" },
+    viewer: { role: null, userId: "user-1" },
+  },
+] as const;
+
+test("actorFromAuthUser keeps a missing role unprivileged", () => {
+  const actor = actorFromAuthUser({ role: null, userId: "user-1", displayName: null } as AuthenticatedUser);
+
+  assert.deepEqual(actor, { type: "user", userId: "user-1", displayName: undefined });
+});
 
 test("claim transition returns the pending to in_progress contract", async () => {
   const rpcCalls: Array<{ name: string; args: Record<string, string> }> = [];
@@ -68,32 +99,8 @@ test("claim transition returns the pending to in_progress contract", async () =>
 });
 
 test("claim lifecycle outcomes match the shared capability for every actor and Ticket status", async () => {
-  const statuses = ["pending", "in_progress", "completed", "closed", "cancelled"] as const;
-  const cases = [
-    {
-      actor: { type: "admin", userId: "admin-1" },
-      viewer: { role: "admin", userId: "admin-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-1" },
-      viewer: { role: "technician", userId: "technician-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-2" },
-      viewer: { role: "technician", userId: "technician-2" },
-    },
-    {
-      actor: { type: "system" },
-      viewer: { role: null, userId: null },
-    },
-    {
-      actor: { type: "user", userId: "user-1" },
-      viewer: { role: null, userId: "user-1" },
-    },
-  ] as const;
-
   for (const status of statuses) {
-    for (const { actor, viewer } of cases) {
+    for (const { actor, viewer } of transitionCases) {
       let rpcCalled = false;
       const supabase = {
         from: () => ({
@@ -136,7 +143,6 @@ test("claim lifecycle outcomes match the shared capability for every actor and T
 });
 
 test("Admin lifecycle outcomes match shared capabilities for every actor and Ticket status", async () => {
-  const statuses = ["pending", "in_progress", "completed", "closed", "cancelled"] as const;
   const transitions = [
     {
       action: "assign" as const,
@@ -151,32 +157,9 @@ test("Admin lifecycle outcomes match shared capabilities for every actor and Tic
       payload: { transition: "return_to_pending" as const },
     },
   ];
-  const cases = [
-    {
-      actor: { type: "admin", userId: "admin-1" },
-      viewer: { role: "admin", userId: "admin-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-1" },
-      viewer: { role: "technician", userId: "technician-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-2" },
-      viewer: { role: "technician", userId: "technician-2" },
-    },
-    {
-      actor: { type: "system" },
-      viewer: { role: null, userId: null },
-    },
-    {
-      actor: { type: "user", userId: "user-1" },
-      viewer: { role: null, userId: "user-1" },
-    },
-  ] as const;
-
   for (const { action, payload } of transitions) {
     for (const status of statuses) {
-      for (const { actor, viewer } of cases) {
+      for (const { actor, viewer } of transitionCases) {
         let mutationCalled = false;
         const supabase = {
           from: (table: string) => ({
@@ -224,32 +207,8 @@ test("Admin lifecycle outcomes match shared capabilities for every actor and Tic
 });
 
 test("Completion lifecycle preserves capability errors before photo validation", async () => {
-  const statuses = ["pending", "in_progress", "completed", "closed", "cancelled"] as const;
-  const cases = [
-    {
-      actor: { type: "admin", userId: "admin-1" },
-      viewer: { role: "admin", userId: "admin-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-1" },
-      viewer: { role: "technician", userId: "technician-1" },
-    },
-    {
-      actor: { type: "technician", userId: "technician-2" },
-      viewer: { role: "technician", userId: "technician-2" },
-    },
-    {
-      actor: { type: "system" },
-      viewer: { role: null, userId: null },
-    },
-    {
-      actor: { type: "user", userId: "user-1" },
-      viewer: { role: null, userId: "user-1" },
-    },
-  ] as const;
-
   for (const status of statuses) {
-    for (const { actor, viewer } of cases) {
+    for (const { actor, viewer } of transitionCases) {
       const supabase = {
         from: () => ({
           select: () => ({

@@ -171,6 +171,20 @@ const expected = {
   },
 } as const;
 
+const transitionViewers = [
+  { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
+  {
+    viewer: { role: "technician" as const, userId: "technician-1" },
+    detailKey: "assignedTechnician" as const,
+  },
+  {
+    viewer: { role: "technician" as const, userId: "technician-2" },
+    detailKey: "unassignedTechnician" as const,
+  },
+  { viewer: { role: null, userId: "user-1" }, detailKey: null },
+  { viewer: { role: null, userId: null }, detailKey: null },
+];
+
 test("Capabilities derive from role, assignment, and every Ticket status", () => {
   const viewers = {
     admin: { role: "admin" as const, userId: "admin-1" },
@@ -193,24 +207,10 @@ test("Capabilities derive from role, assignment, and every Ticket status", () =>
 });
 
 test("Claim capability shares Ticket Detail policy and preserves transition errors", () => {
-  const viewers = [
-    { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
-    {
-      viewer: { role: "technician" as const, userId: "technician-1" },
-      detailKey: "assignedTechnician" as const,
-    },
-    {
-      viewer: { role: "technician" as const, userId: "technician-2" },
-      detailKey: "unassignedTechnician" as const,
-    },
-    { viewer: { role: null, userId: "user-1" }, detailKey: null },
-    { viewer: { role: null, userId: null }, detailKey: null },
-  ];
-
   for (const status of statuses) {
     const detail = createDetail(status, "technician-1");
 
-    for (const { viewer, detailKey } of viewers) {
+    for (const { viewer, detailKey } of transitionViewers) {
       const decision = getTicketTransitionCapability(detail.ticket, viewer, "claim");
       let expectedError: string | null = "僅技師身分可進行接單";
       let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
@@ -252,25 +252,11 @@ test("Admin transition capabilities share Ticket Detail policy and preserve tran
       invalidStatus: "僅維修中的單據可退回待處理",
     },
   ];
-  const viewers = [
-    { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
-    {
-      viewer: { role: "technician" as const, userId: "technician-1" },
-      detailKey: "assignedTechnician" as const,
-    },
-    {
-      viewer: { role: "technician" as const, userId: "technician-2" },
-      detailKey: "unassignedTechnician" as const,
-    },
-    { viewer: { role: null, userId: "user-1" }, detailKey: null },
-    { viewer: { role: null, userId: null }, detailKey: null },
-  ];
-
   for (const { action, allowedStatuses, unauthorized, invalidStatus } of transitions) {
     for (const status of statuses) {
       const detail = createDetail(status, "technician-1");
 
-      for (const { viewer, detailKey } of viewers) {
+      for (const { viewer, detailKey } of transitionViewers) {
         const decision = getTicketTransitionCapability(detail.ticket, viewer, action);
         let expectedError: string | null = unauthorized;
         let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
@@ -293,24 +279,10 @@ test("Admin transition capabilities share Ticket Detail policy and preserve tran
 });
 
 test("Completion capability shares Ticket Detail policy and preserves error precedence", () => {
-  const viewers = [
-    { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
-    {
-      viewer: { role: "technician" as const, userId: "technician-1" },
-      detailKey: "assignedTechnician" as const,
-    },
-    {
-      viewer: { role: "technician" as const, userId: "technician-2" },
-      detailKey: "unassignedTechnician" as const,
-    },
-    { viewer: { role: null, userId: "user-1" }, detailKey: null },
-    { viewer: { role: null, userId: null }, detailKey: null },
-  ];
-
   for (const status of statuses) {
     const detail = createDetail(status, "technician-1");
 
-    for (const { viewer, detailKey } of viewers) {
+    for (const { viewer, detailKey } of transitionViewers) {
       const decision = getTicketTransitionCapability(detail.ticket, viewer, "closure");
       let expectedError: string | null = "僅指派技師或管理者可進行結案";
       let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
