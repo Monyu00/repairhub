@@ -72,15 +72,12 @@ export async function fetchTechnicians(): Promise<{
 export async function claimTicket(ticketId: string): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
     const user = await requireAuth();
-
-    if (user.role !== "technician") {
-      return { success: false, error: "僅技師身分可進行接單" };
-    }
+    const actor = actorFromAuthUser(user);
 
     const result = await transitionTicket(user.supabase, {
       ticketId,
       transition: "claim",
-      actor: { type: "technician", userId: user.userId },
+      actor,
     });
 
     return result.success ? { success: true } : { success: false, error: result.error };
@@ -95,13 +92,14 @@ export async function assignTicket(
   technicianId: string,
 ): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
-    const admin = await requireAdmin();
+    const user = await requireAuth();
+    const actor = actorFromAuthUser(user);
 
-    const result = await transitionTicket(admin.supabase, {
+    const result = await transitionTicket(user.supabase, {
       ticketId,
       transition: "assign",
       technicianId,
-      actor: { type: "admin", userId: admin.userId },
+      actor,
     });
 
     return result.success ? { success: true } : { success: false, error: result.error };
@@ -137,13 +135,14 @@ export async function submitClosure(
  */
 export async function cancelTicket(ticketId: string, reason: string): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
-    const admin = await requireAdmin();
+    const user = await requireAuth();
+    const actor = actorFromAuthUser(user);
 
-    const result = await transitionTicket(admin.supabase, {
+    const result = await transitionTicket(user.supabase, {
       ticketId,
       transition: "cancel",
       reason,
-      actor: { type: "admin", userId: admin.userId },
+      actor,
     });
 
     return result.success ? { success: true } : { success: false, error: result.error };
@@ -155,12 +154,13 @@ export async function cancelTicket(ticketId: string, reason: string): Promise<{ 
  */
 export async function returnToPending(ticketId: string): Promise<{ success: boolean; error?: string }> {
   return safeAction(async () => {
-    const admin = await requireAdmin();
+    const user = await requireAuth();
+    const actor = actorFromAuthUser(user);
 
-    const result = await transitionTicket(admin.supabase, {
+    const result = await transitionTicket(user.supabase, {
       ticketId,
       transition: "return_to_pending",
-      actor: { type: "admin", userId: admin.userId },
+      actor,
     });
 
     return result.success ? { success: true } : { success: false, error: result.error };

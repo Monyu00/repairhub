@@ -1,4 +1,4 @@
-import { getProgressNoteCapability, getTicketDetailCapabilities } from "./capabilities";
+import { getProgressNoteCapability, getTicketDetailCapabilities, getTicketTransitionCapability } from "./capabilities";
 import type { TicketDetail } from "./detail";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -171,6 +171,20 @@ const expected = {
   },
 } as const;
 
+const transitionViewers = [
+  { viewer: { role: "admin" as const, userId: "admin-1" }, detailKey: "admin" as const },
+  {
+    viewer: { role: "technician" as const, userId: "technician-1" },
+    detailKey: "assignedTechnician" as const,
+  },
+  {
+    viewer: { role: "technician" as const, userId: "technician-2" },
+    detailKey: "unassignedTechnician" as const,
+  },
+  { viewer: { role: null, userId: "user-1" }, detailKey: null },
+  { viewer: { role: null, userId: null }, detailKey: null },
+];
+
 test("Capabilities derive from role, assignment, and every Ticket status", () => {
   const viewers = {
     admin: { role: "admin" as const, userId: "admin-1" },
@@ -189,6 +203,115 @@ test("Capabilities derive from role, assignment, and every Ticket status", () =>
       getTicketDetailCapabilities(detail, viewers.unassignedTechnician),
       expected.unassignedTechnician[status],
     );
+  }
+});
+
+test("Claim capability shares Ticket Detail policy and preserves transition errors", () => {
+  for (const status of statuses) {
+    const detail = createDetail(status, "technician-1");
+
+    for (const { viewer, detailKey } of transitionViewers) {
+      const decision = getTicketTransitionCapability(detail.ticket, viewer, "claim");
+      let expectedError: string | null = "僅技師身分可進行接單";
+      let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
+      if (viewer.role === "technician") {
+        expectedError = status === "pending" ? null : "此案件已被接單或不再處於待處理狀態";
+        expectedCode = status === "pending" ? null : "INVALID_PREVIOUS_STATUS";
+      }
+
+      if (detailKey) {
+        assert.deepEqual(
+          { enabled: decision.enabled, disabledReason: decision.disabledReason },
+          expected[detailKey][status].claim,
+        );
+      }
+      assert.equal(decision.transitionError, expectedError);
+      assert.equal(decision.errorCode, expectedCode);
+    }
+  }
+});
+
+test("Admin transition capabilities share Ticket Detail policy and preserve transition errors", () => {
+  const transitions = [
+    {
+      action: "assign" as const,
+      allowedStatuses: ["pending"],
+      unauthorized: "僅管理者可執行指派技師",
+      invalidStatus: "該單據已被接單或不再處於待處理狀態",
+    },
+    {
+      action: "cancel" as const,
+      allowedStatuses: ["pending", "in_progress"],
+      unauthorized: "僅管理者可取消報修單據",
+      invalidStatus: "僅待處理或維修中的單據可被取消",
+    },
+    {
+      action: "returnToPending" as const,
+      allowedStatuses: ["in_progress"],
+      unauthorized: "僅管理者可執行退回待處理",
+      invalidStatus: "僅維修中的單據可退回待處理",
+    },
+  ];
+  for (const { action, allowedStatuses, unauthorized, invalidStatus } of transitions) {
+    for (const status of statuses) {
+      const detail = createDetail(status, "technician-1");
+
+      for (const { viewer, detailKey } of transitionViewers) {
+        const decision = getTicketTransitionCapability(detail.ticket, viewer, action);
+        let expectedError: string | null = unauthorized;
+        let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
+        if (viewer.role === "admin") {
+          expectedError = allowedStatuses.includes(status) ? null : invalidStatus;
+          expectedCode = allowedStatuses.includes(status) ? null : "INVALID_PREVIOUS_STATUS";
+        }
+
+        if (detailKey) {
+          assert.deepEqual(
+            { enabled: decision.enabled, disabledReason: decision.disabledReason },
+            expected[detailKey][status][action],
+          );
+        }
+        assert.equal(decision.transitionError, expectedError);
+        assert.equal(decision.errorCode, expectedCode);
+      }
+    }
+  }
+});
+
+test("Completion capability shares Ticket Detail policy and preserves error precedence", () => {
+  for (const status of statuses) {
+    const detail = createDetail(status, "technician-1");
+
+    for (const { viewer, detailKey } of transitionViewers) {
+      const decision = getTicketTransitionCapability(detail.ticket, viewer, "closure");
+      let expectedError: string | null = "僅指派技師或管理者可進行結案";
+      let expectedCode: "UNAUTHORIZED" | "INVALID_PREVIOUS_STATUS" | null = "UNAUTHORIZED";
+      if (viewer.role) {
+        if (status !== "in_progress") {
+          expectedError = closureOnlyStatusReason;
+          expectedCode = "INVALID_PREVIOUS_STATUS";
+        } else if (viewer.role === "admin" || viewer.userId === "technician-1") {
+          expectedError = null;
+          expectedCode = null;
+        } else {
+          expectedError = "僅負責該單據的技師或管理者可進行結案";
+        }
+      }
+
+      if (detailKey) {
+        assert.deepEqual(
+          { enabled: decision.enabled, disabledReason: decision.disabledReason },
+          expected[detailKey][status].closure,
+        );
+      } else {
+        assert.deepEqual(
+          { enabled: decision.enabled, disabledReason: decision.disabledReason },
+          { enabled: false, disabledReason: "僅指派技師或管理者可進行結案" },
+        );
+      }
+      assert.equal(decision.transitionError, expectedError);
+      assert.equal(decision.errorCode, expectedCode);
+    }
   }
 });
 
