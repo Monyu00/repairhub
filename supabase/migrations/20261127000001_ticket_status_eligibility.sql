@@ -51,6 +51,7 @@ AS $$
     WHERE lower(btrim(auth_user.email)) = lower(btrim(ticket.reporter_email))
     LIMIT 1
   ) AS reporter
+  ON TRUE
   WHERE ticket.id = p_ticket_id
 
   UNION ALL
