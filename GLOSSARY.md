@@ -66,6 +66,10 @@ _Avoid_: Location list, Building tree, location hierarchy
 A trackable physical asset installed in a space (e.g., projector, air conditioner). Has its own lifecycle data (purchase date, warranty, repair history) and can have its own QR code.
 _Avoid_: Device, asset (acceptable in technical context), item
 
+**Current Repair Status** (目前維修狀態):
+The live repair state derived from an Equipment's open Ticket. In Progress wins over Pending; with no open Ticket, Equipment is Normal. Warranty expiry is separate.
+_Avoid_: Repair history, latest repair, warranty status
+
 **Category**:
 A classification for repair requests (e.g., plumbing, electrical, HVAC). Stored in the database and manageable by admins. Technicians subscribe to categories they handle.
 _Avoid_: Type, kind, tag
